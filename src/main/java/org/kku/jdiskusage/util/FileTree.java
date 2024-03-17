@@ -1,12 +1,15 @@
 package org.kku.jdiskusage.util;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class FileTree
 {
@@ -38,6 +41,17 @@ public class FileTree
   {
   }
 
+  public void scan(String pathName)
+  {
+    DirNode dirNode;
+    Path path;
+
+    path = Paths.get(pathName);
+    dirNode = new Scan().scan(path);
+
+    new Print().print(dirNode);
+  }
+
   private interface NodeIF
   {
     public Path getPath();
@@ -60,11 +74,19 @@ public class FileTree
     {
       return m_path;
     }
+
+    @Override
+    public String toString()
+    {
+      return getPath().getFileName().toString();
+    }
   }
 
   private class DirNode
     extends AbstractNode
   {
+    private List<NodeIF> mi_childrenList = new ArrayList<>();
+
     public DirNode(Path path)
     {
       super(path);
@@ -74,6 +96,17 @@ public class FileTree
     public boolean isDirectory()
     {
       return true;
+    }
+
+    public <T extends AbstractNode> T addChild(T dirNode)
+    {
+      mi_childrenList.add(dirNode);
+      return dirNode;
+    }
+
+    public List<NodeIF> getChildren()
+    {
+      return mi_childrenList;
     }
   }
 
@@ -106,13 +139,13 @@ public class FileTree
         return result;
       }
 
-      return String.compare(path1.getFileName(), path2.getFileName());
+      return 0;
     }
   }
 
   private class Scan
   {
-    private DirNode scan(Path rootPath) throws Exception
+    public DirNode scan(Path rootPath)
     {
       DirNode rootNode;
 
@@ -122,37 +155,67 @@ public class FileTree
       return rootNode;
     }
 
-    private void scan(DirNode parentNode, Path currentPath) throws Exception
+    private void scan(DirNode parentNode, Path currentPath)
     {
-      String attributeIds;
-      Map<Long, MyPath> pathByInodeMap = new HashMap<>();
+      // String attributeIds;
+      // Map<Long, MyPath> pathByInodeMap = new HashMap<>();
 
-      attributeIds = "unix:"
-          + Stream.of(UnixAttribute.values()).map(UnixAttribute::getId).collect(Collectors.joining(","));
+      // attributeIds = "unix:"
+      // +
+      // Stream.of(UnixAttribute.values()).map(UnixAttribute::getId).collect(Collectors.joining(","));
 
-      Files.list(currentPath).sorted(new Sorted()).forEach(path -> {
-        if (Files.isDirectory(currentPath))
-        {
-
-        }
-
-        Files.walk(path).filter(Files::isRegularFile).forEach(file -> {
-          try
+      try
+      {
+        Files.list(currentPath).forEach(path -> {
+          if (Files.isDirectory(path))
           {
-            Map<String, Object> attributes;
-            Long inode;
-
-            attributes = Files.readAttributes(file, attributeIds);
-            inode = (Long) UnixAttribute.INODE.get(attributes);
-
-            MyPath v = pathByInodeMap.computeIfAbsent(inode, key -> new MyPath(file, attributes));
+            scan(parentNode.addChild(new DirNode(path)), path);
           }
-          catch (Exception e)
+          else
           {
-            e.printStackTrace();
+            parentNode.addChild(new FileNode(path));
           }
         });
+      }
+      catch (IOException e)
+      {
+        e.printStackTrace();
+      }
+
+      /*
+       * Files.walk(path).filter(Files::isRegularFile).forEach(file -> { try {
+       * Map<String, Object> attributes; Long inode;
+       * 
+       * attributes = Files.readAttributes(file, attributeIds); inode = (Long)
+       * UnixAttribute.INODE.get(attributes);
+       * 
+       * MyPath v = pathByInodeMap.computeIfAbsent(inode, key -> new MyPath(file,
+       * attributes)); } catch (Exception e) { e.printStackTrace(); } }); });
+       */
+    }
+  }
+
+  private class Print
+  {
+    private int mi_indent = 0;
+    private Map<Integer, String> mi_indentMap = new HashMap<>();
+
+    public void print(DirNode dirNode)
+    {
+      dirNode.getChildren().forEach(node -> {
+        System.out.println(getIndent() + node);
+        if (node.isDirectory())
+        {
+          mi_indent++;
+          print((DirNode) node);
+          mi_indent--;
+        }
       });
+    }
+
+    public String getIndent()
+    {
+      return mi_indentMap.computeIfAbsent(mi_indent, indent -> String.join("", Collections.nCopies(indent, "  ")));
     }
   }
 
@@ -180,7 +243,7 @@ public class FileTree
   {
     try
     {
-      new FileTree().scan(args.length >= 1 ? args[0] : "/media/kees/CubeSSD/export/hoorn");
+      new FileTree().scan(args.length >= 1 ? args[0] : "/usr/local/kees/projecten/own/jdiskusage/jdiskusage");
     }
     catch (Exception e)
     {
