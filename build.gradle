@@ -1,0 +1,25 @@
+
+plugins {
+  id 'java-library'
+  id 'eclipse'
+  id 'application'
+}
+
+defaultTasks 'jar'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'org.kku.jdisk.Main'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
