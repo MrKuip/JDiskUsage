@@ -3,6 +3,7 @@ package org.kku.jdiskusage.ui;
 import java.io.File;
 import java.util.Optional;
 import org.kku.jdiskusage.util.FileTree;
+import org.kku.jdiskusage.util.FileTree.DirNode;
 import javafx.application.Platform;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -27,7 +28,7 @@ public class ScanFileTreeUI
   {
   }
 
-  public void execute(Stage stage)
+  public DirNode execute(Stage stage)
   {
     DirectoryChooser directoryChooser;
     File directory;
@@ -49,7 +50,7 @@ public class ScanFileTreeUI
     directory = directoryChooser.showDialog(stage);
     if (directory == null)
     {
-      return;
+      return null;
     }
 
     DiskUsageProperties.INITIAL_DIRECTORY.set(directory.getParentFile());
@@ -107,27 +108,32 @@ public class ScanFileTreeUI
       scan.cancel();
     }
 
-    System.out.println("Scan: " + directory);
-    System.out.println("Result: " + scanDialogResult);
+    return scan.getResult();
   }
 
   private class Scan
       implements Runnable
   {
-    private boolean m_cancel;
-    private File m_directory;
-    private long m_startTime;
-    private long m_previousTime;
-    private boolean m_runLaterActive;
+    private boolean mi_cancel;
+    private File mi_directory;
+    private long mi_startTime;
+    private long mi_previousTime;
+    private boolean mi_runLaterActive;
+    private DirNode mi_result;
 
     private Scan(File directory)
     {
-      m_directory = directory;
+      mi_directory = directory;
+    }
+
+    public DirNode getResult()
+    {
+      return mi_result;
     }
 
     public void cancel()
     {
-      m_cancel = true;
+      mi_cancel = true;
     }
 
     @Override
@@ -135,34 +141,38 @@ public class ScanFileTreeUI
     {
       FileTree tree;
 
-      m_startTime = System.currentTimeMillis();
-      m_previousTime = m_startTime;
-      tree = new FileTree(m_directory);
-      tree.setScanListener((currentPath, numberOfDirectories, numberOfFiles, scanReady) -> {
+      mi_startTime = System.currentTimeMillis();
+      mi_previousTime = mi_startTime;
+      tree = new FileTree(mi_directory);
+      tree.setScanListener((currentPath, numberOfDirectories, numberOfFiles, scanReady) ->
+      {
         long currentTimeMillis;
 
+        System.out.println("scanReady:" + scanReady);
+
         currentTimeMillis = System.currentTimeMillis();
-        if (!m_runLaterActive && m_previousTime + 1000 > currentTimeMillis)
+        if (!scanReady && !mi_runLaterActive && mi_previousTime + 1000 > currentTimeMillis)
         {
-          return m_cancel;
+          return mi_cancel;
         }
 
-        m_previousTime = currentTimeMillis;
-        m_runLaterActive = true;
-        Platform.runLater(() -> {
-          m_elapsedTimeLabel.setText((int) ((currentTimeMillis - m_startTime) / 1000) + " seconds");
+        mi_previousTime = currentTimeMillis;
+        mi_runLaterActive = true;
+        Platform.runLater(() ->
+        {
+          m_elapsedTimeLabel.setText((int) ((currentTimeMillis - mi_startTime) / 1000) + " seconds");
           m_currentDirectoryLabel.setText(currentPath != null ? currentPath.toString() : "Ready");
           m_currentFileCountLabel.setText(numberOfDirectories + " directories, " + numberOfFiles + " files");
-          m_runLaterActive = false;
+          mi_runLaterActive = false;
           if (scanReady)
           {
             m_dialog.close();
           }
         });
 
-        return m_cancel;
+        return mi_cancel;
       });
-      tree.scan();
+      mi_result = tree.scan();
     }
   }
 }

@@ -19,5 +19,6 @@ dependencies {
   implementation 'org.controlsfx:controlsfx:11.2.1'
 }
 
-mainClassName = 'org.kku.jdiskusage.ui.HelloFX'
+//mainClassName = 'org.kku.jdiskusage.ui.HelloFX'
+mainClassName = 'org.kku.jdiskusage.util.FileTree'
 

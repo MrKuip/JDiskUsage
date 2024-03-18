@@ -1,16 +1,20 @@
 package org.kku.jdiskusage.ui;
 
+import org.kku.jdiskusage.util.FileTree.DirNode;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class DiskUsageMain
   extends Application
 {
+  Pane m_content;
+
   @Override
   public void start(Stage stage)
   {
@@ -21,17 +25,26 @@ public class DiskUsageMain
     Scene scene;
 
     menuBar = new MenuBar();
+    root = new VBox(menuBar);
+    m_content = new Pane();
+    root.getChildren().add(m_content);
+    scene = new Scene(root, 300, 250);
 
     menu = new Menu("File");
     menuBar.getMenus().add(menu);
 
     menuItem = new MenuItem("Scan file tree");
-    menuItem.setOnAction(e -> new ScanFileTreeUI().execute(stage));
     menu.getItems().add(menuItem);
+    menuItem.setOnAction(e ->
+    {
+      DirNode dirNode;
+      FileTreeView fileTreeView;
 
-    root = new VBox(menuBar);
+      dirNode = new ScanFileTreeUI().execute(stage);
+      fileTreeView = new FileTreeView(dirNode);
 
-    scene = new Scene(root, 300, 250);
+      m_content.getChildren().add(fileTreeView.getComponent());
+    });
 
     stage.setTitle("JDiskUsage");
     stage.setScene(scene);

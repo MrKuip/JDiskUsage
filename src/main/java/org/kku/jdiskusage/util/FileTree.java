@@ -10,6 +10,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.kku.util.CommonUtil;
 
 public class FileTree
 {
@@ -37,12 +40,19 @@ public class FileTree
     }
   }
 
-  private final File m_directory;
+  private static String ATTRIBUTE_IDS;
+
+  {
+    ATTRIBUTE_IDS = "unix:"
+        + Stream.of(UnixAttribute.values()).map(UnixAttribute::getId).collect(Collectors.joining(","));
+  }
+
+  private final Path m_directory;
   private ScanListenerIF m_scanListener;
 
   public FileTree(File directory)
   {
-    m_directory = directory;
+    m_directory = directory.toPath();
   }
 
   public void setScanListener(ScanListenerIF scanListener)
@@ -50,55 +60,62 @@ public class FileTree
     m_scanListener = scanListener;
   }
 
-  public void scan()
+  public DirNode scan()
   {
     DirNode dirNode;
     Path path;
 
-    path = m_directory.toPath();
+    path = m_directory;
     dirNode = new Scan().scan(path);
 
-    new Print().print(dirNode);
+    // new Print().print(dirNode);
+
+    return dirNode;
   }
 
-  private interface NodeIF
+  public interface NodeIF
   {
-    public Path getPath();
+    public String getPathName();
 
     public boolean isDirectory();
   }
 
-  private abstract class AbstractNode
+  private static abstract class AbstractNode
       implements NodeIF
   {
-    private Path m_path;
+    private final String m_pathName;
 
-    protected AbstractNode(Path path)
+    protected AbstractNode(String pathName)
     {
-      m_path = path;
+      m_pathName = pathName;
     }
 
     @Override
-    public Path getPath()
+    public String getPathName()
     {
-      return m_path;
+      return m_pathName;
     }
 
     @Override
     public String toString()
     {
-      return getPath().getFileName().toString();
+      return getPathName();
     }
   }
 
-  private class DirNode
+  public static class DirNode
     extends AbstractNode
   {
-    private List<NodeIF> mi_childrenList = new ArrayList<>();
+    private List<NodeIF> mi_nodeList = new ArrayList<>();
 
-    public DirNode(Path path)
+    private DirNode(boolean root, Path path)
     {
-      super(path);
+      super(root ? path.toString() : path.getFileName().toString());
+    }
+
+    private DirNode(Path path)
+    {
+      this(false, path);
     }
 
     @Override
@@ -107,30 +124,66 @@ public class FileTree
       return true;
     }
 
-    public <T extends AbstractNode> T addChild(T dirNode)
+    public <T extends AbstractNode> T addNode(T dirNode)
     {
-      mi_childrenList.add(dirNode);
+      mi_nodeList.add(dirNode);
       return dirNode;
     }
 
-    public List<NodeIF> getChildren()
+    public List<NodeIF> getNodeList()
     {
-      return mi_childrenList;
+      return mi_nodeList;
     }
   }
 
-  private class FileNode
+  public static class FileNode
     extends AbstractNode
   {
-    public FileNode(Path path)
+    private final int mi_inodeNumber;
+    private final int mi_numberOfLinks;
+    private final int mi_fileSize;
+
+    private FileNode(Path path)
     {
-      super(path);
+      super(path.getFileName().toString());
+
+      Map<String, Object> attributes;
+      try
+      {
+        attributes = Files.readAttributes(path, ATTRIBUTE_IDS);
+      }
+      catch (IOException e)
+      {
+        mi_numberOfLinks = -1;
+        mi_fileSize = -1;
+        mi_inodeNumber = -1;
+        return;
+      }
+
+      mi_numberOfLinks = UnixAttribute.NUMBER_OF_LINKS.get(attributes);
+      mi_fileSize = ((Long) UnixAttribute.FILE_SIZE.get(attributes)).intValue();
+      mi_inodeNumber = ((Long) UnixAttribute.INODE.get(attributes)).intValue();
     }
 
     @Override
     public boolean isDirectory()
     {
       return false;
+    }
+
+    public int getNumberOfLinks()
+    {
+      return mi_numberOfLinks;
+    }
+
+    public int getFileSize()
+    {
+      return mi_fileSize;
+    }
+
+    public int getInodeNumber()
+    {
+      return mi_inodeNumber;
     }
   }
 
@@ -162,7 +215,7 @@ public class FileTree
     {
       DirNode rootNode;
 
-      rootNode = new DirNode(rootPath);
+      rootNode = new DirNode(true, rootPath);
       scan(rootNode, rootPath);
       if (m_scanListener != null)
       {
@@ -183,7 +236,8 @@ public class FileTree
 
       try
       {
-        Files.list(currentPath).forEach(path -> {
+        Files.list(currentPath).forEach(path ->
+        {
           if (mi_cancel)
           {
             return;
@@ -192,12 +246,12 @@ public class FileTree
           if (Files.isDirectory(path))
           {
             mi_numberOfDirectories++;
-            scan(parentNode.addChild(new DirNode(path)), path);
+            scan(parentNode.addNode(new DirNode(path.getFileName())), path);
           }
           else
           {
             mi_numberOfFiles++;
-            parentNode.addChild(new FileNode(path));
+            parentNode.addNode(new FileNode(path.getFileName()));
             if (m_scanListener != null)
             {
               mi_cancel = m_scanListener.progress(path, mi_numberOfDirectories, mi_numberOfFiles, false);
@@ -230,7 +284,8 @@ public class FileTree
 
     public void print(DirNode dirNode)
     {
-      dirNode.getChildren().forEach(node -> {
+      dirNode.getNodeList().forEach(node ->
+      {
         System.out.println(getIndent() + node);
         if (node.isDirectory())
         {
@@ -271,8 +326,37 @@ public class FileTree
   {
     try
     {
-      File file = new File(args.length >= 1 ? args[0] : "/usr/local/kees/projecten/own/jdiskusage/jdiskusage");
-      new FileTree(file).scan();
+      File file = new File(args.length >= 1 ? args[0]
+          : "/media/kees/CubeBackup/backup/hoorn/snapshot_001_2024_03_18__18_00_01/projecten");
+      FileTree ft = new FileTree(file);
+      ft.setScanListener(new ScanListenerIF()
+      {
+        long previousTime;
+
+        @Override
+        public boolean progress(Path currentFile, int numberOfDirectoriesEvaluated, int numberOfFilesEvaluated,
+            boolean scanReady)
+        {
+          Long currentTime = System.currentTimeMillis();
+          if (currentTime - 1000 > previousTime)
+          {
+            System.out.println("DIR:" + numberOfDirectoriesEvaluated + " FILES:" + numberOfFilesEvaluated);
+            previousTime = currentTime;
+          }
+          return false;
+        }
+      });
+      DirNode dirNode = ft.scan();
+
+      System.out.println("ready");
+
+      for (;;)
+      {
+        System.gc();
+        System.out.println("total:" + Runtime.getRuntime().totalMemory() + ", free:" + Runtime.getRuntime().freeMemory()
+            + ", Used:" + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
+        CommonUtil.sleep(1000);
+      }
     }
     catch (Exception e)
     {
