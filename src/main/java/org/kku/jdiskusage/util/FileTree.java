@@ -1,9 +1,9 @@
 package org.kku.jdiskusage.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,16 +37,25 @@ public class FileTree
     }
   }
 
-  public FileTree()
+  private final File m_directory;
+  private ScanListenerIF m_scanListener;
+
+  public FileTree(File directory)
   {
+    m_directory = directory;
   }
 
-  public void scan(String pathName)
+  public void setScanListener(ScanListenerIF scanListener)
+  {
+    m_scanListener = scanListener;
+  }
+
+  public void scan()
   {
     DirNode dirNode;
     Path path;
 
-    path = Paths.get(pathName);
+    path = m_directory.toPath();
     dirNode = new Scan().scan(path);
 
     new Print().print(dirNode);
@@ -145,12 +154,20 @@ public class FileTree
 
   private class Scan
   {
+    private int mi_numberOfFiles;
+    private int mi_numberOfDirectories;
+    private boolean mi_cancel;
+
     public DirNode scan(Path rootPath)
     {
       DirNode rootNode;
 
       rootNode = new DirNode(rootPath);
       scan(rootNode, rootPath);
+      if (m_scanListener != null)
+      {
+        mi_cancel = m_scanListener.progress(null, mi_numberOfDirectories, mi_numberOfFiles, true);
+      }
 
       return rootNode;
     }
@@ -167,13 +184,24 @@ public class FileTree
       try
       {
         Files.list(currentPath).forEach(path -> {
+          if (mi_cancel)
+          {
+            return;
+          }
+
           if (Files.isDirectory(path))
           {
+            mi_numberOfDirectories++;
             scan(parentNode.addChild(new DirNode(path)), path);
           }
           else
           {
+            mi_numberOfFiles++;
             parentNode.addChild(new FileNode(path));
+            if (m_scanListener != null)
+            {
+              mi_cancel = m_scanListener.progress(path, mi_numberOfDirectories, mi_numberOfFiles, false);
+            }
           }
         });
       }
@@ -243,7 +271,8 @@ public class FileTree
   {
     try
     {
-      new FileTree().scan(args.length >= 1 ? args[0] : "/usr/local/kees/projecten/own/jdiskusage/jdiskusage");
+      File file = new File(args.length >= 1 ? args[0] : "/usr/local/kees/projecten/own/jdiskusage/jdiskusage");
+      new FileTree(file).scan();
     }
     catch (Exception e)
     {

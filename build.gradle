@@ -6,27 +6,18 @@ plugins {
   id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
-defaultTasks 'jar'
-
 repositories {
   mavenCentral()
 }
 
 javafx {
-    version = "17.0.8"
+    version = "21"
     modules = [ 'javafx.controls' ]
 }
 
-
 dependencies {
+  implementation 'org.controlsfx:controlsfx:11.2.1'
 }
 
-jar {
-    manifest {
-        attributes 'Main-Class': 'org.kku.jdisk.Main'
-    }
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-}
+mainClassName = 'org.kku.jdiskusage.ui.HelloFX'
 
