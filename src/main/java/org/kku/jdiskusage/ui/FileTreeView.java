@@ -1,13 +1,14 @@
 package org.kku.jdiskusage.ui;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.NodeIF;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableColumn.CellDataFeatures;
@@ -23,14 +24,14 @@ public class FileTreeView
     m_dirNode = dirNode;
   }
 
-  public Node getComponent()
+  public TreeTableView<NodeIF> createComponent()
   {
     TreeTableView<NodeIF> node;
 
     node = new TreeTableView<NodeIF>(new FileTreeItem(m_dirNode));
 
     TreeTableColumn<NodeIF, String> treeTableColumn1 = new TreeTableColumn<>("File");
-    TreeTableColumn<NodeIF, Integer> treeTableColumn2 = new TreeTableColumn<>("Size");
+    TreeTableColumn<NodeIF, Long> treeTableColumn2 = new TreeTableColumn<>("Size");
 
     treeTableColumn1.setCellValueFactory(new Callback<CellDataFeatures<NodeIF, String>, ObservableValue<String>>()
     {
@@ -41,12 +42,12 @@ public class FileTreeView
       }
     });
 
-    treeTableColumn2.setCellValueFactory(new Callback<CellDataFeatures<NodeIF, Integer>, ObservableValue<Integer>>()
+    treeTableColumn2.setCellValueFactory(new Callback<CellDataFeatures<NodeIF, Long>, ObservableValue<Long>>()
     {
       @Override
-      public ObservableValue<Integer> call(CellDataFeatures<NodeIF, Integer> p)
+      public ObservableValue<Long> call(CellDataFeatures<NodeIF, Long> p)
       {
-        return new ReadOnlyObjectWrapper<Integer>(p.getValue().getValue().getSize());
+        return new ReadOnlyObjectWrapper<Long>(p.getValue().getValue().getSize());
       }
     });
 
@@ -56,7 +57,7 @@ public class FileTreeView
     return node;
   }
 
-  public class FileTreeItem
+  public static class FileTreeItem
     extends TreeItem<NodeIF>
   {
     // We do the children and leaf testing only once, and then set these
@@ -73,6 +74,7 @@ public class FileTreeView
 
       expandedProperty().addListener((observable, wasExpanded, isExpanded) ->
       {
+        System.out.println("expanded:" + toString());
         if (wasExpanded && !isExpanded && !isFirstTimeChildren)
         {
           super.getChildren().clear();
@@ -114,15 +116,8 @@ public class FileTreeView
         nodeList = ((DirNode) node).getNodeList();
         if (!nodeList.isEmpty())
         {
-          ObservableList<TreeItem<NodeIF>> children;
-
-          children = FXCollections.observableArrayList();
-          for (NodeIF child : nodeList)
-          {
-            children.add(new FileTreeItem(child));
-          }
-
-          return children;
+          return nodeList.stream().sorted(Comparator.comparing(NodeIF::getSize).reversed()).map(FileTreeItem::new)
+              .collect(Collectors.toCollection(FXCollections::observableArrayList));
         }
       }
 

@@ -29,17 +29,11 @@ public class ScanFileTreeUI
   {
   }
 
-  public DirNode execute(Stage stage)
+  public DirNode chooseDirectory(Stage stage)
   {
     DirectoryChooser directoryChooser;
     File directory;
     File initialDirectory;
-    Optional<ButtonType> scanDialogResult;
-    GridPane grid;
-    Label currentDirectory;
-    Label currentCount;
-    Label elapsedTime;
-    Scan scan;
 
     initialDirectory = DiskUsageProperties.INITIAL_DIRECTORY.getFile();
     directoryChooser = new DirectoryChooser();
@@ -55,6 +49,18 @@ public class ScanFileTreeUI
     }
 
     DiskUsageProperties.INITIAL_DIRECTORY.setFile(directory.getParentFile());
+
+    return scanDirectory(directory);
+  }
+
+  public DirNode scanDirectory(File directory)
+  {
+    Optional<ButtonType> scanDialogResult;
+    GridPane grid;
+    Label currentDirectory;
+    Label currentCount;
+    Label elapsedTime;
+    Scan scan;
 
     m_dialog = new Dialog<>();
     m_dialog.setTitle("Scan file tree");

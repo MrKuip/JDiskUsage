@@ -79,7 +79,7 @@ public class FileTree
 
     public boolean isDirectory();
 
-    public int getSize();
+    public long getSize();
   }
 
   private static abstract class AbstractNode
@@ -109,7 +109,7 @@ public class FileTree
     extends AbstractNode
   {
     private List<NodeIF> mi_nodeList = new ArrayList<>();
-    private int mi_fileSize = -1;
+    private long mi_fileSize = -1;
 
     private DirNode(boolean root, Path path)
     {
@@ -122,11 +122,11 @@ public class FileTree
     }
 
     @Override
-    public int getSize()
+    public long getSize()
     {
       if (mi_fileSize == -1)
       {
-        mi_fileSize = mi_nodeList.stream().map(NodeIF::getSize).reduce(0, Integer::sum);
+        mi_fileSize = mi_nodeList.stream().map(NodeIF::getSize).reduce(0l, Long::sum);
       }
 
       return mi_fileSize;
@@ -191,7 +191,7 @@ public class FileTree
     }
 
     @Override
-    public int getSize()
+    public long getSize()
     {
       return mi_size;
     }
@@ -242,53 +242,38 @@ public class FileTree
 
     private void scan(DirNode parentNode, Path currentPath)
     {
-      // String attributeIds;
-      // Map<Long, MyPath> pathByInodeMap = new HashMap<>();
-
-      // attributeIds = "unix:"
-      // +
-      // Stream.of(UnixAttribute.values()).map(UnixAttribute::getId).collect(Collectors.joining(","));
-
       try
       {
-        Files.list(currentPath).forEach(path ->
+        try (Stream<Path> stream = Files.list(currentPath))
         {
-          if (mi_cancel)
+          stream.forEach(path ->
           {
-            return;
-          }
-
-          if (Files.isDirectory(path))
-          {
-            mi_numberOfDirectories++;
-            scan(parentNode.addNode(new DirNode(path)), path);
-          }
-          else
-          {
-            mi_numberOfFiles++;
-            parentNode.addNode(new FileNode(path));
-            if (m_scanListener != null)
+            if (mi_cancel)
             {
-              mi_cancel = m_scanListener.progress(path, mi_numberOfDirectories, mi_numberOfFiles, false);
+              return;
             }
-          }
-        });
+
+            if (Files.isDirectory(path))
+            {
+              mi_numberOfDirectories++;
+              scan(parentNode.addNode(new DirNode(path)), path);
+            }
+            else
+            {
+              mi_numberOfFiles++;
+              parentNode.addNode(new FileNode(path));
+              if (m_scanListener != null)
+              {
+                mi_cancel = m_scanListener.progress(path, mi_numberOfDirectories, mi_numberOfFiles, false);
+              }
+            }
+          });
+        }
       }
       catch (IOException e)
       {
         e.printStackTrace();
       }
-
-      /*
-       * Files.walk(path).filter(Files::isRegularFile).forEach(file -> { try {
-       * Map<String, Object> attributes; Long inode;
-       * 
-       * attributes = Files.readAttributes(file, attributeIds); inode = (Long)
-       * UnixAttribute.INODE.get(attributes);
-       * 
-       * MyPath v = pathByInodeMap.computeIfAbsent(inode, key -> new MyPath(file,
-       * attributes)); } catch (Exception e) { e.printStackTrace(); } }); });
-       */
     }
   }
 

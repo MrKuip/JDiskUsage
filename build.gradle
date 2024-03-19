@@ -6,6 +6,8 @@ plugins {
   id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
+apply from: 'build-eclipse.gradle'
+
 repositories {
   mavenCentral()
 }
@@ -19,6 +21,7 @@ dependencies {
   implementation 'org.controlsfx:controlsfx:11.2.1'
 }
 
-//mainClassName = 'org.kku.jdiskusage.ui.HelloFX'
-mainClassName = 'org.kku.jdiskusage.util.FileTree'
+application {
+  mainClass.set('org.kku.jdiskusage.util.FileTree')
+}
 
