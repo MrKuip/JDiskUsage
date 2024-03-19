@@ -10,6 +10,7 @@ import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.NodeIF;
 import org.kku.util.SizeUtil;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.scene.Scene;
 import javafx.scene.chart.PieChart;
@@ -72,15 +73,31 @@ public class DiskUsageMain
     m_tabPane.getTabs().addAll(m_sizeTab, m_top50Tab, m_sizeDistTab, m_modifiedTab, m_typesTab);
 
     splitPane.getItems().addAll(m_treePane, m_tabPane);
+    splitPane.getDividers().get(0).positionProperty()
+        .addListener(DiskUsageProperties.SPLIT_PANE_POSITION.getChangeListener());
+    SplitPane.setResizableWithParent(m_treePane, false);
+    SplitPane.setResizableWithParent(m_tabPane, false);
+    splitPane.getDividers().get(0).setPosition(DiskUsageProperties.SPLIT_PANE_POSITION.getDouble(25.0));
 
     rootPane.setTop(toolBars);
     rootPane.setCenter(splitPane);
 
-    scene = new Scene(rootPane, 300, 250);
+    scene = new Scene(rootPane);
+
+    stage.setHeight(DiskUsageProperties.SCENE_HEIGHT.getDouble(400));
+    stage.setWidth(DiskUsageProperties.SCENE_WIDTH.getDouble(600));
+    stage.setX(DiskUsageProperties.SCENE_LOCATION_X.getDouble(0));
+    stage.setY(DiskUsageProperties.SCENE_LOCATION_Y.getDouble(0));
+
+    stage.widthProperty().addListener(DiskUsageProperties.SCENE_WIDTH.getChangeListener());
+    stage.heightProperty().addListener(DiskUsageProperties.SCENE_HEIGHT.getChangeListener());
+    stage.xProperty().addListener(DiskUsageProperties.SCENE_LOCATION_X.getChangeListener());
+    stage.yProperty().addListener(DiskUsageProperties.SCENE_LOCATION_Y.getChangeListener());
 
     stage.setTitle("JDiskUsage");
     stage.setScene(scene);
     stage.show();
+
   }
 
   private MenuBar createMenuBar()
@@ -136,6 +153,8 @@ public class DiskUsageMain
         fillSizeTab(selectedItem);
       }
     });
+
+    Platform.runLater(() -> treeTableView.getSelectionModel().select(0));
 
     return treeTableView;
   }

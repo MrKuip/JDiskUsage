@@ -11,11 +11,17 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javafx.beans.value.ChangeListener;
 
 public enum DiskUsageProperties
 {
   INITIAL_DIRECTORY,
-  RECENT_FILES;
+  RECENT_FILES,
+  SCENE_WIDTH,
+  SCENE_HEIGHT,
+  SCENE_LOCATION_X,
+  SCENE_LOCATION_Y,
+  SPLIT_PANE_POSITION;
 
   private static Properties m_properties;
 
@@ -57,12 +63,22 @@ public enum DiskUsageProperties
     setPropertyValue(fileList.stream().map(File::getAbsolutePath).collect(Collectors.joining(",")));
   }
 
+  public void setPropertyValue(Number value)
+  {
+    setPropertyValue(value.toString());
+  }
+
+  public double getDouble(double defaultValue)
+  {
+    return getPropertyValue() == null ? defaultValue : Double.valueOf(getPropertyValue());
+  }
+
   private String getPropertyValue()
   {
     return (String) getProperties().get(this.name());
   }
 
-  private void setPropertyValue(String value)
+  public void setPropertyValue(String value)
   {
     getProperties().setProperty(this.name(), value);
     storeProperties();
@@ -109,5 +125,13 @@ public enum DiskUsageProperties
   private File getPropertyFile()
   {
     return new File(System.getProperty("user.home"), "JDiskUsage.properties");
+  }
+
+  public ChangeListener<Number> getChangeListener()
+  {
+    return (observable, oldValue, newValue) ->
+    {
+      this.setPropertyValue(newValue);
+    };
   }
 }
