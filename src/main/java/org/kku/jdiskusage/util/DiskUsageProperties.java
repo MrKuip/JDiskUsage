@@ -1,4 +1,4 @@
-package org.kku.jdiskusage.ui;
+package org.kku.jdiskusage.util;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -6,21 +6,22 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public enum DiskUsageProperties
 {
-  INITIAL_DIRECTORY;
+  INITIAL_DIRECTORY,
+  RECENT_FILES;
 
   private static Properties m_properties;
 
-  public void set(File directory)
+  public void setFile(File directory)
   {
-    String path;
-
-    path = directory != null ? directory.getPath() : "";
-    getProperties().setProperty(this.name(), path);
-    storeProperties();
+    setPropertyValue(directory != null ? directory.getPath() : "");
   }
 
   public File getFile()
@@ -28,7 +29,7 @@ public enum DiskUsageProperties
     File file;
     String fileName;
 
-    fileName = (String) getProperties().get(this.name());
+    fileName = getPropertyValue();
     if (fileName == null)
     {
       return null;
@@ -36,6 +37,35 @@ public enum DiskUsageProperties
 
     file = new File(fileName);
     return file.exists() ? file : null;
+  }
+
+  public List<File> getFileList()
+  {
+    String files;
+
+    files = getPropertyValue();
+    if (files == null)
+    {
+      return Collections.emptyList();
+    }
+
+    return Stream.of(files.split(",")).map(File::new).filter(File::exists).collect(Collectors.toList());
+  }
+
+  public void setFileList(List<File> fileList)
+  {
+    setPropertyValue(fileList.stream().map(File::getAbsolutePath).collect(Collectors.joining(",")));
+  }
+
+  private String getPropertyValue()
+  {
+    return (String) getProperties().get(this.name());
+  }
+
+  private void setPropertyValue(String value)
+  {
+    getProperties().setProperty(this.name(), value);
+    storeProperties();
   }
 
   private Properties getProperties()

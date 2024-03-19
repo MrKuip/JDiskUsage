@@ -75,9 +75,11 @@ public class FileTree
 
   public interface NodeIF
   {
-    public String getPathName();
+    public String getName();
 
     public boolean isDirectory();
+
+    public int getSize();
   }
 
   private static abstract class AbstractNode
@@ -91,7 +93,7 @@ public class FileTree
     }
 
     @Override
-    public String getPathName()
+    public String getName()
     {
       return m_pathName;
     }
@@ -99,7 +101,7 @@ public class FileTree
     @Override
     public String toString()
     {
-      return getPathName();
+      return getName();
     }
   }
 
@@ -107,6 +109,7 @@ public class FileTree
     extends AbstractNode
   {
     private List<NodeIF> mi_nodeList = new ArrayList<>();
+    private int mi_fileSize = -1;
 
     private DirNode(boolean root, Path path)
     {
@@ -116,6 +119,17 @@ public class FileTree
     private DirNode(Path path)
     {
       this(false, path);
+    }
+
+    @Override
+    public int getSize()
+    {
+      if (mi_fileSize == -1)
+      {
+        mi_fileSize = mi_nodeList.stream().map(NodeIF::getSize).reduce(0, Integer::sum);
+      }
+
+      return mi_fileSize;
     }
 
     @Override
@@ -141,7 +155,7 @@ public class FileTree
   {
     private final int mi_inodeNumber;
     private final int mi_numberOfLinks;
-    private final int mi_fileSize;
+    private final int mi_size;
 
     private FileNode(Path path)
     {
@@ -155,13 +169,13 @@ public class FileTree
       catch (IOException e)
       {
         mi_numberOfLinks = -1;
-        mi_fileSize = -1;
+        mi_size = -1;
         mi_inodeNumber = -1;
         return;
       }
 
       mi_numberOfLinks = UnixAttribute.NUMBER_OF_LINKS.get(attributes);
-      mi_fileSize = ((Long) UnixAttribute.FILE_SIZE.get(attributes)).intValue();
+      mi_size = ((Long) UnixAttribute.FILE_SIZE.get(attributes)).intValue();
       mi_inodeNumber = ((Long) UnixAttribute.INODE.get(attributes)).intValue();
     }
 
@@ -176,9 +190,10 @@ public class FileTree
       return mi_numberOfLinks;
     }
 
-    public int getFileSize()
+    @Override
+    public int getSize()
     {
-      return mi_fileSize;
+      return mi_size;
     }
 
     public int getInodeNumber()
@@ -246,12 +261,12 @@ public class FileTree
           if (Files.isDirectory(path))
           {
             mi_numberOfDirectories++;
-            scan(parentNode.addNode(new DirNode(path.getFileName())), path);
+            scan(parentNode.addNode(new DirNode(path)), path);
           }
           else
           {
             mi_numberOfFiles++;
-            parentNode.addNode(new FileNode(path.getFileName()));
+            parentNode.addNode(new FileNode(path));
             if (m_scanListener != null)
             {
               mi_cancel = m_scanListener.progress(path, mi_numberOfDirectories, mi_numberOfFiles, false);

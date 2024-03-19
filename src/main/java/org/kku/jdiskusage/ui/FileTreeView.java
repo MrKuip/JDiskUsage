@@ -3,10 +3,16 @@ package org.kku.jdiskusage.ui;
 import java.util.List;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.NodeIF;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableColumn.CellDataFeatures;
+import javafx.scene.control.TreeTableView;
+import javafx.util.Callback;
 
 public class FileTreeView
 {
@@ -17,9 +23,37 @@ public class FileTreeView
     m_dirNode = dirNode;
   }
 
-  public TreeView<NodeIF> getComponent()
+  public Node getComponent()
   {
-    return new TreeView<NodeIF>(new FileTreeItem(m_dirNode));
+    TreeTableView<NodeIF> node;
+
+    node = new TreeTableView<NodeIF>(new FileTreeItem(m_dirNode));
+
+    TreeTableColumn<NodeIF, String> treeTableColumn1 = new TreeTableColumn<>("File");
+    TreeTableColumn<NodeIF, Integer> treeTableColumn2 = new TreeTableColumn<>("Size");
+
+    treeTableColumn1.setCellValueFactory(new Callback<CellDataFeatures<NodeIF, String>, ObservableValue<String>>()
+    {
+      @Override
+      public ObservableValue<String> call(CellDataFeatures<NodeIF, String> p)
+      {
+        return new ReadOnlyObjectWrapper<String>(p.getValue().getValue().getName());
+      }
+    });
+
+    treeTableColumn2.setCellValueFactory(new Callback<CellDataFeatures<NodeIF, Integer>, ObservableValue<Integer>>()
+    {
+      @Override
+      public ObservableValue<Integer> call(CellDataFeatures<NodeIF, Integer> p)
+      {
+        return new ReadOnlyObjectWrapper<Integer>(p.getValue().getValue().getSize());
+      }
+    });
+
+    node.getColumns().add(treeTableColumn1);
+    node.getColumns().add(treeTableColumn2);
+
+    return node;
   }
 
   public class FileTreeItem
@@ -36,6 +70,15 @@ public class FileTreeView
     public FileTreeItem(NodeIF node)
     {
       super(node);
+
+      expandedProperty().addListener((observable, wasExpanded, isExpanded) ->
+      {
+        if (wasExpanded && !isExpanded && !isFirstTimeChildren)
+        {
+          super.getChildren().clear();
+          isFirstTimeChildren = true;
+        }
+      });
     }
 
     @Override

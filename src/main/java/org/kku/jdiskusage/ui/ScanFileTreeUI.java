@@ -2,6 +2,7 @@ package org.kku.jdiskusage.ui;
 
 import java.io.File;
 import java.util.Optional;
+import org.kku.jdiskusage.util.DiskUsageProperties;
 import org.kku.jdiskusage.util.FileTree;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import javafx.application.Platform;
@@ -53,7 +54,7 @@ public class ScanFileTreeUI
       return null;
     }
 
-    DiskUsageProperties.INITIAL_DIRECTORY.set(directory.getParentFile());
+    DiskUsageProperties.INITIAL_DIRECTORY.setFile(directory.getParentFile());
 
     m_dialog = new Dialog<>();
     m_dialog.setTitle("Scan file tree");
@@ -147,8 +148,6 @@ public class ScanFileTreeUI
       tree.setScanListener((currentPath, numberOfDirectories, numberOfFiles, scanReady) ->
       {
         long currentTimeMillis;
-
-        System.out.println("scanReady:" + scanReady);
 
         currentTimeMillis = System.currentTimeMillis();
         if (!scanReady && !mi_runLaterActive && mi_previousTime + 1000 > currentTimeMillis)
