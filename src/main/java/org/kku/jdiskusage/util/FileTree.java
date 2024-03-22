@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.kku.util.CommonUtil;
 
 public class FileTree
 {
@@ -73,21 +72,33 @@ public class FileTree
     return dirNode;
   }
 
-  public interface NodeIF
+  public interface FileNodeIF
   {
     public String getName();
 
     public boolean isDirectory();
 
     public long getSize();
+
+    public Stream<FileNodeIF> streamNode();
+
+    default public boolean isFile()
+    {
+      return !isDirectory();
+    }
+
+    static public Comparator<FileNodeIF> getSizeComparator()
+    {
+      return Comparator.comparing(FileNodeIF::getSize).reversed();
+    }
   }
 
-  private static abstract class AbstractNode
-      implements NodeIF
+  public static abstract class AbstractFileNode
+      implements FileNodeIF
   {
     private final String m_pathName;
 
-    protected AbstractNode(String pathName)
+    protected AbstractFileNode(String pathName)
     {
       m_pathName = pathName;
     }
@@ -106,9 +117,9 @@ public class FileTree
   }
 
   public static class DirNode
-    extends AbstractNode
+    extends AbstractFileNode
   {
-    private List<NodeIF> mi_nodeList = new ArrayList<>();
+    private List<FileNodeIF> mi_nodeList = new ArrayList<>();
     private long mi_fileSize = -1;
 
     private DirNode(boolean root, Path path)
@@ -126,7 +137,7 @@ public class FileTree
     {
       if (mi_fileSize == -1)
       {
-        mi_fileSize = mi_nodeList.stream().map(NodeIF::getSize).reduce(0l, Long::sum);
+        mi_fileSize = mi_nodeList.stream().map(FileNodeIF::getSize).reduce(0l, Long::sum);
       }
 
       return mi_fileSize;
@@ -138,24 +149,30 @@ public class FileTree
       return true;
     }
 
-    public <T extends AbstractNode> T addNode(T dirNode)
+    public <T extends AbstractFileNode> T addNode(T dirNode)
     {
       mi_nodeList.add(dirNode);
       return dirNode;
     }
 
-    public List<NodeIF> getNodeList()
+    public List<FileNodeIF> getNodeList()
     {
       return mi_nodeList;
+    }
+
+    @Override
+    public Stream<FileNodeIF> streamNode()
+    {
+      return Stream.concat(Stream.of(this), getNodeList().stream().flatMap(FileNodeIF::streamNode));
     }
   }
 
   public static class FileNode
-    extends AbstractNode
+    extends AbstractFileNode
   {
     private final int mi_inodeNumber;
     private final int mi_numberOfLinks;
-    private final int mi_size;
+    private final long mi_size;
 
     private FileNode(Path path)
     {
@@ -175,7 +192,7 @@ public class FileTree
       }
 
       mi_numberOfLinks = UnixAttribute.NUMBER_OF_LINKS.get(attributes);
-      mi_size = ((Long) UnixAttribute.FILE_SIZE.get(attributes)).intValue();
+      mi_size = ((Long) UnixAttribute.FILE_SIZE.get(attributes)).longValue();
       mi_inodeNumber = ((Long) UnixAttribute.INODE.get(attributes)).intValue();
     }
 
@@ -199,6 +216,12 @@ public class FileTree
     public int getInodeNumber()
     {
       return mi_inodeNumber;
+    }
+
+    @Override
+    public Stream<FileNodeIF> streamNode()
+    {
+      return Stream.of(this);
     }
   }
 
@@ -277,7 +300,7 @@ public class FileTree
     }
   }
 
-  private class Print
+  private static class Print
   {
     private int mi_indent = 0;
     private Map<Integer, String> mi_indentMap = new HashMap<>();
@@ -286,7 +309,7 @@ public class FileTree
     {
       dirNode.getNodeList().forEach(node ->
       {
-        System.out.println(getIndent() + node);
+        System.out.printf("%-10d%s%s%n", node.getSize(), getIndent(), node);
         if (node.isDirectory())
         {
           mi_indent++;
@@ -302,32 +325,11 @@ public class FileTree
     }
   }
 
-  private static class MyPath
-  {
-    private final String mi_fileName;
-    private final int mi_numberOfLinks;
-    private final long mi_fileSize;
-
-    public MyPath(Path file, Map<String, Object> attributes)
-    {
-      mi_fileName = file.toString();
-      mi_numberOfLinks = UnixAttribute.NUMBER_OF_LINKS.get(attributes);
-      mi_fileSize = UnixAttribute.FILE_SIZE.get(attributes);
-    }
-
-    @Override
-    public String toString()
-    {
-      return mi_numberOfLinks + " " + mi_fileSize + " " + mi_fileName;
-    }
-  }
-
   static public void main(String[] args)
   {
     try
     {
-      File file = new File(args.length >= 1 ? args[0]
-          : "/media/kees/CubeBackup/backup/hoorn/snapshot_001_2024_03_18__18_00_01/projecten");
+      File file = new File(args.length >= 1 ? args[0] : "/home/kees");
       FileTree ft = new FileTree(file);
       ft.setScanListener(new ScanListenerIF()
       {
@@ -347,16 +349,17 @@ public class FileTree
         }
       });
       DirNode dirNode = ft.scan();
+      new Print().print(dirNode);
 
       System.out.println("ready");
 
-      for (;;)
-      {
-        System.gc();
-        System.out.println("total:" + Runtime.getRuntime().totalMemory() + ", free:" + Runtime.getRuntime().freeMemory()
-            + ", Used:" + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
-        CommonUtil.sleep(1000);
-      }
+      /*
+       * for (;;) { System.gc(); System.out.println("total:" +
+       * Runtime.getRuntime().totalMemory() + ", free:" +
+       * Runtime.getRuntime().freeMemory() + ", Used:" +
+       * (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
+       * CommonUtil.sleep(1000); }
+       */
     }
     catch (Exception e)
     {

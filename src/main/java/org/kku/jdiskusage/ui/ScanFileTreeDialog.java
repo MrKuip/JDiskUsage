@@ -2,6 +2,8 @@ package org.kku.jdiskusage.ui;
 
 import java.io.File;
 import java.util.Optional;
+import org.kku.fonticons.ui.FxIcon.IconSize;
+import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.DiskUsageProperties;
 import org.kku.jdiskusage.util.FileTree;
 import org.kku.jdiskusage.util.FileTree.DirNode;
@@ -17,7 +19,7 @@ import javafx.scene.layout.Region;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
-public class ScanFileTreeUI
+public class ScanFileTreeDialog
 {
   private Dialog<ButtonType> m_dialog;
   private Label m_currentDirectoryLabel;
@@ -25,7 +27,7 @@ public class ScanFileTreeUI
   private Label m_elapsedTimeLabel;
   private ProgressBar m_progressLabel;
 
-  public ScanFileTreeUI()
+  public ScanFileTreeDialog()
   {
   }
 
@@ -66,6 +68,7 @@ public class ScanFileTreeUI
     m_dialog.setTitle("Scan file tree");
     m_dialog.setHeaderText("Scan " + directory.getPath());
     m_dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
+    m_dialog.setGraphic(IconUtil.createImageNode("file-search", IconSize.LARGE));
 
     grid = new GridPane();
     grid.setMinSize(1000, 200);

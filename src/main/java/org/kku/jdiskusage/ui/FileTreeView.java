@@ -1,10 +1,10 @@
 package org.kku.jdiskusage.ui;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.kku.jdiskusage.util.DiskUsageProperties;
 import org.kku.jdiskusage.util.FileTree.DirNode;
-import org.kku.jdiskusage.util.FileTree.NodeIF;
+import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -24,41 +24,72 @@ public class FileTreeView
     m_dirNode = dirNode;
   }
 
-  public TreeTableView<NodeIF> createComponent()
+  public TreeTableView<FileNodeIF> createComponent()
   {
-    TreeTableView<NodeIF> node;
+    TreeTableView<FileNodeIF> node;
 
-    node = new TreeTableView<NodeIF>(new FileTreeItem(m_dirNode));
+    node = new TreeTableView<FileNodeIF>(new FileTreeItem(m_dirNode));
 
-    TreeTableColumn<NodeIF, String> treeTableColumn1 = new TreeTableColumn<>("File");
-    TreeTableColumn<NodeIF, Long> treeTableColumn2 = new TreeTableColumn<>("Size");
+    TreeTableColumn<FileNodeIF, String> treeTableColumn1 = new TreeTableColumn<>("File");
+    TreeTableColumn<FileNodeIF, Long> treeTableColumn2 = new TreeTableColumn<>("Size");
+    TreeTableColumn<FileNodeIF, Double> treeTableColumn3 = new TreeTableColumn<>("%");
 
-    treeTableColumn1.setCellValueFactory(new Callback<CellDataFeatures<NodeIF, String>, ObservableValue<String>>()
+    treeTableColumn1.setPrefWidth(DiskUsageProperties.TREE_TABLE_COLUMN1_SIZE.getDouble(200.0));
+    treeTableColumn1.widthProperty().addListener(DiskUsageProperties.TREE_TABLE_COLUMN1_SIZE.getChangeListener());
+
+    treeTableColumn2.setPrefWidth(DiskUsageProperties.TREE_TABLE_COLUMN2_SIZE.getDouble(100.0));
+    treeTableColumn2.widthProperty().addListener(DiskUsageProperties.TREE_TABLE_COLUMN2_SIZE.getChangeListener());
+
+    treeTableColumn2.setPrefWidth(DiskUsageProperties.TREE_TABLE_COLUMN3_SIZE.getDouble(100.0));
+    treeTableColumn2.widthProperty().addListener(DiskUsageProperties.TREE_TABLE_COLUMN3_SIZE.getChangeListener());
+
+    treeTableColumn1.setCellValueFactory(new Callback<CellDataFeatures<FileNodeIF, String>, ObservableValue<String>>()
     {
       @Override
-      public ObservableValue<String> call(CellDataFeatures<NodeIF, String> p)
+      public ObservableValue<String> call(CellDataFeatures<FileNodeIF, String> p)
       {
         return new ReadOnlyObjectWrapper<String>(p.getValue().getValue().getName());
       }
     });
 
-    treeTableColumn2.setCellValueFactory(new Callback<CellDataFeatures<NodeIF, Long>, ObservableValue<Long>>()
+    treeTableColumn2.setCellValueFactory(new Callback<CellDataFeatures<FileNodeIF, Long>, ObservableValue<Long>>()
     {
       @Override
-      public ObservableValue<Long> call(CellDataFeatures<NodeIF, Long> p)
+      public ObservableValue<Long> call(CellDataFeatures<FileNodeIF, Long> p)
       {
         return new ReadOnlyObjectWrapper<Long>(p.getValue().getValue().getSize());
       }
     });
 
+    treeTableColumn3.setCellValueFactory(new Callback<CellDataFeatures<FileNodeIF, Double>, ObservableValue<Double>>()
+    {
+      @Override
+      public ObservableValue<Double> call(CellDataFeatures<FileNodeIF, Double> p)
+      {
+        double percentage;
+
+        if (p.getValue().getParent() != null)
+        {
+          percentage = p.getValue().getValue().getSize() * 100.0 / p.getValue().getParent().getValue().getSize();
+        }
+        else
+        {
+          percentage = 100.0;
+        }
+
+        return new ReadOnlyObjectWrapper<Double>(percentage);
+      }
+    });
+
     node.getColumns().add(treeTableColumn1);
     node.getColumns().add(treeTableColumn2);
+    node.getColumns().add(treeTableColumn3);
 
     return node;
   }
 
   public static class FileTreeItem
-    extends TreeItem<NodeIF>
+    extends TreeItem<FileNodeIF>
   {
     // We do the children and leaf testing only once, and then set these
     // booleans to false so that we do not check again during this
@@ -68,23 +99,24 @@ public class FileTreeView
     // exercise for the reader.
     private boolean isFirstTimeChildren = true;
 
-    public FileTreeItem(NodeIF node)
+    public FileTreeItem(FileNodeIF node)
     {
       super(node);
 
+      /*
       expandedProperty().addListener((observable, wasExpanded, isExpanded) ->
       {
-        System.out.println("expanded:" + toString());
         if (wasExpanded && !isExpanded && !isFirstTimeChildren)
         {
           super.getChildren().clear();
           isFirstTimeChildren = true;
         }
       });
+      */
     }
 
     @Override
-    public ObservableList<TreeItem<NodeIF>> getChildren()
+    public ObservableList<TreeItem<FileNodeIF>> getChildren()
     {
       if (isFirstTimeChildren)
       {
@@ -104,19 +136,19 @@ public class FileTreeView
       return !getValue().isDirectory();
     }
 
-    private ObservableList<TreeItem<NodeIF>> buildChildren(TreeItem<NodeIF> TreeItem)
+    private ObservableList<TreeItem<FileNodeIF>> buildChildren(TreeItem<FileNodeIF> TreeItem)
     {
-      NodeIF node;
+      FileNodeIF node;
 
       node = TreeItem.getValue();
       if (node != null && node.isDirectory())
       {
-        List<NodeIF> nodeList;
+        List<FileNodeIF> nodeList;
 
         nodeList = ((DirNode) node).getNodeList();
         if (!nodeList.isEmpty())
         {
-          return nodeList.stream().sorted(Comparator.comparing(NodeIF::getSize).reversed()).map(FileTreeItem::new)
+          return nodeList.stream().sorted(FileNodeIF.getSizeComparator()).map(FileTreeItem::new)
               .collect(Collectors.toCollection(FXCollections::observableArrayList));
         }
       }

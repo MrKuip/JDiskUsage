@@ -21,7 +21,10 @@ public enum DiskUsageProperties
   SCENE_HEIGHT,
   SCENE_LOCATION_X,
   SCENE_LOCATION_Y,
-  SPLIT_PANE_POSITION;
+  SPLIT_PANE_POSITION,
+  TREE_TABLE_COLUMN1_SIZE,
+  TREE_TABLE_COLUMN2_SIZE,
+  TREE_TABLE_COLUMN3_SIZE;
 
   private static Properties m_properties;
 

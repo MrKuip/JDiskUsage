@@ -6,6 +6,8 @@ plugins {
   id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
+defaultTasks 'jar'
+
 apply from: 'build-eclipse.gradle'
 
 repositories {
@@ -19,6 +21,7 @@ javafx {
 
 dependencies {
   implementation 'org.controlsfx:controlsfx:11.2.1'
+  implementation files('lib/fontIcons-1.0.jar')
 }
 
 application {

@@ -1,4 +1,4 @@
-package org.kku.util;
+package org.kku.jdiskusage.util;
 
 public class CommonUtil
 {

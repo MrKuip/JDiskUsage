@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Implementation-Title: FontIcons (material design)
+Automatic-Module-Name: org.kku.fontIcons
+Implementation-Version: 1.0
+
