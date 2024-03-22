@@ -27,7 +27,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -457,6 +461,10 @@ public class DiskUsageMain
     {
       if (!treeItem.getChildren().isEmpty())
       {
+        NumberAxis xAxis;
+        CategoryAxis yAxis;
+        BarChart<Number, String> barChart;
+        XYChart.Series<Number, String> series1;
         FileNodeIF node;
         Map<SizeDistributionBucket, Long> map;
 
@@ -465,6 +473,25 @@ public class DiskUsageMain
             .collect(Collectors.groupingBy(SizeDistributionBucket::findBucket, Collectors.counting()));
 
         map.entrySet().forEach(System.out::println);
+
+        xAxis = new NumberAxis();
+        yAxis = new CategoryAxis();
+        barChart = new BarChart<>(xAxis, yAxis);
+        barChart.setTitle("Distribution of sizes in " + treeItem.getValue().getName());
+        xAxis.setLabel("FileSize");
+        yAxis.setLabel("Number of files");
+
+        series1 = new XYChart.Series<>();
+        Stream.of(SizeDistributionBucket.values()).forEach(bucket ->
+        {
+          Long value;
+          value = map.getOrDefault(bucket, 0l);
+          series1.getData().add(new XYChart.Data<Number, String>(value, bucket.getText()));
+        });
+
+        barChart.getData().add(series1);
+
+        return barChart;
       }
 
       return new Label("No data");
@@ -517,7 +544,7 @@ public class DiskUsageMain
 
     static public SizeDistributionBucket findBucket(long value)
     {
-      return Stream.of(values()).filter(bucket -> value > bucket.getFrom() && value < bucket.getTo()).findFirst()
+      return Stream.of(values()).filter(bucket -> value > bucket.getFrom() && value <= bucket.getTo()).findFirst()
           .orElse(INVALID);
     }
 
