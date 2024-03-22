@@ -224,7 +224,7 @@ public class DiskUsageMain
     {
       SIZE("Size", "chart-pie", TabPaneData::fillSizeTab),
       TOP50("Top 50", "trophy", TabPaneData::fillTop50Tab),
-      SIZE_DISTRIBUTION("Size Dist", "chart-bell-curve", TabPaneData::fillSizeTab),
+      SIZE_DISTRIBUTION("Size Dist", "chart-bell-curve", TabPaneData::fillSizeDistributionTab),
       MODIFIED("Modified", "sort-calendar-ascending", TabPaneData::fillSizeTab),
       TYPES("Types", "chart-bell-curve", TabPaneData::fillSizeTab);
 
@@ -453,6 +453,88 @@ public class DiskUsageMain
       return new Label("No data");
     }
 
+    private static Node fillSizeDistributionTab(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
+    {
+      if (!treeItem.getChildren().isEmpty())
+      {
+        FileNodeIF node;
+        Map<SizeDistributionBucket, Long> map;
+
+        node = treeItem.getValue();
+        map = node.streamNode().filter(FileNodeIF::isFile).map(FileNodeIF::getSize)
+            .collect(Collectors.groupingBy(SizeDistributionBucket::findBucket, Collectors.counting()));
+
+        map.entrySet().forEach(System.out::println);
+      }
+
+      return new Label("No data");
+    }
+  }
+
+  private enum SizeDistributionBucket
+  {
+    INVALID("Invalid", -Double.MAX_VALUE, 0),
+    SIZE_0_KB_TO_1_KB("0 KB - 1 KB", kilo_bytes(0), kilo_bytes(1)),
+    SIZE_1_KB_TO_4_KB("1 KB - 4 KB", kilo_bytes(1), kilo_bytes(4)),
+    SIZE_4_KB_TO_16_KB("4 KB - 16 KB", kilo_bytes(4), kilo_bytes(16)),
+    SIZE_16_KB_TO_64_KB("16 KB - 64 KB", kilo_bytes(16), kilo_bytes(64)),
+    SIZE_64_KB_TO_256_KB("64 KB - 256 KB", kilo_bytes(64), kilo_bytes(256)),
+    SIZE_256_KB_TO_1_MB("256 KB - 1 MB", kilo_bytes(256), mega_bytes(1)),
+    SIZE_1_MB_TO_4_MB("1 MB - 4 MB", mega_bytes(1), mega_bytes(4)),
+    SIZE_4_MB_TO_16_MB("4 MB - 16 MB", mega_bytes(4), mega_bytes(16)),
+    SIZE_16_MB_TO_64_MB("16 MB - 64 MB", mega_bytes(16), mega_bytes(64)),
+    SIZE_64_MB_TO_256_MB("64 MB - 256 MB", mega_bytes(64), mega_bytes(256)),
+    SIZE_256_MB_TO_1_GB("256 MB - 1 GB", mega_bytes(256), giga_bytes(1)),
+    SIZE_1_GB_TO_4_GB("1 GB - 4 GB", giga_bytes(1), giga_bytes(4)),
+    SIZE_4_GB_TO_16_GB("4 GB - 16 GB", giga_bytes(4), giga_bytes(16)),
+    SIZE_OVER_16_GB("Over 16 GB", giga_bytes(16), Double.MAX_VALUE);
+
+    private final String mi_text;
+    private final double mi_from;
+    private final double mi_to;
+
+    SizeDistributionBucket(String text, double from, double to)
+    {
+      mi_text = text;
+      mi_from = from;
+      mi_to = to;
+    }
+
+    public String getText()
+    {
+      return mi_text;
+    }
+
+    double getFrom()
+    {
+      return mi_from;
+    }
+
+    double getTo()
+    {
+      return mi_to;
+    }
+
+    static public SizeDistributionBucket findBucket(long value)
+    {
+      return Stream.of(values()).filter(bucket -> value > bucket.getFrom() && value < bucket.getTo()).findFirst()
+          .orElse(INVALID);
+    }
+
+    static private double kilo_bytes(double value)
+    {
+      return 1000 * value;
+    }
+
+    static private double mega_bytes(double value)
+    {
+      return kilo_bytes(value) * 1000;
+    }
+
+    static private double giga_bytes(double value)
+    {
+      return mega_bytes(value) * 1000;
+    }
   }
 
   private class RecentFilesMenu
