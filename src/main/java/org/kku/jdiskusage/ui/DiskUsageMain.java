@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.ui;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -14,7 +15,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.controlsfx.control.BreadCrumbBar;
 import org.kku.fonticons.ui.FxIcon.IconSize;
+import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
+import org.kku.jdiskusage.util.CommonUtil;
 import org.kku.jdiskusage.util.DiskUsageProperties;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
@@ -40,6 +43,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
@@ -47,6 +51,8 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -100,9 +106,9 @@ public class DiskUsageMain
     m_tabPaneData.getNode().setTop(m_treePaneData.createBreadCrumbBar());
 
     stage.setTitle("JDiskUsage");
+    stage.getIcons().add(IconUtil.createImage("file-search", IconSize.SMALL));
     stage.setScene(scene);
     stage.show();
-
   }
 
   private MenuBar createMenuBar()
@@ -180,7 +186,10 @@ public class DiskUsageMain
         select(e.getSelectedCrumb());
       });
 
-      Platform.runLater(() -> mi_treeTableView.getSelectionModel().select(0));
+      Platform.runLater(() -> {
+        mi_treeTableView.getSelectionModel().select(0);
+        mi_treeTableView.getSelectionModel().getSelectedItem().setExpanded(true);
+      });
 
       mi_treePane.setCenter(mi_treeTableView);
     }
@@ -227,7 +236,7 @@ public class DiskUsageMain
       SIZE("Size", "chart-pie", TabPaneData::fillSizeTab),
       TOP50("Top 50", "trophy", TabPaneData::fillTop50Tab),
       DISTRIBUTION_SIZE("Size Dist", "chart-bell-curve", TabPaneData::fillSizeDistributionTab),
-      DISTRIBUTION_MODIFIED("Modified", "sort-calendar-ascending", TabPaneData::fillSizeTab),
+      DISTRIBUTION_MODIFIED("Modified", "sort-calendar-ascending", TabPaneData::fillModifiedDistributionTab),
       DISTRIBUTION_TYPES("Types", "chart-pie", TabPaneData::fillTypeDistributionTab);
 
       private final String m_name;
@@ -346,8 +355,7 @@ public class DiskUsageMain
         record Data(PieChart.Data pieChartData, TreeItem<FileNodeIF> treeItem) {
         }
 
-        chart = new PieChart();
-        chart.setStartAngle(90.0);
+        chart = FxUtil.createPieChart();
         treeItem.getChildren().stream().filter(item -> {
           return item.getValue().getSize() > minimumDataSize;
         }).limit(10).map(item -> {
@@ -378,68 +386,135 @@ public class DiskUsageMain
       return new Label("No data");
     }
 
+    public static class ObjectWithIndexFactory<T>
+    {
+      private int nextRank = 1;
+
+      public ObjectWithIndex<T> create(T object)
+      {
+        return new ObjectWithIndex<>(object, nextRank++);
+      }
+    }
+
+    public static class ObjectWithIndex<T>
+    {
+      private final T m_object;
+      private final int m_index;
+
+      private ObjectWithIndex(T object, int index)
+      {
+        m_object = object;
+        m_index = index;
+      }
+
+      public int getIndex()
+      {
+        return m_index;
+      }
+
+      public T getObject()
+      {
+        return m_object;
+      }
+    }
+
     private static Node fillTop50Tab(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
     {
       if (!treeItem.getChildren().isEmpty())
       {
         FileNodeIF node;
-        ObservableList<FileNodeIF> list;
-        TableView<FileNodeIF> table;
-        TableColumn<FileNodeIF, Short> rankColumn;
-        TableColumn<FileNodeIF, String> nameColumn;
-        TableColumn<FileNodeIF, Long> fileSizeColumn;
-        TableColumn<FileNodeIF, Date> modifiedColumn;
-        TableColumn<FileNodeIF, String> pathColumn;
+        ObservableList<ObjectWithIndex<FileNodeIF>> list;
+        TableView<ObjectWithIndex<FileNodeIF>> table;
+        TableColumn<ObjectWithIndex<FileNodeIF>, Integer> rankColumn;
+        TableColumn<ObjectWithIndex<FileNodeIF>, String> nameColumn;
+        TableColumn<ObjectWithIndex<FileNodeIF>, Long> fileSizeColumn;
+        TableColumn<ObjectWithIndex<FileNodeIF>, Date> lastModifiedColumn;
+        TableColumn<ObjectWithIndex<FileNodeIF>, String> pathColumn;
+        ObjectWithIndexFactory<FileNodeIF> objectWithIndexFactory;
+
+        objectWithIndexFactory = new ObjectWithIndexFactory<>();
 
         node = treeItem.getValue();
         list = node.streamNode().filter(FileNodeIF::isFile).sorted(FileNodeIF.getSizeComparator()).limit(50)
-            .collect(Collectors.toCollection(FXCollections::observableArrayList));
-
-        list.forEach(n -> {
-          System.out.printf("%9d %s%n", n.getSize(), n.getName());
-        });
+            .map(objectWithIndexFactory::create).collect(Collectors.toCollection(FXCollections::observableArrayList));
 
         table = new TableView<>();
         table.setEditable(false);
 
-        rankColumn = new TableColumn<>("No");
+        rankColumn = new TableColumn<>("Rank");
         nameColumn = new TableColumn<>("Name");
         fileSizeColumn = new TableColumn<>("File size");
-        modifiedColumn = new TableColumn<>("Modified");
+        lastModifiedColumn = new TableColumn<>("Last modified");
         pathColumn = new TableColumn<>("path");
 
         table.getColumns().add(rankColumn);
         table.getColumns().add(nameColumn);
         table.getColumns().add(fileSizeColumn);
-        table.getColumns().add(modifiedColumn);
+        table.getColumns().add(lastModifiedColumn);
         table.getColumns().add(pathColumn);
 
-        rankColumn.setCellValueFactory(new Callback<CellDataFeatures<FileNodeIF, Short>, ObservableValue<Short>>()
-        {
-          @Override
-          public ObservableValue<Short> call(CellDataFeatures<FileNodeIF, Short> p)
-          {
-            return new ReadOnlyObjectWrapper<Short>(Short.valueOf((short) 1));
-          }
-        });
+        rankColumn.setCellValueFactory(
+            new Callback<CellDataFeatures<ObjectWithIndex<FileNodeIF>, Integer>, ObservableValue<Integer>>()
+            {
+              @Override
+              public ObservableValue<Integer> call(CellDataFeatures<ObjectWithIndex<FileNodeIF>, Integer> p)
+              {
+                return new ReadOnlyObjectWrapper<Integer>(p.getValue().getIndex());
+              }
+            });
 
-        nameColumn.setCellValueFactory(new Callback<CellDataFeatures<FileNodeIF, String>, ObservableValue<String>>()
-        {
-          @Override
-          public ObservableValue<String> call(CellDataFeatures<FileNodeIF, String> p)
-          {
-            return new ReadOnlyObjectWrapper<String>(p.getValue().getName());
-          }
-        });
+        nameColumn.setCellValueFactory(
+            new Callback<CellDataFeatures<ObjectWithIndex<FileNodeIF>, String>, ObservableValue<String>>()
+            {
+              @Override
+              public ObservableValue<String> call(CellDataFeatures<ObjectWithIndex<FileNodeIF>, String> p)
+              {
+                return new ReadOnlyObjectWrapper<String>(p.getValue().getObject().getName());
+              }
+            });
 
-        fileSizeColumn.setCellValueFactory(new Callback<CellDataFeatures<FileNodeIF, Long>, ObservableValue<Long>>()
-        {
-          @Override
-          public ObservableValue<Long> call(CellDataFeatures<FileNodeIF, Long> p)
+        lastModifiedColumn.setCellValueFactory(
+            new Callback<CellDataFeatures<ObjectWithIndex<FileNodeIF>, Date>, ObservableValue<Date>>()
+            {
+              @Override
+              public ObservableValue<Date> call(CellDataFeatures<ObjectWithIndex<FileNodeIF>, Date> p)
+              {
+                return new ReadOnlyObjectWrapper<Date>(new Date(p.getValue().getObject().getLastModifiedTime()));
+              }
+            });
+
+        lastModifiedColumn.setCellFactory(column -> {
+          TableCell<ObjectWithIndex<FileNodeIF>, Date> cell = new TableCell<>()
           {
-            return new ReadOnlyObjectWrapper<Long>(p.getValue().getSize());
-          }
+            private SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+
+            @Override
+            protected void updateItem(Date date, boolean empty)
+            {
+              super.updateItem(date, empty);
+
+              if (empty || date == null)
+              {
+                setText("");
+              }
+              else
+              {
+                setText(format.format(date));
+              }
+            }
+          };
+
+          return cell;
         });
+        fileSizeColumn.setCellValueFactory(
+            new Callback<CellDataFeatures<ObjectWithIndex<FileNodeIF>, Long>, ObservableValue<Long>>()
+            {
+              @Override
+              public ObservableValue<Long> call(CellDataFeatures<ObjectWithIndex<FileNodeIF>, Long> p)
+              {
+                return new ReadOnlyObjectWrapper<Long>(p.getValue().getObject().getSize());
+              }
+            });
         table.setItems(list);
 
         return table;
@@ -452,6 +527,7 @@ public class DiskUsageMain
     {
       if (!treeItem.getChildren().isEmpty())
       {
+        GridPane pane;
         NumberAxis xAxis;
         CategoryAxis yAxis;
         BarChart<Number, String> barChart;
@@ -461,35 +537,272 @@ public class DiskUsageMain
         record Data(Long numberOfFiles, Long sizeOfFiles) {
         }
         Map<SizeDistributionBucket, Data> map;
-        Data data0 = new Data(0l, 0l);
+        Data dataDefault = new Data(0l, 0l);
+
+        pane = new GridPane();
 
         node = treeItem.getValue();
         map = node.streamNode().filter(FileNodeIF::isFile).map(FileNodeIF::getSize)
-            .collect(Collectors.groupingBy(SizeDistributionBucket::findBucket, Collectors.teeing(Collectors.counting(),
-                Collectors.summingLong(a -> a), (numberOfFiles, sizeOfFiles) -> new Data(numberOfFiles, sizeOfFiles))));
+            .collect(Collectors.groupingBy(SizeDistributionBucket::findBucket,
+                Collectors.teeing(Collectors.counting(), Collectors.summingLong(a -> a / 1000000),
+                    (numberOfFiles, sizeOfFiles) -> new Data(numberOfFiles, sizeOfFiles))));
 
         xAxis = new NumberAxis();
         yAxis = new CategoryAxis();
-        barChart = new BarChart<>(xAxis, yAxis);
+        barChart = FxUtil.createBarChart(xAxis, yAxis);
         barChart.setTitle("Distribution of sizes in " + treeItem.getValue().getName());
         xAxis.setLabel("Number of files");
         yAxis.setLabel("File sizes");
 
         series1 = new XYChart.Series<>();
+        Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
+          Data value;
+          value = map.getOrDefault(bucket, dataDefault);
+          series1.getData().add(new XYChart.Data<Number, String>(value.numberOfFiles(), bucket.getText()));
+        });
+
+        barChart.getData().add(series1);
+        pane.add(barChart, 0, 0);
+        GridPane.setHgrow(barChart, Priority.ALWAYS);
+        GridPane.setVgrow(barChart, Priority.ALWAYS);
+
+        xAxis = new NumberAxis();
+        yAxis = new CategoryAxis();
+        barChart = FxUtil.createBarChart(xAxis, yAxis);
+        xAxis.setLabel("Total size of files (in Gb)");
+        yAxis.setLabel("File sizes");
+
         series2 = new XYChart.Series<>();
         Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
           Data value;
-          value = map.getOrDefault(bucket, data0);
-          series1.getData().add(new XYChart.Data<Number, String>(value.numberOfFiles(), bucket.getText()));
+          value = map.getOrDefault(bucket, dataDefault);
           series2.getData().add(new XYChart.Data<Number, String>(value.sizeOfFiles(), bucket.getText()));
         });
 
-        barChart.getData().addAll(series1, series2);
+        barChart.getData().add(series2);
+        pane.add(barChart, 0, 1);
+        GridPane.setHgrow(barChart, Priority.ALWAYS);
+        GridPane.setVgrow(barChart, Priority.ALWAYS);
 
-        return barChart;
+        return pane;
       }
 
       return new Label("No data");
+    }
+
+    private enum SizeDistributionBucket
+    {
+      INVALID("Invalid", -Double.MAX_VALUE, 0),
+      SIZE_0_KB_TO_1_KB("0 KB - 1 KB", kilo_bytes(0), kilo_bytes(1)),
+      SIZE_1_KB_TO_4_KB("1 KB - 4 KB", kilo_bytes(1), kilo_bytes(4)),
+      SIZE_4_KB_TO_16_KB("4 KB - 16 KB", kilo_bytes(4), kilo_bytes(16)),
+      SIZE_16_KB_TO_64_KB("16 KB - 64 KB", kilo_bytes(16), kilo_bytes(64)),
+      SIZE_64_KB_TO_256_KB("64 KB - 256 KB", kilo_bytes(64), kilo_bytes(256)),
+      SIZE_256_KB_TO_1_MB("256 KB - 1 MB", kilo_bytes(256), mega_bytes(1)),
+      SIZE_1_MB_TO_4_MB("1 MB - 4 MB", mega_bytes(1), mega_bytes(4)),
+      SIZE_4_MB_TO_16_MB("4 MB - 16 MB", mega_bytes(4), mega_bytes(16)),
+      SIZE_16_MB_TO_64_MB("16 MB - 64 MB", mega_bytes(16), mega_bytes(64)),
+      SIZE_64_MB_TO_256_MB("64 MB - 256 MB", mega_bytes(64), mega_bytes(256)),
+      SIZE_256_MB_TO_1_GB("256 MB - 1 GB", mega_bytes(256), giga_bytes(1)),
+      SIZE_1_GB_TO_4_GB("1 GB - 4 GB", giga_bytes(1), giga_bytes(4)),
+      SIZE_4_GB_TO_16_GB("4 GB - 16 GB", giga_bytes(4), giga_bytes(16)),
+      SIZE_OVER_16_GB("Over 16 GB", giga_bytes(16), Double.MAX_VALUE);
+
+      private final String mi_text;
+      private final double mi_from;
+      private final double mi_to;
+
+      SizeDistributionBucket(String text, double from, double to)
+      {
+        mi_text = text;
+        mi_from = from;
+        mi_to = to;
+      }
+
+      public String getText()
+      {
+        return mi_text;
+      }
+
+      double getFrom()
+      {
+        return mi_from;
+      }
+
+      double getTo()
+      {
+        return mi_to;
+      }
+
+      static public SizeDistributionBucket findBucket(long value)
+      {
+        return Stream.of(values()).filter(bucket -> value >= bucket.getFrom() && value < bucket.getTo()).findFirst()
+            .orElse(INVALID);
+      }
+
+      static private double kilo_bytes(double value)
+      {
+        return 1000 * value;
+      }
+
+      static private double mega_bytes(double value)
+      {
+        return kilo_bytes(value) * 1000;
+      }
+
+      static private double giga_bytes(double value)
+      {
+        return mega_bytes(value) * 1000;
+      }
+    }
+
+    private static Node fillModifiedDistributionTab(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
+    {
+      if (!treeItem.getChildren().isEmpty())
+      {
+        GridPane pane;
+        NumberAxis xAxis;
+        CategoryAxis yAxis;
+        BarChart<Number, String> barChart;
+        XYChart.Series<Number, String> series1;
+        XYChart.Series<Number, String> series2;
+        FileNodeIF node;
+        record Data(Long numberOfFiles, Long sizeOfFiles) {
+        }
+        Map<LastModifiedDistributionBucket, Data> map;
+        Data dataDefault = new Data(0l, 0l);
+        long todayMidnight;
+
+        pane = new GridPane();
+        todayMidnight = CommonUtil.getMidnight();
+
+        System.out.println("30 dagen = " + LastModifiedDistributionBucket.days(30));
+
+        Stream.of(LastModifiedDistributionBucket.values()).forEach(bucket -> {
+          System.out.println(bucket.getText() + " " + bucket.getFrom() + " until " + bucket.getTo());
+        });
+
+        node = treeItem.getValue();
+        map = node.streamNode().filter(FileNodeIF::isFile)
+            .collect(Collectors.groupingBy(
+                fileNode -> LastModifiedDistributionBucket.findBucket(todayMidnight, fileNode.getLastModifiedTime()),
+                Collectors.teeing(Collectors.counting(),
+                    Collectors.summingLong(fileNode -> fileNode.getSize() / 1000000),
+                    (numberOfFiles, sizeOfFiles) -> new Data(numberOfFiles, sizeOfFiles))));
+
+        xAxis = new NumberAxis();
+        yAxis = new CategoryAxis();
+        barChart = FxUtil.createBarChart(xAxis, yAxis);
+        barChart.setTitle("Distribution of last modification dates in " + treeItem.getValue().getName());
+        xAxis.setLabel("Number of files");
+        yAxis.setLabel("File sizes");
+
+        System.out.println("numberOfFiles:");
+        series1 = new XYChart.Series<>();
+        Stream.of(LastModifiedDistributionBucket.values()).forEach(bucket -> {
+          Data value;
+          value = map.getOrDefault(bucket, dataDefault);
+          series1.getData().add(new XYChart.Data<Number, String>(value.numberOfFiles(), bucket.getText()));
+          System.out.println(bucket.getText() + " -> " + value.numberOfFiles());
+        });
+
+        barChart.getData().add(series1);
+        pane.add(barChart, 0, 0);
+        GridPane.setHgrow(barChart, Priority.ALWAYS);
+        GridPane.setVgrow(barChart, Priority.ALWAYS);
+
+        xAxis = new NumberAxis();
+        yAxis = new CategoryAxis();
+        barChart = FxUtil.createBarChart(xAxis, yAxis);
+        xAxis.setLabel("Total size of files (in Gb)");
+        yAxis.setLabel("File sizes");
+
+        System.out.println("sizeOfFiles:");
+        series2 = new XYChart.Series<>();
+        Stream.of(LastModifiedDistributionBucket.values()).forEach(bucket -> {
+          Data value;
+          value = map.getOrDefault(bucket, dataDefault);
+          series2.getData().add(new XYChart.Data<Number, String>(value.sizeOfFiles(), bucket.getText()));
+          System.out.println(bucket.getText() + " -> " + value.sizeOfFiles());
+        });
+
+        barChart.getData().add(series2);
+        pane.add(barChart, 0, 1);
+        GridPane.setHgrow(barChart, Priority.ALWAYS);
+        GridPane.setVgrow(barChart, Priority.ALWAYS);
+
+        return pane;
+      }
+
+      return new Label("No data");
+    }
+
+    private enum LastModifiedDistributionBucket
+    {
+      INVALID("Invalid", Long.MAX_VALUE - 1l, Long.MAX_VALUE),
+      LAST_MODIFIED_FUTURE("In the future", -Long.MAX_VALUE, 0),
+      LAST_MODIFIED_TODAY("Today", days(0), days(1)),
+      LAST_MODIFIED_YESTERDAY("Yesterday", days(1), days(2)),
+      LAST_MODIFIED_1_DAY_TILL_7_DAYS("2 - 7 days", days(2), days(8)),
+      LAST_MODIFIED_7_DAYs_TILL_30_DAYS("7 - 30 days", days(9), days(31)),
+      LAST_MODIFIED_30_DAYS_TILL_90_DAYS("30 - 90 days", days(31), days(91)),
+      LAST_MODIFIED_90_DAYS_TILL_180_DAYS("90 - 180 days", days(91), days(181)),
+      LAST_MODIFIED_180_DAYS_TILL_365_DAYS("180 - 365 days", days(181), years(1)),
+      LAST_MODIFIED_1_YEAR_TILL_2_YEAR("1 - 2 years", years(1), years(2)),
+      LAST_MODIFIED_2_YEAR_TILL_3_YEAR("2 - 3 years", years(2), years(3)),
+      LAST_MODIFIED_3_YEAR_TILL_6_YEAR("3 - 6 years", years(3), years(6)),
+      LAST_MODIFIED_6_YEAR_TILL_10_YEAR("6 - 10 years", years(6), years(10)),
+      LAST_MODIFIED_OVER_10_YEARS("Over 10 years", years(10), Long.MAX_VALUE);
+
+      private final String mi_text;
+      private final long mi_from;
+      private final long mi_to;
+
+      LastModifiedDistributionBucket(String text, long from, long to)
+      {
+        mi_text = text;
+        mi_from = from;
+        mi_to = to;
+      }
+
+      public String getText()
+      {
+        return mi_text;
+      }
+
+      long getFrom()
+      {
+        return mi_from;
+      }
+
+      long getTo()
+      {
+        return mi_to;
+      }
+
+      static public LastModifiedDistributionBucket findBucket(long todayMidnight, long lastModified)
+      {
+        long ago;
+
+        ago = todayMidnight - lastModified;
+
+        LastModifiedDistributionBucket b = Stream.of(values())
+            .filter(bucket -> ago >= bucket.getFrom() && ago < bucket.getTo()).findFirst().orElse(INVALID);
+
+        System.out.println(b + " -> " + new Date(lastModified) + " ago: " + (ago / (24 * 60 * 60 * 1000)) + " dagen");
+
+        return b;
+      }
+
+      private static long days(long days)
+      {
+        return days * 24 * 60 * 60 * 1000;
+      }
+
+      private static long years(long years)
+      {
+        return days(years * 365);
+      }
     }
 
     private static Node fillTypeDistributionTab(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
@@ -504,17 +817,13 @@ public class DiskUsageMain
         double minimumCount;
         long otherCount;
 
-        chart = new PieChart();
-        chart.setStartAngle(90.0);
+        chart = FxUtil.createPieChart();
 
         node = treeItem.getValue();
         fullMap = node.streamNode().filter(FileNodeIF::isFile).map(FileNodeIF::getName)
             .collect(Collectors.groupingBy(TabPaneData::getFileType, Collectors.counting()));
         totalCount = fullMap.values().stream().reduce(0l, Long::sum);
         minimumCount = totalCount * 0.01; // Only types with a count larger than a percentage are shown
-
-        System.out.println("\nfullmap:");
-        fullMap.entrySet().stream().forEach(System.out::println);
 
         reducedMap = fullMap.entrySet().stream()
             .sorted(Comparator.comparing(Entry<String, Long>::getValue, Comparator.reverseOrder()))
@@ -526,9 +835,6 @@ public class DiskUsageMain
         {
           reducedMap.put("<Other>", otherCount);
         }
-
-        System.out.println("\nreducedMap:");
-        reducedMap.entrySet().stream().forEach(System.out::println);
 
         reducedMap.entrySet().stream().map(entry -> {
           PieChart.Data data;
@@ -544,47 +850,6 @@ public class DiskUsageMain
 
       return new Label("No data");
     }
-
-    /*
-     * 
-     * { if (!treeItem.getChildren().isEmpty()) { NumberAxis xAxis; CategoryAxis
-     * yAxis; BarChart<Number, String> barChart; XYChart.Series<Number, String>
-     * series1; FileNodeIF node; Map<String, Long> fullMap; Map<String, Long>
-     * reducedMap; long totalCount; double minimumCount;
-     * 
-     * node = treeItem.getValue(); fullMap =
-     * node.streamNode().filter(FileNodeIF::isFile).map(FileNodeIF::getName)
-     * .collect(Collectors.groupingBy(TabPaneData::getFileType,
-     * Collectors.counting()));
-     * 
-     * totalCount = fullMap.values().stream().reduce(0l, Long::sum); minimumCount =
-     * totalCount * 0.05; // Only types with a count larger than a percentage are
-     * shown
-     * 
-     * record Data(String key, Long value) { }
-     * 
-     * //with a count larger than a percentage are shown reducedMap =
-     * fullMap.entrySet().stream().map(entry -> return new Data(entry.getValue() <
-     * minimumCount? "<other>" : entry.getKey(), entry.getValue());
-     * }).collect(Collectors.toMap(Data::key, Data::value));
-     * 
-     * reducedMap.entrySet().forEach(System.out::println);
-     * 
-     * xAxis = new NumberAxis(); yAxis = new CategoryAxis(); barChart = new
-     * BarChart<>(xAxis, yAxis); barChart.setTitle("Distribution of types in " +
-     * treeItem.getValue().getName()); xAxis.setLabel("File type");
-     * yAxis.setLabel("Number of files");
-     * 
-     * series1 = new XYChart.Series<>(); reducedMap.keySet().forEach(type -> {
-     * series1.getData().add(new XYChart.Data<Number, String>(reducedMap.get(type),
-     * type)); });
-     * 
-     * barChart.getData().add(series1);
-     * 
-     * return barChart; }
-     * 
-     * return new Label("No data"); }
-     */
 
     private static String getFileType(String fileName)
     {
@@ -603,72 +868,6 @@ public class DiskUsageMain
       }
 
       return "<none>";
-    }
-  }
-
-  private enum SizeDistributionBucket
-  {
-    INVALID("Invalid", -Double.MAX_VALUE, 0),
-    SIZE_0_KB_TO_1_KB("0 KB - 1 KB", kilo_bytes(0), kilo_bytes(1)),
-    SIZE_1_KB_TO_4_KB("1 KB - 4 KB", kilo_bytes(1), kilo_bytes(4)),
-    SIZE_4_KB_TO_16_KB("4 KB - 16 KB", kilo_bytes(4), kilo_bytes(16)),
-    SIZE_16_KB_TO_64_KB("16 KB - 64 KB", kilo_bytes(16), kilo_bytes(64)),
-    SIZE_64_KB_TO_256_KB("64 KB - 256 KB", kilo_bytes(64), kilo_bytes(256)),
-    SIZE_256_KB_TO_1_MB("256 KB - 1 MB", kilo_bytes(256), mega_bytes(1)),
-    SIZE_1_MB_TO_4_MB("1 MB - 4 MB", mega_bytes(1), mega_bytes(4)),
-    SIZE_4_MB_TO_16_MB("4 MB - 16 MB", mega_bytes(4), mega_bytes(16)),
-    SIZE_16_MB_TO_64_MB("16 MB - 64 MB", mega_bytes(16), mega_bytes(64)),
-    SIZE_64_MB_TO_256_MB("64 MB - 256 MB", mega_bytes(64), mega_bytes(256)),
-    SIZE_256_MB_TO_1_GB("256 MB - 1 GB", mega_bytes(256), giga_bytes(1)),
-    SIZE_1_GB_TO_4_GB("1 GB - 4 GB", giga_bytes(1), giga_bytes(4)),
-    SIZE_4_GB_TO_16_GB("4 GB - 16 GB", giga_bytes(4), giga_bytes(16)),
-    SIZE_OVER_16_GB("Over 16 GB", giga_bytes(16), Double.MAX_VALUE);
-
-    private final String mi_text;
-    private final double mi_from;
-    private final double mi_to;
-
-    SizeDistributionBucket(String text, double from, double to)
-    {
-      mi_text = text;
-      mi_from = from;
-      mi_to = to;
-    }
-
-    public String getText()
-    {
-      return mi_text;
-    }
-
-    double getFrom()
-    {
-      return mi_from;
-    }
-
-    double getTo()
-    {
-      return mi_to;
-    }
-
-    static public SizeDistributionBucket findBucket(long value)
-    {
-      return Stream.of(values()).filter(bucket -> value > bucket.getFrom() && value <= bucket.getTo()).findFirst()
-          .orElse(INVALID);
-    }
-
-    static private double kilo_bytes(double value)
-    {
-      return 1000 * value;
-    }
-
-    static private double mega_bytes(double value)
-    {
-      return kilo_bytes(value) * 1000;
-    }
-
-    static private double giga_bytes(double value)
-    {
-      return mega_bytes(value) * 1000;
     }
   }
 

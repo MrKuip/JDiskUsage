@@ -3,7 +3,9 @@ package org.kku.jdiskusage.util;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -80,7 +82,11 @@ public class FileTree
 
     public long getSize();
 
+    public long getLastModifiedTime();
+
     public Stream<FileNodeIF> streamNode();
+
+    public Stream<FileNodeWithPath> streamNodeWithPath();
 
     default public boolean isFile()
     {
@@ -90,6 +96,18 @@ public class FileTree
     static public Comparator<FileNodeIF> getSizeComparator()
     {
       return Comparator.comparing(FileNodeIF::getSize).reversed();
+    }
+  }
+
+  public class FileNodeWithPath
+  {
+    private final String m_parentPath;
+    private final FileNodeIF m_node;
+
+    public FileNodeWithPath(String parentPath, FileNodeIF node)
+    {
+      m_parentPath = parentPath;
+      m_node = node;
     }
   }
 
@@ -106,7 +124,13 @@ public class FileTree
     @Override
     public String getName()
     {
-      return m_pathName;
+      return m_pathName.intern();
+    }
+
+    @Override
+    public Stream<FileNodeWithPath> streamNodeWithPath()
+    {
+      return null;
     }
 
     @Override
@@ -144,6 +168,12 @@ public class FileTree
     }
 
     @Override
+    public long getLastModifiedTime()
+    {
+      return -1;
+    }
+
+    @Override
     public boolean isDirectory()
     {
       return true;
@@ -173,27 +203,40 @@ public class FileTree
     private final int mi_inodeNumber;
     private final int mi_numberOfLinks;
     private final long mi_size;
+    private final long mi_lastModifiedTime;
 
     private FileNode(Path path)
     {
       super(path.getFileName().toString());
 
-      Map<String, Object> attributes;
+      Map<String, Object> unixAttributes;
+      BasicFileAttributes basicAttributes;
+
+      unixAttributes = null;
+      basicAttributes = null;
+
       try
       {
-        attributes = Files.readAttributes(path, ATTRIBUTE_IDS);
+        unixAttributes = Files.readAttributes(path, ATTRIBUTE_IDS);
       }
       catch (IOException e)
       {
-        mi_numberOfLinks = -1;
-        mi_size = -1;
-        mi_inodeNumber = -1;
-        return;
       }
 
-      mi_numberOfLinks = UnixAttribute.NUMBER_OF_LINKS.get(attributes);
-      mi_size = ((Long) UnixAttribute.FILE_SIZE.get(attributes)).longValue();
-      mi_inodeNumber = ((Long) UnixAttribute.INODE.get(attributes)).intValue();
+      mi_inodeNumber = unixAttributes == null ? -1 : ((Long) UnixAttribute.INODE.get(unixAttributes)).intValue();
+      mi_numberOfLinks = unixAttributes == null ? -1
+          : ((Integer) UnixAttribute.NUMBER_OF_LINKS.get(unixAttributes)).intValue();
+
+      try
+      {
+        basicAttributes = Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+      }
+      catch (IOException e)
+      {
+      }
+
+      mi_size = basicAttributes == null ? -1 : basicAttributes.size();
+      mi_lastModifiedTime = basicAttributes == null ? -1 : basicAttributes.lastModifiedTime().toMillis();
     }
 
     @Override
@@ -216,6 +259,12 @@ public class FileTree
     public int getInodeNumber()
     {
       return mi_inodeNumber;
+    }
+
+    @Override
+    public long getLastModifiedTime()
+    {
+      return mi_lastModifiedTime;
     }
 
     @Override
@@ -267,30 +316,32 @@ public class FileTree
     {
       try
       {
-        try (Stream<Path> stream = Files.list(currentPath))
+        if (currentPath.toFile().canRead())
         {
-          stream.forEach(path ->
+          try (Stream<Path> stream = Files.list(currentPath))
           {
-            if (mi_cancel)
-            {
-              return;
-            }
-
-            if (Files.isDirectory(path))
-            {
-              mi_numberOfDirectories++;
-              scan(parentNode.addNode(new DirNode(path)), path);
-            }
-            else
-            {
-              mi_numberOfFiles++;
-              parentNode.addNode(new FileNode(path));
-              if (m_scanListener != null)
+            stream.forEach(path -> {
+              if (mi_cancel)
               {
-                mi_cancel = m_scanListener.progress(path, mi_numberOfDirectories, mi_numberOfFiles, false);
+                return;
               }
-            }
-          });
+
+              if (Files.isDirectory(path))
+              {
+                mi_numberOfDirectories++;
+                scan(parentNode.addNode(new DirNode(path)), path);
+              }
+              else
+              {
+                mi_numberOfFiles++;
+                parentNode.addNode(new FileNode(path));
+                if (m_scanListener != null)
+                {
+                  mi_cancel = m_scanListener.progress(path, mi_numberOfDirectories, mi_numberOfFiles, false);
+                }
+              }
+            });
+          }
         }
       }
       catch (IOException e)
@@ -307,8 +358,7 @@ public class FileTree
 
     public void print(DirNode dirNode)
     {
-      dirNode.getNodeList().forEach(node ->
-      {
+      dirNode.getNodeList().forEach(node -> {
         System.out.printf("%-10d%s%s%n", node.getSize(), getIndent(), node);
         if (node.isDirectory())
         {
