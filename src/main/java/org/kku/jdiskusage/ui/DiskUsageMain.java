@@ -2,6 +2,7 @@ package org.kku.jdiskusage.ui;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -124,8 +125,7 @@ public class DiskUsageMain
 
     menuItem = new MenuItem("Scan file tree");
     menuItem.setGraphic(IconUtil.createImageNode("file-search", IconSize.SMALLER));
-    menuItem.setOnAction(e ->
-    {
+    menuItem.setOnAction(e -> {
       DirNode dirNode;
 
       dirNode = new ScanFileTreeDialog().chooseDirectory(m_stage);
@@ -171,14 +171,12 @@ public class DiskUsageMain
 
       fileTreeView = new FileTreeView(dirNode);
       mi_treeTableView = fileTreeView.createComponent();
-      mi_treeTableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) ->
-      {
+      mi_treeTableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
         m_tabPaneData.setSelected(mi_treeTableView.getSelectionModel().getSelectedItem());
       });
       mi_breadCrumbBar.selectedCrumbProperty().bind(mi_treeTableView.getSelectionModel().selectedItemProperty());
       mi_breadCrumbBar.setAutoNavigationEnabled(false);
-      mi_breadCrumbBar.setOnCrumbAction((e) ->
-      {
+      mi_breadCrumbBar.setOnCrumbAction((e) -> {
         select(e.getSelectedCrumb());
       });
 
@@ -228,9 +226,9 @@ public class DiskUsageMain
     {
       SIZE("Size", "chart-pie", TabPaneData::fillSizeTab),
       TOP50("Top 50", "trophy", TabPaneData::fillTop50Tab),
-      SIZE_DISTRIBUTION("Size Dist", "chart-bell-curve", TabPaneData::fillSizeDistributionTab),
-      MODIFIED("Modified", "sort-calendar-ascending", TabPaneData::fillSizeTab),
-      TYPES("Types", "chart-bell-curve", TabPaneData::fillSizeTab);
+      DISTRIBUTION_SIZE("Size Dist", "chart-bell-curve", TabPaneData::fillSizeDistributionTab),
+      DISTRIBUTION_MODIFIED("Modified", "sort-calendar-ascending", TabPaneData::fillSizeTab),
+      DISTRIBUTION_TYPES("Types", "chart-pie", TabPaneData::fillTypeDistributionTab);
 
       private final String m_name;
       private final String m_iconName;
@@ -282,8 +280,7 @@ public class DiskUsageMain
     private TabPaneData()
     {
       mi_tabPane = new TabPane();
-      mi_tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) ->
-      {
+      mi_tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
         fillContent(newTab, m_treePaneData.getSelectedItem());
       });
       mi_borderPane = new BorderPane();
@@ -297,8 +294,7 @@ public class DiskUsageMain
 
     public Tab createTab(TabData tabData)
     {
-      return mi_tabByTabId.computeIfAbsent(tabData, td ->
-      {
+      return mi_tabByTabId.computeIfAbsent(tabData, td -> {
         Tab tab;
         tab = td.createTab();
         mi_tabPane.getTabs().add(tab);
@@ -345,30 +341,26 @@ public class DiskUsageMain
         double minimumDataSize;
 
         totalSize = treeItem.getValue().getSize();
-        minimumDataSize = totalSize * 0.05;
+        minimumDataSize = totalSize * 0.02;
 
         record Data(PieChart.Data pieChartData, TreeItem<FileNodeIF> treeItem) {
         }
 
         chart = new PieChart();
         chart.setStartAngle(90.0);
-        treeItem.getChildren().stream().filter(item ->
-        {
+        treeItem.getChildren().stream().filter(item -> {
           return item.getValue().getSize() > minimumDataSize;
-        }).limit(10).map(item ->
-        {
+        }).limit(10).map(item -> {
           PieChart.Data data;
 
           data = new PieChart.Data(item.getValue().getName(), item.getValue().getSize());
           data.nameProperty().bind(Bindings.concat(data.getName(), "\n", SizeUtil.getFileSize(data.getPieValue())));
 
           return new Data(data, item);
-        }).forEach(tuple ->
-        {
+        }).forEach(tuple -> {
           chart.getData().add(tuple.pieChartData);
           tuple.pieChartData.getNode().setUserData(tuple.treeItem);
-          tuple.pieChartData.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, (me) ->
-          {
+          tuple.pieChartData.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, (me) -> {
             treePaneData.select(tuple.treeItem);
             // treePaneData.select(4);
           });
@@ -377,7 +369,7 @@ public class DiskUsageMain
         if (chart.getData().size() != treeItem.getChildren().size())
         {
           sum = chart.getData().stream().map(data -> data.getPieValue()).reduce(0.0d, Double::sum);
-          chart.getData().add(new PieChart.Data("Remainder", treeItem.getValue().getSize() - sum));
+          chart.getData().add(new PieChart.Data("<Other>", treeItem.getValue().getSize() - sum));
         }
 
         return chart;
@@ -403,8 +395,7 @@ public class DiskUsageMain
         list = node.streamNode().filter(FileNodeIF::isFile).sorted(FileNodeIF.getSizeComparator()).limit(50)
             .collect(Collectors.toCollection(FXCollections::observableArrayList));
 
-        list.forEach(n ->
-        {
+        list.forEach(n -> {
           System.out.printf("%9d %s%n", n.getSize(), n.getName());
         });
 
@@ -465,36 +456,153 @@ public class DiskUsageMain
         CategoryAxis yAxis;
         BarChart<Number, String> barChart;
         XYChart.Series<Number, String> series1;
+        XYChart.Series<Number, String> series2;
         FileNodeIF node;
-        Map<SizeDistributionBucket, Long> map;
+        record Data(Long numberOfFiles, Long sizeOfFiles) {
+        }
+        Map<SizeDistributionBucket, Data> map;
+        Data data0 = new Data(0l, 0l);
 
         node = treeItem.getValue();
         map = node.streamNode().filter(FileNodeIF::isFile).map(FileNodeIF::getSize)
-            .collect(Collectors.groupingBy(SizeDistributionBucket::findBucket, Collectors.counting()));
-
-        map.entrySet().forEach(System.out::println);
+            .collect(Collectors.groupingBy(SizeDistributionBucket::findBucket, Collectors.teeing(Collectors.counting(),
+                Collectors.summingLong(a -> a), (numberOfFiles, sizeOfFiles) -> new Data(numberOfFiles, sizeOfFiles))));
 
         xAxis = new NumberAxis();
         yAxis = new CategoryAxis();
         barChart = new BarChart<>(xAxis, yAxis);
         barChart.setTitle("Distribution of sizes in " + treeItem.getValue().getName());
-        xAxis.setLabel("FileSize");
-        yAxis.setLabel("Number of files");
+        xAxis.setLabel("Number of files");
+        yAxis.setLabel("File sizes");
 
         series1 = new XYChart.Series<>();
-        Stream.of(SizeDistributionBucket.values()).forEach(bucket ->
-        {
-          Long value;
-          value = map.getOrDefault(bucket, 0l);
-          series1.getData().add(new XYChart.Data<Number, String>(value, bucket.getText()));
+        series2 = new XYChart.Series<>();
+        Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
+          Data value;
+          value = map.getOrDefault(bucket, data0);
+          series1.getData().add(new XYChart.Data<Number, String>(value.numberOfFiles(), bucket.getText()));
+          series2.getData().add(new XYChart.Data<Number, String>(value.sizeOfFiles(), bucket.getText()));
         });
 
-        barChart.getData().add(series1);
+        barChart.getData().addAll(series1, series2);
 
         return barChart;
       }
 
       return new Label("No data");
+    }
+
+    private static Node fillTypeDistributionTab(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
+    {
+      if (!treeItem.getChildren().isEmpty())
+      {
+        PieChart chart;
+        FileNodeIF node;
+        Map<String, Long> fullMap;
+        Map<String, Long> reducedMap;
+        long totalCount;
+        double minimumCount;
+        long otherCount;
+
+        chart = new PieChart();
+        chart.setStartAngle(90.0);
+
+        node = treeItem.getValue();
+        fullMap = node.streamNode().filter(FileNodeIF::isFile).map(FileNodeIF::getName)
+            .collect(Collectors.groupingBy(TabPaneData::getFileType, Collectors.counting()));
+        totalCount = fullMap.values().stream().reduce(0l, Long::sum);
+        minimumCount = totalCount * 0.01; // Only types with a count larger than a percentage are shown
+
+        System.out.println("\nfullmap:");
+        fullMap.entrySet().stream().forEach(System.out::println);
+
+        reducedMap = fullMap.entrySet().stream()
+            .sorted(Comparator.comparing(Entry<String, Long>::getValue, Comparator.reverseOrder()))
+            .filter(e -> e.getValue() > minimumCount).limit(10)
+            .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+
+        otherCount = totalCount - reducedMap.values().stream().reduce(0l, Long::sum);
+        if (otherCount != 0)
+        {
+          reducedMap.put("<Other>", otherCount);
+        }
+
+        System.out.println("\nreducedMap:");
+        reducedMap.entrySet().stream().forEach(System.out::println);
+
+        reducedMap.entrySet().stream().map(entry -> {
+          PieChart.Data data;
+          data = new PieChart.Data(entry.getKey(), entry.getValue());
+          data.nameProperty().bind(Bindings.concat(data.getName(), "\n", entry.getValue()));
+          return data;
+        }).forEach(data -> {
+          chart.getData().add(data);
+        });
+
+        return chart;
+      }
+
+      return new Label("No data");
+    }
+
+    /*
+     * 
+     * { if (!treeItem.getChildren().isEmpty()) { NumberAxis xAxis; CategoryAxis
+     * yAxis; BarChart<Number, String> barChart; XYChart.Series<Number, String>
+     * series1; FileNodeIF node; Map<String, Long> fullMap; Map<String, Long>
+     * reducedMap; long totalCount; double minimumCount;
+     * 
+     * node = treeItem.getValue(); fullMap =
+     * node.streamNode().filter(FileNodeIF::isFile).map(FileNodeIF::getName)
+     * .collect(Collectors.groupingBy(TabPaneData::getFileType,
+     * Collectors.counting()));
+     * 
+     * totalCount = fullMap.values().stream().reduce(0l, Long::sum); minimumCount =
+     * totalCount * 0.05; // Only types with a count larger than a percentage are
+     * shown
+     * 
+     * record Data(String key, Long value) { }
+     * 
+     * //with a count larger than a percentage are shown reducedMap =
+     * fullMap.entrySet().stream().map(entry -> return new Data(entry.getValue() <
+     * minimumCount? "<other>" : entry.getKey(), entry.getValue());
+     * }).collect(Collectors.toMap(Data::key, Data::value));
+     * 
+     * reducedMap.entrySet().forEach(System.out::println);
+     * 
+     * xAxis = new NumberAxis(); yAxis = new CategoryAxis(); barChart = new
+     * BarChart<>(xAxis, yAxis); barChart.setTitle("Distribution of types in " +
+     * treeItem.getValue().getName()); xAxis.setLabel("File type");
+     * yAxis.setLabel("Number of files");
+     * 
+     * series1 = new XYChart.Series<>(); reducedMap.keySet().forEach(type -> {
+     * series1.getData().add(new XYChart.Data<Number, String>(reducedMap.get(type),
+     * type)); });
+     * 
+     * barChart.getData().add(series1);
+     * 
+     * return barChart; }
+     * 
+     * return new Label("No data"); }
+     */
+
+    private static String getFileType(String fileName)
+    {
+      int index;
+
+      index = fileName.lastIndexOf(".");
+      if (index > 0 && index != -1)
+      {
+        String type;
+
+        type = fileName.substring(index + 1);
+        if (type.chars().allMatch(Character::isLetter))
+        {
+          return type.toLowerCase();
+        }
+      }
+
+      return "<none>";
     }
   }
 
@@ -611,8 +719,7 @@ public class DiskUsageMain
 
       menuItem = new MenuItem(path);
       menuItem.setGraphic(IconUtil.createImageNode("folder-outline", IconSize.SMALLER));
-      menuItem.setOnAction(e ->
-      {
+      menuItem.setOnAction(e -> {
         DirNode dirNode;
 
         dirNode = new ScanFileTreeDialog().scanDirectory(new File(path));

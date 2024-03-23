@@ -25,6 +25,6 @@ dependencies {
 }
 
 application {
-  mainClass.set('org.kku.jdiskusage.util.FileTree')
+  mainClass.set('org.kku.jdiskusage.ui.DiskUsageMain');
 }
 
