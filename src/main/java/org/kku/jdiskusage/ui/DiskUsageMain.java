@@ -235,7 +235,7 @@ public class DiskUsageMain
     }
   }
 
-  private class TabPaneData
+  private static class TabPaneData
   {
     private enum TabData
     {
@@ -733,13 +733,13 @@ public class DiskUsageMain
 
   private abstract static class AbstractTabContentPane
   {
+    private Map<String, PaneType> m_paneTypeByIdMap = new LinkedHashMap<>();
     private final BorderPane mi_node = new BorderPane();
     private final SegmentedButton mi_segmentedButton = new SegmentedButton();
     private PaneType mi_currentPaneType;
     private TreePaneData mi_currentTreePaneData;
     private TreeItem<FileNodeIF> mi_currentTreeItem;
     private Map<PaneType, Node> mi_nodeByPaneTypeMap = new HashMap<>();
-    private Map<String, PaneType> m_paneTypeByIdMap = new LinkedHashMap<>();
 
     private record PaneType(String description, String iconName, Supplier<Node> node) {};
 
@@ -759,6 +759,10 @@ public class DiskUsageMain
         button.setOnAction((ae) -> {
           setCurrentPaneType((PaneType) ((Node) ae.getSource()).getUserData());
         });
+        if (mi_currentPaneType == paneType)
+        {
+          button.setSelected(true);
+        }
 
         return button;
       }).collect(Collectors.toList()));
@@ -768,23 +772,33 @@ public class DiskUsageMain
 
     protected PaneType createPaneType(String paneTypeId, String description, String iconName, Supplier<Node> node)
     {
-      return m_paneTypeByIdMap.put(paneTypeId, new PaneType(description, iconName, node));
+      PaneType paneType;
+
+      paneType = m_paneTypeByIdMap.computeIfAbsent(paneTypeId,
+          (panelTypeId) -> new PaneType(description, iconName, node));
+      if (mi_currentPaneType == null)
+      {
+        setCurrentPaneType(paneType);
+      }
+
+      return paneType;
     }
 
     private void setCurrentPaneType(PaneType paneType)
     {
       mi_currentPaneType = paneType;
-      initCurrentNode(mi_currentPaneType);
+      initCurrentNode();
     }
 
-    private void initCurrentNode(PaneType paneType)
+    private void initCurrentNode()
     {
-      if (paneType != null)
+      if (mi_currentPaneType != null)
       {
-        Node node;
-
-        node = mi_nodeByPaneTypeMap.computeIfAbsent(paneType, type -> type.node().get());
-        mi_node.setCenter(node);
+        mi_node.setCenter(mi_nodeByPaneTypeMap.computeIfAbsent(mi_currentPaneType, type -> type.node().get()));
+      }
+      else
+      {
+        mi_node.setCenter(new Label(""));
       }
     }
 
@@ -802,7 +816,7 @@ public class DiskUsageMain
         mi_nodeByPaneTypeMap.clear();
       }
 
-      initCurrentNode(mi_currentPaneType);
+      initCurrentNode();
       return mi_node;
     }
   }
@@ -902,8 +916,7 @@ public class DiskUsageMain
       TreeItem<FileNodeIF> treeItem;
 
       treeItem = getCurrentTreeItem();
-
-      if (!treeItem.getChildren().isEmpty())
+      if (treeItem != null && !treeItem.getChildren().isEmpty())
       {
         GridPane pane;
         NumberAxis xAxis;
