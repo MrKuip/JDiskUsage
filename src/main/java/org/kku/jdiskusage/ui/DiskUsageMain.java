@@ -6,11 +6,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.controlsfx.control.BreadCrumbBar;
@@ -66,7 +68,7 @@ public class DiskUsageMain
   private Stage m_stage;
   private TreePaneData m_treePaneData = new TreePaneData();
   private TabPaneData m_tabPaneData = new TabPaneData();
-  private LastModifiedDistribution m_modifiedDistributionTab = new LastModifiedDistribution();
+  private LastModifiedDistributionPane m_modifiedDistributionTab = new LastModifiedDistributionPane();
   private RecentFilesMenu m_recentFiles = new RecentFilesMenu();
 
   @Override
@@ -356,8 +358,7 @@ public class DiskUsageMain
         totalSize = treeItem.getValue().getSize();
         minimumDataSize = totalSize * 0.02;
 
-        record Data(PieChart.Data pieChartData, TreeItem<FileNodeIF> treeItem) {
-        }
+        record Data(PieChart.Data pieChartData, TreeItem<FileNodeIF> treeItem) {}
 
         chart = FxUtil.createPieChart();
         treeItem.getChildren().stream().filter(item -> {
@@ -538,8 +539,7 @@ public class DiskUsageMain
         XYChart.Series<Number, String> series1;
         XYChart.Series<Number, String> series2;
         FileNodeIF node;
-        record Data(Long numberOfFiles, Long sizeOfFiles) {
-        }
+        record Data(Long numberOfFiles, Long sizeOfFiles) {}
         Map<SizeDistributionBucket, Data> map;
         Data dataDefault = new Data(0l, 0l);
 
@@ -662,7 +662,7 @@ public class DiskUsageMain
 
     private static Node fillModifiedDistributionTab(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
     {
-      return new LastModifiedDistribution().getNode(treePaneData, treeItem);
+      return new LastModifiedDistributionPane().getNode(treePaneData, treeItem);
     }
 
     private static Node fillTypeDistributionTab(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
@@ -731,15 +731,85 @@ public class DiskUsageMain
     }
   }
 
-  private static class LastModifiedDistribution
+  private abstract static class AbstractTabContentPane
   {
-    private final BorderPane mi_node;
-    private final SegmentedButton mi_segmentedButton;
-    private PaneType mi_currentPaneType = PaneType.PIECHART;
+    private final BorderPane mi_node = new BorderPane();
+    private final SegmentedButton mi_segmentedButton = new SegmentedButton();
+    private PaneType mi_currentPaneType;
     private TreePaneData mi_currentTreePaneData;
     private TreeItem<FileNodeIF> mi_currentTreeItem;
     private Map<PaneType, Node> mi_nodeByPaneTypeMap = new HashMap<>();
+    private Map<String, PaneType> m_paneTypeByIdMap = new LinkedHashMap<>();
 
+    private record PaneType(String description, String iconName, Supplier<Node> node) {};
+
+    private AbstractTabContentPane()
+    {
+    }
+
+    protected void init()
+    {
+      mi_segmentedButton.getButtons().addAll(m_paneTypeByIdMap.values().stream().map(paneType -> {
+        ToggleButton button;
+
+        button = new ToggleButton();
+        button.setTooltip(new Tooltip(paneType.description()));
+        button.setGraphic(IconUtil.createImageNode(paneType.iconName(), IconSize.SMALLER));
+        button.setUserData(paneType);
+        button.setOnAction((ae) -> {
+          setCurrentPaneType((PaneType) ((Node) ae.getSource()).getUserData());
+        });
+
+        return button;
+      }).collect(Collectors.toList()));
+
+      mi_node.setBottom(mi_segmentedButton);
+    }
+
+    protected PaneType createPaneType(String paneTypeId, String description, String iconName, Supplier<Node> node)
+    {
+      return m_paneTypeByIdMap.put(paneTypeId, new PaneType(description, iconName, node));
+    }
+
+    private void setCurrentPaneType(PaneType paneType)
+    {
+      mi_currentPaneType = paneType;
+      initCurrentNode(mi_currentPaneType);
+    }
+
+    private void initCurrentNode(PaneType paneType)
+    {
+      if (paneType != null)
+      {
+        Node node;
+
+        node = mi_nodeByPaneTypeMap.computeIfAbsent(paneType, type -> type.node().get());
+        mi_node.setCenter(node);
+      }
+    }
+
+    protected TreeItem<FileNodeIF> getCurrentTreeItem()
+    {
+      return mi_currentTreeItem;
+    }
+
+    Node getNode(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
+    {
+      if (mi_currentTreePaneData != treePaneData && mi_currentTreeItem != treeItem)
+      {
+        mi_currentTreePaneData = treePaneData;
+        mi_currentTreeItem = treeItem;
+        mi_nodeByPaneTypeMap.clear();
+      }
+
+      initCurrentNode(mi_currentPaneType);
+      return mi_node;
+    }
+  }
+
+  private static class LastModifiedDistributionPane
+    extends AbstractTabContentPane
+  {
     private enum LastModifiedDistributionBucket
     {
       INVALID("Invalid", Long.MAX_VALUE - 1l, Long.MAX_VALUE),
@@ -808,101 +878,31 @@ public class DiskUsageMain
       }
     }
 
-    private enum PaneType
+    LastModifiedDistributionPane()
     {
-      PIECHART("Show pie chart", "chart-pie"),
-      BARCHART("Show bar chart", "chart-bar"),
-      TABLE("Show details table", "table");
+      createPaneType("PIECHART", "Show details table", "table", this::getPieChartNode);
+      createPaneType("BARCHART", "Show bar chart", "chart-bar", this::getBarChartNode);
+      createPaneType("TABLE", "Show details table", "table", this::getTableNode);
 
-      private final String mi_text;
-      private final String mi_iconName;
-
-      private PaneType(String text, String iconName)
-      {
-        mi_text = text;
-        mi_iconName = iconName;
-      }
-
-      public String getText()
-      {
-        return mi_text;
-      }
-
-      public String getIconName()
-      {
-        return mi_iconName;
-      }
+      init();
     }
 
-    LastModifiedDistribution()
+    Node getTableNode()
     {
-      mi_node = new BorderPane();
-      mi_segmentedButton = new SegmentedButton();
-      mi_segmentedButton.getButtons().addAll(Stream.of(PaneType.values()).map(paneType -> {
-        ToggleButton button;
-
-        button = new ToggleButton();
-        button.setTooltip(new Tooltip(paneType.getText()));
-        button.setGraphic(IconUtil.createImageNode(paneType.getIconName(), IconSize.SMALLER));
-        button.setUserData(paneType);
-        button.setOnAction((ae) -> {
-          setCurrentPaneType((PaneType) ((Node) ae.getSource()).getUserData());
-        });
-
-        return button;
-      }).collect(Collectors.toList()));
-
-      mi_node.setBottom(mi_segmentedButton);
+      return new Label("Table");
     }
 
-    private void setCurrentPaneType(PaneType paneType)
+    Node getBarChartNode()
     {
-      mi_currentPaneType = paneType;
-      initCurrentNode();
+      return new Label("Bar chart");
     }
 
-    Node getNode(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
+    Node getPieChartNode()
     {
-      if (mi_currentTreePaneData != treePaneData && mi_currentTreeItem != treeItem)
-      {
-        mi_currentTreePaneData = treePaneData;
-        mi_currentTreeItem = treeItem;
-        mi_nodeByPaneTypeMap.clear();
-      }
+      TreeItem<FileNodeIF> treeItem;
 
-      initCurrentNode();
-      return mi_node;
-    }
+      treeItem = getCurrentTreeItem();
 
-    private void initCurrentNode()
-    {
-      Node node;
-
-      node = mi_nodeByPaneTypeMap.get(mi_currentPaneType);
-      if (node == null)
-      {
-        switch (mi_currentPaneType)
-        {
-          case BARCHART:
-            node = new Label("BarChart");
-            break;
-          case PIECHART:
-            node = getPieChart(mi_currentTreePaneData, mi_currentTreeItem);
-            break;
-          case TABLE:
-            node = new Label("Table");
-            break;
-          default:
-            break;
-        }
-        mi_nodeByPaneTypeMap.put(mi_currentPaneType, node);
-      }
-
-      mi_node.setCenter(node);
-    }
-
-    Node getPieChart(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
-    {
       if (!treeItem.getChildren().isEmpty())
       {
         GridPane pane;
@@ -912,8 +912,7 @@ public class DiskUsageMain
         XYChart.Series<Number, String> series1;
         XYChart.Series<Number, String> series2;
         FileNodeIF node;
-        record Data(Long numberOfFiles, Long sizeOfFiles) {
-        }
+        record Data(Long numberOfFiles, Long sizeOfFiles) {}
         Map<LastModifiedDistributionBucket, Data> map;
         Data dataDefault = new Data(0l, 0l);
         long todayMidnight;
