@@ -14,6 +14,7 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.controlsfx.control.BreadCrumbBar;
+import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
@@ -47,6 +48,8 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.MouseEvent;
@@ -63,6 +66,7 @@ public class DiskUsageMain
   private Stage m_stage;
   private TreePaneData m_treePaneData = new TreePaneData();
   private TabPaneData m_tabPaneData = new TabPaneData();
+  private LastModifiedDistribution m_modifiedDistributionTab = new LastModifiedDistribution();
   private RecentFilesMenu m_recentFiles = new RecentFilesMenu();
 
   @Override
@@ -658,6 +662,247 @@ public class DiskUsageMain
 
     private static Node fillModifiedDistributionTab(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
     {
+      return new LastModifiedDistribution().getNode(treePaneData, treeItem);
+    }
+
+    private static Node fillTypeDistributionTab(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
+    {
+      if (!treeItem.getChildren().isEmpty())
+      {
+        PieChart chart;
+        FileNodeIF node;
+        Map<String, Long> fullMap;
+        Map<String, Long> reducedMap;
+        long totalCount;
+        double minimumCount;
+        long otherCount;
+
+        chart = FxUtil.createPieChart();
+
+        node = treeItem.getValue();
+        fullMap = node.streamNode().filter(FileNodeIF::isFile).map(FileNodeIF::getName)
+            .collect(Collectors.groupingBy(TabPaneData::getFileType, Collectors.counting()));
+        totalCount = fullMap.values().stream().reduce(0l, Long::sum);
+        minimumCount = totalCount * 0.01; // Only types with a count larger than a percentage are shown
+
+        reducedMap = fullMap.entrySet().stream()
+            .sorted(Comparator.comparing(Entry<String, Long>::getValue, Comparator.reverseOrder()))
+            .filter(e -> e.getValue() > minimumCount).limit(10)
+            .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+
+        otherCount = totalCount - reducedMap.values().stream().reduce(0l, Long::sum);
+        if (otherCount != 0)
+        {
+          reducedMap.put("<Other>", otherCount);
+        }
+
+        reducedMap.entrySet().stream().map(entry -> {
+          PieChart.Data data;
+          data = new PieChart.Data(entry.getKey(), entry.getValue());
+          data.nameProperty().bind(Bindings.concat(data.getName(), "\n", entry.getValue()));
+          return data;
+        }).forEach(data -> {
+          chart.getData().add(data);
+        });
+
+        return chart;
+      }
+
+      return new Label("No data");
+    }
+
+    private static String getFileType(String fileName)
+    {
+      int index;
+
+      index = fileName.lastIndexOf(".");
+      if (index > 0 && index != -1)
+      {
+        String type;
+
+        type = fileName.substring(index + 1);
+        if (type.chars().allMatch(Character::isLetter))
+        {
+          return type.toLowerCase();
+        }
+      }
+
+      return "<none>";
+    }
+  }
+
+  private static class LastModifiedDistribution
+  {
+    private final BorderPane mi_node;
+    private final SegmentedButton mi_segmentedButton;
+    private PaneType mi_currentPaneType = PaneType.PIECHART;
+    private TreePaneData mi_currentTreePaneData;
+    private TreeItem<FileNodeIF> mi_currentTreeItem;
+    private Map<PaneType, Node> mi_nodeByPaneTypeMap = new HashMap<>();
+
+    private enum LastModifiedDistributionBucket
+    {
+      INVALID("Invalid", Long.MAX_VALUE - 1l, Long.MAX_VALUE),
+      LAST_MODIFIED_FUTURE("In the future", -Long.MAX_VALUE, 0),
+      LAST_MODIFIED_TODAY("Today", days(0), days(1)),
+      LAST_MODIFIED_YESTERDAY("Yesterday", days(1), days(2)),
+      LAST_MODIFIED_1_DAY_TILL_7_DAYS("2 - 7 days", days(2), days(8)),
+      LAST_MODIFIED_7_DAYs_TILL_30_DAYS("7 - 30 days", days(9), days(31)),
+      LAST_MODIFIED_30_DAYS_TILL_90_DAYS("30 - 90 days", days(31), days(91)),
+      LAST_MODIFIED_90_DAYS_TILL_180_DAYS("90 - 180 days", days(91), days(181)),
+      LAST_MODIFIED_180_DAYS_TILL_365_DAYS("180 - 365 days", days(181), years(1)),
+      LAST_MODIFIED_1_YEAR_TILL_2_YEAR("1 - 2 years", years(1), years(2)),
+      LAST_MODIFIED_2_YEAR_TILL_3_YEAR("2 - 3 years", years(2), years(3)),
+      LAST_MODIFIED_3_YEAR_TILL_6_YEAR("3 - 6 years", years(3), years(6)),
+      LAST_MODIFIED_6_YEAR_TILL_10_YEAR("6 - 10 years", years(6), years(10)),
+      LAST_MODIFIED_OVER_10_YEARS("Over 10 years", years(10), Long.MAX_VALUE);
+
+      private final String mi_text;
+      private final long mi_from;
+      private final long mi_to;
+
+      LastModifiedDistributionBucket(String text, long from, long to)
+      {
+        mi_text = text;
+        mi_from = from;
+        mi_to = to;
+      }
+
+      public String getText()
+      {
+        return mi_text;
+      }
+
+      long getFrom()
+      {
+        return mi_from;
+      }
+
+      long getTo()
+      {
+        return mi_to;
+      }
+
+      static public LastModifiedDistributionBucket findBucket(long todayMidnight, long lastModified)
+      {
+        long ago;
+
+        ago = todayMidnight - lastModified;
+
+        LastModifiedDistributionBucket b = Stream.of(values())
+            .filter(bucket -> ago >= bucket.getFrom() && ago < bucket.getTo()).findFirst().orElse(INVALID);
+
+        System.out.println(b + " -> " + new Date(lastModified) + " ago: " + (ago / (24 * 60 * 60 * 1000)) + " dagen");
+
+        return b;
+      }
+
+      private static long days(long days)
+      {
+        return days * 24 * 60 * 60 * 1000;
+      }
+
+      private static long years(long years)
+      {
+        return days(years * 365);
+      }
+    }
+
+    private enum PaneType
+    {
+      PIECHART("Show pie chart", "chart-pie"),
+      BARCHART("Show bar chart", "chart-bar"),
+      TABLE("Show details table", "table");
+
+      private final String mi_text;
+      private final String mi_iconName;
+
+      private PaneType(String text, String iconName)
+      {
+        mi_text = text;
+        mi_iconName = iconName;
+      }
+
+      public String getText()
+      {
+        return mi_text;
+      }
+
+      public String getIconName()
+      {
+        return mi_iconName;
+      }
+    }
+
+    LastModifiedDistribution()
+    {
+      mi_node = new BorderPane();
+      mi_segmentedButton = new SegmentedButton();
+      mi_segmentedButton.getButtons().addAll(Stream.of(PaneType.values()).map(paneType -> {
+        ToggleButton button;
+
+        button = new ToggleButton();
+        button.setTooltip(new Tooltip(paneType.getText()));
+        button.setGraphic(IconUtil.createImageNode(paneType.getIconName(), IconSize.SMALLER));
+        button.setUserData(paneType);
+        button.setOnAction((ae) -> {
+          setCurrentPaneType((PaneType) ((Node) ae.getSource()).getUserData());
+        });
+
+        return button;
+      }).collect(Collectors.toList()));
+
+      mi_node.setBottom(mi_segmentedButton);
+    }
+
+    private void setCurrentPaneType(PaneType paneType)
+    {
+      mi_currentPaneType = paneType;
+      initCurrentNode();
+    }
+
+    Node getNode(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
+    {
+      if (mi_currentTreePaneData != treePaneData && mi_currentTreeItem != treeItem)
+      {
+        mi_currentTreePaneData = treePaneData;
+        mi_currentTreeItem = treeItem;
+        mi_nodeByPaneTypeMap.clear();
+      }
+
+      initCurrentNode();
+      return mi_node;
+    }
+
+    private void initCurrentNode()
+    {
+      Node node;
+
+      node = mi_nodeByPaneTypeMap.get(mi_currentPaneType);
+      if (node == null)
+      {
+        switch (mi_currentPaneType)
+        {
+          case BARCHART:
+            node = new Label("BarChart");
+            break;
+          case PIECHART:
+            node = getPieChart(mi_currentTreePaneData, mi_currentTreeItem);
+            break;
+          case TABLE:
+            node = new Label("Table");
+            break;
+          default:
+            break;
+        }
+        mi_nodeByPaneTypeMap.put(mi_currentPaneType, node);
+      }
+
+      mi_node.setCenter(node);
+    }
+
+    Node getPieChart(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
+    {
       if (!treeItem.getChildren().isEmpty())
       {
         GridPane pane;
@@ -735,139 +980,6 @@ public class DiskUsageMain
       }
 
       return new Label("No data");
-    }
-
-    private enum LastModifiedDistributionBucket
-    {
-      INVALID("Invalid", Long.MAX_VALUE - 1l, Long.MAX_VALUE),
-      LAST_MODIFIED_FUTURE("In the future", -Long.MAX_VALUE, 0),
-      LAST_MODIFIED_TODAY("Today", days(0), days(1)),
-      LAST_MODIFIED_YESTERDAY("Yesterday", days(1), days(2)),
-      LAST_MODIFIED_1_DAY_TILL_7_DAYS("2 - 7 days", days(2), days(8)),
-      LAST_MODIFIED_7_DAYs_TILL_30_DAYS("7 - 30 days", days(9), days(31)),
-      LAST_MODIFIED_30_DAYS_TILL_90_DAYS("30 - 90 days", days(31), days(91)),
-      LAST_MODIFIED_90_DAYS_TILL_180_DAYS("90 - 180 days", days(91), days(181)),
-      LAST_MODIFIED_180_DAYS_TILL_365_DAYS("180 - 365 days", days(181), years(1)),
-      LAST_MODIFIED_1_YEAR_TILL_2_YEAR("1 - 2 years", years(1), years(2)),
-      LAST_MODIFIED_2_YEAR_TILL_3_YEAR("2 - 3 years", years(2), years(3)),
-      LAST_MODIFIED_3_YEAR_TILL_6_YEAR("3 - 6 years", years(3), years(6)),
-      LAST_MODIFIED_6_YEAR_TILL_10_YEAR("6 - 10 years", years(6), years(10)),
-      LAST_MODIFIED_OVER_10_YEARS("Over 10 years", years(10), Long.MAX_VALUE);
-
-      private final String mi_text;
-      private final long mi_from;
-      private final long mi_to;
-
-      LastModifiedDistributionBucket(String text, long from, long to)
-      {
-        mi_text = text;
-        mi_from = from;
-        mi_to = to;
-      }
-
-      public String getText()
-      {
-        return mi_text;
-      }
-
-      long getFrom()
-      {
-        return mi_from;
-      }
-
-      long getTo()
-      {
-        return mi_to;
-      }
-
-      static public LastModifiedDistributionBucket findBucket(long todayMidnight, long lastModified)
-      {
-        long ago;
-
-        ago = todayMidnight - lastModified;
-
-        LastModifiedDistributionBucket b = Stream.of(values())
-            .filter(bucket -> ago >= bucket.getFrom() && ago < bucket.getTo()).findFirst().orElse(INVALID);
-
-        System.out.println(b + " -> " + new Date(lastModified) + " ago: " + (ago / (24 * 60 * 60 * 1000)) + " dagen");
-
-        return b;
-      }
-
-      private static long days(long days)
-      {
-        return days * 24 * 60 * 60 * 1000;
-      }
-
-      private static long years(long years)
-      {
-        return days(years * 365);
-      }
-    }
-
-    private static Node fillTypeDistributionTab(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
-    {
-      if (!treeItem.getChildren().isEmpty())
-      {
-        PieChart chart;
-        FileNodeIF node;
-        Map<String, Long> fullMap;
-        Map<String, Long> reducedMap;
-        long totalCount;
-        double minimumCount;
-        long otherCount;
-
-        chart = FxUtil.createPieChart();
-
-        node = treeItem.getValue();
-        fullMap = node.streamNode().filter(FileNodeIF::isFile).map(FileNodeIF::getName)
-            .collect(Collectors.groupingBy(TabPaneData::getFileType, Collectors.counting()));
-        totalCount = fullMap.values().stream().reduce(0l, Long::sum);
-        minimumCount = totalCount * 0.01; // Only types with a count larger than a percentage are shown
-
-        reducedMap = fullMap.entrySet().stream()
-            .sorted(Comparator.comparing(Entry<String, Long>::getValue, Comparator.reverseOrder()))
-            .filter(e -> e.getValue() > minimumCount).limit(10)
-            .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-
-        otherCount = totalCount - reducedMap.values().stream().reduce(0l, Long::sum);
-        if (otherCount != 0)
-        {
-          reducedMap.put("<Other>", otherCount);
-        }
-
-        reducedMap.entrySet().stream().map(entry -> {
-          PieChart.Data data;
-          data = new PieChart.Data(entry.getKey(), entry.getValue());
-          data.nameProperty().bind(Bindings.concat(data.getName(), "\n", entry.getValue()));
-          return data;
-        }).forEach(data -> {
-          chart.getData().add(data);
-        });
-
-        return chart;
-      }
-
-      return new Label("No data");
-    }
-
-    private static String getFileType(String fileName)
-    {
-      int index;
-
-      index = fileName.lastIndexOf(".");
-      if (index > 0 && index != -1)
-      {
-        String type;
-
-        type = fileName.substring(index + 1);
-        if (type.chars().allMatch(Character::isLetter))
-        {
-          return type.toLowerCase();
-        }
-      }
-
-      return "<none>";
     }
   }
 
