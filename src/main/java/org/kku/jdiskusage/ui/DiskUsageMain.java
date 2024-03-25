@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -65,11 +65,41 @@ import javafx.util.Callback;
 public class DiskUsageMain
   extends Application
 {
-  private Stage m_stage;
-  private TreePaneData m_treePaneData = new TreePaneData();
-  private TabPaneData m_tabPaneData = new TabPaneData();
-  private LastModifiedDistributionPane m_modifiedDistributionTab = new LastModifiedDistributionPane();
-  private RecentFilesMenu m_recentFiles = new RecentFilesMenu();
+  private DiskUsageMainData m_diskUsageMainData = new DiskUsageMainData();
+
+  private class DiskUsageMainData
+  {
+    private Stage mi_stage;
+    private TreePaneData mi_treePaneData;
+    private TabPaneData mi_tabPaneData;
+    private LastModifiedDistributionPane mi_modifiedDistributionTab;
+    private RecentFilesMenu mi_recentFiles;
+
+    private DiskUsageMainData()
+    {
+    }
+
+    public void init()
+    {
+      mi_treePaneData = new TreePaneData();
+      mi_tabPaneData = new TabPaneData();
+      mi_modifiedDistributionTab = new LastModifiedDistributionPane();
+      mi_recentFiles = new RecentFilesMenu();
+    }
+
+    TreeItem<FileNodeIF> getSelectedTreeItem()
+    {
+      if (mi_treePaneData == null || mi_treePaneData.mi_treeTableView == null)
+      {
+        return null;
+      }
+      return mi_treePaneData.mi_treeTableView.getSelectionModel().getSelectedItem();
+    }
+  }
+
+  {
+    m_diskUsageMainData.init();
+  }
 
   @Override
   public void start(Stage stage)
@@ -79,19 +109,20 @@ public class DiskUsageMain
     SplitPane splitPane;
     Scene scene;
 
-    m_stage = stage;
+    m_diskUsageMainData.mi_stage = stage;
     rootPane = new BorderPane();
 
     toolBars = new VBox(createMenuBar());
     splitPane = new SplitPane();
 
-    Stream.of(TabPaneData.TabData.values()).forEach(td -> m_tabPaneData.createTab(td));
+    Stream.of(TabPaneData.TabData.values()).forEach(td -> m_diskUsageMainData.mi_tabPaneData.createTab(td));
 
-    splitPane.getItems().addAll(m_treePaneData.getNode(), m_tabPaneData.getNode());
+    splitPane.getItems().addAll(m_diskUsageMainData.mi_treePaneData.getNode(),
+        m_diskUsageMainData.mi_tabPaneData.getNode());
     splitPane.getDividers().get(0).positionProperty()
         .addListener(DiskUsageProperties.SPLIT_PANE_POSITION.getChangeListener());
-    SplitPane.setResizableWithParent(m_treePaneData.getNode(), false);
-    SplitPane.setResizableWithParent(m_tabPaneData.getNode(), false);
+    SplitPane.setResizableWithParent(m_diskUsageMainData.mi_treePaneData.getNode(), false);
+    SplitPane.setResizableWithParent(m_diskUsageMainData.mi_tabPaneData.getNode(), false);
     splitPane.getDividers().get(0).setPosition(DiskUsageProperties.SPLIT_PANE_POSITION.getDouble(25.0));
 
     rootPane.setTop(toolBars);
@@ -109,7 +140,7 @@ public class DiskUsageMain
     stage.xProperty().addListener(DiskUsageProperties.SCENE_LOCATION_X.getChangeListener());
     stage.yProperty().addListener(DiskUsageProperties.SCENE_LOCATION_Y.getChangeListener());
 
-    m_tabPaneData.getNode().setTop(m_treePaneData.createBreadCrumbBar());
+    m_diskUsageMainData.mi_tabPaneData.getNode().setTop(m_diskUsageMainData.mi_treePaneData.createBreadCrumbBar());
 
     stage.setTitle("JDiskUsage");
     stage.getIcons().add(IconUtil.createImage("file-search", IconSize.SMALL));
@@ -137,14 +168,15 @@ public class DiskUsageMain
 
     menuItem = new MenuItem("Scan file tree");
     menuItem.setGraphic(IconUtil.createImageNode("file-search", IconSize.SMALLER));
-    menuItem.setOnAction(e -> {
+    menuItem.setOnAction(e ->
+    {
       DirNode dirNode;
 
-      dirNode = new ScanFileTreeDialog().chooseDirectory(m_stage);
+      dirNode = new ScanFileTreeDialog().chooseDirectory(m_diskUsageMainData.mi_stage);
       if (dirNode != null)
       {
-        m_treePaneData.createTreeTableView(dirNode);
-        m_recentFiles.addFile(new File(dirNode.getName()));
+        m_diskUsageMainData.mi_treePaneData.createTreeTableView(dirNode);
+        m_diskUsageMainData.mi_recentFiles.addFile(new File(dirNode.getName()));
       }
     });
 
@@ -153,7 +185,7 @@ public class DiskUsageMain
 
   private Menu createRecentFilesMenu()
   {
-    return m_recentFiles.createMenu();
+    return m_diskUsageMainData.mi_recentFiles.createMenu();
   }
 
   private class TreePaneData
@@ -183,16 +215,19 @@ public class DiskUsageMain
 
       fileTreeView = new FileTreeView(dirNode);
       mi_treeTableView = fileTreeView.createComponent();
-      mi_treeTableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-        m_tabPaneData.setSelected(mi_treeTableView.getSelectionModel().getSelectedItem());
+      mi_treeTableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) ->
+      {
+        m_diskUsageMainData.mi_tabPaneData.itemSelected();
       });
       mi_breadCrumbBar.selectedCrumbProperty().bind(mi_treeTableView.getSelectionModel().selectedItemProperty());
       mi_breadCrumbBar.setAutoNavigationEnabled(false);
-      mi_breadCrumbBar.setOnCrumbAction((e) -> {
+      mi_breadCrumbBar.setOnCrumbAction((e) ->
+      {
         select(e.getSelectedCrumb());
       });
 
-      Platform.runLater(() -> {
+      Platform.runLater(() ->
+      {
         mi_treeTableView.getSelectionModel().select(0);
         mi_treeTableView.getSelectionModel().getSelectedItem().setExpanded(true);
       });
@@ -235,7 +270,7 @@ public class DiskUsageMain
     }
   }
 
-  private static class TabPaneData
+  private class TabPaneData
   {
     private enum TabData
     {
@@ -247,9 +282,9 @@ public class DiskUsageMain
 
       private final String m_name;
       private final String m_iconName;
-      private final BiFunction<TreePaneData, TreeItem<FileNodeIF>, Node> m_fillContent;
+      private final Function<DiskUsageMainData, Node> m_fillContent;
 
-      private TabData(String name, String iconName, BiFunction<TreePaneData, TreeItem<FileNodeIF>, Node> fillContent)
+      private TabData(String name, String iconName, Function<DiskUsageMainData, Node> fillContent)
       {
         m_name = name;
         m_iconName = iconName;
@@ -281,9 +316,9 @@ public class DiskUsageMain
         return tab;
       }
 
-      Node fillContent(TreePaneData treePaneData, TreeItem<FileNodeIF> selectedItem)
+      Node fillContent(DiskUsageMainData mainData)
       {
-        return m_fillContent.apply(treePaneData, selectedItem);
+        return m_fillContent.apply(mainData);
       }
     }
 
@@ -295,8 +330,9 @@ public class DiskUsageMain
     private TabPaneData()
     {
       mi_tabPane = new TabPane();
-      mi_tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
-        fillContent(newTab, m_treePaneData.getSelectedItem());
+      mi_tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) ->
+      {
+        fillContent(newTab);
       });
       mi_borderPane = new BorderPane();
       mi_borderPane.setCenter(mi_tabPane);
@@ -309,7 +345,8 @@ public class DiskUsageMain
 
     public Tab createTab(TabData tabData)
     {
-      return mi_tabByTabId.computeIfAbsent(tabData, td -> {
+      return mi_tabByTabId.computeIfAbsent(tabData, td ->
+      {
         Tab tab;
         tab = td.createTab();
         mi_tabPane.getTabs().add(tab);
@@ -317,18 +354,18 @@ public class DiskUsageMain
       });
     }
 
-    public void fillContent(Tab tab, TreeItem<FileNodeIF> selectedItem)
+    public void fillContent(Tab tab)
     {
       Optional<Entry<TabData, Tab>> tabEntry;
 
       tabEntry = mi_tabByTabId.entrySet().stream().filter(entry -> tab.equals(entry.getValue())).findFirst();
-      if (tabEntry.isPresent() && selectedItem != null)
+      if (tabEntry.isPresent() && m_diskUsageMainData.getSelectedTreeItem() != null)
       {
         TabData tabData;
 
         tabData = tabEntry.get().getKey();
-        tab.setContent(mi_contentByTabId.computeIfAbsent(tabData,
-            td -> tabEntry.get().getKey().fillContent(m_treePaneData, selectedItem)));
+        tab.setContent(
+            mi_contentByTabId.computeIfAbsent(tabData, td -> tabEntry.get().getKey().fillContent(m_diskUsageMainData)));
       }
       else
       {
@@ -336,53 +373,61 @@ public class DiskUsageMain
       }
     }
 
-    public void setSelected(TreeItem<FileNodeIF> selectedItem)
+    public void itemSelected()
     {
       Tab selectedTab;
 
       mi_contentByTabId.clear();
 
       selectedTab = mi_tabPane.getSelectionModel().getSelectedItem();
-      m_tabPaneData.fillContent(selectedTab, selectedItem);
+      m_diskUsageMainData.mi_tabPaneData.fillContent(selectedTab);
     }
 
-    private static Node fillSizeTab(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
+    private static Node fillSizeTab(DiskUsageMainData mainData)
     {
-      if (!treeItem.getChildren().isEmpty())
+      TreeItem<FileNodeIF> selectedTreeItem;
+
+      selectedTreeItem = mainData.getSelectedTreeItem();
+      if (!selectedTreeItem.getChildren().isEmpty())
       {
         PieChart chart;
         double sum;
         double totalSize;
         double minimumDataSize;
 
-        totalSize = treeItem.getValue().getSize();
+        totalSize = selectedTreeItem.getValue().getSize();
         minimumDataSize = totalSize * 0.02;
 
-        record Data(PieChart.Data pieChartData, TreeItem<FileNodeIF> treeItem) {}
+        record Data(PieChart.Data pieChartData, TreeItem<FileNodeIF> treeItem) {
+        }
 
         chart = FxUtil.createPieChart();
-        treeItem.getChildren().stream().filter(item -> {
+        selectedTreeItem.getChildren().stream().filter(item ->
+        {
           return item.getValue().getSize() > minimumDataSize;
-        }).limit(10).map(item -> {
+        }).limit(10).map(item ->
+        {
           PieChart.Data data;
 
           data = new PieChart.Data(item.getValue().getName(), item.getValue().getSize());
           data.nameProperty().bind(Bindings.concat(data.getName(), "\n", SizeUtil.getFileSize(data.getPieValue())));
 
           return new Data(data, item);
-        }).forEach(tuple -> {
+        }).forEach(tuple ->
+        {
           chart.getData().add(tuple.pieChartData);
           tuple.pieChartData.getNode().setUserData(tuple.treeItem);
-          tuple.pieChartData.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, (me) -> {
-            treePaneData.select(tuple.treeItem);
+          tuple.pieChartData.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, (me) ->
+          {
+            mainData.mi_treePaneData.select(tuple.treeItem);
             // treePaneData.select(4);
           });
         });
 
-        if (chart.getData().size() != treeItem.getChildren().size())
+        if (chart.getData().size() != selectedTreeItem.getChildren().size())
         {
           sum = chart.getData().stream().map(data -> data.getPieValue()).reduce(0.0d, Double::sum);
-          chart.getData().add(new PieChart.Data("<Other>", treeItem.getValue().getSize() - sum));
+          chart.getData().add(new PieChart.Data("<Other>", selectedTreeItem.getValue().getSize() - sum));
         }
 
         return chart;
@@ -423,8 +468,11 @@ public class DiskUsageMain
       }
     }
 
-    private static Node fillTop50Tab(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
+    private static Node fillTop50Tab(DiskUsageMainData mainData)
     {
+      TreeItem<FileNodeIF> treeItem;
+
+      treeItem = mainData.getSelectedTreeItem();
       if (!treeItem.getChildren().isEmpty())
       {
         FileNodeIF node;
@@ -488,7 +536,8 @@ public class DiskUsageMain
               }
             });
 
-        lastModifiedColumn.setCellFactory(column -> {
+        lastModifiedColumn.setCellFactory(column ->
+        {
           TableCell<ObjectWithIndex<FileNodeIF>, Date> cell = new TableCell<>()
           {
             private SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -528,8 +577,11 @@ public class DiskUsageMain
       return new Label("No data");
     }
 
-    private static Node fillSizeDistributionTab(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
+    private static Node fillSizeDistributionTab(DiskUsageMainData mainData)
     {
+      TreeItem<FileNodeIF> treeItem;
+
+      treeItem = mainData.getSelectedTreeItem();
       if (!treeItem.getChildren().isEmpty())
       {
         GridPane pane;
@@ -539,7 +591,8 @@ public class DiskUsageMain
         XYChart.Series<Number, String> series1;
         XYChart.Series<Number, String> series2;
         FileNodeIF node;
-        record Data(Long numberOfFiles, Long sizeOfFiles) {}
+        record Data(Long numberOfFiles, Long sizeOfFiles) {
+        }
         Map<SizeDistributionBucket, Data> map;
         Data dataDefault = new Data(0l, 0l);
 
@@ -559,7 +612,8 @@ public class DiskUsageMain
         yAxis.setLabel("File sizes");
 
         series1 = new XYChart.Series<>();
-        Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
+        Stream.of(SizeDistributionBucket.values()).forEach(bucket ->
+        {
           Data value;
           value = map.getOrDefault(bucket, dataDefault);
           series1.getData().add(new XYChart.Data<Number, String>(value.numberOfFiles(), bucket.getText()));
@@ -577,7 +631,8 @@ public class DiskUsageMain
         yAxis.setLabel("File sizes");
 
         series2 = new XYChart.Series<>();
-        Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
+        Stream.of(SizeDistributionBucket.values()).forEach(bucket ->
+        {
           Data value;
           value = map.getOrDefault(bucket, dataDefault);
           series2.getData().add(new XYChart.Data<Number, String>(value.sizeOfFiles(), bucket.getText()));
@@ -660,13 +715,16 @@ public class DiskUsageMain
       }
     }
 
-    private static Node fillModifiedDistributionTab(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
+    private static Node fillModifiedDistributionTab(DiskUsageMainData mainData)
     {
-      return new LastModifiedDistributionPane().getNode(treePaneData, treeItem);
+      return mainData.mi_modifiedDistributionTab.getNode(mainData.mi_treePaneData);
     }
 
-    private static Node fillTypeDistributionTab(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
+    private static Node fillTypeDistributionTab(DiskUsageMainData mainData)
     {
+      TreeItem<FileNodeIF> treeItem;
+
+      treeItem = mainData.getSelectedTreeItem();
       if (!treeItem.getChildren().isEmpty())
       {
         PieChart chart;
@@ -696,12 +754,14 @@ public class DiskUsageMain
           reducedMap.put("<Other>", otherCount);
         }
 
-        reducedMap.entrySet().stream().map(entry -> {
+        reducedMap.entrySet().stream().map(entry ->
+        {
           PieChart.Data data;
           data = new PieChart.Data(entry.getKey(), entry.getValue());
           data.nameProperty().bind(Bindings.concat(data.getName(), "\n", entry.getValue()));
           return data;
-        }).forEach(data -> {
+        }).forEach(data ->
+        {
           chart.getData().add(data);
         });
 
@@ -731,17 +791,18 @@ public class DiskUsageMain
     }
   }
 
-  private abstract static class AbstractTabContentPane
+  private abstract class AbstractTabContentPane
   {
     private Map<String, PaneType> m_paneTypeByIdMap = new LinkedHashMap<>();
     private final BorderPane mi_node = new BorderPane();
     private final SegmentedButton mi_segmentedButton = new SegmentedButton();
     private PaneType mi_currentPaneType;
+    private Map<PaneType, Node> mi_nodeByPaneTypeMap = new HashMap<>();
     private TreePaneData mi_currentTreePaneData;
     private TreeItem<FileNodeIF> mi_currentTreeItem;
-    private Map<PaneType, Node> mi_nodeByPaneTypeMap = new HashMap<>();
 
-    private record PaneType(String description, String iconName, Supplier<Node> node) {};
+    private record PaneType(String description, String iconName, Supplier<Node> node) {
+    };
 
     private AbstractTabContentPane()
     {
@@ -749,14 +810,16 @@ public class DiskUsageMain
 
     protected void init()
     {
-      mi_segmentedButton.getButtons().addAll(m_paneTypeByIdMap.values().stream().map(paneType -> {
+      mi_segmentedButton.getButtons().addAll(m_paneTypeByIdMap.values().stream().map(paneType ->
+      {
         ToggleButton button;
 
         button = new ToggleButton();
         button.setTooltip(new Tooltip(paneType.description()));
         button.setGraphic(IconUtil.createImageNode(paneType.iconName(), IconSize.SMALLER));
         button.setUserData(paneType);
-        button.setOnAction((ae) -> {
+        button.setOnAction((ae) ->
+        {
           setCurrentPaneType((PaneType) ((Node) ae.getSource()).getUserData());
         });
         if (mi_currentPaneType == paneType)
@@ -794,7 +857,10 @@ public class DiskUsageMain
     {
       if (mi_currentPaneType != null)
       {
-        mi_node.setCenter(mi_nodeByPaneTypeMap.computeIfAbsent(mi_currentPaneType, type -> type.node().get()));
+        mi_node.setCenter(mi_nodeByPaneTypeMap.computeIfAbsent(mi_currentPaneType, type ->
+        {
+          return type.node().get();
+        }));
       }
       else
       {
@@ -807,12 +873,11 @@ public class DiskUsageMain
       return mi_currentTreeItem;
     }
 
-    Node getNode(TreePaneData treePaneData, TreeItem<FileNodeIF> treeItem)
+    Node getNode(TreePaneData treePaneData)
     {
-      if (mi_currentTreePaneData != treePaneData && mi_currentTreeItem != treeItem)
+      if (mi_currentTreePaneData != treePaneData || getCurrentTreeItem() != m_diskUsageMainData.getSelectedTreeItem())
       {
         mi_currentTreePaneData = treePaneData;
-        mi_currentTreeItem = treeItem;
         mi_nodeByPaneTypeMap.clear();
       }
 
@@ -821,7 +886,7 @@ public class DiskUsageMain
     }
   }
 
-  private static class LastModifiedDistributionPane
+  private class LastModifiedDistributionPane
     extends AbstractTabContentPane
   {
     private enum LastModifiedDistributionBucket
@@ -876,8 +941,6 @@ public class DiskUsageMain
         LastModifiedDistributionBucket b = Stream.of(values())
             .filter(bucket -> ago >= bucket.getFrom() && ago < bucket.getTo()).findFirst().orElse(INVALID);
 
-        System.out.println(b + " -> " + new Date(lastModified) + " ago: " + (ago / (24 * 60 * 60 * 1000)) + " dagen");
-
         return b;
       }
 
@@ -892,7 +955,7 @@ public class DiskUsageMain
       }
     }
 
-    LastModifiedDistributionPane()
+    private LastModifiedDistributionPane()
     {
       createPaneType("PIECHART", "Show details table", "table", this::getPieChartNode);
       createPaneType("BARCHART", "Show bar chart", "chart-bar", this::getBarChartNode);
@@ -915,7 +978,7 @@ public class DiskUsageMain
     {
       TreeItem<FileNodeIF> treeItem;
 
-      treeItem = getCurrentTreeItem();
+      treeItem = m_diskUsageMainData.getSelectedTreeItem();
       if (treeItem != null && !treeItem.getChildren().isEmpty())
       {
         GridPane pane;
@@ -925,19 +988,14 @@ public class DiskUsageMain
         XYChart.Series<Number, String> series1;
         XYChart.Series<Number, String> series2;
         FileNodeIF node;
-        record Data(Long numberOfFiles, Long sizeOfFiles) {}
+        record Data(Long numberOfFiles, Long sizeOfFiles) {
+        }
         Map<LastModifiedDistributionBucket, Data> map;
         Data dataDefault = new Data(0l, 0l);
         long todayMidnight;
 
         pane = new GridPane();
         todayMidnight = CommonUtil.getMidnight();
-
-        System.out.println("30 dagen = " + LastModifiedDistributionBucket.days(30));
-
-        Stream.of(LastModifiedDistributionBucket.values()).forEach(bucket -> {
-          System.out.println(bucket.getText() + " " + bucket.getFrom() + " until " + bucket.getTo());
-        });
 
         node = treeItem.getValue();
         map = node.streamNode().filter(FileNodeIF::isFile)
@@ -954,13 +1012,12 @@ public class DiskUsageMain
         xAxis.setLabel("Number of files");
         yAxis.setLabel("File sizes");
 
-        System.out.println("numberOfFiles:");
         series1 = new XYChart.Series<>();
-        Stream.of(LastModifiedDistributionBucket.values()).forEach(bucket -> {
+        Stream.of(LastModifiedDistributionBucket.values()).forEach(bucket ->
+        {
           Data value;
           value = map.getOrDefault(bucket, dataDefault);
           series1.getData().add(new XYChart.Data<Number, String>(value.numberOfFiles(), bucket.getText()));
-          System.out.println(bucket.getText() + " -> " + value.numberOfFiles());
         });
 
         barChart.getData().add(series1);
@@ -974,13 +1031,12 @@ public class DiskUsageMain
         xAxis.setLabel("Total size of files (in Gb)");
         yAxis.setLabel("File sizes");
 
-        System.out.println("sizeOfFiles:");
         series2 = new XYChart.Series<>();
-        Stream.of(LastModifiedDistributionBucket.values()).forEach(bucket -> {
+        Stream.of(LastModifiedDistributionBucket.values()).forEach(bucket ->
+        {
           Data value;
           value = map.getOrDefault(bucket, dataDefault);
           series2.getData().add(new XYChart.Data<Number, String>(value.sizeOfFiles(), bucket.getText()));
-          System.out.println(bucket.getText() + " -> " + value.sizeOfFiles());
         });
 
         barChart.getData().add(series2);
@@ -1042,14 +1098,15 @@ public class DiskUsageMain
 
       menuItem = new MenuItem(path);
       menuItem.setGraphic(IconUtil.createImageNode("folder-outline", IconSize.SMALLER));
-      menuItem.setOnAction(e -> {
+      menuItem.setOnAction(e ->
+      {
         DirNode dirNode;
 
         dirNode = new ScanFileTreeDialog().scanDirectory(new File(path));
         if (dirNode != null)
         {
-          m_treePaneData.createTreeTableView(dirNode);
-          m_recentFiles.addFile(new File(dirNode.getName()));
+          m_diskUsageMainData.mi_treePaneData.createTreeTableView(dirNode);
+          m_diskUsageMainData.mi_recentFiles.addFile(new File(dirNode.getName()));
         }
       });
 
