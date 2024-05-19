@@ -14,11 +14,11 @@ public class IconUtil
 
   public static Node createImageNode(String iconName, IconSize iconSize)
   {
-    return new ImageView(createImage(iconName, iconSize));
+    return new FxIcon(iconName).size(iconSize).getImageView();
   }
 
   public static Image createImage(String iconName, IconSize iconSize)
   {
-    return new FxIcon(iconName).getImage(iconSize);
+    return new FxIcon(iconName).size(iconSize).getImage();
   }
 }
