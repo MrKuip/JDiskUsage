@@ -1,8 +1,5 @@
 package org.kku.jdiskusage.ui;
 
-import javafx.scene.paint.Color;
-
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -22,15 +19,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.controlsfx.control.BreadCrumbBar;
 import org.controlsfx.control.SegmentedButton;
-import org.kku.fonticons.ui.FxIcon.IconBuilder;
+import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconColor;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
-import org.kku.fonticons.ui.FxIcon;
-import org.kku.fonticons.ui.FxIcon.IconSize;
-import org.kku.fonticons.ui.FxIcon.IconAlignment;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
@@ -226,9 +220,8 @@ public class DiskUsageView
       {
         Button button;
 
-        IconBuilder builder = IconUtil.buildImage("close").size(IconSize.SMALLER).color(IconColor.RED);
-        Node node = IconUtil.createImageNode(builder);
-        button = new Button(filter.getFilterText(), IconUtil.createImageNode("close", IconSize.SMALLER));
+        button = new Button(filter.getFilterText(),
+            new FxIcon("close").size(IconSize.SMALLER).fillColor(IconColor.RED).getImageView());
         button.setContentDisplay(ContentDisplay.RIGHT);
         button.setUserData(filter);
         button.setDisable(true);

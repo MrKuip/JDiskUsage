@@ -27,7 +27,7 @@ dependencies {
 }
 
 application {
-  //mainClass.set('org.kku.jdiskusage.main.Main');
-  mainClass.set('Test');
+  mainClass.set('org.kku.jdiskusage.main.Main');
+  mainModule.set('org.kku.jdiskusage');
 }
 

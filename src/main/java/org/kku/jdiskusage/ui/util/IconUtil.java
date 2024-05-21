@@ -4,7 +4,6 @@ import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 public class IconUtil
 {
