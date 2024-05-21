@@ -1,5 +1,8 @@
 package org.kku.jdiskusage.ui;
 
+import javafx.scene.paint.Color;
+
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,6 +28,9 @@ import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
+import org.kku.fonticons.ui.FxIcon;
+import org.kku.fonticons.ui.FxIcon.IconSize;
+import org.kku.fonticons.ui.FxIcon.IconAlignment;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
