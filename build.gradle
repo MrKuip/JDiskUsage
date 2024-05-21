@@ -22,9 +22,12 @@ javafx {
 dependencies {
   implementation 'org.controlsfx:controlsfx:11.2.1'
   implementation files('lib/fontIcons-1.0.jar')
+  implementation 'net.raumzeitfalle.fx:filechooser:0.0.11'
+  implementation 'net.openhft:compiler:2.25ea2'
 }
 
 application {
-  mainClass.set('org.kku.jdiskusage.ui.DiskUsageMain');
+  //mainClass.set('org.kku.jdiskusage.main.Main');
+  mainClass.set('Test');
 }
 

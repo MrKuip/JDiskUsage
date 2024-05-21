@@ -1,0 +1,12 @@
+
+- Double click on table cell 'Path' in table of Top 50 -> Select node and expand in tree.
+- Left align the text in the header of a Table (and wrap).
+- Create an efficient filter for the tree that can AND and OR and can be saved. (evaluate https://github.com/dlsc-software-consulting-gmbh/GemsFX)
+- Examine memory consumption on very large trees (evaluate Junion https://github.com/TehLeo/junion).
+- Create an executable from gradle.
+- The pie chart, bar chart and table of a TabPane should use the same scan.
+- Filter the tree when a piece of a bar chart or pie chart is double clicked.
+- Add totals (sum, average, highest value, lowest value) to a TableView
+- Select multiple directories in a DirectoryChooser (evaluate https://oliver-loeffler.github.io/FXFileChooser/)
+Fixed 28/03/2024 - Allow value in table to be copied (and then pasted somewhere else)
+
