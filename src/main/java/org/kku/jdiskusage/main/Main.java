@@ -18,6 +18,7 @@ public class Main
     Scene scene;
 
     scene = new Scene(new DiskUsageView(stage));
+    scene.getStylesheets().add("jdiskusage.css");
 
     stage.setHeight(getProps().getDouble(Property.HEIGHT, 400));
     stage.setWidth(getProps().getDouble(Property.WIDTH, 600));

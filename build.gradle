@@ -31,3 +31,37 @@ application {
   mainModule.set('org.kku.jdiskusage');
 }
 
+
+
+eclipse 
+{
+  classpath 
+  {
+    file 
+    {
+      withXml 
+      {
+        def node = it.asNode()
+        node.each { n -> 
+          { 
+            println "-----"
+            println "n       = " + n
+            def entry = n.children()[0];
+            println "entry   = " + entry
+            if(entry != null) 
+            {
+              println "entry.children= " + entry.children()[0]
+            }
+            println "-----"
+          }
+        }
+      }
+    }
+  }
+}
+
+boolean isModule(entry) {
+    // filter java 9 modules
+    entry.kind == 'lib'  // Only libraries can be modules
+}
+
