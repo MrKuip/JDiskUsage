@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -36,6 +37,8 @@ import org.kku.jdiskusage.util.FileTree.FilterIF;
 import org.kku.jdiskusage.util.SizeUtil;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -64,6 +67,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -132,7 +136,7 @@ public class DiskUsageView
 
     m_diskUsageMainData.mi_stage = stage;
 
-    toolBars = new VBox(createMenuBar(), createFilterPane());
+    toolBars = new VBox(createMenuBar(), createFilterPane().getNode());
     splitPane = new SplitPane();
 
     Stream.of(TabPaneData.TabData.values()).forEach(td -> m_diskUsageMainData.mi_tabPaneData.createTab(td));
@@ -196,56 +200,59 @@ public class DiskUsageView
   }
 
   private class FilterPane
-    extends BorderPane
   {
-    private final Map<String, Set<Filter>> mi_filterByOwnerMap = new HashMap<>();
+    private final Set<Filter> mi_filterSet = new LinkedHashSet<>();
+    private final Map<String, Set<Filter>> mi_filterByTypeMap = new HashMap<>();
+    private final Map<String, Pane> mi_filterTypePaneByTypeMap = new HashMap<>();
     private final HBox mi_filterActivationPane = new HBox();
     private final HBox mi_filterPane = new HBox();
+    private final BorderPane contentPane;
     private Button mi_activateFilterButton;
     private Button mi_cancelFilterButton;
+    private Button mi_clearFilterButton;
 
     private FilterPane()
     {
-      mi_filterActivationPane.setPadding(new Insets(2, 10, 2, 2));
+      HBox filterTextPane = new HBox();
+
+      contentPane = new BorderPane();
+
+      filterTextPane = new HBox();
+      filterTextPane.setPadding(new Insets(2, 10, 2, 10));
+      filterTextPane.setAlignment(Pos.CENTER);
+      filterTextPane.getChildren().add(new Label("Filter", IconUtil.createImageView("filter", IconSize.SMALLER)));
+
+      // mi_filterPane.setPadding(new Insets(2, 10, 2, 10));
+      mi_filterPane.setId("filterPane");
+      // mi_filterPane.setSpacing(2);
+
+      // mi_filterActivationPane.setId("filterPane");
+      mi_filterActivationPane.setPadding(new Insets(2, 10, 2, 10));
+      mi_filterActivationPane.setAlignment(Pos.CENTER);
       mi_filterActivationPane.setSpacing(2);
 
-      mi_filterPane.setPadding(new Insets(2, 0, 2, 0));
-      setVisible(false);
-      setManaged(false);
-
-      setLeft(mi_filterActivationPane);
-      setCenter(mi_filterPane);
+      contentPane.setLeft(filterTextPane);
+      contentPane.setCenter(mi_filterPane);
+      contentPane.setRight(mi_filterActivationPane);
 
       updateFilterActivationPane();
     }
 
+    public Node getNode()
+    {
+      return contentPane;
+    }
+
+    private Set<Filter> getFilterSet()
+    {
+      return mi_filterSet;
+    }
+
     public void addFilter(Filter filter, boolean activateFilterImmediately)
     {
-      if (mi_filterByOwnerMap.computeIfAbsent(filter.getOwnerName(), (k) -> new HashSet<>()).add(filter))
-      {
-        Label button;
-        Node closeNode;
+      mi_filterSet.add(filter);
 
-        // Wrap in HBox because adding a mouselistener to the ImageView does not work!
-        // (Bug in JavaFX!)
-        closeNode = new HBox(new FxIcon("close").size(IconSize.SMALLER).fillColor(IconColor.RED).getImageView());
-        closeNode.setStyle("-fx-padding:2px 0px 1px 0px;");
-
-        button = new Label(filter.getFilterText(), closeNode);
-        button.setId("filterButton");
-        button.setContentDisplay(ContentDisplay.RIGHT);
-        button.setUserData(filter);
-        button.setDisable(true);
-
-        closeNode.addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
-          System.out.println(e);
-          removeFilter(button);
-        });
-
-        mi_filterPane.getChildren().add(button);
-
-        updateFilterActivationPane();
-      }
+      reInitFilterPanel();
 
       if (activateFilterImmediately && mi_activateFilterButton != null)
       {
@@ -253,19 +260,95 @@ public class DiskUsageView
       }
     }
 
-    public void removeFilter(Node node)
+    private void reInitFilterPanel()
     {
-      mi_filterPane.getChildren().remove(node);
-      mi_filterByOwnerMap.remove(node.getUserData());
+      mi_filterPane.getChildren().clear();
+      mi_filterActivationPane.getChildren().clear();
+      mi_filterByTypeMap.clear();
+      mi_filterTypePaneByTypeMap.clear();
+
+      mi_filterSet.forEach(filter -> {
+        if (mi_filterByTypeMap.computeIfAbsent(filter.getFilterType(), (k) -> new HashSet<>()).add(filter))
+        {
+          Pane filterTypePane;
+          Node filterValueNode;
+
+          filterValueNode = createFilterValueNode(filter);
+
+          filterTypePane = mi_filterTypePaneByTypeMap.computeIfAbsent(filter.getFilterType(),
+              filterType -> createFilterTypePane(filter));
+          if (mi_filterByTypeMap.get(filter.getFilterType()).size() > 1)
+          {
+            filterTypePane.getChildren().add(getFilterTypePaneText("or"));
+          }
+          filterTypePane.getChildren().add(filterValueNode);
+        }
+      });
 
       updateFilterActivationPane();
+    }
+
+    private Label getFilterTypePaneText(String text)
+    {
+      Label label;
+
+      label = new Label(text);
+      label.setId("filterTypePaneText");
+
+      return label;
+    }
+
+    private Pane createFilterTypePane(Filter filter)
+    {
+      HBox filterPane;
+
+      filterPane = new HBox();
+      filterPane.setId("filterTypePane");
+
+      filterPane.getChildren().add(getFilterTypePaneText(filter.getFilterType() + " is "));
+
+      mi_filterPane.getChildren().add(filterPane);
+
+      return filterPane;
+    }
+
+    private Node createFilterValueNode(Filter filter)
+    {
+      Label filterNode;
+      Node closeNode;
+
+      // Wrap in HBox because adding a mouselistener to the ImageView does not work!
+      // (Bug in JavaFX!)
+      closeNode = new HBox(new FxIcon("close").size(IconSize.SMALLER).fillColor(IconColor.RED).getImageView());
+      closeNode.setStyle("-fx-padding:2px 0px 1px 0px;");
+
+      filterNode = new Label(filter.getFilterValue(), closeNode);
+      filterNode.setId("filterButton");
+      filterNode.setContentDisplay(ContentDisplay.RIGHT);
+      filterNode.setUserData(filter);
+      filterNode.disableProperty().bind(filter.disabledProperty());
+
+      closeNode.addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
+        removeFilters(filter);
+      });
+
+      return filterNode;
+    }
+
+    public void removeFilters(Filter... filters)
+    {
+      Stream.of(filters).forEach(filter -> {
+        mi_filterSet.remove(filter);
+      });
+
+      reInitFilterPanel();
     }
 
     public boolean accept(FileNodeIF fileNode)
     {
       Set<Entry<String, Set<Filter>>> entries;
 
-      entries = mi_filterByOwnerMap.entrySet();
+      entries = mi_filterByTypeMap.entrySet();
       for (Entry<String, Set<Filter>> entry : entries)
       {
         if (entry.getValue().stream().filter(filter -> filter.accept(fileNode)).findFirst().isPresent())
@@ -289,8 +372,8 @@ public class DiskUsageView
         {
           mi_activateFilterButton = new Button("Activate filter",
               IconUtil.createImageView("filter-plus", IconSize.SMALLER));
-          mi_activateFilterButton.setOnAction((ae) -> mi_filterPane.getChildren().forEach(child -> {
-            child.setDisable(false);
+          mi_activateFilterButton.setOnAction((ae) -> getFilterSet().forEach(filter -> {
+            filter.disable(false);
             m_diskUsageMainData.mi_treePaneData.setFilter((fn) -> accept(fn));
             updateFilterActivationPane();
           }));
@@ -299,22 +382,23 @@ public class DiskUsageView
           mi_cancelFilterButton = new Button("Cancel filter",
               IconUtil.createImageView("filter-minus", IconSize.SMALLER));
           mi_cancelFilterButton.setOnAction((ae) -> {
-            new ArrayList<>(mi_filterPane.getChildren()).forEach(child -> {
-              if (child.isDisabled())
-              {
-                removeFilter(child);
-              }
-            });
-            updateFilterActivationPane();
+            removeFilters(getFilterSet().stream().filter(Filter::isDisabled).toArray(Filter[]::new));
           });
           mi_filterActivationPane.getChildren().add(mi_cancelFilterButton);
+
+          mi_clearFilterButton = new Button("Clear filter",
+              IconUtil.createImageView("filter-remove", IconSize.SMALLER));
+          mi_clearFilterButton.setOnAction((ae) -> {
+            removeFilters(getFilterSet().stream().toArray(Filter[]::new));
+          });
+          mi_filterActivationPane.getChildren().add(mi_clearFilterButton);
         }
 
-        disabled = mi_filterPane.getChildren().stream().filter(node -> node.isDisabled()).findFirst().isPresent();
+        disabled = getFilterSet().stream().filter(filter -> filter.isDisabled()).findFirst().isPresent();
         mi_activateFilterButton.setDisable(!disabled);
         mi_cancelFilterButton.setDisable(!disabled);
-        setVisible(true);
-        setManaged(true);
+        // contentPane.setVisible(true);
+        // contentPane.setManaged(true);
       }
       else
       {
@@ -323,8 +407,8 @@ public class DiskUsageView
           mi_filterActivationPane.getChildren().clear();
           mi_activateFilterButton = null;
           mi_cancelFilterButton = null;
-          setVisible(false);
-          setManaged(false);
+          // contentPane.setVisible(false);
+          // contentPane.setManaged(false);
         }
       }
     }
@@ -333,15 +417,18 @@ public class DiskUsageView
   public class Filter
       implements FilterIF
   {
-    private final String mi_ownerName;
-    private final String mi_filterText;
+    private final int mi_hashCode;
+    private final String mi_filterType;
+    private final String mi_filterValue;
     private final Predicate<FileNodeIF> mi_fileNodePredicate;
+    private BooleanProperty mi_filterDisabled = new SimpleBooleanProperty(true);
 
-    public Filter(String ownerName, String filterText, Predicate<FileNodeIF> fileNodePredicate)
+    public Filter(String filterName, String filterValue, Predicate<FileNodeIF> fileNodePredicate)
     {
-      mi_ownerName = ownerName;
-      mi_filterText = filterText;
+      mi_filterType = filterName;
+      mi_filterValue = filterValue;
       mi_fileNodePredicate = fileNodePredicate;
+      mi_hashCode = (filterName + filterValue).hashCode();
     }
 
     @Override
@@ -350,14 +437,29 @@ public class DiskUsageView
       return getPredicate().test(fileNode);
     }
 
-    public String getOwnerName()
+    public void disable(boolean disable)
     {
-      return mi_ownerName;
+      mi_filterDisabled.set(disable);
     }
 
-    public String getFilterText()
+    public BooleanProperty disabledProperty()
     {
-      return mi_filterText;
+      return mi_filterDisabled;
+    }
+
+    public boolean isDisabled()
+    {
+      return mi_filterDisabled.get();
+    }
+
+    public String getFilterType()
+    {
+      return mi_filterType;
+    }
+
+    public String getFilterValue()
+    {
+      return mi_filterValue;
     }
 
     public Predicate<FileNodeIF> getPredicate()
@@ -368,18 +470,26 @@ public class DiskUsageView
     @Override
     public int hashCode()
     {
-      return getFilterText().hashCode();
+      return mi_hashCode;
     }
 
     @Override
     public boolean equals(Object obj)
     {
+      Filter filter;
+
       if (obj == null || !(obj instanceof Filter))
       {
         return false;
       }
 
-      return ((Filter) obj).getFilterText().equals(getFilterText());
+      filter = (Filter) obj;
+      if (!filter.getFilterType().equals(getFilterType()))
+      {
+        return false;
+      }
+
+      return filter.getFilterValue().equals(getFilterValue());
     }
   }
 
@@ -693,10 +803,12 @@ public class DiskUsageView
       return mi_node;
     }
 
-    protected void addFilter(MouseEvent event, String description, Predicate<FileNodeIF> fileNodePredicate)
+    protected void addFilter(Node node, String filterType, String filterValue, Predicate<FileNodeIF> fileNodePredicate)
     {
-      m_diskUsageMainData.addFilter(new Filter(getClass().getSimpleName(), description, fileNodePredicate),
-          event.getClickCount() == 2);
+      node.addEventHandler(MouseEvent.MOUSE_CLICKED, (event) -> {
+        m_diskUsageMainData.addFilter(new Filter(filterType, filterValue, fileNodePredicate),
+            event.getClickCount() == 2);
+      });
     }
   }
 
@@ -727,7 +839,7 @@ public class DiskUsageView
         totalSize = treeItem.getValue().getSize();
         minimumDataSize = totalSize * 0.02;
 
-        record Data(PieChart.Data pieChartData, TreeItem<FileNodeIF> treeItem) {
+        record MyData(PieChart.Data pieChartData, TreeItem<FileNodeIF> treeItem) {
         }
 
         chart = FxUtil.createPieChart();
@@ -739,7 +851,7 @@ public class DiskUsageView
           data = new PieChart.Data(item.getValue().getName(), item.getValue().getSize());
           data.nameProperty().bind(Bindings.concat(data.getName(), "\n", SizeUtil.getFileSize(data.getPieValue())));
 
-          return new Data(data, item);
+          return new MyData(data, item);
         }).forEach(tuple -> {
           chart.getData().add(tuple.pieChartData);
           tuple.pieChartData.getNode().setUserData(tuple.treeItem);
@@ -957,10 +1069,10 @@ public class DiskUsageView
         XYChart.Series<Number, String> series1;
         XYChart.Series<Number, String> series2;
         FileNodeIF node;
-        record Data(Long numberOfFiles, Long sizeOfFiles) {
+        record MyData(Long numberOfFiles, Long sizeOfFiles) {
         }
-        Map<SizeDistributionBucket, Data> map;
-        Data dataDefault = new Data(0l, 0l);
+        Map<SizeDistributionBucket, MyData> map;
+        MyData dataDefault = new MyData(0l, 0l);
 
         pane = new GridPane();
 
@@ -968,7 +1080,7 @@ public class DiskUsageView
         map = node.streamNode().filter(FileNodeIF::isFile).map(FileNodeIF::getSize)
             .collect(Collectors.groupingBy(SizeDistributionBucket::findBucket,
                 Collectors.teeing(Collectors.counting(), Collectors.summingLong(a -> a / 1000000),
-                    (numberOfFiles, sizeOfFiles) -> new Data(numberOfFiles, sizeOfFiles))));
+                    (numberOfFiles, sizeOfFiles) -> new MyData(numberOfFiles, sizeOfFiles))));
 
         xAxis = new NumberAxis();
         yAxis = new CategoryAxis();
@@ -979,7 +1091,7 @@ public class DiskUsageView
 
         series1 = new XYChart.Series<>();
         Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
-          Data value;
+          MyData value;
           value = map.getOrDefault(bucket, dataDefault);
           series1.getData().add(new XYChart.Data<Number, String>(value.numberOfFiles(), bucket.getText()));
         });
@@ -997,7 +1109,7 @@ public class DiskUsageView
 
         series2 = new XYChart.Series<>();
         Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
-          Data value;
+          MyData value;
           value = map.getOrDefault(bucket, dataDefault);
           series2.getData().add(new XYChart.Data<Number, String>(value.sizeOfFiles(), bucket.getText()));
         });
@@ -1022,6 +1134,8 @@ public class DiskUsageView
   private class LastModifiedDistributionPane
     extends AbstractTabContentPane
   {
+    private final long mi_todayMidnight = CommonUtil.getMidnight();
+
     private enum LastModifiedDistributionBucket
     {
       INVALID("Invalid", Long.MAX_VALUE - 1l, Long.MAX_VALUE),
@@ -1106,27 +1220,23 @@ public class DiskUsageView
       {
         GridPane pane;
         FileNodeIF node;
-        record Data(Long numberOfFiles, Long sizeOfFiles) {
+        record MyData(Long numberOfFiles, Long sizeOfFiles) {
         }
-        Map<LastModifiedDistributionBucket, Data> map;
-        long todayMidnight;
-        ObservableList<Entry<LastModifiedDistributionBucket, Data>> list;
-        MyTableView<Entry<LastModifiedDistributionBucket, Data>> table;
-        MyTableColumn<Entry<LastModifiedDistributionBucket, Data>, String> timeIntervalColumn;
-        MyTableColumn<Entry<LastModifiedDistributionBucket, Data>, Long> sumOfFileSizesColumn;
-        MyTableColumn<Entry<LastModifiedDistributionBucket, Data>, Long> numberOfFilesColumn;
-        Data dataDefault = new Data(0l, 0l);
+        Map<LastModifiedDistributionBucket, MyData> map;
+        ObservableList<Entry<LastModifiedDistributionBucket, MyData>> list;
+        MyTableView<Entry<LastModifiedDistributionBucket, MyData>> table;
+        MyTableColumn<Entry<LastModifiedDistributionBucket, MyData>, String> timeIntervalColumn;
+        MyTableColumn<Entry<LastModifiedDistributionBucket, MyData>, Long> sumOfFileSizesColumn;
+        MyTableColumn<Entry<LastModifiedDistributionBucket, MyData>, Long> numberOfFilesColumn;
 
         pane = new GridPane();
-        todayMidnight = CommonUtil.getMidnight();
 
         node = treeItem.getValue();
         map = node.streamNode().filter(FileNodeIF::isFile)
-            .collect(Collectors.groupingBy(
-                fileNode -> LastModifiedDistributionBucket.findBucket(todayMidnight, fileNode.getLastModifiedTime()),
+            .collect(Collectors.groupingBy(this::findBucket,
                 Collectors.teeing(Collectors.counting(),
                     Collectors.summingLong(fileNode -> fileNode.getSize() / 1000000),
-                    (numberOfFiles, sizeOfFiles) -> new Data(numberOfFiles, sizeOfFiles))));
+                    (numberOfFiles, sizeOfFiles) -> new MyData(numberOfFiles, sizeOfFiles))));
 
         list = map.entrySet().stream().collect(Collectors.toCollection(FXCollections::observableArrayList));
 
@@ -1157,12 +1267,17 @@ public class DiskUsageView
       return new Label("No data");
     }
 
-    Node getBarChartNode()
+    private LastModifiedDistributionBucket findBucket(FileNodeIF fileNode)
+    {
+      return LastModifiedDistributionBucket.findBucket(mi_todayMidnight, fileNode.getLastModifiedTime());
+    }
+
+    Node getPieChartNode()
     {
       return new Label("Bar chart");
     }
 
-    Node getPieChartNode()
+    Node getBarChartNode()
     {
       TreeItem<FileNodeIF> treeItem;
 
@@ -1176,23 +1291,19 @@ public class DiskUsageView
         XYChart.Series<Number, String> series1;
         XYChart.Series<Number, String> series2;
         FileNodeIF node;
-        record Data(Long numberOfFiles, Long sizeOfFiles) {
+        record MyData(Long numberOfFiles, Long sizeOfFiles) {
         }
-        Map<LastModifiedDistributionBucket, Data> map;
-        Data dataDefault = new Data(0l, 0l);
-        long todayMidnight;
+        Map<LastModifiedDistributionBucket, MyData> map;
+        MyData dataDefault = new MyData(0l, 0l);
 
         pane = new GridPane();
-        todayMidnight = CommonUtil.getMidnight();
 
         node = treeItem.getValue();
         map = node.streamNode().filter(FileNodeIF::isFile)
-            .collect(Collectors.groupingBy(
-                fileNode -> LastModifiedDistributionBucket.findBucket(todayMidnight, fileNode.getLastModifiedTime()),
-                LinkedHashMap::new,
+            .collect(Collectors.groupingBy(this::findBucket, LinkedHashMap::new,
                 Collectors.teeing(Collectors.counting(),
                     Collectors.summingLong(fileNode -> fileNode.getSize() / 1000000),
-                    (numberOfFiles, sizeOfFiles) -> new Data(numberOfFiles, sizeOfFiles))));
+                    (numberOfFiles, sizeOfFiles) -> new MyData(numberOfFiles, sizeOfFiles))));
 
         xAxis = new NumberAxis();
         yAxis = new CategoryAxis();
@@ -1202,13 +1313,18 @@ public class DiskUsageView
         yAxis.setLabel("Last modified date");
 
         series1 = new XYChart.Series<>();
+        barChart.getData().add(series1);
+
         Stream.of(LastModifiedDistributionBucket.values()).forEach(bucket -> {
-          Data value;
+          MyData value;
+          XYChart.Data<Number, String> data;
+
           value = map.getOrDefault(bucket, dataDefault);
-          series1.getData().add(new XYChart.Data<Number, String>(value.numberOfFiles(), bucket.getText()));
+          data = new XYChart.Data<Number, String>(value.numberOfFiles(), bucket.getText());
+          series1.getData().add(data);
+          addFilter(data.getNode(), "Modification date", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
         });
 
-        barChart.getData().add(series1);
         pane.add(barChart, 0, 0);
         GridPane.setHgrow(barChart, Priority.ALWAYS);
         GridPane.setVgrow(barChart, Priority.ALWAYS);
@@ -1220,13 +1336,18 @@ public class DiskUsageView
         yAxis.setLabel("Last modified date");
 
         series2 = new XYChart.Series<>();
+        barChart.getData().add(series2);
+
         Stream.of(LastModifiedDistributionBucket.values()).forEach(bucket -> {
-          Data value;
+          MyData value;
+          XYChart.Data<Number, String> data;
+
           value = map.getOrDefault(bucket, dataDefault);
-          series2.getData().add(new XYChart.Data<Number, String>(value.sizeOfFiles(), bucket.getText()));
+          data = new XYChart.Data<Number, String>(value.sizeOfFiles(), bucket.getText());
+          series2.getData().add(data);
+          addFilter(data.getNode(), "Modification date", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
         });
 
-        barChart.getData().add(series2);
         pane.add(barChart, 0, 1);
         GridPane.setHgrow(barChart, Priority.ALWAYS);
         GridPane.setVgrow(barChart, Priority.ALWAYS);
@@ -1294,10 +1415,8 @@ public class DiskUsageView
           name = entry.getKey() + "\n" + entry.getValue() + " files";
           data = new PieChart.Data(name, entry.getValue());
           chart.getData().add(data);
-          data.getNode().addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-            addFilter(e, "Distribution type == " + entry.getKey(),
-                (fileNode) -> fileNode.getName().endsWith(entry.getKey()));
-          });
+          addFilter(data.getNode(), "File type", entry.getKey(),
+              (fileNode) -> fileNode.getName().endsWith(entry.getKey()));
         });
 
         return chart;
