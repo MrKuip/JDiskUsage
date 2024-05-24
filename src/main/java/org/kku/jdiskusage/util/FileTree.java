@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,9 +35,9 @@ public class FileTree
       return m_id;
     }
 
-    <T> T get(Map<String, Object> attributeMap)
+    <T> T get(Map<String, T> attributeMap)
     {
-      return (T) attributeMap.get(getId());
+      return attributeMap.get(getId());
     }
   }
 
@@ -51,16 +50,10 @@ public class FileTree
 
   private final Path m_directory;
   private ScanListenerIF m_scanListener;
-  private List<FilterIF> m_filterList = new ArrayList<>();
 
   public FileTree(File directory)
   {
     m_directory = directory.toPath();
-  }
-
-  public void addFilter(FilterIF filter)
-  {
-    m_filterList.add(filter);
   }
 
   public void setScanListener(ScanListenerIF scanListener)
@@ -74,7 +67,7 @@ public class FileTree
     Path path;
 
     path = m_directory;
-    dirNode = new Scan().scan(path);
+    dirNode = new ScanPath().scan(path);
 
     return dirNode;
   }
@@ -217,7 +210,6 @@ public class FileTree
     extends AbstractFileNode
   {
     private List<FileNodeIF> mi_childList = new ArrayList<>();
-    private List<FileNodeIF> mi_filteredChildList = new ArrayList<>();
     private long mi_fileSize = -1;
 
     private DirNode(boolean root, Path path)
@@ -228,6 +220,11 @@ public class FileTree
     private DirNode(Path path)
     {
       this(false, path);
+    }
+
+    public DirNode(DirNode node)
+    {
+      super(node.getName());
     }
 
     @Override
@@ -287,6 +284,11 @@ public class FileTree
       return Stream.concat(Stream.of(fileNodeWithPath),
           getChildList().stream().map(fn -> new FileNodeWithPath(fileNodeWithPath.getParentPath(), fn))
               .flatMap(fnwp -> fnwp.getFileNode().streamNodeWithPath(fnwp.getParentPath())));
+    }
+
+    public FileNodeIF filter(FilterIF filter)
+    {
+      return new FilterNodes(filter).filter(this);
     }
   }
 
@@ -375,25 +377,7 @@ public class FileTree
     }
   }
 
-  private class Sorted
-      implements Comparator<Path>
-  {
-    @Override
-    public int compare(Path path1, Path path2)
-    {
-      int result;
-
-      result = Boolean.compare(Files.isDirectory(path1), Files.isDirectory(path2));
-      if (result != 0)
-      {
-        return result;
-      }
-
-      return 0;
-    }
-  }
-
-  private class Scan
+  private class ScanPath
   {
     private int mi_numberOfFiles;
     private int mi_numberOfDirectories;
@@ -425,8 +409,7 @@ public class FileTree
           c = mi_depth == 0 ? Comparator.comparing(Path::toString) : (a, b) -> 0;
           try (Stream<Path> stream = Files.list(currentPath).sorted(c))
           {
-            stream.forEach(path ->
-            {
+            stream.forEach(path -> {
               if (mi_cancel)
               {
                 return;
@@ -460,10 +443,7 @@ public class FileTree
                 newFileNode = new FileNode(path);
 
                 mi_numberOfFiles++;
-                if (isAccepted(newFileNode))
-                {
-                  parentNode.addChild(newFileNode);
-                }
+                parentNode.addChild(newFileNode);
                 if (m_scanListener != null)
                 {
                   mi_cancel = m_scanListener.progress(path, mi_numberOfDirectories, mi_numberOfFiles, false);
@@ -478,20 +458,53 @@ public class FileTree
         e.printStackTrace();
       }
     }
+  }
 
-    private boolean isAccepted(FileNode newFileNode)
+  private static class FilterNodes
+  {
+    private final FilterIF mi_filter;
+
+    public FilterNodes(FilterIF filter)
     {
-      if (m_filterList.isEmpty())
-      {
-        return true;
-      }
+      mi_filter = filter;
+    }
 
-      if (!m_filterList.stream().allMatch(filter -> filter.accept(newFileNode)))
-      {
-        return false;
-      }
+    public DirNode filter(DirNode node)
+    {
+      DirNode rootNode;
 
-      return true;
+      rootNode = new DirNode(node);
+      filter(rootNode, node);
+
+      return rootNode;
+    }
+
+    private void filter(DirNode parentNode, DirNode currentNode)
+    {
+      try (Stream<FileNodeIF> stream = currentNode.getChildList().stream())
+      {
+        stream.forEach(node -> {
+          if (node.isDirectory())
+          {
+            DirNode newDirNode;
+
+            newDirNode = new DirNode((DirNode) node);
+
+            filter(parentNode.addChild(newDirNode), (DirNode) node);
+            if (!newDirNode.hasChildren())
+            {
+              parentNode.removeChild(newDirNode);
+            }
+          }
+          else
+          {
+            if (mi_filter.accept(node))
+            {
+              parentNode.addChild((FileNode) node);
+            }
+          }
+        });
+      }
     }
   }
 
@@ -502,8 +515,7 @@ public class FileTree
 
     public void print(DirNode dirNode)
     {
-      dirNode.getChildList().forEach(node ->
-      {
+      dirNode.getChildList().forEach(node -> {
         System.out.printf("%-10d%s%s%n", node.getSize(), getIndent(), node);
         if (node.isDirectory())
         {
@@ -551,18 +563,6 @@ public class FileTree
     catch (Exception e)
     {
       e.printStackTrace();
-    }
-  }
-
-  public static class UniqueInodeFilter
-      implements FilterIF
-  {
-    private HashSet<Integer> m_evaluatedInodeNumberSet = new HashSet<>();
-
-    @Override
-    public boolean accept(FileNodeIF fileNode)
-    {
-      return m_evaluatedInodeNumberSet.add(fileNode.getInodeNumber());
     }
   }
 }

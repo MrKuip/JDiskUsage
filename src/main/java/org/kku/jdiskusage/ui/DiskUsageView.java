@@ -213,20 +213,17 @@ public class DiskUsageView
 
     private FilterPane()
     {
-      HBox filterTextPane = new HBox();
+      HBox filterTextPane;
 
       contentPane = new BorderPane();
 
       filterTextPane = new HBox();
-      filterTextPane.setPadding(new Insets(2, 10, 2, 10));
+      filterTextPane.setPadding(new Insets(5, 10, 5, 10));
       filterTextPane.setAlignment(Pos.CENTER);
       filterTextPane.getChildren().add(new Label("Filter", IconUtil.createImageView("filter", IconSize.SMALLER)));
 
-      // mi_filterPane.setPadding(new Insets(2, 10, 2, 10));
       mi_filterPane.setId("filterPane");
-      // mi_filterPane.setSpacing(2);
 
-      // mi_filterActivationPane.setId("filterPane");
       mi_filterActivationPane.setPadding(new Insets(2, 10, 2, 10));
       mi_filterActivationPane.setAlignment(Pos.CENTER);
       mi_filterActivationPane.setSpacing(2);
@@ -390,6 +387,7 @@ public class DiskUsageView
               IconUtil.createImageView("filter-remove", IconSize.SMALLER));
           mi_clearFilterButton.setOnAction((ae) -> {
             removeFilters(getFilterSet().stream().toArray(Filter[]::new));
+            m_diskUsageMainData.mi_treePaneData.setFilter((fn) -> accept(fn));
           });
           mi_filterActivationPane.getChildren().add(mi_clearFilterButton);
         }
@@ -397,8 +395,6 @@ public class DiskUsageView
         disabled = getFilterSet().stream().filter(filter -> filter.isDisabled()).findFirst().isPresent();
         mi_activateFilterButton.setDisable(!disabled);
         mi_cancelFilterButton.setDisable(!disabled);
-        // contentPane.setVisible(true);
-        // contentPane.setManaged(true);
       }
       else
       {
@@ -407,8 +403,6 @@ public class DiskUsageView
           mi_filterActivationPane.getChildren().clear();
           mi_activateFilterButton = null;
           mi_cancelFilterButton = null;
-          // contentPane.setVisible(false);
-          // contentPane.setManaged(false);
         }
       }
     }
@@ -1411,12 +1405,22 @@ public class DiskUsageView
         reducedMap.entrySet().forEach(entry -> {
           PieChart.Data data;
           String name;
+          Predicate<FileNodeIF> test;
 
           name = entry.getKey() + "\n" + entry.getValue() + " files";
           data = new PieChart.Data(name, entry.getValue());
           chart.getData().add(data);
-          addFilter(data.getNode(), "File type", entry.getKey(),
-              (fileNode) -> fileNode.getName().endsWith(entry.getKey()));
+
+          if (!entry.getKey().equals(OTHER))
+          {
+            test = (fileNode) -> getFileType(fileNode.getName()).equals(entry.getKey());
+          }
+          else
+          {
+            test = (fileNode) -> !reducedMap.containsKey(getFileType(fileNode.getName()));
+          }
+
+          addFilter(data.getNode(), "File type", entry.getKey(), test);
         });
 
         return chart;

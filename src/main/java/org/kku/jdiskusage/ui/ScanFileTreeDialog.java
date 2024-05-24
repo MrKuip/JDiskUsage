@@ -7,7 +7,6 @@ import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
 import org.kku.jdiskusage.util.FileTree;
 import org.kku.jdiskusage.util.FileTree.DirNode;
-import org.kku.jdiskusage.util.FileTree.UniqueInodeFilter;
 import javafx.application.Platform;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -164,8 +163,7 @@ public class ScanFileTreeDialog
       mi_startTime = System.currentTimeMillis();
       mi_previousTime = mi_startTime;
       tree = new FileTree(mi_directory);
-      tree.setScanListener((currentPath, numberOfDirectories, numberOfFiles, scanReady) ->
-      {
+      tree.setScanListener((currentPath, numberOfDirectories, numberOfFiles, scanReady) -> {
         long currentTimeMillis;
 
         currentTimeMillis = System.currentTimeMillis();
@@ -176,8 +174,7 @@ public class ScanFileTreeDialog
 
         mi_previousTime = currentTimeMillis;
         mi_runLaterActive = true;
-        Platform.runLater(() ->
-        {
+        Platform.runLater(() -> {
           m_elapsedTimeLabel.setText((int) ((currentTimeMillis - mi_startTime) / 1000) + " seconds");
           m_currentDirectoryLabel.setText(currentPath != null ? currentPath.toString() : "Ready");
           m_currentFileCountLabel.setText(numberOfDirectories + " directories, " + numberOfFiles + " files");
@@ -191,7 +188,6 @@ public class ScanFileTreeDialog
 
         return mi_cancel;
       });
-      tree.addFilter(new UniqueInodeFilter());
       mi_result = tree.scan();
     }
   }

@@ -18,6 +18,7 @@ public class FileTreeView
 {
   private DirNode m_dirNode;
   private FilterIF mi_filter = (fn) -> true;
+  private MyTreeTableView<FileNodeIF> mi_treeTableView;
 
   public FileTreeView(DirNode dirNode)
   {
@@ -26,30 +27,28 @@ public class FileTreeView
 
   public TreeTableView<FileNodeIF> createComponent()
   {
-    MyTreeTableView<FileNodeIF> node;
     MyTreeTableColumn<FileNodeIF, String> treeTableColumn1;
     MyTreeTableColumn<FileNodeIF, Long> treeTableColumn2;
     MyTreeTableColumn<FileNodeIF, Double> treeTableColumn3;
     MyTreeTableColumn<FileNodeIF, Integer> treeTableColumn4;
 
-    node = new MyTreeTableView<FileNodeIF>(getClass().getSimpleName(), new FileTreeItem(m_dirNode));
+    mi_treeTableView = new MyTreeTableView<FileNodeIF>(getClass().getSimpleName(), new FileTreeItem(m_dirNode));
 
-    treeTableColumn1 = node.addColumn("File");
+    treeTableColumn1 = mi_treeTableView.addColumn("File");
     treeTableColumn1.initPersistentPrefWidth(200.0);
     treeTableColumn1.setCellValueGetter((treeItem) -> treeItem.getValue().getName());
 
-    treeTableColumn2 = node.addColumn("Size");
+    treeTableColumn2 = mi_treeTableView.addColumn("Size");
     treeTableColumn2.initPersistentPrefWidth(100.0);
     treeTableColumn2.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
     treeTableColumn2.setCellValueAlignment(Pos.CENTER_RIGHT);
     treeTableColumn2.setCellValueGetter((treeItem) -> treeItem.getValue().getSize());
 
-    treeTableColumn3 = node.addColumn("%");
+    treeTableColumn3 = mi_treeTableView.addColumn("%");
     treeTableColumn3.initPersistentPrefWidth(100.0);
     treeTableColumn3.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2f %%"));
     treeTableColumn3.setCellValueAlignment(Pos.CENTER_RIGHT);
-    treeTableColumn3.setCellValueGetter((treeItem) ->
-    {
+    treeTableColumn3.setCellValueGetter((treeItem) -> {
       if (treeItem.getParent() != null)
       {
         return treeItem.getValue().getSize() * 100.0 / treeItem.getParent().getValue().getSize();
@@ -60,17 +59,18 @@ public class FileTreeView
       }
     });
 
-    treeTableColumn4 = node.addColumn("Number\nof inode\nlinks");
+    treeTableColumn4 = mi_treeTableView.addColumn("Number\nof inode\nlinks");
     treeTableColumn4.initPersistentPrefWidth(100.0);
     treeTableColumn4.setCellValueAlignment(Pos.CENTER_RIGHT);
     treeTableColumn4.setCellValueGetter((treeItem) -> treeItem.getValue().getNumberOfLinks());
 
-    return node;
+    return mi_treeTableView;
   }
 
   public void setFilter(FilterIF filter)
   {
     mi_filter = filter;
+    mi_treeTableView.setRoot(new FileTreeItem(m_dirNode.filter(filter)));
   }
 
   public class FileTreeItem
@@ -83,8 +83,7 @@ public class FileTreeView
       super(node);
 
       // Release memory
-      expandedProperty().addListener((observable, wasExpanded, isExpanded) ->
-      {
+      expandedProperty().addListener((observable, wasExpanded, isExpanded) -> {
         if (wasExpanded && !isExpanded && !mi_isFirstTimeChildren)
         {
           super.getChildren().clear();
@@ -131,8 +130,9 @@ public class FileTreeView
         nodeList = ((DirNode) node).getChildList();
         if (!nodeList.isEmpty())
         {
-          return nodeList.stream().filter(mi_filter::accept).sorted(FileNodeIF.getSizeComparator())
-              .map(FileTreeItem::new).collect(Collectors.toCollection(FXCollections::observableArrayList));
+          return nodeList.stream().filter(fileNode -> fileNode.isDirectory() || mi_filter.accept(fileNode))
+              .sorted(FileNodeIF.getSizeComparator()).map(FileTreeItem::new)
+              .collect(Collectors.toCollection(FXCollections::observableArrayList));
         }
       }
 
