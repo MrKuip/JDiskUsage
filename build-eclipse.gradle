@@ -1,5 +1,16 @@
 
 
+eclipse.classpath.file {
+    whenMerged {
+        entries.findAll { isModule(it) }.each { it.entryAttributes['module'] = 'true' }
+    }
+}
+
+boolean isModule(entry) {
+    def moduleDescription = "jar --file $entry.path --describe-module".execute().text
+    return moduleDescription.contains('module-info.class');
+}
+
 
 
 
