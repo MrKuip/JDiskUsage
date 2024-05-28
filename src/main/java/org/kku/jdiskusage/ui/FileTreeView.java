@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.kku.jdiskusage.javafx.scene.control.MyTreeTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTreeTableView;
+import org.kku.jdiskusage.javafx.scene.control.MyTreeTableView.SelectedItem;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.FileTree.FilterIF;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
@@ -64,13 +66,35 @@ public class FileTreeView
     treeTableColumn4.setCellValueAlignment(Pos.CENTER_RIGHT);
     treeTableColumn4.setCellValueGetter((treeItem) -> treeItem.getValue().getNumberOfLinks());
 
+    selectFirstItem();
+
     return mi_treeTableView;
   }
 
   public void setFilter(FilterIF filter)
   {
+    SelectedItem selectedPathList;
+
     mi_filter = filter;
+
+    selectedPathList = mi_treeTableView.getSelectedItem();
+
     mi_treeTableView.setRoot(new FileTreeItem(m_dirNode.filter(filter)));
+
+    mi_treeTableView.initSelectedItem(selectedPathList);
+  }
+
+  private void selectFirstItem()
+  {
+    selectItem(mi_treeTableView.getSelectionModel().getModelItem(0));
+  }
+
+  private void selectItem(TreeItem<FileNodeIF> treeItem)
+  {
+    Platform.runLater(() -> {
+      mi_treeTableView.getSelectionModel().select(treeItem);
+      mi_treeTableView.getSelectionModel().getSelectedItem().setExpanded(true);
+    });
   }
 
   public class FileTreeItem

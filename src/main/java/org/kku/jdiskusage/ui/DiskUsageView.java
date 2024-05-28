@@ -2,6 +2,7 @@ package org.kku.jdiskusage.ui;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,8 +35,8 @@ import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.FileTree.FileNodeWithPath;
 import org.kku.jdiskusage.util.FileTree.FilterIF;
-import org.kku.jdiskusage.util.SizeUtil;
-import javafx.application.Platform;
+import org.kku.jdiskusage.util.preferences.DisplayMetric;
+import org.kku.jdiskusage.util.preferences.JDiskUsagePreferences;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -43,18 +44,21 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -89,6 +93,7 @@ public class DiskUsageView
     private LastModifiedDistributionPane mi_modifiedDistributionTab;
     private TypesPane mi_typesTab;
     private RecentFilesMenu mi_recentFiles;
+    private PreferencesMenu mi_preferences;
     private FilterPane mi_filterPane;
 
     private DiskUsageMainData()
@@ -105,6 +110,7 @@ public class DiskUsageView
       mi_modifiedDistributionTab = new LastModifiedDistributionPane();
       mi_typesTab = new TypesPane();
       mi_recentFiles = new RecentFilesMenu();
+      mi_preferences = new PreferencesMenu();
       mi_filterPane = new FilterPane();
     }
 
@@ -163,7 +169,7 @@ public class DiskUsageView
     menuBar = new MenuBar();
 
     menu = new Menu("File");
-    menu.getItems().addAll(createScanFileTreeMenuItem(), createRecentFilesMenu());
+    menu.getItems().addAll(createScanFileTreeMenuItem(), createRecentFilesMenu(), createPreferencesMenuItem());
     menuBar.getMenus().add(menu);
 
     return menuBar;
@@ -192,6 +198,11 @@ public class DiskUsageView
   private Menu createRecentFilesMenu()
   {
     return m_diskUsageMainData.mi_recentFiles.createMenu();
+  }
+
+  private MenuItem createPreferencesMenuItem()
+  {
+    return m_diskUsageMainData.mi_preferences.createMenu();
   }
 
   private FilterPane createFilterPane()
@@ -522,11 +533,6 @@ public class DiskUsageView
         select(e.getSelectedCrumb());
       });
 
-      Platform.runLater(() -> {
-        mi_treeTableView.getSelectionModel().select(0);
-        mi_treeTableView.getSelectionModel().getSelectedItem().setExpanded(true);
-      });
-
       mi_treePane.setCenter(mi_treeTableView);
     }
 
@@ -561,11 +567,10 @@ public class DiskUsageView
     private enum TabData
     {
       SIZE("Size", "chart-pie", TabPaneData::fillSizeTab),
-      TOP50("Top 50 (size)", "trophy", TabPaneData::fillTop50Tab),
-      DISTRIBUTION_SIZE("Distribution size", "chart-bell-curve", TabPaneData::fillSizeDistributionTab),
-      DISTRIBUTION_MODIFIED("Distribution last modified", "sort-calendar-ascending",
-          TabPaneData::fillModifiedDistributionTab),
-      DISTRIBUTION_TYPES("Distribution types", "chart-pie", TabPaneData::fillTypeDistributionTab);
+      TOP50("Top 50", "trophy", TabPaneData::fillTop50Tab),
+      DISTRIBUTION_SIZE("Size distribution", "chart-bell-curve", TabPaneData::fillSizeDistributionTab),
+      DISTRIBUTION_MODIFIED("Last modified", "sort-calendar-ascending", TabPaneData::fillModifiedDistributionTab),
+      DISTRIBUTION_TYPES("Types", "chart-pie", TabPaneData::fillTypeDistributionTab);
 
       private final String m_name;
       private final String m_iconName;
@@ -785,11 +790,17 @@ public class DiskUsageView
       return mi_currentTreeItem;
     }
 
+    protected DisplayMetric getCurrentDisplayMetric()
+    {
+      return JDiskUsagePreferences.getDisplayMetric();
+    }
+
     Node getNode(TreePaneData treePaneData)
     {
       if (mi_currentTreePaneData != treePaneData || getCurrentTreeItem() != m_diskUsageMainData.getSelectedTreeItem())
       {
         mi_currentTreePaneData = treePaneData;
+        mi_currentTreeItem = m_diskUsageMainData.getSelectedTreeItem();
         mi_nodeByPaneTypeMap.clear();
       }
 
@@ -803,6 +814,40 @@ public class DiskUsageView
         m_diskUsageMainData.addFilter(new Filter(filterType, filterValue, fileNodePredicate),
             event.getClickCount() == 2);
       });
+    }
+
+    public abstract class PaneData
+    {
+      private TreeItem<FileNodeIF> mii_currentTreeItem;
+      private DisplayMetric mii_currentDisplayMetric;
+
+      private PaneData()
+      {
+      }
+
+      public abstract void currentTreeItemChanged();
+
+      public abstract void currentDisplayMetricChanged();
+
+      public DisplayMetric getCurrentDisplayMetric()
+      {
+        return mii_currentDisplayMetric;
+      }
+
+      protected void checkInitData()
+      {
+        if (mii_currentTreeItem != m_diskUsageMainData.getSelectedTreeItem())
+        {
+          mii_currentTreeItem = m_diskUsageMainData.getSelectedTreeItem();
+          currentTreeItemChanged();
+        }
+
+        if (mii_currentDisplayMetric != AbstractTabContentPane.this.getCurrentDisplayMetric())
+        {
+          mii_currentDisplayMetric = AbstractTabContentPane.this.getCurrentDisplayMetric();
+          currentDisplayMetricChanged();
+        }
+      }
     }
   }
 
@@ -843,7 +888,8 @@ public class DiskUsageView
           PieChart.Data data;
 
           data = new PieChart.Data(item.getValue().getName(), item.getValue().getSize());
-          data.nameProperty().bind(Bindings.concat(data.getName(), "\n", SizeUtil.getFileSize(data.getPieValue())));
+          data.nameProperty().bind(Bindings.concat(data.getName(), "\n",
+              JDiskUsagePreferences.getSizeSystem().getFileSize(data.getPieValue())));
 
           return new MyData(data, item);
         }).forEach(tuple -> {
@@ -1359,6 +1405,8 @@ public class DiskUsageView
     private final String OTHER = "<Other>";
     private final String NONE = "<None>";
 
+    private TypesPaneData mi_data = new TypesPaneData();
+
     private TypesPane()
     {
       createPaneType("PIECHART", "Show details table", "chart-pie", this::getPieChartNode);
@@ -1370,68 +1418,152 @@ public class DiskUsageView
 
     Node getPieChartNode()
     {
-      TreeItem<FileNodeIF> treeItem;
+      PieChart pieChart;
 
-      treeItem = m_diskUsageMainData.getSelectedTreeItem();
-      if (!treeItem.getChildren().isEmpty())
-      {
-        PieChart chart;
-        FileNodeIF node;
-        Map<String, Long> fullMap;
-        Map<String, Long> reducedMap;
-        long totalCount;
-        double minimumCount;
-        long otherCount;
+      pieChart = FxUtil.createPieChart();
+      mi_data.getReducedMap().entrySet().forEach(entry -> {
+        PieChart.Data data;
+        String name;
+        Predicate<FileNodeIF> test;
 
-        chart = FxUtil.createPieChart();
+        name = entry.getKey() + "\n" + entry.getValue().getValueDescription(getCurrentDisplayMetric());
+        data = new PieChart.Data(name, entry.getValue().getSize(getCurrentDisplayMetric()));
+        pieChart.getData().add(data);
 
-        node = treeItem.getValue();
-        fullMap = node.streamNode().filter(FileNodeIF::isFile).map(FileNodeIF::getName)
-            .collect(Collectors.groupingBy(TypesPane.this::getFileType, Collectors.counting()));
-        totalCount = fullMap.values().stream().reduce(0l, Long::sum);
-        minimumCount = totalCount * 0.01; // Only types with a count larger than a percentage are shown
-
-        reducedMap = fullMap.entrySet().stream()
-            .sorted(Comparator.comparing(Entry<String, Long>::getValue, Comparator.reverseOrder()))
-            .filter(e -> e.getValue() > minimumCount).limit(10)
-            .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-
-        otherCount = totalCount - reducedMap.values().stream().reduce(0l, Long::sum);
-        if (otherCount != 0)
+        if (!entry.getKey().equals(OTHER))
         {
-          reducedMap.put(OTHER, otherCount);
+          test = (fileNode) -> getFileType(fileNode.getName()).equals(entry.getKey());
+        }
+        else
+        {
+          test = (fileNode) -> !mi_data.getReducedMap().containsKey(getFileType(fileNode.getName()));
         }
 
-        reducedMap.entrySet().forEach(entry -> {
-          PieChart.Data data;
-          String name;
-          Predicate<FileNodeIF> test;
+        addFilter(data.getNode(), "File type", entry.getKey(), test);
+      });
 
-          name = entry.getKey() + "\n" + entry.getValue() + " files";
-          data = new PieChart.Data(name, entry.getValue());
-          chart.getData().add(data);
-
-          if (!entry.getKey().equals(OTHER))
-          {
-            test = (fileNode) -> getFileType(fileNode.getName()).equals(entry.getKey());
-          }
-          else
-          {
-            test = (fileNode) -> !reducedMap.containsKey(getFileType(fileNode.getName()));
-          }
-
-          addFilter(data.getNode(), "File type", entry.getKey(), test);
-        });
-
-        return chart;
-      }
-
-      return new Label("No data");
+      return pieChart;
     }
 
     Node getBarChartNode()
     {
-      return new Label("Bar chart");
+      BarChart<Number, String> barChart;
+      XYChart.Series<Number, String> series1;
+      ArrayList<Entry<String, FileAggregates>> fullList;
+      GridPane gridPane;
+      ScrollPane scrollPane;
+      NumberAxis xAxis;
+      CategoryAxis yAxis;
+
+      scrollPane = new ScrollPane();
+      scrollPane.setFitToWidth(true);
+      gridPane = new GridPane();
+
+      xAxis = new NumberAxis();
+      xAxis.setSide(Side.TOP);
+      yAxis = new CategoryAxis();
+      barChart = FxUtil.createBarChart(xAxis, yAxis);
+      GridPane.setHgrow(barChart, Priority.ALWAYS);
+      GridPane.setVgrow(barChart, Priority.ALWAYS);
+
+      series1 = new XYChart.Series<>();
+      barChart.getData().add(series1);
+
+      fullList = new ArrayList<>(mi_data.getFullMap().entrySet());
+      Collections.reverse(fullList);
+      fullList.forEach(entry -> {
+        Data<Number, String> data;
+        Predicate<FileNodeIF> test;
+
+        data = new XYChart.Data<Number, String>(entry.getValue().getSize(getCurrentDisplayMetric()), entry.getKey());
+        series1.getData().add(data);
+
+        if (!entry.getKey().equals(OTHER))
+        {
+          test = (fileNode) -> getFileType(fileNode.getName()).equals(entry.getKey());
+        }
+        else
+        {
+          test = (fileNode) -> !mi_data.getReducedMap().containsKey(getFileType(fileNode.getName()));
+        }
+
+        addFilter(data.getNode(), "File type", entry.getKey(), test);
+      });
+
+      barChart.setPrefHeight(series1.getData().size() * 20);
+
+      gridPane.add(barChart, 0, 0);
+      scrollPane.setContent(gridPane);
+
+      return scrollPane;
+    }
+
+    private class TypesPaneData
+      extends PaneData
+    {
+      private Map<String, FileAggregates> mi_fullMap;
+      private Map<String, FileAggregates> mi_reducedMap;
+
+      private TypesPaneData()
+      {
+      }
+
+      private Map<String, FileAggregates> getFullMap()
+      {
+        checkInitData();
+        if (mi_fullMap == null)
+        {
+          mi_fullMap = getCurrentTreeItem().getValue().streamNode().filter(FileNodeIF::isFile)
+              .collect(Collectors.groupingBy(fn -> TypesPane.this.getFileType(fn.getName()),
+                  Collectors.teeing(Collectors.counting(), Collectors.summingLong(FileNodeIF::getSize),
+                      (a, b) -> new FileAggregates(a, b))));
+          mi_fullMap = mi_fullMap.entrySet().stream()
+              .sorted(Comparator.comparing(e -> e.getValue().accumulatedSize, Comparator.reverseOrder()))
+              .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (x, y) -> y, LinkedHashMap::new));
+        }
+        return mi_fullMap;
+      }
+
+      private Map<String, FileAggregates> getReducedMap()
+      {
+        checkInitData();
+        if (mi_reducedMap == null)
+        {
+          long totalCount;
+          double minimumCount;
+          long otherCount;
+
+          totalCount = getFullMap().values().stream().map(fa -> fa.getSize(getCurrentDisplayMetric())).reduce(0l,
+              Long::sum);
+
+          minimumCount = totalCount * 0.01; // Only types with a count larger than a percentage are shown
+          mi_reducedMap = mi_fullMap.entrySet().stream()
+              .filter(e -> e.getValue().getSize(getCurrentDisplayMetric()) > minimumCount).limit(10)
+              .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (x, y) -> y, LinkedHashMap::new));
+
+          otherCount = totalCount
+              - mi_reducedMap.values().stream().map(fa -> fa.getSize(getCurrentDisplayMetric())).reduce(0l, Long::sum);
+          if (otherCount != 0)
+          {
+            mi_reducedMap.put(OTHER, new FileAggregates(totalCount, otherCount));
+          }
+        }
+
+        return mi_reducedMap;
+      }
+
+      @Override
+      public void currentTreeItemChanged()
+      {
+        mi_fullMap = null;
+        mi_reducedMap = null;
+      }
+
+      @Override
+      public void currentDisplayMetricChanged()
+      {
+        mi_reducedMap = null;
+      }
     }
 
     Node getTableNode()
@@ -1458,6 +1590,8 @@ public class DiskUsageView
       return NONE;
     }
   }
+
+  int counter = 0;
 
   private class RecentFilesMenu
   {
@@ -1518,6 +1652,49 @@ public class DiskUsageView
       });
 
       return menuItem;
+    }
+  }
+
+  private class PreferencesMenu
+  {
+    public MenuItem createMenu()
+    {
+      MenuItem menuItem;
+
+      menuItem = new MenuItem("Preferences");
+      menuItem.setGraphic(IconUtil.createImageView("cog", IconSize.SMALLER));
+      menuItem.setOnAction(e -> {
+      });
+
+      return menuItem;
+    }
+  }
+
+  public record FileAggregates(long accumulatedSize, long fileCount) {
+    public long getSize(DisplayMetric displayMetric)
+    {
+      switch (displayMetric)
+      {
+        case FILE_SIZE:
+          return accumulatedSize();
+        case FILE_COUNT:
+          return fileCount();
+        default:
+          return -1;
+      }
+    }
+
+    public String getValueDescription(DisplayMetric displayMetric)
+    {
+      switch (displayMetric)
+      {
+        case FILE_SIZE:
+          return JDiskUsagePreferences.getSizeSystem().getFileSize(accumulatedSize());
+        case FILE_COUNT:
+          return fileCount() + " files";
+        default:
+          return "";
+      }
     }
   }
 

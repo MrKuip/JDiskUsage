@@ -7,7 +7,8 @@ module org.kku.jdiskusage
   requires java.base;
   requires org.kku.materialdesignicons;
   requires org.controlsfx.controls;
-  //requires compiler;
+  // requires com.dlsc.preferencesfx;
+  // requires com.google.gson;
 
   exports org.kku.jdiskusage.main;
 }
