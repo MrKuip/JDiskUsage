@@ -33,29 +33,5 @@
   -fx-spacing: 5px
 }
 
-.root {
-  CHART_COLOR_9: brown;
-  CHART_COLOR_10: olive;
-  CHART_COLOR_11: maroon;
-  CHART_COLOR_12: gold;
-}
-
-
-.chart-pie.default-color8 {
-	-fx-pie-color: CHART_COLOR_9;
-}
-
-.chart-pie.default-color9 {
-	-fx-pie-color: CHART_COLOR_10;
-}
-
-.chart-pie.default-color10 {
-	-fx-pie-color: CHART_COLOR_11;
-}
-
-.chart-pie.default-color11 {
-	-fx-pie-color: CHART_COLOR_12;
-}
-
 
 

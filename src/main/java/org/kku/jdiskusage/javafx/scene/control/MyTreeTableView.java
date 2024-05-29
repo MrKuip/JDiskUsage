@@ -1,5 +1,6 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
+import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +19,7 @@ public class MyTreeTableView<S>
   public <R> MyTreeTableColumn<S, R> addColumn(String name)
   {
     MyTreeTableColumn<S, R> column;
-    column = new MyTreeTableColumn<S, R>(name, name);
+    column = translate(new MyTreeTableColumn<S, R>(name, name));
     getColumns().add(column);
     return column;
   }

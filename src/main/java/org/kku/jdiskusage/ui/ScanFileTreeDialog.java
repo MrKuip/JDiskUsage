@@ -1,5 +1,6 @@
 package org.kku.jdiskusage.ui;
 
+import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.io.File;
 import java.util.Optional;
 import org.kku.fonticons.ui.FxIcon.IconSize;
@@ -68,8 +69,8 @@ public class ScanFileTreeDialog
     Scan scan;
 
     m_dialog = new Dialog<>();
-    m_dialog.setTitle("Scan file tree");
-    m_dialog.setHeaderText("Scan " + directory.getPath());
+    m_dialog.setTitle(translate("Scan directory"));
+    m_dialog.setHeaderText(translate("Scan") + " " + directory.getPath());
     m_dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
     m_dialog.setGraphic(IconUtil.createImageView("file-search", IconSize.LARGE));
 
@@ -78,17 +79,17 @@ public class ScanFileTreeDialog
     grid.setHgap(10);
     grid.setVgap(10);
 
-    currentDirectory = new Label("Current directory:");
+    currentDirectory = translate(new Label("Current directory"));
     currentDirectory.setMinWidth(currentDirectory.getPrefWidth());
     m_currentDirectoryLabel = new Label();
     m_currentDirectoryLabel.setMaxWidth(Double.MAX_VALUE);
-    currentCount = new Label("Scanned:");
+    currentCount = translate(new Label("Scanned"));
     m_currentFileCountLabel = new Label();
     m_currentFileCountLabel.setMaxWidth(Double.MAX_VALUE);
-    filteredCount = new Label("Filtered:");
+    filteredCount = new Label("Filtered");
     m_filteredFileCountLabel = new Label();
     m_filteredFileCountLabel.setMaxWidth(Double.MAX_VALUE);
-    elapsedTime = new Label("Elapsed time:");
+    elapsedTime = new Label("Elapsed time");
     m_elapsedTimeLabel = new Label();
     m_elapsedTimeLabel.setMaxWidth(Double.MAX_VALUE);
     m_progressLabel = new ProgressBar();
@@ -175,10 +176,12 @@ public class ScanFileTreeDialog
         mi_previousTime = currentTimeMillis;
         mi_runLaterActive = true;
         Platform.runLater(() -> {
-          m_elapsedTimeLabel.setText((int) ((currentTimeMillis - mi_startTime) / 1000) + " seconds");
+          m_elapsedTimeLabel.setText((int) ((currentTimeMillis - mi_startTime) / 1000) + " " + translate("seconds"));
           m_currentDirectoryLabel.setText(currentPath != null ? currentPath.toString() : "Ready");
-          m_currentFileCountLabel.setText(numberOfDirectories + " directories, " + numberOfFiles + " files");
-          m_filteredFileCountLabel.setText(numberOfDirectories + " directories, " + numberOfFiles + " files");
+          m_currentFileCountLabel.setText(
+              numberOfDirectories + " " + translate("directories") + ", " + numberOfFiles + " " + translate("files"));
+          m_filteredFileCountLabel.setText(
+              numberOfDirectories + " " + translate("directories") + ", " + numberOfFiles + " " + translate("files"));
           mi_runLaterActive = false;
           if (scanReady)
           {

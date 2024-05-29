@@ -1,5 +1,6 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
+import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Stream;
@@ -25,9 +26,6 @@ public class MyTableView<T>
 
     getSelectionModel().setCellSelectionEnabled(true);
     TableUtils.installCopyPasteHandler(this);
-
-    Skin<?> skin = skinProperty().get();
-    System.out.println("skin = " + skin);
   }
 
   @Override
@@ -63,7 +61,7 @@ public class MyTableView<T>
   public <R> MyTableColumn<T, R> addColumn(String name)
   {
     MyTableColumn<T, R> column;
-    column = new MyTableColumn<T, R>(name);
+    column = translate(new MyTableColumn<T, R>(name));
     getColumns().add(column);
     return column;
   }
@@ -71,8 +69,7 @@ public class MyTableView<T>
   @SuppressWarnings("unchecked")
   public void initTotals()
   {
-    Stream.of(Totals.values()).forEach(totals ->
-    {
+    Stream.of(Totals.values()).forEach(totals -> {
       if (getColumns().stream().map(MyTableColumn.class::cast).filter(c -> c.hasTotal(totals)).findFirst().isPresent())
       {
         @SuppressWarnings("rawtypes")

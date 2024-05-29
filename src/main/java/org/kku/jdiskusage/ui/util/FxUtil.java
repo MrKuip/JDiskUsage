@@ -4,6 +4,7 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
+import javafx.scene.layout.Region;
 
 public class FxUtil
 {
@@ -32,5 +33,15 @@ public class FxUtil
     pieChart.setStartAngle(90.0);
 
     return pieChart;
+  }
+
+  public static Region createHorizontalSpacer(int size)
+  {
+    Region spacer;
+
+    spacer = new Region();
+    spacer.setPrefWidth(size);
+
+    return spacer;
   }
 }

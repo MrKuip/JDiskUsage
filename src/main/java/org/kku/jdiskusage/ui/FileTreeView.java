@@ -40,7 +40,7 @@ public class FileTreeView
     treeTableColumn1.initPersistentPrefWidth(200.0);
     treeTableColumn1.setCellValueGetter((treeItem) -> treeItem.getValue().getName());
 
-    treeTableColumn2 = mi_treeTableView.addColumn("Size");
+    treeTableColumn2 = mi_treeTableView.addColumn("File size");
     treeTableColumn2.initPersistentPrefWidth(100.0);
     treeTableColumn2.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
     treeTableColumn2.setCellValueAlignment(Pos.CENTER_RIGHT);
@@ -61,7 +61,7 @@ public class FileTreeView
       }
     });
 
-    treeTableColumn4 = mi_treeTableView.addColumn("Number\nof inode\nlinks");
+    treeTableColumn4 = mi_treeTableView.addColumn("Number\nof links\nto file");
     treeTableColumn4.initPersistentPrefWidth(100.0);
     treeTableColumn4.setCellValueAlignment(Pos.CENTER_RIGHT);
     treeTableColumn4.setCellValueGetter((treeItem) -> treeItem.getValue().getNumberOfLinks());
