@@ -1008,7 +1008,7 @@ public class DiskUsageView
         if (chart.getData().size() != treeItem.getChildren().size())
         {
           sum = chart.getData().stream().map(data -> data.getPieValue()).reduce(0.0d, Double::sum);
-          chart.getData().add(new PieChart.Data("<Other>", treeItem.getValue().getSize() - sum));
+          chart.getData().add(new PieChart.Data(getOtherText(), treeItem.getValue().getSize() - sum));
         }
 
         return chart;
@@ -1230,9 +1230,9 @@ public class DiskUsageView
         xAxis = new NumberAxis();
         yAxis = new CategoryAxis();
         barChart = FxUtil.createBarChart(xAxis, yAxis);
-        barChart.setTitle("Distribution of sizes in " + treeItem.getValue().getName());
-        xAxis.setLabel("Number of files");
-        yAxis.setLabel("File sizes");
+        barChart.setTitle(translate("Distribution of file sizes in") + " " + treeItem.getValue().getName());
+        xAxis.setLabel(translate("Number of files"));
+        yAxis.setLabel(translate("File sizes"));
 
         series1 = new XYChart.Series<>();
         Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
@@ -1249,8 +1249,8 @@ public class DiskUsageView
         xAxis = new NumberAxis();
         yAxis = new CategoryAxis();
         barChart = FxUtil.createBarChart(xAxis, yAxis);
-        xAxis.setLabel("Total size of files (in Gb)");
-        yAxis.setLabel("File sizes");
+        xAxis.setLabel(translate("Total size of files (in Gb)"));
+        yAxis.setLabel(translate("File sizes"));
 
         series2 = new XYChart.Series<>();
         Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
@@ -1283,26 +1283,26 @@ public class DiskUsageView
 
     private enum LastModifiedDistributionBucket
     {
-      INVALID("Invalid", Long.MAX_VALUE - 1l, Long.MAX_VALUE),
-      LAST_MODIFIED_FUTURE("In the future", -Long.MAX_VALUE, 0),
-      LAST_MODIFIED_TODAY("Today", days(0), days(1)),
-      LAST_MODIFIED_YESTERDAY("Yesterday", days(1), days(2)),
-      LAST_MODIFIED_1_DAY_TILL_7_DAYS("2 - 7 days", days(2), days(8)),
-      LAST_MODIFIED_7_DAYs_TILL_30_DAYS("7 - 30 days", days(9), days(31)),
-      LAST_MODIFIED_30_DAYS_TILL_90_DAYS("30 - 90 days", days(31), days(91)),
-      LAST_MODIFIED_90_DAYS_TILL_180_DAYS("90 - 180 days", days(91), days(181)),
-      LAST_MODIFIED_180_DAYS_TILL_365_DAYS("180 - 365 days", days(181), years(1)),
-      LAST_MODIFIED_1_YEAR_TILL_2_YEAR("1 - 2 years", years(1), years(2)),
-      LAST_MODIFIED_2_YEAR_TILL_3_YEAR("2 - 3 years", years(2), years(3)),
-      LAST_MODIFIED_3_YEAR_TILL_6_YEAR("3 - 6 years", years(3), years(6)),
-      LAST_MODIFIED_6_YEAR_TILL_10_YEAR("6 - 10 years", years(6), years(10)),
-      LAST_MODIFIED_OVER_10_YEARS("Over 10 years", years(10), Long.MAX_VALUE);
+      INVALID(() -> translate("Invalid"), Long.MAX_VALUE - 1l, Long.MAX_VALUE),
+      LAST_MODIFIED_FUTURE(() -> translate("In the future"), -Long.MAX_VALUE, 0),
+      LAST_MODIFIED_TODAY(() -> translate("Today"), days(0), days(1)),
+      LAST_MODIFIED_YESTERDAY(() -> translate("Yesterday"), days(1), days(2)),
+      LAST_MODIFIED_1_DAY_TILL_7_DAYS(() -> "2 - 7 " + translate("days"), days(2), days(8)),
+      LAST_MODIFIED_7_DAYs_TILL_30_DAYS(() -> "7 - 30 " + translate("days"), days(8), days(31)),
+      LAST_MODIFIED_30_DAYS_TILL_90_DAYS(() -> "30 - 90 " + translate("days"), days(31), days(91)),
+      LAST_MODIFIED_90_DAYS_TILL_180_DAYS(() -> "90 - 180 " + translate("days"), days(91), days(181)),
+      LAST_MODIFIED_180_DAYS_TILL_365_DAYS(() -> "180 - 365 " + translate("days"), days(181), years(1)),
+      LAST_MODIFIED_1_YEAR_TILL_2_YEAR(() -> "1 - 2 " + translate("years"), years(1), years(2)),
+      LAST_MODIFIED_2_YEAR_TILL_3_YEAR(() -> "2 - 3 " + translate("years"), years(2), years(3)),
+      LAST_MODIFIED_3_YEAR_TILL_6_YEAR(() -> "3 - 6 " + translate("years"), years(3), years(6)),
+      LAST_MODIFIED_6_YEAR_TILL_10_YEAR(() -> "6 - 10 " + translate("years"), years(6), years(10)),
+      LAST_MODIFIED_OVER_10_YEARS(() -> translate("Over") + " 10 " + translate("years"), years(10), Long.MAX_VALUE);
 
-      private final String mi_text;
+      private final Supplier<String> mi_text;
       private final long mi_from;
       private final long mi_to;
 
-      LastModifiedDistributionBucket(String text, long from, long to)
+      LastModifiedDistributionBucket(Supplier<String> text, long from, long to)
       {
         mi_text = text;
         mi_from = from;
@@ -1311,7 +1311,7 @@ public class DiskUsageView
 
       public String getText()
       {
-        return mi_text;
+        return mi_text.get();
       }
 
       long getFrom()
@@ -1453,9 +1453,9 @@ public class DiskUsageView
         xAxis = new NumberAxis();
         yAxis = new CategoryAxis();
         barChart = FxUtil.createBarChart(xAxis, yAxis);
-        barChart.setTitle("Distribution of last modified dates in " + treeItem.getValue().getName());
-        xAxis.setLabel("Number of files");
-        yAxis.setLabel("Last modified date");
+        barChart.setTitle(translate("Distribution of last modified dates in") + " " + treeItem.getValue().getName());
+        xAxis.setLabel(translate("Number of files"));
+        yAxis.setLabel(translate("Last modified date"));
 
         series1 = new XYChart.Series<>();
         barChart.getData().add(series1);
@@ -1477,8 +1477,8 @@ public class DiskUsageView
         xAxis = new NumberAxis();
         yAxis = new CategoryAxis();
         barChart = FxUtil.createBarChart(xAxis, yAxis);
-        xAxis.setLabel("Total size of files (in Gb)");
-        yAxis.setLabel("Last modified date");
+        xAxis.setLabel(translate("Total size of files (in Gb)"));
+        yAxis.setLabel(translate("Last modified date"));
 
         series2 = new XYChart.Series<>();
         barChart.getData().add(series2);
@@ -1565,6 +1565,7 @@ public class DiskUsageView
       xAxis.setSide(Side.TOP);
       yAxis = new CategoryAxis();
       barChart = FxUtil.createBarChart(xAxis, yAxis);
+      barChart.setTitle(translate("Number of files"));
       GridPane.setHgrow(barChart, Priority.ALWAYS);
       GridPane.setVgrow(barChart, Priority.ALWAYS);
 
