@@ -9,6 +9,7 @@ import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
 import org.kku.jdiskusage.util.FileTree;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import javafx.application.Platform;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -71,7 +72,7 @@ public class ScanFileTreeDialog
     m_dialog = new Dialog<>();
     m_dialog.setTitle(translate("Scan directory"));
     m_dialog.setHeaderText(translate("Scan") + " " + directory.getPath());
-    m_dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
+    m_dialog.getDialogPane().getButtonTypes().addAll(new ButtonType(translate("Cancel"), ButtonData.CANCEL_CLOSE));
     m_dialog.setGraphic(IconUtil.createImageView("file-search", IconSize.LARGE));
 
     grid = new GridPane();
@@ -86,10 +87,10 @@ public class ScanFileTreeDialog
     currentCount = translate(new Label("Scanned"));
     m_currentFileCountLabel = new Label();
     m_currentFileCountLabel.setMaxWidth(Double.MAX_VALUE);
-    filteredCount = new Label("Filtered");
+    filteredCount = translate(new Label("Filtered"));
     m_filteredFileCountLabel = new Label();
     m_filteredFileCountLabel.setMaxWidth(Double.MAX_VALUE);
-    elapsedTime = new Label("Elapsed time");
+    elapsedTime = translate(new Label("Elapsed time"));
     m_elapsedTimeLabel = new Label();
     m_elapsedTimeLabel.setMaxWidth(Double.MAX_VALUE);
     m_progressLabel = new ProgressBar();
