@@ -39,7 +39,7 @@ import org.kku.jdiskusage.util.FileTree.FileNodeWithPath;
 import org.kku.jdiskusage.util.FileTree.FilterIF;
 import org.kku.jdiskusage.util.Translator;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
-import org.kku.jdiskusage.util.preferences.JDiskUsagePreferences;
+import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.Sort;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -206,18 +206,18 @@ public class DiskUsageView
     showFileSizeButton = new ToggleButton("", IconUtil.createImageView("sigma", IconSize.SMALL));
     showFileSizeButton.setTooltip(translate(new Tooltip("Show file size")));
     showFileSizeButton.setToggleGroup(showDisplayMetricGroup);
-    System.out.println(JDiskUsagePreferences.getDisplayMetric());
-    showFileSizeButton.setSelected(DisplayMetric.FILE_SIZE == JDiskUsagePreferences.getDisplayMetric());
+    System.out.println(AppPreferences.displayMetricPreference.get());
+    showFileSizeButton.setSelected(DisplayMetric.FILE_SIZE == AppPreferences.displayMetricPreference.get());
     showFileSizeButton.setOnAction((e) -> {
-      JDiskUsagePreferences.displayMetricProperty().set(DisplayMetric.FILE_SIZE);
+      AppPreferences.displayMetricPreference.set(DisplayMetric.FILE_SIZE);
     });
 
     showFileCountButton = new ToggleButton("", IconUtil.createImageView("tally-mark-5", IconSize.SMALL));
     showFileCountButton.setTooltip(translate(new Tooltip("Show number of files")));
     showFileCountButton.setToggleGroup(showDisplayMetricGroup);
-    showFileCountButton.setSelected(DisplayMetric.FILE_COUNT == JDiskUsagePreferences.getDisplayMetric());
+    showFileCountButton.setSelected(DisplayMetric.FILE_COUNT == AppPreferences.displayMetricPreference.get());
     showFileCountButton.setOnAction((e) -> {
-      JDiskUsagePreferences.displayMetricProperty().set(DisplayMetric.FILE_COUNT);
+      AppPreferences.displayMetricPreference.set(DisplayMetric.FILE_COUNT);
     });
 
     showDisplayMetricButton = new SegmentedButton();
@@ -228,7 +228,7 @@ public class DiskUsageView
     sortNumericButton = new ToggleButton("", IconUtil.createImageView("sort-numeric-ascending", IconSize.SMALL));
     sortNumericButton.setToggleGroup(sortGroup);
     sortNumericButton.setOnAction((e) -> {
-      JDiskUsagePreferences.sortProperty().set(Sort.NUMERIC);
+      AppPreferences.sortPreference.set(Sort.NUMERIC);
       Translator.getInstance().changeLocale(new Locale("nl"));
     });
 
@@ -236,7 +236,7 @@ public class DiskUsageView
         IconUtil.createImageView("sort-alphabetical-ascending", IconSize.SMALL));
     sortAlphabeticallyButton.setToggleGroup(sortGroup);
     sortAlphabeticallyButton.setOnAction((e) -> {
-      JDiskUsagePreferences.sortProperty().set(Sort.ALPHABETICALLY);
+      AppPreferences.sortPreference.set(Sort.ALPHABETICALLY);
       Translator.getInstance().changeLocale(Locale.CANADA);
     });
 
@@ -887,7 +887,7 @@ public class DiskUsageView
 
     protected DisplayMetric getCurrentDisplayMetric()
     {
-      return JDiskUsagePreferences.getDisplayMetric();
+      return AppPreferences.displayMetricPreference.get();
     }
 
     Node getNode(TreePaneData treePaneData)
@@ -994,7 +994,7 @@ public class DiskUsageView
 
           data = new PieChart.Data(item.getValue().getName(), item.getValue().getSize());
           data.nameProperty().bind(Bindings.concat(data.getName(), "\n",
-              JDiskUsagePreferences.getSizeSystem().getFileSize(data.getPieValue())));
+              AppPreferences.sizeSystemPreference.get().getFileSize(data.getPieValue())));
 
           return new MyData(data, item);
         }).forEach(tuple -> {
@@ -1792,7 +1792,7 @@ public class DiskUsageView
       switch (displayMetric)
       {
         case FILE_SIZE:
-          return JDiskUsagePreferences.getSizeSystem().getFileSize(accumulatedSize());
+          return AppPreferences.sizeSystemPreference.get().getFileSize(accumulatedSize());
         case FILE_COUNT:
           return fileCount() + " files";
         default:

@@ -1,7 +1,8 @@
 package org.kku.jdiskusage.main;
 
 import java.util.Locale;
-import org.kku.jdiskusage.util.Translator;
+import org.kku.jdiskusage.util.preferences.AppPreferences;
+import org.kku.jdiskusage.util.preferences.AppPreferences.AppPreference;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -11,11 +12,16 @@ public class Test
   @Override
   public void start(Stage stage)
   {
-    Locale.setDefault(new Locale("nl"));
+    AppPreference<Locale> p;
 
-    System.out.println(Translator.translatedTextProperty("hallo daar").get());
-    System.out.println(Translator.translatedTextProperty("Show file size").get());
-    System.out.println(Translator.translatedTextProperty("Show-file-size").get());
+    p = AppPreferences.localePreference;
+    System.out.println(p.getName() + " = " + p.get());
+    p.set(Locale.CANADA);
+    System.out.println(p.getName() + " = " + p.get());
+    p.set(Locale.CHINA);
+    System.out.println(p.getName() + " = " + p.get());
+    p.set(new Locale("nl"));
+    System.out.println(p.getName() + " = " + p.get());
 
     System.exit(-1);
   }

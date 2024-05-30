@@ -1,9 +1,11 @@
 package org.kku.jdiskusage.main;
 
+import java.util.Locale;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
+import org.kku.jdiskusage.util.preferences.AppPreferences;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -16,6 +18,8 @@ public class Main
   public void start(Stage stage)
   {
     Scene scene;
+
+    Locale.setDefault(AppPreferences.localePreference.get());
 
     scene = new Scene(new DiskUsageView(stage));
     scene.getStylesheets().add("jdiskusage.css");
