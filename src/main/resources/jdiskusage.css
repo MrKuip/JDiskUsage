@@ -29,6 +29,7 @@
 
 #filterPane {
   -fx-background-color: GRAY;
+  -fx-background-radius: 5;
   -fx-padding: 3px;
   -fx-spacing: 5px
 }
