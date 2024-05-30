@@ -38,9 +38,10 @@ import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.FileTree.FileNodeWithPath;
 import org.kku.jdiskusage.util.FileTree.FilterIF;
 import org.kku.jdiskusage.util.Translator;
-import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
+import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.kku.jdiskusage.util.preferences.Sort;
+import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -194,7 +195,9 @@ public class DiskUsageView
     forwardButton.disableProperty().bind(navigation.forwardNavigationDisabledProperty());
     forwardButton.setOnAction((e) -> navigation.forward());
 
-    homeButton = new Button("", IconUtil.createImageView("home", IconSize.SMALL));
+    FontIcon fontIcon = new FontIcon("mdi2h-home:24:BLUE");
+    // fontIcon.setIconSize(24);
+    homeButton = new Button("", fontIcon);
     homeButton.disableProperty().bind(navigation.homeNavigationDisabledProperty());
     homeButton.setOnAction((e) -> navigation.home());
 
