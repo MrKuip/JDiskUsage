@@ -314,7 +314,7 @@ public class FileTree
       {
         unixAttributes = Files.readAttributes(path, ATTRIBUTE_IDS);
       }
-      catch (IOException e)
+      catch (Exception e)
       {
       }
 
@@ -326,7 +326,7 @@ public class FileTree
       {
         basicAttributes = Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
       }
-      catch (IOException e)
+      catch (Exception e)
       {
       }
 
