@@ -4,6 +4,7 @@ plugins {
   id 'eclipse'
   id 'application'
   id 'org.openjfx.javafxplugin' version '0.1.0'
+  id 'org.beryx.jlink' version '2.16.2'
 }
 
 defaultTasks 'jar'
@@ -28,5 +29,13 @@ dependencies {
 application {
   mainClass.set('org.kku.jdiskusage.main.Main');
   mainModule.set('org.kku.jdiskusage');
+}
+
+mainClassName = 'org.kku.jdiskusage.main.Main';
+
+jlink {
+  launcher {
+    name = 'JDiskUsage'
+  }
 }
 
