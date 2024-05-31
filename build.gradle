@@ -15,6 +15,13 @@ repositories {
   mavenCentral()
 }
 
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(17);
+    vendor = JvmVendorSpec.ADOPTIUM
+  }
+}
+
 javafx {
     version = "21"
     modules = [ 'javafx.controls' ]
