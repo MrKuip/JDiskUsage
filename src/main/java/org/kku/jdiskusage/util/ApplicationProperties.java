@@ -42,9 +42,30 @@ public class ApplicationProperties
       mi_subject = subject;
     }
 
-    public void setFile(CharSequence propertyName, File file)
+    public void set(CharSequence propertyName, File file)
     {
       setPropertyValue(propertyName, file != null ? file.getPath() : "");
+    }
+
+    public void set(CharSequence propertyName, List<File> fileList)
+    {
+      setPropertyValue(propertyName, fileList.stream().map(File::getAbsolutePath).collect(Collectors.joining(",")));
+    }
+
+    public void set(CharSequence propertyName, Number value)
+    {
+      setPropertyValue(propertyName, value.toString());
+    }
+
+    public void set(CharSequence propertyName, String value)
+    {
+      setPropertyValue(propertyName, value);
+    }
+
+    private void setPropertyValue(CharSequence propertyName, String propertyValue)
+    {
+      getProperties().setProperty(getPropertyName(propertyName), propertyValue);
+      storeProperties();
     }
 
     public File getFile(CharSequence propertyName)
@@ -75,30 +96,19 @@ public class ApplicationProperties
       return Stream.of(files.split(",")).map(File::new).filter(File::exists).collect(Collectors.toList());
     }
 
-    public void setFileList(CharSequence propertyName, List<File> fileList)
-    {
-      setPropertyValue(propertyName, fileList.stream().map(File::getAbsolutePath).collect(Collectors.joining(",")));
-    }
-
-    public void setPropertyValue(CharSequence propertyName, Number value)
-    {
-      setPropertyValue(propertyName, value.toString());
-    }
-
     public double getDouble(CharSequence propertyName, double defaultValue)
     {
       return getPropertyValue(propertyName) == null ? defaultValue : Double.valueOf(getPropertyValue(propertyName));
     }
 
+    public String getString(CharSequence propertyName, String defaultValue)
+    {
+      return getPropertyValue(propertyName) == null ? defaultValue : getPropertyValue(propertyName);
+    }
+
     private String getPropertyValue(CharSequence propertyName)
     {
       return (String) getProperties().get(getPropertyName(propertyName));
-    }
-
-    public void setPropertyValue(CharSequence propertyName, String propertyValue)
-    {
-      getProperties().setProperty(getPropertyName(propertyName), propertyValue);
-      storeProperties();
     }
 
     private String getPropertyName(CharSequence propertyName)
@@ -108,9 +118,8 @@ public class ApplicationProperties
 
     public ChangeListener<Number> getChangeListener(CharSequence propertyName)
     {
-      return (observable, oldValue, newValue) ->
-      {
-        setPropertyValue(propertyName, newValue);
+      return (observable, oldValue, newValue) -> {
+        set(propertyName, newValue);
       };
     }
   }

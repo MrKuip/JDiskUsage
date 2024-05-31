@@ -13,7 +13,8 @@ public interface ApplicationPropertyExtensionIF
     X,
     Y,
     SPLIT_PANE_POSITION,
-    PREF_SIZE;
+    PREF_SIZE,
+    SELECTED_ID;
 
     @Override
     public int length()

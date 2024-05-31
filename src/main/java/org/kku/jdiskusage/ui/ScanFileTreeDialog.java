@@ -54,7 +54,7 @@ public class ScanFileTreeDialog
       return null;
     }
 
-    getProps().setFile(Property.INITIAL_DIRECTORY, directory.getParentFile());
+    getProps().set(Property.INITIAL_DIRECTORY, directory.getParentFile());
 
     return scanDirectory(directory);
   }

@@ -133,8 +133,7 @@ public class MyTableColumn<T, R>
 
   private void init()
   {
-    this.setCellFactory(column ->
-    {
+    this.setCellFactory(column -> {
       TableCell<T, R> cell;
       MyTableColumn myTableColumn;
 

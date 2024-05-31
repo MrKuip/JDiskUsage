@@ -134,7 +134,7 @@ public class DiskUsageView
     toolBars = new VBox(createMenuBar(), createToolBar());
     splitPane = new SplitPane();
 
-    Stream.of(TabPaneData.TabData.values()).forEach(td -> m_diskUsageMainData.mi_tabPaneData.createTab(td));
+    m_diskUsageMainData.mi_tabPaneData.init();
 
     splitPane.getItems().addAll(m_diskUsageMainData.mi_treePaneData.getNode(),
         m_diskUsageMainData.mi_tabPaneData.getNode());
@@ -691,6 +691,7 @@ public class DiskUsageView
         Tab tab;
 
         tab = translate(new Tab(getName()));
+        tab.setUserData(this);
         tab.setClosable(false);
         if (getIconName() != null)
         {
@@ -710,19 +711,34 @@ public class DiskUsageView
       }
     }
 
-    private BorderPane mi_borderPane;
-    private TabPane mi_tabPane;
+    private final BorderPane mi_borderPane;
+    private final TabPane mi_tabPane;
     private Map<TabData, Tab> mi_tabByTabId = new HashMap<>();
     private Map<TabData, Node> mi_contentByTabId = new HashMap<>();
 
     private TabPaneData()
     {
       mi_tabPane = new TabPane();
-      mi_tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
-        fillContent(newTab, m_diskUsageMainData.getSelectedTreeItem());
-      });
       mi_borderPane = new BorderPane();
       mi_borderPane.setCenter(mi_tabPane);
+    }
+
+    public void init()
+    {
+      String selectedTabDataName;
+
+      Stream.of(TabPaneData.TabData.values()).forEach(this::createTab);
+
+      mi_tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
+        fillContent(newTab, m_diskUsageMainData.getSelectedTreeItem());
+        getProps().set(Property.SELECTED_ID, ((TabData) newTab.getUserData()).name());
+      });
+
+      selectedTabDataName = getProps().getString(Property.SELECTED_ID, TabPaneData.TabData.values()[0].name());
+      mi_tabPane.getTabs().stream().filter(tab -> ((TabData) tab.getUserData()).name().equals(selectedTabDataName))
+          .findFirst().ifPresent(tab -> {
+            mi_tabPane.getSelectionModel().select(tab);
+          });
     }
 
     public BorderPane getNode()
@@ -1715,7 +1731,7 @@ public class DiskUsageView
 
     public void addFile(File file)
     {
-      getProps().setFileList(Property.RECENT_FILES,
+      getProps().set(Property.RECENT_FILES,
           Stream.concat(Stream.of(file), getProps().getFileList(Property.RECENT_FILES).stream()).distinct().limit(10)
               .collect(Collectors.toList()));
       update();
