@@ -1,9 +1,7 @@
 package org.kku.jdiskusage.ui;
 
-import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
-import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.FileTree.FilterIF;
 import javafx.application.Application;
@@ -82,7 +80,6 @@ public class Test
 
     scene = new Scene(tableView);
     stage.setTitle("JDiskUsage");
-    stage.getIcons().add(IconUtil.createImage("file-search", IconSize.SMALL));
     stage.setScene(scene);
     stage.show();
   }

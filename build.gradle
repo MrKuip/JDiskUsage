@@ -24,8 +24,6 @@ dependencies {
   implementation 'org.controlsfx:controlsfx:11.2.1'
   implementation files('lib/fontIcons-1.0.jar')
   implementation 'net.raumzeitfalle.fx:filechooser:0.0.11'
-  implementation 'org.kordamp.ikonli:ikonli-javafx:12.3.1'
-  implementation 'org.kordamp.ikonli:ikonli-materialdesign2-pack:12.3.1'
 }
 
 application {

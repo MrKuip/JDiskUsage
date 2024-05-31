@@ -1,9 +1,7 @@
 package org.kku.jdiskusage.main;
 
 import java.util.Locale;
-import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.DiskUsageView;
-import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import javafx.application.Application;
@@ -35,7 +33,6 @@ public class Main
     stage.yProperty().addListener(getProps().getChangeListener(Property.Y));
 
     stage.setTitle("JDiskUsage");
-    stage.getIcons().add(IconUtil.createImage("file-search", IconSize.SMALL));
     stage.setScene(scene);
     stage.show();
   }

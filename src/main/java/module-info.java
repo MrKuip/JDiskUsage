@@ -8,9 +8,6 @@ module org.kku.jdiskusage
   requires org.kku.materialdesignicons;
   requires org.controlsfx.controls;
   requires java.prefs;
-  requires org.kordamp.ikonli.core;
-  requires org.kordamp.ikonli.javafx;
-  requires org.kordamp.ikonli.materialdesign2;
 
   exports org.kku.jdiskusage.main;
 }

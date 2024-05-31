@@ -41,7 +41,6 @@ import org.kku.jdiskusage.util.Translator;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.kku.jdiskusage.util.preferences.Sort;
-import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -74,7 +73,6 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -195,9 +193,7 @@ public class DiskUsageView
     forwardButton.disableProperty().bind(navigation.forwardNavigationDisabledProperty());
     forwardButton.setOnAction((e) -> navigation.forward());
 
-    FontIcon fontIcon = new FontIcon("mdi2h-home:24:BLUE");
-    // fontIcon.setIconSize(24);
-    homeButton = new Button("", fontIcon);
+    homeButton = new Button("", IconUtil.createImageView("home", IconSize.SMALL));
     homeButton.disableProperty().bind(navigation.homeNavigationDisabledProperty());
     homeButton.setOnAction((e) -> navigation.home());
 
@@ -698,9 +694,11 @@ public class DiskUsageView
         tab.setClosable(false);
         if (getIconName() != null)
         {
-          ImageView imageView = IconUtil.createImageView(getIconName(), IconSize.SMALL);
-          imageView.prefHeight(300);
-          tab.setGraphic(imageView);
+          Node icon;
+
+          icon = IconUtil.createImageView(getIconName(), IconSize.SMALL);
+          icon.prefHeight(300);
+          tab.setGraphic(icon);
         }
 
         return tab;
