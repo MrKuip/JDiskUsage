@@ -1,28 +1,32 @@
-image: eclipse-temurin:17
-
 stages:
   - build
-  - deploy
 
-before_script:
-#  - echo `pwd` # debug
-#  - echo "$CI_BUILD_NAME, $CI_BUILD_REF_NAME $CI_BUILD_STAGE" # debug
-  - export GRADLE_USER_HOME=`pwd`/.gradle
-
-cache:
-  paths:
-    - .gradle/wrapper
-    - .gradle/caches
-
-compile:
+build_linux:
   stage: build
+  tags:
+    - linux
   script:
-    - ./gradlew assemble
-  
-create executable:
-  stage: deploy
-  script:
-    - ./gradlew jpackage
+    - ./gradlew build
+  artifacts:
+    paths:
+      - build/libs/
 
-after_script:
-  - echo "End CI"
+build_windows:
+  stage: build
+  tags:
+    - windows
+  script:
+    - ./gradlew.bat build
+  artifacts:
+    paths:
+      - build/libs/
+
+build_mac:
+  stage: build
+  tags:
+    - mac
+  script:
+    - ./gradlew build
+  artifacts:
+    paths:
+      - build/libs/
