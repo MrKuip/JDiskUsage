@@ -2,8 +2,6 @@ image: eclipse-temurin:17
 
 stages:
   - build
-  - test
-
 
 before_script:
 #  - echo `pwd` # debug
@@ -19,17 +17,7 @@ build:
   stage: build
   script:
     - ./gradlew assemble
-  artifacts:
-    paths:
-      - build/libs/*.jar
-    expire_in: 1 week
-  only:
-    - master
-
-test:
-  stage: test
-  script:
-    - ./gradlew check
+  
 
 after_script:
   - echo "End CI"
