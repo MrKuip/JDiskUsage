@@ -2,7 +2,6 @@ image: eclipse-temurin:17
 
 stages:
   - build
-  - deploy
 
 before_script:
 #  - echo `pwd` # debug
@@ -19,10 +18,5 @@ compile:
   script:
     - ./gradlew assemble
   
-create executable:
-  stage: deploy
-  script:
-    - ./gradlew jpackage
-
 after_script:
   - echo "End CI"
