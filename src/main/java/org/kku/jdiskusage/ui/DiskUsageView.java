@@ -260,14 +260,7 @@ public class DiskUsageView
     menuItem = translate(new MenuItem("Scan directory"));
     menuItem.setGraphic(IconUtil.createImageView("file-search", IconSize.SMALLER));
     menuItem.setOnAction(e -> {
-      DirNode dirNode;
-
-      dirNode = new ScanFileTreeDialog().chooseDirectory(m_diskUsageMainData.mi_stage);
-      if (dirNode != null)
-      {
-        m_diskUsageMainData.mi_treePaneData.createTreeTableView(dirNode);
-        m_diskUsageMainData.mi_recentFiles.addFile(new File(dirNode.getName()));
-      }
+      scanDirectory(new ScanFileTreeDialog().chooseDirectory(m_diskUsageMainData.mi_stage));
     });
 
     return menuItem;
@@ -730,10 +723,14 @@ public class DiskUsageView
       Stream.of(TabPaneData.TabData.values()).forEach(this::createTab);
 
       mi_tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
+        // Fill the new selected tab with data.
         fillContent(newTab, m_diskUsageMainData.getSelectedTreeItem());
+
+        // Remember the last selected tab
         getProps().set(Property.SELECTED_ID, ((TabData) newTab.getUserData()).name());
       });
 
+      // Select the tab that was in a previous version the last tab selected
       selectedTabDataName = getProps().getString(Property.SELECTED_ID, TabPaneData.TabData.values()[0].name());
       mi_tabPane.getTabs().stream().filter(tab -> ((TabData) tab.getUserData()).name().equals(selectedTabDataName))
           .findFirst().ifPresent(tab -> {
@@ -1761,17 +1758,24 @@ public class DiskUsageView
       menuItem = translate(new MenuItem(path));
       menuItem.setGraphic(IconUtil.createImageView("folder-outline", IconSize.SMALLER));
       menuItem.setOnAction(e -> {
-        DirNode dirNode;
-
-        dirNode = new ScanFileTreeDialog().scanDirectory(new File(path));
-        if (dirNode != null)
-        {
-          m_diskUsageMainData.mi_treePaneData.createTreeTableView(dirNode);
-          m_diskUsageMainData.mi_recentFiles.addFile(new File(dirNode.getName()));
-        }
+        scanDirectory(path);
       });
 
       return menuItem;
+    }
+  }
+
+  public void scanDirectory(String path)
+  {
+    scanDirectory(new ScanFileTreeDialog().scanDirectory(new File(path)));
+  }
+
+  private void scanDirectory(DirNode dirNode)
+  {
+    if (dirNode != null)
+    {
+      m_diskUsageMainData.mi_treePaneData.createTreeTableView(dirNode);
+      m_diskUsageMainData.mi_recentFiles.addFile(new File(dirNode.getName()));
     }
   }
 

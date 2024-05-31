@@ -1,5 +1,6 @@
 package org.kku.jdiskusage.main;
 
+import java.io.File;
 import java.util.Locale;
 import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
@@ -15,11 +16,15 @@ public class Main
   @Override
   public void start(Stage stage)
   {
+    DiskUsageView diskUsageView;
     Scene scene;
+
+    getParameters().getRaw().forEach(System.out::println);
 
     Locale.setDefault(AppPreferences.localePreference.get());
 
-    scene = new Scene(new DiskUsageView(stage));
+    diskUsageView = new DiskUsageView(stage);
+    scene = new Scene(diskUsageView);
     scene.getStylesheets().add("jdiskusage.css");
 
     stage.setHeight(getProps().getDouble(Property.HEIGHT, 400));
@@ -35,10 +40,15 @@ public class Main
     stage.setTitle("JDiskUsage");
     stage.setScene(scene);
     stage.show();
+
+    getParameters().getRaw().stream().filter(p -> {
+      File file = new File(p);
+      return file.exists() && file.isDirectory();
+    }).findFirst().ifPresent(diskUsageView::scanDirectory);
   }
 
   public static void main(String[] args)
   {
-    launch();
+    launch(args);
   }
 }
