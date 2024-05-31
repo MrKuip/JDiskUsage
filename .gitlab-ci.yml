@@ -1,9 +1,9 @@
-image: java:17-jdk
+image: eclipse-temurin:21
 
 stages:
   - build
   - test
-  - deploy
+
 
 before_script:
 #  - echo `pwd` # debug
@@ -30,11 +30,6 @@ test:
   stage: test
   script:
     - ./gradlew check
-
-deploy:
-  stage: deploy
-  script:
-    - ./deploy
 
 after_script:
   - echo "End CI"
