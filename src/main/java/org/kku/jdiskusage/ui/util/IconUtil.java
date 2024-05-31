@@ -10,7 +10,7 @@ public class IconUtil
   {
   }
 
-  public static Node createImageView(String iconName, IconSize iconSize)
+  public static Node createIconNode(String iconName, IconSize iconSize)
   {
     return new FxIcon(iconName).size(iconSize).getCanvas();
   }

@@ -172,6 +172,7 @@ public class DiskUsageView
     Button forwardButton;
     Button backButton;
     Button refreshButton;
+    Button fullScreenButton;
     ToggleButton showFileSizeButton;
     ToggleButton showFileCountButton;
     ToggleGroup showDisplayMetricGroup;
@@ -185,24 +186,24 @@ public class DiskUsageView
     toolBar = new ToolBar();
     navigation = m_diskUsageMainData.mi_navigation;
 
-    backButton = new Button("", IconUtil.createImageView("arrow-left", IconSize.SMALL));
+    backButton = new Button("", IconUtil.createIconNode("arrow-left", IconSize.SMALL));
     backButton.disableProperty().bind(navigation.backNavigationDisabledProperty());
     backButton.setOnAction((e) -> navigation.back());
 
-    forwardButton = new Button("", IconUtil.createImageView("arrow-right", IconSize.SMALL));
+    forwardButton = new Button("", IconUtil.createIconNode("arrow-right", IconSize.SMALL));
     forwardButton.disableProperty().bind(navigation.forwardNavigationDisabledProperty());
     forwardButton.setOnAction((e) -> navigation.forward());
 
-    homeButton = new Button("", IconUtil.createImageView("home", IconSize.SMALL));
+    homeButton = new Button("", IconUtil.createIconNode("home", IconSize.SMALL));
     homeButton.disableProperty().bind(navigation.homeNavigationDisabledProperty());
     homeButton.setOnAction((e) -> navigation.home());
 
-    refreshButton = new Button("", IconUtil.createImageView("refresh", IconSize.SMALL));
+    refreshButton = new Button("", IconUtil.createIconNode("refresh", IconSize.SMALL));
     refreshButton.setOnAction((e) -> System.out.println("refresh"));
 
     showDisplayMetricGroup = new ToggleGroup();
 
-    showFileSizeButton = new ToggleButton("", IconUtil.createImageView("sigma", IconSize.SMALL));
+    showFileSizeButton = new ToggleButton("", IconUtil.createIconNode("sigma", IconSize.SMALL));
     showFileSizeButton.setTooltip(translate(new Tooltip("Show file size")));
     showFileSizeButton.setToggleGroup(showDisplayMetricGroup);
     System.out.println(AppPreferences.displayMetricPreference.get());
@@ -211,7 +212,7 @@ public class DiskUsageView
       AppPreferences.displayMetricPreference.set(DisplayMetric.FILE_SIZE);
     });
 
-    showFileCountButton = new ToggleButton("", IconUtil.createImageView("tally-mark-5", IconSize.SMALL));
+    showFileCountButton = new ToggleButton("", IconUtil.createIconNode("tally-mark-5", IconSize.SMALL));
     showFileCountButton.setTooltip(translate(new Tooltip("Show number of files")));
     showFileCountButton.setToggleGroup(showDisplayMetricGroup);
     showFileCountButton.setSelected(DisplayMetric.FILE_COUNT == AppPreferences.displayMetricPreference.get());
@@ -224,7 +225,7 @@ public class DiskUsageView
 
     sortGroup = new ToggleGroup();
 
-    sortNumericButton = new ToggleButton("", IconUtil.createImageView("sort-numeric-ascending", IconSize.SMALL));
+    sortNumericButton = new ToggleButton("", IconUtil.createIconNode("sort-numeric-ascending", IconSize.SMALL));
     sortNumericButton.setToggleGroup(sortGroup);
     sortNumericButton.setOnAction((e) -> {
       AppPreferences.sortPreference.set(Sort.NUMERIC);
@@ -232,7 +233,7 @@ public class DiskUsageView
     });
 
     sortAlphabeticallyButton = new ToggleButton("",
-        IconUtil.createImageView("sort-alphabetical-ascending", IconSize.SMALL));
+        IconUtil.createIconNode("sort-alphabetical-ascending", IconSize.SMALL));
     sortAlphabeticallyButton.setToggleGroup(sortGroup);
     sortAlphabeticallyButton.setOnAction((e) -> {
       AppPreferences.sortPreference.set(Sort.ALPHABETICALLY);
@@ -258,7 +259,7 @@ public class DiskUsageView
     MenuItem menuItem;
 
     menuItem = translate(new MenuItem("Scan directory"));
-    menuItem.setGraphic(IconUtil.createImageView("file-search", IconSize.SMALLER));
+    menuItem.setGraphic(IconUtil.createIconNode("file-search", IconSize.SMALLER));
     menuItem.setOnAction(e -> {
       scanDirectory(new ScanFileTreeDialog().chooseDirectory(m_diskUsageMainData.mi_stage));
     });
@@ -303,7 +304,7 @@ public class DiskUsageView
       filterTextPane.setPadding(new Insets(5, 10, 5, 10));
       filterTextPane.setAlignment(Pos.CENTER);
       filterTextPane.getChildren()
-          .add(translate(new Label("Filter", IconUtil.createImageView("filter", IconSize.SMALLER))));
+          .add(translate(new Label("Filter", IconUtil.createIconNode("filter", IconSize.SMALLER))));
 
       mi_filterPane.setId("filterPane");
 
@@ -452,7 +453,7 @@ public class DiskUsageView
         if (mi_filterActivationPane.getChildren().isEmpty())
         {
           mi_activateFilterButton = translate(
-              new Button("Activate filter", IconUtil.createImageView("filter-plus", IconSize.SMALL)));
+              new Button("Activate filter", IconUtil.createIconNode("filter-plus", IconSize.SMALL)));
           mi_activateFilterButton.setOnAction((ae) -> getFilterSet().forEach(filter -> {
             filter.disable(false);
             m_diskUsageMainData.mi_treePaneData.setFilter((fn) -> accept(fn));
@@ -461,14 +462,14 @@ public class DiskUsageView
           mi_filterActivationPane.getChildren().add(mi_activateFilterButton);
 
           mi_cancelFilterButton = translate(
-              new Button("Cancel filter", IconUtil.createImageView("filter-minus", IconSize.SMALL)));
+              new Button("Cancel filter", IconUtil.createIconNode("filter-minus", IconSize.SMALL)));
           mi_cancelFilterButton.setOnAction((ae) -> {
             removeFilters(getFilterSet().stream().filter(Filter::isDisabled).toArray(Filter[]::new));
           });
           mi_filterActivationPane.getChildren().add(mi_cancelFilterButton);
 
           mi_clearFilterButton = translate(
-              new Button("Clear filter", IconUtil.createImageView("filter-remove", IconSize.SMALL)));
+              new Button("Clear filter", IconUtil.createIconNode("filter-remove", IconSize.SMALL)));
           mi_clearFilterButton.setOnAction((ae) -> {
             removeFilters(getFilterSet().stream().toArray(Filter[]::new));
             m_diskUsageMainData.mi_treePaneData.setFilter((fn) -> accept(fn));
@@ -690,7 +691,7 @@ public class DiskUsageView
         {
           Node icon;
 
-          icon = IconUtil.createImageView(getIconName(), IconSize.SMALL);
+          icon = IconUtil.createIconNode(getIconName(), IconSize.SMALL);
           icon.prefHeight(300);
           tab.setGraphic(icon);
         }
@@ -835,7 +836,7 @@ public class DiskUsageView
 
         button = new ToggleButton();
         button.setTooltip(new Tooltip(paneType.description()));
-        button.setGraphic(IconUtil.createImageView(paneType.iconName(), IconSize.SMALLER));
+        button.setGraphic(IconUtil.createIconNode(paneType.iconName(), IconSize.SMALLER));
         button.setUserData(paneType);
         button.setOnAction((ae) -> {
           setCurrentPaneType((PaneType) ((Node) ae.getSource()).getUserData());
@@ -1719,7 +1720,7 @@ public class DiskUsageView
       Menu menu;
 
       menu = translate(new Menu("Recent scans"));
-      menu.setGraphic(IconUtil.createImageView("history", IconSize.SMALLER));
+      menu.setGraphic(IconUtil.createIconNode("history", IconSize.SMALLER));
       update(menu);
       m_listenerList.add(menu);
 
@@ -1756,7 +1757,7 @@ public class DiskUsageView
       MenuItem menuItem;
 
       menuItem = translate(new MenuItem(path));
-      menuItem.setGraphic(IconUtil.createImageView("folder-outline", IconSize.SMALLER));
+      menuItem.setGraphic(IconUtil.createIconNode("folder-outline", IconSize.SMALLER));
       menuItem.setOnAction(e -> {
         scanDirectory(path);
       });
@@ -1786,7 +1787,7 @@ public class DiskUsageView
       MenuItem menuItem;
 
       menuItem = translate(new MenuItem("Preferences"));
-      menuItem.setGraphic(IconUtil.createImageView("cog", IconSize.SMALLER));
+      menuItem.setGraphic(IconUtil.createIconNode("cog", IconSize.SMALLER));
       menuItem.setOnAction(e -> {
       });
 

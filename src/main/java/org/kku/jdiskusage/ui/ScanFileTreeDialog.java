@@ -73,7 +73,7 @@ public class ScanFileTreeDialog
     m_dialog.setTitle(translate("Scan directory"));
     m_dialog.setHeaderText(translate("Scan") + " " + directory.getPath());
     m_dialog.getDialogPane().getButtonTypes().addAll(new ButtonType(translate("Cancel"), ButtonData.CANCEL_CLOSE));
-    m_dialog.setGraphic(IconUtil.createImageView("file-search", IconSize.LARGE));
+    m_dialog.setGraphic(IconUtil.createIconNode("file-search", IconSize.LARGE));
 
     grid = new GridPane();
     grid.setMinSize(1000, 200);
