@@ -169,7 +169,7 @@ public class ScanFileTreeDialog
         long currentTimeMillis;
 
         currentTimeMillis = System.currentTimeMillis();
-        if (!scanReady && !mi_runLaterActive && mi_previousTime + 1000 > currentTimeMillis)
+        if (!scanReady && !mi_runLaterActive && mi_previousTime + 100 > currentTimeMillis)
         {
           return mi_cancel;
         }
