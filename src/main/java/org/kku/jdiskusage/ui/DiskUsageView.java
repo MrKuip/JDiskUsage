@@ -51,6 +51,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -81,6 +82,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 public class DiskUsageView
   extends BorderPane
@@ -90,7 +92,7 @@ public class DiskUsageView
 
   private class DiskUsageMainData
   {
-    private Stage mi_stage;
+    private FullScreen mi_fullScreen;
     private final Navigation mi_navigation = new Navigation();
     private final TreePaneData mi_treePaneData = new TreePaneData();
     private final TabPaneData mi_tabPaneData = new TabPaneData();
@@ -129,7 +131,7 @@ public class DiskUsageView
 
     getProps().getDouble(Property.HEIGHT, 0);
 
-    m_diskUsageMainData.mi_stage = stage;
+    m_diskUsageMainData.mi_fullScreen = new FullScreen(stage);
 
     toolBars = new VBox(createMenuBar(), createToolBar());
     splitPane = new SplitPane();
@@ -203,9 +205,7 @@ public class DiskUsageView
     refreshButton.setOnAction((e) -> System.out.println("refresh"));
 
     fullScreenButton = new ToggleButton("", IconUtil.createIconNode("fullscreen", IconSize.SMALL));
-    fullScreenButton.setOnAction((e) -> {
-      m_diskUsageMainData.mi_stage.setFullScreen(!m_diskUsageMainData.mi_stage.isFullScreen());
-    });
+    fullScreenButton.setOnAction((e) -> m_diskUsageMainData.mi_fullScreen.toggleFullScreen());
 
     showDisplayMetricGroup = new ToggleGroup();
 
@@ -267,7 +267,7 @@ public class DiskUsageView
     menuItem = translate(new MenuItem("Scan directory"));
     menuItem.setGraphic(IconUtil.createIconNode("file-search", IconSize.SMALLER));
     menuItem.setOnAction(e -> {
-      scanDirectory(new ScanFileTreeDialog().chooseDirectory(m_diskUsageMainData.mi_stage));
+      scanDirectory(new ScanFileTreeDialog().chooseDirectory(m_diskUsageMainData.mi_fullScreen.getCurrentStage()));
     });
 
     return menuItem;
@@ -1871,6 +1871,57 @@ public class DiskUsageView
     public T getObject()
     {
       return m_object;
+    }
+  }
+
+  private class FullScreen
+  {
+    private Stage mi_initialStage;
+    private Stage mi_fullScreenStage;
+    private Stage mi_currentStage;
+
+    private FullScreen(Stage stage)
+    {
+      mi_initialStage = stage;
+      mi_currentStage = mi_initialStage;
+    }
+
+    public Stage getCurrentStage()
+    {
+      return mi_currentStage;
+    }
+
+    private Stage getFullscreenStage()
+    {
+      if (mi_fullScreenStage == null)
+      {
+        mi_fullScreenStage = new Stage();
+        mi_fullScreenStage.setTitle(mi_initialStage.getTitle());
+        mi_fullScreenStage.setMaximized(true);
+        mi_fullScreenStage.setResizable(false);
+        mi_fullScreenStage.initStyle(StageStyle.UNDECORATED);
+      }
+
+      return mi_fullScreenStage;
+    }
+
+    public void toggleFullScreen()
+    {
+      if (OperatingSystemUtil.isLinux())
+      {
+        Scene currentScene;
+
+        currentScene = mi_currentStage.getScene();
+        mi_currentStage.setScene(null);
+        mi_currentStage.hide();
+        mi_currentStage = mi_initialStage == mi_currentStage ? getFullscreenStage() : mi_initialStage;
+        mi_currentStage.setScene(currentScene);
+        mi_currentStage.show();
+      }
+      else
+      {
+        mi_initialStage.setFullScreen(!mi_initialStage.isFullScreen());
+      }
     }
   }
 

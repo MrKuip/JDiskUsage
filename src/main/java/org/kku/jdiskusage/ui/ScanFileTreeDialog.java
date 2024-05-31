@@ -19,7 +19,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 public class ScanFileTreeDialog
     implements ApplicationPropertyExtensionIF
@@ -70,6 +72,8 @@ public class ScanFileTreeDialog
     Scan scan;
 
     m_dialog = new Dialog<>();
+    m_dialog.initModality(Modality.APPLICATION_MODAL);
+    m_dialog.initStyle(StageStyle.UTILITY);
     m_dialog.setTitle(translate("Scan directory"));
     m_dialog.setHeaderText(translate("Scan") + " " + directory.getPath());
     m_dialog.getDialogPane().getButtonTypes().addAll(new ButtonType(translate("Cancel"), ButtonData.CANCEL_CLOSE));
