@@ -158,7 +158,8 @@ public class DiskUsageView
     menuBar = new MenuBar();
 
     menu = translate(new Menu("File"));
-    menu.getItems().addAll(createScanFileTreeMenuItem(), createRecentFilesMenu(), createPreferencesMenuItem());
+    menu.getItems().addAll(createScanFileTreeMenuItem(), createRecentFilesMenu(), createPreferencesMenuItem(),
+        createExitMenuItem());
     menuBar.getMenus().add(menu);
 
     return menuBar;
@@ -279,7 +280,20 @@ public class DiskUsageView
 
   private MenuItem createPreferencesMenuItem()
   {
-    return m_diskUsageMainData.mi_preferences.createMenu();
+    return m_diskUsageMainData.mi_preferences.createMenuItem();
+  }
+
+  private MenuItem createExitMenuItem()
+  {
+    MenuItem menuItem;
+
+    menuItem = translate(new MenuItem("Exit"));
+    menuItem.setGraphic(IconUtil.createIconNode("exit-to-app", IconSize.SMALLER));
+    menuItem.setOnAction(e -> {
+      System.exit(0);
+    });
+
+    return menuItem;
   }
 
   private FilterPane createFilterPane()
@@ -1787,7 +1801,7 @@ public class DiskUsageView
 
   private class PreferencesMenu
   {
-    public MenuItem createMenu()
+    public MenuItem createMenuItem()
     {
       MenuItem menuItem;
 
