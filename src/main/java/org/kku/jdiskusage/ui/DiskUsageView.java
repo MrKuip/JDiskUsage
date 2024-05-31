@@ -172,7 +172,7 @@ public class DiskUsageView
     Button forwardButton;
     Button backButton;
     Button refreshButton;
-    Button fullScreenButton;
+    ToggleButton fullScreenButton;
     ToggleButton showFileSizeButton;
     ToggleButton showFileCountButton;
     ToggleGroup showDisplayMetricGroup;
@@ -200,6 +200,11 @@ public class DiskUsageView
 
     refreshButton = new Button("", IconUtil.createIconNode("refresh", IconSize.SMALL));
     refreshButton.setOnAction((e) -> System.out.println("refresh"));
+
+    fullScreenButton = new ToggleButton("", IconUtil.createIconNode("fullscreen", IconSize.SMALL));
+    fullScreenButton.setOnAction((e) -> {
+      m_diskUsageMainData.mi_stage.setFullScreen(!m_diskUsageMainData.mi_stage.isFullScreen());
+    });
 
     showDisplayMetricGroup = new ToggleGroup();
 
@@ -247,9 +252,9 @@ public class DiskUsageView
     filterPaneNode.setId("filterButton");
     HBox.setHgrow(filterPaneNode, Priority.ALWAYS);
 
-    toolBar.getItems().addAll(backButton, forwardButton, homeButton, refreshButton, FxUtil.createHorizontalSpacer(20),
-        showDisplayMetricButton, FxUtil.createHorizontalSpacer(20), sortButton, FxUtil.createHorizontalSpacer(20),
-        filterPaneNode);
+    toolBar.getItems().addAll(backButton, forwardButton, homeButton, FxUtil.createHorizontalSpacer(20),
+        fullScreenButton, refreshButton, FxUtil.createHorizontalSpacer(20), showDisplayMetricButton,
+        FxUtil.createHorizontalSpacer(20), sortButton, FxUtil.createHorizontalSpacer(20), filterPaneNode);
 
     return toolBar;
   }
