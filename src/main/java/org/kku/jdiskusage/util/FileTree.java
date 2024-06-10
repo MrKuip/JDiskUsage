@@ -7,6 +7,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.kku.jdiskusage.ui.DiskUsageView;
 
 public class FileTree
 {
@@ -49,11 +51,18 @@ public class FileTree
   }
 
   private final Path m_directory;
+  private final List<Path> m_directoryList;
   private ScanListenerIF m_scanListener;
 
-  public FileTree(File directory)
+  public FileTree(Path directory)
   {
-    m_directory = directory.toPath();
+    this(directory, Arrays.asList(directory));
+  }
+
+  public FileTree(Path directory, List<Path> directoryList)
+  {
+    m_directory = directory;
+    m_directoryList = directoryList;
   }
 
   public void setScanListener(ScanListenerIF scanListener)
@@ -63,13 +72,7 @@ public class FileTree
 
   public DirNode scan()
   {
-    DirNode dirNode;
-    Path path;
-
-    path = m_directory;
-    dirNode = new ScanPath().scan(path);
-
-    return dirNode;
+    return new ScanPath().scan(m_directory, m_directoryList);
   }
 
   public interface FilterIF
@@ -79,7 +82,13 @@ public class FileTree
 
   public interface FileNodeIF
   {
+    public FileNodeIF getParent();
+
+    public void setParent(DirNode dirNode);
+
     public String getName();
+
+    public String getFileType();
 
     public boolean isDirectory();
 
@@ -99,8 +108,6 @@ public class FileTree
 
     public Stream<FileNodeIF> streamNode();
 
-    public Stream<FileNodeWithPath> streamNodeWithPath(String parentPath);
-
     default public boolean isFile()
     {
       return !isDirectory();
@@ -110,121 +117,90 @@ public class FileTree
     {
       return Comparator.comparing(FileNodeIF::getSize).reversed();
     }
-  }
 
-  /**
-   * Remembering the complete path of a FileNode in AbstractFileNode will take a
-   * lot of memory. The path is only shown in top50 pane. So this object builds up
-   * the path after streaming.
-   */
-  public static class FileNodeWithPath
-      implements FileNodeIF
-  {
-    private final String m_parentPath;
-    private final FileNodeIF m_fileNode;
-
-    public FileNodeWithPath(String parentPath, FileNodeIF fileNode)
-    {
-      m_parentPath = parentPath;
-      m_fileNode = fileNode;
-    }
-
-    @Override
-    public boolean isFile()
-    {
-      return m_fileNode.isFile();
-    }
-
-    public FileNodeIF getFileNode()
-    {
-      return m_fileNode;
-    }
-
-    public String getParentPath()
-    {
-      return m_parentPath + ((m_parentPath.isEmpty() || m_fileNode.isFile()) ? "" : "/")
-          + (m_fileNode.isFile() ? "" : m_fileNode.getName());
-    }
-
-    @Override
-    public String getName()
-    {
-      return getFileNode().getName();
-    }
-
-    @Override
-    public boolean isDirectory()
-    {
-      return getFileNode().isDirectory();
-    }
-
-    @Override
-    public long getSize()
-    {
-      return getFileNode().getSize();
-    }
-
-    @Override
-    public long getLastModifiedTime()
-    {
-      return getFileNode().getLastModifiedTime();
-    }
-
-    @Override
-    public Stream<FileNodeIF> streamNode()
-    {
-      return null;
-    }
-
-    @Override
-    public Stream<FileNodeWithPath> streamNodeWithPath(String parentPath)
-    {
-      return null;
-    }
+    public String getAbsolutePath();
   }
 
   public static abstract class AbstractFileNode
       implements FileNodeIF
   {
     private final String m_pathName;
+    private DirNode mi_parentNode;
 
     protected AbstractFileNode(String pathName)
     {
-      m_pathName = pathName;
+      m_pathName = pathName.intern();
     }
 
     @Override
     public String getName()
     {
-      return m_pathName.intern();
+      return m_pathName;
+    }
+
+    @Override
+    public DirNode getParent()
+    {
+      return mi_parentNode;
+    }
+
+    @Override
+    public void setParent(DirNode parentNode)
+    {
+      mi_parentNode = parentNode;
+    }
+
+    @Override
+    public String getAbsolutePath()
+    {
+      return (getParent() != null ? (getParent().getAbsolutePath() + File.separator) : "") + getName();
     }
 
     @Override
     public String toString()
     {
-      return getName();
+      return getName() + " size=" + getSize();
     }
   }
 
   public static class DirNode
     extends AbstractFileNode
   {
-    private List<FileNodeIF> mi_childList = new ArrayList<>();
+    private List<FileNodeIF> mi_childList;
     private long mi_fileSize = -1;
 
-    private DirNode(boolean root, Path path)
+    private DirNode(boolean root, Path path, int size)
     {
       super(root ? path.toString() : path.getFileName().toString());
+      if (size > 0)
+      {
+        initList(size);
+      }
     }
 
     private DirNode(Path path)
     {
-      this(false, path);
+      this(false, path, -1);
     }
 
     public DirNode(DirNode node)
     {
       super(node.getName());
+      initList(node.getChildList().size());
+    }
+
+    public void initList(int size)
+    {
+      if (mi_childList == null)
+      {
+        mi_childList = new ArrayList<>(size);
+      }
+    }
+
+    @Override
+    public String getFileType()
+    {
+      return "";
     }
 
     @Override
@@ -255,14 +231,16 @@ public class FileTree
       return !getChildList().isEmpty();
     }
 
-    public <T extends AbstractFileNode> T addChild(T dirNode)
+    public <T extends AbstractFileNode> T addChild(T node)
     {
-      mi_childList.add(dirNode);
-      return dirNode;
+      node.setParent(this);
+      mi_childList.add(node);
+      return node;
     }
 
     public <T extends AbstractFileNode> boolean removeChild(T dirNode)
     {
+      dirNode.setParent(null);
       return mi_childList.remove(dirNode);
     }
 
@@ -277,15 +255,6 @@ public class FileTree
       return Stream.concat(Stream.of(this), getChildList().stream().flatMap(FileNodeIF::streamNode));
     }
 
-    @Override
-    public Stream<FileNodeWithPath> streamNodeWithPath(String parentPath)
-    {
-      FileNodeWithPath fileNodeWithPath = new FileNodeWithPath(parentPath, this);
-      return Stream.concat(Stream.of(fileNodeWithPath),
-          getChildList().stream().map(fn -> new FileNodeWithPath(fileNodeWithPath.getParentPath(), fn))
-              .flatMap(fnwp -> fnwp.getFileNode().streamNodeWithPath(fnwp.getParentPath())));
-    }
-
     public FileNodeIF filter(FilterIF filter)
     {
       return new FilterNodes(filter).filter(this);
@@ -295,6 +264,7 @@ public class FileTree
   public static class FileNode
     extends AbstractFileNode
   {
+    private final String mi_fileType;
     private final int mi_inodeNumber;
     private final int mi_numberOfLinks;
     private final long mi_size;
@@ -303,6 +273,8 @@ public class FileTree
     private FileNode(Path path)
     {
       super(path.getFileName().toString());
+
+      mi_fileType = determineFileType(getName());
 
       Map<String, Object> unixAttributes;
       BasicFileAttributes basicAttributes;
@@ -332,6 +304,43 @@ public class FileTree
 
       mi_size = basicAttributes == null ? -1 : basicAttributes.size();
       mi_lastModifiedTime = basicAttributes == null ? -1 : basicAttributes.lastModifiedTime().toMillis();
+    }
+
+    private String determineFileType(String name)
+    {
+      int index;
+
+      index = name.lastIndexOf('/');
+      if (index != -1)
+      {
+        name.substring(index + 1);
+      }
+
+      index = name.lastIndexOf('\\');
+      if (index != -1)
+      {
+        name.substring(index + 1);
+      }
+
+      index = name.lastIndexOf(".");
+      if (index > 0 && index != -1)
+      {
+        String type;
+
+        type = name.substring(index + 1);
+        if (StringUtils.isAllLetters(type))
+        {
+          return type.toLowerCase();
+        }
+      }
+
+      return DiskUsageView.getNoneText();
+    }
+
+    @Override
+    public String getFileType()
+    {
+      return mi_fileType;
     }
 
     @Override
@@ -369,12 +378,6 @@ public class FileTree
     {
       return Stream.of(this);
     }
-
-    @Override
-    public Stream<FileNodeWithPath> streamNodeWithPath(String parentPath)
-    {
-      return Stream.of(new FileNodeWithPath(parentPath, this));
-    }
   }
 
   private class ScanPath
@@ -384,12 +387,26 @@ public class FileTree
     private boolean mi_cancel;
     private int mi_depth;
 
-    public DirNode scan(Path rootPath)
+    public DirNode scan(Path directory, List<Path> directoryList)
     {
       DirNode rootNode;
 
-      rootNode = new DirNode(true, rootPath);
-      scan(rootNode, rootPath);
+      rootNode = new DirNode(true, directory, directoryList.size());
+      directoryList.forEach(path -> {
+        DirNode node;
+
+        if (directoryList.size() > 1)
+        {
+          node = new DirNode(false, path, directoryList.size());
+          rootNode.addChild(node);
+        }
+        else
+        {
+          node = rootNode;
+        }
+
+        scan(node, path);
+      });
       if (m_scanListener != null)
       {
         mi_cancel = m_scanListener.progress(null, mi_numberOfDirectories, mi_numberOfFiles, true);
@@ -407,9 +424,9 @@ public class FileTree
           Comparator<Path> c;
 
           c = mi_depth == 0 ? Comparator.comparing(Path::toString) : (a, b) -> 0;
-          try (Stream<Path> stream = Files.list(currentPath).sorted(c))
+          try (Stream<Path> stream = Files.list(currentPath))
           {
-            stream.forEach(path -> {
+            stream.sorted(c).forEach(path -> {
               if (mi_cancel)
               {
                 return;
@@ -537,7 +554,7 @@ public class FileTree
     try
     {
       File file = new File(args.length >= 1 ? args[0] : "/home/kees/test");
-      FileTree ft = new FileTree(file);
+      FileTree ft = new FileTree(file.toPath());
       ft.setScanListener(new ScanListenerIF()
       {
         long previousTime;

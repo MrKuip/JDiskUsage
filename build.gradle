@@ -4,7 +4,7 @@ plugins {
   id 'eclipse'
   id 'application'
   id 'org.openjfx.javafxplugin' version '0.1.0'
-  id 'org.beryx.jlink' version '3.0.1'
+  id 'org.beryx.jlink' version '3.0.0'
 }
 
 defaultTasks 'jar'
@@ -18,19 +18,23 @@ repositories {
 java {
   toolchain {
     languageVersion = JavaLanguageVersion.of(17);
-    vendor = JvmVendorSpec.ADOPTIUM
+    vendor = JvmVendorSpec.ADOPTIUM;
   }
 }
 
 javafx {
-    version = "21"
+    version = "22.0.1"
     modules = [ 'javafx.controls' ]
 }
 
 dependencies {
   implementation 'org.controlsfx:controlsfx:11.2.1'
   implementation files('lib/fontIcons-1.0.jar')
-  implementation 'net.raumzeitfalle.fx:filechooser:0.0.11'
+  //implementation files('lib/miglayout-javafx-11.3.jar')
+  //implementation files('lib/miglayout-core-11.3.jar')
+  //implementation files('lib/miglayout-swing-11.3.jar')
+  implementation 'com.miglayout:miglayout-javafx:11.3'
+  implementation 'com.miglayout:miglayout-swing:11.3'
 }
 
 application {
@@ -49,6 +53,4 @@ jlink {
     installerType = "deb"
   }
 }
-
-
 

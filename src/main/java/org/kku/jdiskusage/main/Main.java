@@ -19,8 +19,6 @@ public class Main
     DiskUsageView diskUsageView;
     Scene scene;
 
-    getParameters().getRaw().forEach(System.out::println);
-
     Locale.setDefault(AppPreferences.localePreference.get());
 
     diskUsageView = new DiskUsageView(stage);

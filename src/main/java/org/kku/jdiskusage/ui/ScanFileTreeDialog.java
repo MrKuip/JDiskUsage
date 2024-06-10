@@ -2,10 +2,13 @@ package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.io.File;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
+import org.kku.jdiskusage.util.DirectoryChooser;
 import org.kku.jdiskusage.util.FileTree;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import javafx.application.Platform;
@@ -18,7 +21,6 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -29,7 +31,6 @@ public class ScanFileTreeDialog
   private Dialog<ButtonType> m_dialog;
   private Label m_currentDirectoryLabel;
   private Label m_currentFileCountLabel;
-  private Label m_filteredFileCountLabel;
   private Label m_elapsedTimeLabel;
   private ProgressBar m_progressLabel;
 
@@ -40,42 +41,41 @@ public class ScanFileTreeDialog
   public DirNode chooseDirectory(Stage stage)
   {
     DirectoryChooser directoryChooser;
-    File directory;
+    List<Path> dirPathList;
     File initialDirectory;
 
     initialDirectory = getProps().getFile(Property.INITIAL_DIRECTORY);
     directoryChooser = new DirectoryChooser();
     if (initialDirectory != null)
     {
-      directoryChooser.setInitialDirectory(initialDirectory);
+      directoryChooser.setInitialDirectory(initialDirectory.toPath());
     }
 
-    directory = directoryChooser.showDialog(stage);
-    if (directory == null)
+    dirPathList = directoryChooser.showOpenMultipleDialog(stage);
+    if (dirPathList == null)
     {
       return null;
     }
 
-    getProps().set(Property.INITIAL_DIRECTORY, directory.getParentFile());
-
-    return scanDirectory(directory);
+    return scanDirectory(dirPathList);
   }
 
-  public DirNode scanDirectory(File directory)
+  public DirNode scanDirectory(List<Path> directoryList)
   {
     Optional<ButtonType> scanDialogResult;
     GridPane grid;
     Label currentDirectory;
     Label currentCount;
-    Label filteredCount;
     Label elapsedTime;
     Scan scan;
 
+    scan = new Scan(directoryList);
+
     m_dialog = new Dialog<>();
     m_dialog.initModality(Modality.APPLICATION_MODAL);
-    m_dialog.initStyle(StageStyle.UTILITY);
+    m_dialog.initStyle(StageStyle.UNDECORATED);
     m_dialog.setTitle(translate("Scan directory"));
-    m_dialog.setHeaderText(translate("Scan") + " " + directory.getPath());
+    m_dialog.setHeaderText(translate("Scan") + " " + scan.getRootDirectory());
     m_dialog.getDialogPane().getButtonTypes().addAll(new ButtonType(translate("Cancel"), ButtonData.CANCEL_CLOSE));
     m_dialog.setGraphic(IconUtil.createIconNode("file-search", IconSize.LARGE));
 
@@ -91,9 +91,6 @@ public class ScanFileTreeDialog
     currentCount = translate(new Label("Scanned"));
     m_currentFileCountLabel = new Label();
     m_currentFileCountLabel.setMaxWidth(Double.MAX_VALUE);
-    filteredCount = translate(new Label("Filtered"));
-    m_filteredFileCountLabel = new Label();
-    m_filteredFileCountLabel.setMaxWidth(Double.MAX_VALUE);
     elapsedTime = translate(new Label("Elapsed time"));
     m_elapsedTimeLabel = new Label();
     m_elapsedTimeLabel.setMaxWidth(Double.MAX_VALUE);
@@ -110,21 +107,17 @@ public class ScanFileTreeDialog
     grid.add(m_currentDirectoryLabel, 1, 0);
     grid.add(currentCount, 0, 1);
     grid.add(m_currentFileCountLabel, 1, 1);
-    grid.add(filteredCount, 0, 2);
-    grid.add(m_filteredFileCountLabel, 1, 2);
-    grid.add(elapsedTime, 0, 3);
-    grid.add(m_elapsedTimeLabel, 1, 3);
-    grid.add(m_progressLabel, 0, 4, 2, 1);
+    grid.add(elapsedTime, 0, 2);
+    grid.add(m_elapsedTimeLabel, 1, 2);
+    grid.add(m_progressLabel, 0, 3, 2, 1);
 
     GridPane.setHgrow(m_currentDirectoryLabel, Priority.SOMETIMES);
     GridPane.setHgrow(m_currentFileCountLabel, Priority.SOMETIMES);
-    GridPane.setHgrow(m_filteredFileCountLabel, Priority.SOMETIMES);
     GridPane.setHgrow(m_elapsedTimeLabel, Priority.SOMETIMES);
     GridPane.setHgrow(m_progressLabel, Priority.SOMETIMES);
 
     m_dialog.getDialogPane().setContent(grid);
 
-    scan = new Scan(directory);
     new Thread(scan).start();
 
     scanDialogResult = m_dialog.showAndWait();
@@ -139,16 +132,29 @@ public class ScanFileTreeDialog
   private class Scan
       implements Runnable
   {
+    private List<Path> mi_directoryList;
+    private Path mi_rootDirectory;
     private boolean mi_cancel;
-    private File mi_directory;
     private long mi_startTime;
     private long mi_previousTime;
     private boolean mi_runLaterActive;
     private DirNode mi_result;
 
-    private Scan(File directory)
+    private Scan(List<Path> directoryList)
     {
-      mi_directory = directory;
+      mi_directoryList = directoryList;
+      mi_rootDirectory = directoryList.get(0);
+      if (directoryList.size() > 1)
+      {
+        mi_rootDirectory = mi_rootDirectory.getParent();
+      }
+
+      getProps().set(Property.INITIAL_DIRECTORY, mi_rootDirectory.toFile());
+    }
+
+    public Path getRootDirectory()
+    {
+      return mi_rootDirectory;
     }
 
     public DirNode getResult()
@@ -168,7 +174,7 @@ public class ScanFileTreeDialog
 
       mi_startTime = System.currentTimeMillis();
       mi_previousTime = mi_startTime;
-      tree = new FileTree(mi_directory);
+      tree = new FileTree(mi_rootDirectory, mi_directoryList);
       tree.setScanListener((currentPath, numberOfDirectories, numberOfFiles, scanReady) -> {
         long currentTimeMillis;
 
@@ -181,12 +187,11 @@ public class ScanFileTreeDialog
         mi_previousTime = currentTimeMillis;
         mi_runLaterActive = true;
         Platform.runLater(() -> {
-          m_elapsedTimeLabel.setText((int) ((currentTimeMillis - mi_startTime) / 1000) + " " + translate("seconds"));
+          m_elapsedTimeLabel.setText(
+              String.format("%,d %s", (int) ((currentTimeMillis - mi_startTime) / 1000), translate("seconds")));
           m_currentDirectoryLabel.setText(currentPath != null ? currentPath.toString() : "Ready");
-          m_currentFileCountLabel.setText(
-              numberOfDirectories + " " + translate("directories") + ", " + numberOfFiles + " " + translate("files"));
-          m_filteredFileCountLabel.setText(
-              numberOfDirectories + " " + translate("directories") + ", " + numberOfFiles + " " + translate("files"));
+          m_currentFileCountLabel.setText(String.format("%,d %s %,d %s", numberOfDirectories, translate("directories"),
+              numberOfFiles, translate("files")));
           mi_runLaterActive = false;
           if (scanReady)
           {

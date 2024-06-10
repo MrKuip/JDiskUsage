@@ -11,6 +11,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.input.MouseEvent;
@@ -71,50 +72,35 @@ public class MyTableColumn<T, R>
   }
 
   /*
-  public void setCellValueGetter2(Function<T, R> function)
-  {
-    this.setCellValueFactory(new Callback<CellDataFeatures<T, R>, ObservableValue<R>>()
-    {
-      @Override
-      public ObservableValue<R> call(CellDataFeatures<T, R> p)
-      {
-        if (p.getValue() instanceof Totals)
-        {
-          MyTableColumn myTableColumn;
-          MyTableView myTableView;
-          Totals totals;
-  
-          totals = (Totals) p.getValue();
-          myTableColumn = (MyTableColumn) p.getTableColumn();
-          myTableView = (MyTableView) p.getTableView();
-          if (!myTableView.hasTotals(totals))
-          {
-            return new ReadOnlyObjectWrapper(new Wrapper(""));
-          }
-  
-          if (myTableColumn == myTableView.getColumns().get(0))
-          {
-            return new ReadOnlyObjectWrapper(new Wrapper(totals.getText()));
-          }
-  
-          if (myTableColumn.hasTotal(totals))
-          {
-            Integer v = p.getTableView().getItems().stream().filter(item -> !(item instanceof Totals))
-                .map(item -> function.apply(item)).filter(value -> value instanceof Integer).map(Integer.class::cast)
-                .collect(Collectors.summingInt(Integer::intValue));
-  
-            System.out.println(v + " " + v.getClass().getSimpleName());
-  
-            return new ReadOnlyObjectWrapper<R>((R) new Wrapper(v));
-          }
-  
-          return new ReadOnlyObjectWrapper(new Wrapper(""));
-        }
-        return new ReadOnlyObjectWrapper<R>(function.apply(p.getValue()));
-      }
-    });
-  }
-  */
+   * public void setCellValueGetter2(Function<T, R> function) {
+   * this.setCellValueFactory(new Callback<CellDataFeatures<T, R>,
+   * ObservableValue<R>>() {
+   * 
+   * @Override public ObservableValue<R> call(CellDataFeatures<T, R> p) { if
+   * (p.getValue() instanceof Totals) { MyTableColumn myTableColumn; MyTableView
+   * myTableView; Totals totals;
+   * 
+   * totals = (Totals) p.getValue(); myTableColumn = (MyTableColumn)
+   * p.getTableColumn(); myTableView = (MyTableView) p.getTableView(); if
+   * (!myTableView.hasTotals(totals)) { return new ReadOnlyObjectWrapper(new
+   * Wrapper("")); }
+   * 
+   * if (myTableColumn == myTableView.getColumns().get(0)) { return new
+   * ReadOnlyObjectWrapper(new Wrapper(totals.getText())); }
+   * 
+   * if (myTableColumn.hasTotal(totals)) { Integer v =
+   * p.getTableView().getItems().stream().filter(item -> !(item instanceof
+   * Totals)) .map(item -> function.apply(item)).filter(value -> value instanceof
+   * Integer).map(Integer.class::cast)
+   * .collect(Collectors.summingInt(Integer::intValue));
+   * 
+   * System.out.println(v + " " + v.getClass().getSimpleName());
+   * 
+   * return new ReadOnlyObjectWrapper<R>((R) new Wrapper(v)); }
+   * 
+   * return new ReadOnlyObjectWrapper(new Wrapper("")); } return new
+   * ReadOnlyObjectWrapper<R>(function.apply(p.getValue())); } }); }
+   */
 
   public static class Wrapper<T>
   {
@@ -145,6 +131,7 @@ public class MyTableColumn<T, R>
         protected void updateItem(R value, boolean empty)
         {
           String text;
+          Node graphic;
 
           super.updateItem(value, empty);
 
@@ -156,23 +143,33 @@ public class MyTableColumn<T, R>
                 new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
           }
 
-          if (empty || value == null)
+          if (value != null && value instanceof Node)
           {
             text = "";
+            graphic = (Node) value;
           }
           else
           {
-            if (value != null && mi_formatter != null)
+            graphic = null;
+            if (empty || value == null)
             {
-              text = mi_formatter.format(value);
+              text = "";
             }
             else
             {
-              text = value.toString();
+              if (value != null && mi_formatter != null)
+              {
+                text = mi_formatter.format(value);
+              }
+              else
+              {
+                text = value.toString();
+              }
             }
           }
 
           setText(text);
+          setGraphic(graphic);
 
           if (m_alignment != null)
           {
@@ -188,9 +185,7 @@ public class MyTableColumn<T, R>
         {
           if (event.getClickCount() > 1)
           {
-            System.out.println("double clicked!");
             TableCell c = (TableCell) event.getSource();
-            System.out.println("Cell text: " + c.getText());
           }
         }
       });

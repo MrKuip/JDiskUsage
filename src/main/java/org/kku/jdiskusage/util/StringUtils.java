@@ -6,4 +6,19 @@ public class StringUtils
   {
     return text != null && !text.isBlank();
   }
+
+  public static boolean isAllLetters(String type)
+  {
+    int length = type.length();
+
+    for (int i = 0; i < length; i++)
+    {
+      if (!(Character.isLetter(type.charAt(i))))
+      {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
