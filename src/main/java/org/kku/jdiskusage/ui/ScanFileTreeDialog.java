@@ -1,7 +1,6 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -42,13 +41,13 @@ public class ScanFileTreeDialog
   {
     DirectoryChooser directoryChooser;
     List<Path> dirPathList;
-    File initialDirectory;
+    Path initialDirectory;
 
-    initialDirectory = getProps().getFile(Property.INITIAL_DIRECTORY);
+    initialDirectory = getProps().getPath(Property.INITIAL_DIRECTORY);
     directoryChooser = new DirectoryChooser();
     if (initialDirectory != null)
     {
-      directoryChooser.setInitialDirectory(initialDirectory.toPath());
+      directoryChooser.setInitialDirectory(initialDirectory);
     }
 
     dirPathList = directoryChooser.showOpenMultipleDialog(stage);
@@ -149,7 +148,7 @@ public class ScanFileTreeDialog
         mi_rootDirectory = mi_rootDirectory.getParent();
       }
 
-      getProps().set(Property.INITIAL_DIRECTORY, mi_rootDirectory.toFile());
+      getProps().set(Property.INITIAL_DIRECTORY, mi_rootDirectory);
     }
 
     public Path getRootDirectory()
@@ -174,7 +173,7 @@ public class ScanFileTreeDialog
 
       mi_startTime = System.currentTimeMillis();
       mi_previousTime = mi_startTime;
-      tree = new FileTree(mi_rootDirectory, mi_directoryList);
+      tree = new FileTree(mi_directoryList);
       tree.setScanListener((currentPath, numberOfDirectories, numberOfFiles, scanReady) -> {
         long currentTimeMillis;
 
@@ -189,13 +188,22 @@ public class ScanFileTreeDialog
         Platform.runLater(() -> {
           m_elapsedTimeLabel.setText(
               String.format("%,d %s", (int) ((currentTimeMillis - mi_startTime) / 1000), translate("seconds")));
-          m_currentDirectoryLabel.setText(currentPath != null ? currentPath.toString() : "Ready");
+          m_currentDirectoryLabel.setText(currentPath != null ? currentPath.toString() : translate("Ready"));
           m_currentFileCountLabel.setText(String.format("%,d %s %,d %s", numberOfDirectories, translate("directories"),
               numberOfFiles, translate("files")));
+
           mi_runLaterActive = false;
           if (scanReady)
           {
+            String text;
+
+            text = String.format("%,d %s , %,d %s %s %d %s", numberOfDirectories, translate("directories"),
+                numberOfFiles, translate("files"), translate("in"), (int) ((currentTimeMillis - mi_startTime) / 1000),
+                translate("seconds"));
+
             m_dialog.close();
+
+            showInformationNotification("Scan ready", text);
           }
         });
 

@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.main;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Locale;
 import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
@@ -39,9 +40,8 @@ public class Main
     stage.setScene(scene);
     stage.show();
 
-    getParameters().getRaw().stream().filter(p -> {
-      File file = new File(p);
-      return file.exists() && file.isDirectory();
+    getParameters().getRaw().stream().map(Path::of).filter(path -> {
+      return Files.exists(path) && Files.isDirectory(path);
     }).findFirst().ifPresent(diskUsageView::scanDirectory);
   }
 

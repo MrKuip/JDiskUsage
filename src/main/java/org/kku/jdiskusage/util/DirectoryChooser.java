@@ -1,8 +1,8 @@
 package org.kku.jdiskusage.util;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -189,7 +189,7 @@ public class DirectoryChooser
       List<DirectoryNode> rootNodes;
 
       rootNodes = new ArrayList<>();
-      Stream.of(File.listRoots()).map(DirectoryNode::new).forEach(rootNodes::add);
+      FileSystems.getDefault().getRootDirectories().forEach(path -> rootNodes.add(new DirectoryNode(path)));
 
       return rootNodes;
     }
@@ -421,9 +421,9 @@ public class DirectoryChooser
     private final String m_iconName;
     private final Path m_path;
 
-    private DirectoryNode(File file)
+    private DirectoryNode(Path path)
     {
-      this(file.getPath(), "folder-outline", file.toPath());
+      this(path.toString(), "folder-outline", path);
     }
 
     private DirectoryNode(String name, String iconName, Path path)

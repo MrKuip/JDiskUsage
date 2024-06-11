@@ -2,9 +2,11 @@ package org.kku.jdiskusage.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +15,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kku.jdiskusage.ui.DiskUsageView;
@@ -50,18 +54,16 @@ public class FileTree
         + Stream.of(UnixAttribute.values()).map(UnixAttribute::getId).collect(Collectors.joining(","));
   }
 
-  private final Path m_directory;
   private final List<Path> m_directoryList;
   private ScanListenerIF m_scanListener;
 
   public FileTree(Path directory)
   {
-    this(directory, Arrays.asList(directory));
+    this(Arrays.asList(directory));
   }
 
-  public FileTree(Path directory, List<Path> directoryList)
+  public FileTree(List<Path> directoryList)
   {
-    m_directory = directory;
     m_directoryList = directoryList;
   }
 
@@ -72,7 +74,7 @@ public class FileTree
 
   public DirNode scan()
   {
-    return new ScanPath().scan(m_directory, m_directoryList);
+    return new ScanPath().scan(m_directoryList);
   }
 
   public interface FilterIF
@@ -159,7 +161,7 @@ public class FileTree
     @Override
     public String toString()
     {
-      return getName() + " size=" + getSize();
+      return getName();
     }
   }
 
@@ -208,7 +210,7 @@ public class FileTree
     {
       if (mi_fileSize == -1)
       {
-        mi_fileSize = mi_childList.stream().map(FileNodeIF::getSize).reduce(0l, Long::sum);
+        mi_fileSize = getChildList().stream().map(FileNodeIF::getSize).reduce(0l, Long::sum);
       }
 
       return mi_fileSize;
@@ -234,18 +236,22 @@ public class FileTree
     public <T extends AbstractFileNode> T addChild(T node)
     {
       node.setParent(this);
-      mi_childList.add(node);
+      getChildList().add(node);
       return node;
     }
 
     public <T extends AbstractFileNode> boolean removeChild(T dirNode)
     {
       dirNode.setParent(null);
-      return mi_childList.remove(dirNode);
+      return getChildList().remove(dirNode);
     }
 
     public List<FileNodeIF> getChildList()
     {
+      if (mi_childList == null)
+      {
+        mi_childList = new ArrayList<>(100);
+      }
       return mi_childList;
     }
 
@@ -306,6 +312,8 @@ public class FileTree
       mi_lastModifiedTime = basicAttributes == null ? -1 : basicAttributes.lastModifiedTime().toMillis();
     }
 
+    private static Pattern typePattern = Pattern.compile("[a-zA-Z_-]*");
+
     private String determineFileType(String name)
     {
       int index;
@@ -325,12 +333,10 @@ public class FileTree
       index = name.lastIndexOf(".");
       if (index > 0 && index != -1)
       {
-        String type;
-
-        type = name.substring(index + 1);
-        if (StringUtils.isAllLetters(type))
+        name = name.substring(index + 1);
+        if (name.length() < 10 && typePattern.matcher(name).matches())
         {
-          return type.toLowerCase();
+          return name.toLowerCase();
         }
       }
 
@@ -384,95 +390,114 @@ public class FileTree
   {
     private int mi_numberOfFiles;
     private int mi_numberOfDirectories;
-    private boolean mi_cancel;
-    private int mi_depth;
 
-    public DirNode scan(Path directory, List<Path> directoryList)
+    public DirNode scan(List<Path> directoryList)
     {
       DirNode rootNode;
+      Path rootDir;
 
-      rootNode = new DirNode(true, directory, directoryList.size());
+      rootDir = directoryList.get(0).getParent();
+      rootNode = new DirNode(true, rootDir, directoryList.size());
       directoryList.forEach(path -> {
-        DirNode node;
-
-        if (directoryList.size() > 1)
+        try
         {
-          node = new DirNode(false, path, directoryList.size());
-          rootNode.addChild(node);
+          ScanVisitor visitor = new ScanVisitor();
+          Files.walkFileTree(path, visitor);
+          if (!visitor.isCancelled())
+          {
+            rootNode.addChild(visitor.getRootDirNode());
+          }
         }
-        else
+        catch (IOException e)
         {
-          node = rootNode;
+          e.printStackTrace();
         }
-
-        scan(node, path);
       });
       if (m_scanListener != null)
       {
-        mi_cancel = m_scanListener.progress(null, mi_numberOfDirectories, mi_numberOfFiles, true);
+        m_scanListener.progress(null, mi_numberOfDirectories, mi_numberOfFiles, true);
       }
 
       return rootNode;
     }
 
-    private void scan(DirNode parentNode, Path currentPath)
+    private class ScanVisitor
+      extends SimpleFileVisitor<Path>
     {
-      try
+      private Stack<DirNode> mi_parentNodeStack = new Stack<>();
+      private DirNode mi_rootDirNode;
+      private boolean mi_cancelled;
+
+      private ScanVisitor()
       {
-        if (currentPath.toFile().canRead())
-        {
-          Comparator<Path> c;
-
-          c = mi_depth == 0 ? Comparator.comparing(Path::toString) : (a, b) -> 0;
-          try (Stream<Path> stream = Files.list(currentPath))
-          {
-            stream.sorted(c).forEach(path -> {
-              if (mi_cancel)
-              {
-                return;
-              }
-
-              if (Files.isDirectory(path))
-              {
-                DirNode newDirNode;
-
-                newDirNode = new DirNode(path);
-
-                mi_numberOfDirectories++;
-                try
-                {
-                  mi_depth++;
-                  scan(parentNode.addChild(newDirNode), path);
-                }
-                finally
-                {
-                  mi_depth--;
-                }
-                if (!newDirNode.hasChildren())
-                {
-                  parentNode.removeChild(newDirNode);
-                }
-              }
-              else
-              {
-                FileNode newFileNode;
-
-                newFileNode = new FileNode(path);
-
-                mi_numberOfFiles++;
-                parentNode.addChild(newFileNode);
-                if (m_scanListener != null)
-                {
-                  mi_cancel = m_scanListener.progress(path, mi_numberOfDirectories, mi_numberOfFiles, false);
-                }
-              }
-            });
-          }
-        }
       }
-      catch (IOException e)
+
+      public boolean isCancelled()
       {
-        e.printStackTrace();
+        return mi_cancelled;
+      }
+
+      public DirNode getRootDirNode()
+      {
+        return mi_rootDirNode;
+      }
+
+      @Override
+      public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
+      {
+        DirNode node;
+        DirNode parentNode;
+
+        if (mi_cancelled)
+        {
+          return FileVisitResult.SKIP_SUBTREE;
+        }
+
+        node = new DirNode(dir);
+        if (mi_rootDirNode == null)
+        {
+          mi_rootDirNode = node;
+        }
+        parentNode = mi_parentNodeStack.isEmpty() ? null : mi_parentNodeStack.peek();
+        if (parentNode != null)
+        {
+          parentNode.addChild(node);
+        }
+        mi_parentNodeStack.push(node);
+        mi_numberOfDirectories++;
+
+        return FileVisitResult.CONTINUE;
+      }
+
+      @Override
+      public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+      {
+        mi_parentNodeStack.pop();
+        return FileVisitResult.CONTINUE;
+      }
+
+      @Override
+      public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+      {
+        FileNode node;
+
+        //System.out.println("file:" + file.toString() + " add to " + mi_parentNodeStack.peek());
+        node = new FileNode(file);
+        mi_parentNodeStack.peek().addChild(node);
+        mi_numberOfFiles++;
+
+        if (m_scanListener != null)
+        {
+          mi_cancelled = m_scanListener.progress(file, mi_numberOfDirectories, mi_numberOfFiles, false);
+        }
+
+        return FileVisitResult.CONTINUE;
+      }
+
+      @Override
+      public FileVisitResult visitFileFailed(Path file, IOException io)
+      {
+        return FileVisitResult.SKIP_SUBTREE;
       }
     }
   }
@@ -553,8 +578,11 @@ public class FileTree
   {
     try
     {
-      File file = new File(args.length >= 1 ? args[0] : "/home/kees/test");
-      FileTree ft = new FileTree(file.toPath());
+      String pathName = "/media/kees/CubeSSD/export/hoorn/snapshot_001_2024_03_13__11_53_56/";
+      pathName = "/home/kees";
+      Path path = Path.of(args.length >= 1 ? args[0] : pathName);
+      StopWatch sw = new StopWatch();
+      FileTree ft = new FileTree(path);
       ft.setScanListener(new ScanListenerIF()
       {
         long previousTime;
@@ -572,8 +600,10 @@ public class FileTree
           return false;
         }
       });
+      sw.start();
       DirNode dirNode = ft.scan();
-      new Print().print(dirNode);
+      System.out.println("scan took " + sw.getElapsedTime() + " msec.");
+      //new Print().print(dirNode);
 
       System.out.println("ready");
     }
