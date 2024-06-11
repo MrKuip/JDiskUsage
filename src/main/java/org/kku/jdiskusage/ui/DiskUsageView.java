@@ -1,7 +1,6 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1647,18 +1646,6 @@ public class DiskUsageView
       init();
     }
 
-    private class TypesBucketData
-    {
-      public long mi_numberOfFiles;
-      public long mi_sizeOfFiles;
-
-      public TypesBucketData(Long numberOfFiles, Long sizeOfFiles)
-      {
-        mi_numberOfFiles = numberOfFiles;
-        mi_sizeOfFiles = sizeOfFiles;
-      }
-    }
-
     Node getPieChartNode()
     {
       PieChart pieChart;
@@ -1742,6 +1729,77 @@ public class DiskUsageView
       return scrollPane;
     }
 
+    Node getTableNode()
+    {
+      TreeItem<FileNodeIF> treeItem;
+
+      treeItem = m_diskUsageMainData.getSelectedTreeItem();
+      if (!treeItem.getChildren().isEmpty())
+      {
+        ObservableList<Entry<String, FileAggregates>> list;
+        MyTableView<Entry<String, FileAggregates>> table;
+        MyTableColumn<Entry<String, FileAggregates>, String> extensionColumn;
+        MyTableColumn<Entry<String, FileAggregates>, Long> fileSizeColumn;
+        MyTableColumn<Entry<String, FileAggregates>, Double> fileSizePercentageColumn;
+        MyTableColumn<Entry<String, FileAggregates>, Long> numberOfFilesColumn;
+        MyTableColumn<Entry<String, FileAggregates>, Double> numberOfFilesPercentageColumn;
+        Map<String, FileAggregates> fullMap;
+        long totalFileSize;
+        long totalNumberOfFiles;
+
+        StopWatch sw = new StopWatch();
+        sw.start();
+
+        fullMap = mi_data.getFullMap();
+        list = fullMap.entrySet().stream().collect(Collectors.toCollection(FXCollections::observableArrayList));
+
+        totalFileSize = fullMap.values().stream().map(FileAggregates::getFileSize).reduce(0l, (a, b) -> a + b);
+        System.out.println("totalFileSize = " + totalFileSize);
+        totalNumberOfFiles = fullMap.values().stream().map(FileAggregates::getFileCount).reduce(0l, (a, b) -> a + b);
+        System.out.println("totalNumberOfFiles = " + totalNumberOfFiles);
+
+        System.out.println("Types table took " + sw.getElapsedTime() + " msec.");
+
+        table = new MyTableView<>("File types in %d");
+        table.setEditable(false);
+
+        extensionColumn = table.addColumn("Extension");
+        extensionColumn.initPersistentPrefWidth(100.0);
+        extensionColumn.setCellValueGetter(Entry::getKey);
+
+        fileSizeColumn = table.addColumn("File sizes");
+        fileSizeColumn.initPersistentPrefWidth(200.0);
+        fileSizeColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
+        fileSizeColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+        fileSizeColumn.setCellValueGetter((e) -> e.getValue().getFileSize());
+
+        fileSizePercentageColumn = table.addColumn("%");
+        fileSizePercentageColumn.initPersistentPrefWidth(200.0);
+        fileSizePercentageColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2f %%"));
+        fileSizePercentageColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+        fileSizePercentageColumn.setCellValueGetter((e) -> (e.getValue().getFileSize() * 100.0) / totalFileSize);
+
+        numberOfFilesColumn = table.addColumn("# Files");
+        numberOfFilesColumn.initPersistentPrefWidth(200.0);
+        numberOfFilesColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
+        numberOfFilesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+        numberOfFilesColumn.setCellValueGetter((e) -> e.getValue().getFileCount());
+
+        numberOfFilesPercentageColumn = table.addColumn("%");
+        numberOfFilesPercentageColumn.initPersistentPrefWidth(200.0);
+        numberOfFilesPercentageColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2f %%"));
+        numberOfFilesPercentageColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+        numberOfFilesPercentageColumn
+            .setCellValueGetter((e) -> (e.getValue().getFileCount() * 100.0) / totalNumberOfFiles);
+
+        table.setItems(list);
+
+        return table;
+      }
+
+      return translate(new Label("No data"));
+    }
+
     private class TypesPaneData
       extends PaneData
     {
@@ -1767,11 +1825,12 @@ public class DiskUsageView
               bucket = fn.getFileType();
               data = mi_fullMap.computeIfAbsent(bucket, (a) -> new FileAggregates(0l, 0l));
               data.mi_fileCount += 1;
-              data.mi_accumulatedSize += fn.getSize();
+              data.mi_fileSize += fn.getSize();
             }
           });
           mi_fullMap = mi_fullMap.entrySet().stream()
-              .sorted(Comparator.comparing(e -> e.getValue().mi_fileCount, Comparator.reverseOrder()))
+              .sorted(
+                  Comparator.comparing(e -> e.getValue().getSize(getCurrentDisplayMetric()), Comparator.reverseOrder()))
               .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (x, y) -> y, LinkedHashMap::new));
         }
         return mi_fullMap;
@@ -1818,11 +1877,6 @@ public class DiskUsageView
         mi_reducedMap = null;
       }
     }
-
-    Node getTableNode()
-    {
-      return new Label("Table");
-    }
   }
 
   int counter = 0;
@@ -1843,10 +1897,10 @@ public class DiskUsageView
       return menu;
     }
 
-    public void addFile(File file)
+    public void addPath(Path path)
     {
       getProps().set(Property.RECENT_FILES,
-          Stream.concat(Stream.of(file), getProps().getFileList(Property.RECENT_FILES).stream()).distinct().limit(10)
+          Stream.concat(Stream.of(path), getProps().getPathList(Property.RECENT_FILES).stream()).distinct().limit(10)
               .collect(Collectors.toList()));
       update();
     }
@@ -1864,15 +1918,15 @@ public class DiskUsageView
 
     private List<MenuItem> getItems()
     {
-      return getProps().getFileList(Property.RECENT_FILES).stream().map(File::getPath).map(this::createMenuItem)
+      return getProps().getPathList(Property.RECENT_FILES).stream().map(this::createMenuItem)
           .collect(Collectors.toList());
     }
 
-    private MenuItem createMenuItem(String path)
+    private MenuItem createMenuItem(Path path)
     {
       MenuItem menuItem;
 
-      menuItem = translate(new MenuItem(path));
+      menuItem = translate(new MenuItem(path.toString()));
       menuItem.setGraphic(IconUtil.createIconNode("folder-outline", IconSize.SMALLER));
       menuItem.setOnAction(e -> {
         scanDirectory(path);
@@ -1882,9 +1936,9 @@ public class DiskUsageView
     }
   }
 
-  public void scanDirectory(String path)
+  public void scanDirectory(Path path)
   {
-    scanDirectory(new ScanFileTreeDialog().scanDirectory(Arrays.asList(Path.of(path))));
+    scanDirectory(new ScanFileTreeDialog().scanDirectory(Arrays.asList(path)));
   }
 
   private void scanDirectory(DirNode dirNode)
@@ -1892,7 +1946,7 @@ public class DiskUsageView
     if (dirNode != null)
     {
       m_diskUsageMainData.mi_treePaneData.createTreeTableView(dirNode);
-      m_diskUsageMainData.mi_recentFiles.addFile(new File(dirNode.getName()));
+      m_diskUsageMainData.mi_recentFiles.addPath(Path.of(dirNode.getName()));
     }
   }
 
@@ -1913,13 +1967,23 @@ public class DiskUsageView
 
   public class FileAggregates
   {
-    public long mi_accumulatedSize;
+    public long mi_fileSize;
     public long mi_fileCount;
 
     public FileAggregates(long accumulatedSize, long fileCount)
     {
-      mi_accumulatedSize = accumulatedSize;
+      mi_fileSize = accumulatedSize;
       mi_fileCount = fileCount;
+    }
+
+    public long getFileSize()
+    {
+      return mi_fileSize;
+    }
+
+    public long getFileCount()
+    {
+      return mi_fileCount;
     }
 
     public long getSize(DisplayMetric displayMetric)
@@ -1927,9 +1991,9 @@ public class DiskUsageView
       switch (displayMetric)
       {
         case FILE_SIZE:
-          return mi_accumulatedSize;
+          return getFileSize();
         case FILE_COUNT:
-          return mi_fileCount;
+          return getFileCount();
         default:
           return -1;
       }
@@ -1940,9 +2004,9 @@ public class DiskUsageView
       switch (displayMetric)
       {
         case FILE_SIZE:
-          return AppPreferences.sizeSystemPreference.get().getFileSize(mi_accumulatedSize);
+          return AppPreferences.sizeSystemPreference.get().getFileSize(getFileSize());
         case FILE_COUNT:
-          return mi_fileCount + " files";
+          return getFileCount() + " files";
         default:
           return "";
       }

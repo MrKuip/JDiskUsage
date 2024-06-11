@@ -1,11 +1,9 @@
 package org.kku.jdiskusage.util;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -42,14 +40,14 @@ public class ApplicationProperties
       mi_subject = subject;
     }
 
-    public void set(CharSequence propertyName, File file)
+    public void set(CharSequence propertyName, Path path)
     {
-      setPropertyValue(propertyName, file != null ? file.getPath() : "");
+      setPropertyValue(propertyName, path != null ? path.toString() : "");
     }
 
-    public void set(CharSequence propertyName, List<File> fileList)
+    public void set(CharSequence propertyName, List<Path> pathList)
     {
-      setPropertyValue(propertyName, fileList.stream().map(File::getAbsolutePath).collect(Collectors.joining(",")));
+      setPropertyValue(propertyName, pathList.stream().map(Path::toString).collect(Collectors.joining(",")));
     }
 
     public void set(CharSequence propertyName, Number value)
@@ -68,32 +66,33 @@ public class ApplicationProperties
       storeProperties();
     }
 
-    public File getFile(CharSequence propertyName)
+    public Path getPath(CharSequence propertyName)
     {
-      File file;
-      String fileName;
+      Path path;
+      String pathName;
 
-      fileName = getPropertyValue(propertyName);
-      if (fileName == null)
+      pathName = getPropertyValue(propertyName);
+      if (pathName == null)
       {
         return null;
       }
 
-      file = new File(fileName);
-      return file.exists() ? file : null;
+      path = Path.of(pathName);
+      return Files.exists(path) ? path : null;
     }
 
-    public List<File> getFileList(CharSequence propertyName)
+    public List<Path> getPathList(CharSequence propertyName)
     {
-      String files;
+      String paths;
 
-      files = getPropertyValue(propertyName);
-      if (files == null)
+      paths = getPropertyValue(propertyName);
+      if (paths == null)
       {
         return Collections.emptyList();
       }
 
-      return Stream.of(files.split(",")).map(File::new).filter(File::exists).collect(Collectors.toList());
+      return Stream.of(paths.split(",")).map(fileName -> Path.of(fileName)).filter(file -> Files.exists(file))
+          .collect(Collectors.toList());
     }
 
     public double getDouble(CharSequence propertyName, double defaultValue)
@@ -132,10 +131,7 @@ public class ApplicationProperties
 
       try
       {
-        InputStream is;
-
-        is = new FileInputStream(getPropertyFile());
-        m_properties.load(is);
+        m_properties.load(Files.newInputStream(getPropertyPath()));
       }
       catch (FileNotFoundException e)
       {
@@ -154,7 +150,7 @@ public class ApplicationProperties
   {
     try
     {
-      m_properties.store(new FileOutputStream(getPropertyFile()), "store to properties file");
+      m_properties.store(Files.newOutputStream(getPropertyPath()), "store to properties file");
     }
     catch (IOException e)
     {
@@ -162,8 +158,8 @@ public class ApplicationProperties
     }
   }
 
-  private File getPropertyFile()
+  private Path getPropertyPath()
   {
-    return new File(System.getProperty("user.home"), "JDiskUsage2.properties");
+    return Path.of(System.getProperty("user.home"), "JDiskUsage2.properties");
   }
 }
