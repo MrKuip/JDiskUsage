@@ -20,7 +20,7 @@ class SizePane
   {
     super(diskUsageData);
 
-    createPaneType("PIECHART", "Show details table", "chart-pie", this::getPieChartNode, true);
+    createPaneType("PIECHART", "Show pie chart", "chart-pie", this::getPieChartNode, true);
     createPaneType("BARCHART", "Show bar chart", "chart-bar", this::getBarChartNode);
     createPaneType("TABLE", "Show details table", "table", this::getTableNode);
 

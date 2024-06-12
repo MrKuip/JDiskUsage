@@ -16,11 +16,10 @@ import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.DiskUsageView.FileAggregates;
 import org.kku.jdiskusage.ui.DiskUsageView.FileNodeIterator;
 import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
-import org.kku.jdiskusage.ui.common.AbstractTabContentPane.PaneData;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
 import org.kku.jdiskusage.ui.util.FxUtil;
-import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
+import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -48,7 +47,7 @@ class TypesPane
   {
     super(diskUsageData);
 
-    createPaneType("PIECHART", "Show details table", "chart-pie", this::getPieChartNode);
+    createPaneType("PIECHART", "Show pie chart", "chart-pie", this::getPieChartNode);
     createPaneType("BARCHART", "Show bar chart", "chart-bar", this::getBarChartNode);
     createPaneType("TABLE", "Show details table", "table", this::getTableNode);
 

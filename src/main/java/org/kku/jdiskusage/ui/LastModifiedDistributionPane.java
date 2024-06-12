@@ -202,7 +202,7 @@ class LastModifiedDistributionPane
   {
     super(diskUsageData);
 
-    createPaneType("PIECHART", "Show details table", "chart-pie", this::getPieChartNode);
+    createPaneType("PIECHART", "Show pie chart", "chart-pie", this::getPieChartNode);
     createPaneType("BARCHART", "Show bar chart", "chart-bar", this::getBarChartNode);
     createPaneType("TABLE", "Show details table", "table", this::getTableNode);
 
@@ -331,7 +331,7 @@ class LastModifiedDistributionPane
       sumOfFileSizesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
       sumOfFileSizesColumn.initPersistentPrefWidth(100.0);
       sumOfFileSizesColumn.setCellValueGetter((o) -> o.getValue().mi_sizeOfFiles);
-      numberOfFilesColumn = table.addColumn("Sum of file sizes");
+      numberOfFilesColumn = table.addColumn("Sum of number of files");
       numberOfFilesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
       numberOfFilesColumn.initPersistentPrefWidth(100.0);
       numberOfFilesColumn.setCellValueGetter((o) -> o.getValue().mi_numberOfFiles);

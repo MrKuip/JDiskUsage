@@ -1,5 +1,6 @@
 package org.kku.jdiskusage.ui.common;
 
+import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -7,8 +8,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
-import org.kku.jdiskusage.ui.FileTreePane;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
+import org.kku.jdiskusage.ui.FileTreePane;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
@@ -52,8 +53,15 @@ abstract public class AbstractTabContentPane
       ToggleButton button;
 
       button = new ToggleButton();
-      button.setTooltip(new Tooltip(paneType.description()));
-      button.setGraphic(IconUtil.createIconNode(paneType.iconName(), IconSize.SMALLER));
+      if (paneType.iconName() != null)
+      {
+        button.setGraphic(IconUtil.createIconNode(paneType.iconName(), IconSize.SMALLER));
+        button.setTooltip(new Tooltip(translate(paneType.description())));
+      }
+      else
+      {
+        button.setText(translate(paneType.description()));
+      }
       button.setUserData(paneType);
       button.setOnAction((ae) -> {
         setCurrentPaneType((AbstractTabContentPane.PaneType) ((Node) ae.getSource()).getUserData());

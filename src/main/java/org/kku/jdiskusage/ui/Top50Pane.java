@@ -1,9 +1,13 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
@@ -11,10 +15,10 @@ import org.kku.jdiskusage.ui.DiskUsageView.ObjectWithIndex;
 import org.kku.jdiskusage.ui.DiskUsageView.ObjectWithIndexFactory;
 import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
-import org.kku.jdiskusage.util.Performance;
-import org.kku.jdiskusage.util.StreamUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
+import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
+import org.kku.jdiskusage.util.StreamUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
@@ -25,15 +29,80 @@ import javafx.scene.control.TreeItem;
 class Top50Pane
   extends AbstractTabContentPane
 {
+  private final Top50PaneData mi_data = new Top50PaneData();
+
+  private enum FileComparator
+  {
+    LARGEST("Largest", FileNodeIF.getSizeComparator()),
+    OLDEST("Oldest", Comparator.comparing(FileNodeIF::getLastModifiedTime)),
+    NEWEST("Newest", Comparator.comparing(FileNodeIF::getLastModifiedTime).reversed());
+
+    private final String mi_description;
+    private final Comparator<FileNodeIF> mi_comparator;
+
+    FileComparator(String description, Comparator<FileNodeIF> comparator)
+    {
+      mi_description = description;
+      mi_comparator = comparator;
+    }
+
+    public String getDescription()
+    {
+      return mi_description;
+    }
+
+    public Comparator<FileNodeIF> getComparator()
+    {
+      return mi_comparator;
+    }
+  }
+
   Top50Pane(DiskUsageData diskUsageData)
   {
     super(diskUsageData);
 
-    createPaneType("PIECHART", "Show details table", "chart-pie", this::getPieChartNode);
-    createPaneType("BARCHART", "Show bar chart", "chart-bar", this::getBarChartNode);
-    createPaneType("TABLE", "Show details table", "table", this::getTableNode, true);
+    Stream.of(FileComparator.values()).forEach(fc -> {
+      createPaneType(fc.name(), fc.getDescription(), null, () -> getTableNode(fc));
+    });
 
     init();
+  }
+
+  class Top50PaneData
+    extends PaneData
+  {
+    private Map<FileComparator, ObservableList<ObjectWithIndex<FileNodeIF>>> mi_map = new HashMap<>();
+
+    public ObservableList<ObjectWithIndex<FileNodeIF>> getList(FileComparator fc)
+    {
+      return mi_map.computeIfAbsent(fc, (key) -> {
+        try (PerformancePoint pp = Performance.start("Collecting data for top 50 table"))
+        {
+          List<FileNodeIF> fnList;
+          ObjectWithIndexFactory<FileNodeIF> objectWithIndexFactory;
+
+          objectWithIndexFactory = new ObjectWithIndexFactory<>();
+
+          fnList = getCurrentTreeItem().getValue().streamNode().filter(FileNodeIF::isFile)
+              .collect(StreamUtil.createTopCollector(fc.getComparator(), 50));
+
+          return fnList.stream().map(objectWithIndexFactory::create)
+              .collect(Collectors.toCollection(FXCollections::observableArrayList));
+        }
+      });
+    }
+
+    @Override
+    public void currentTreeItemChanged()
+    {
+      mi_map.clear();
+    }
+
+    @Override
+    public void currentDisplayMetricChanged()
+    {
+      mi_map.clear();
+    }
   }
 
   Node getPieChartNode()
@@ -46,15 +115,13 @@ class Top50Pane
     return new Label("BarChart");
   }
 
-  Node getTableNode()
+  Node getTableNode(FileComparator fc)
   {
     TreeItem<FileNodeIF> treeItem;
 
     treeItem = getDiskUsageData().getSelectedTreeItem();
     if (!treeItem.getChildren().isEmpty())
     {
-      FileNodeIF node;
-      ObservableList<ObjectWithIndex<FileNodeIF>> list;
       MyTableView<ObjectWithIndex<FileNodeIF>> table;
       MyTableColumn<ObjectWithIndex<FileNodeIF>, Integer> rankColumn;
       MyTableColumn<ObjectWithIndex<FileNodeIF>, String> nameColumn;
@@ -62,21 +129,6 @@ class Top50Pane
       MyTableColumn<ObjectWithIndex<FileNodeIF>, Date> lastModifiedColumn;
       MyTableColumn<ObjectWithIndex<FileNodeIF>, Integer> numberOfLinksColumn;
       MyTableColumn<ObjectWithIndex<FileNodeIF>, String> pathColumn;
-      List<FileNodeIF> fnList;
-      ObjectWithIndexFactory<FileNodeIF> objectWithIndexFactory;
-
-      objectWithIndexFactory = new ObjectWithIndexFactory<>();
-
-      node = treeItem.getValue();
-
-      try (PerformancePoint pp = Performance.start("Collecting data for top 50 table"))
-      {
-        fnList = node.streamNode().filter(FileNodeIF::isFile)
-            .collect(StreamUtil.createTopCollector(FileNodeIF.getSizeComparator(), 50));
-
-        list = fnList.stream().map(objectWithIndexFactory::create)
-            .collect(Collectors.toCollection(FXCollections::observableArrayList));
-      }
 
       table = new MyTableView<>("Top50");
       table.setEditable(false);
@@ -111,7 +163,7 @@ class Top50Pane
       pathColumn = table.addColumn("Path");
       pathColumn.setCellValueGetter((owi) -> owi.getObject().getAbsolutePath());
 
-      table.setItems(list);
+      table.setItems(mi_data.getList(fc));
 
       return table;
     }
