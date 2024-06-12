@@ -12,7 +12,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.BorderPane;
 
-public class TreePaneData
+public class FileTreePane
 {
   private final DiskUsageData mi_diskUsageData;
   private FileTreeView mi_fileTreeView;
@@ -20,7 +20,7 @@ public class TreePaneData
   private BreadCrumbBar<FileNodeIF> mi_breadCrumbBar;
   TreeTableView<FileNodeIF> mi_treeTableView;
 
-  public TreePaneData(DiskUsageData diskUsageData)
+  public FileTreePane(DiskUsageData diskUsageData)
   {
     mi_diskUsageData = diskUsageData;
     mi_treePane = new BorderPane();

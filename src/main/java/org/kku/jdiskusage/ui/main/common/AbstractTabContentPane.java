@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.main.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.main.TreePaneData;
+import org.kku.jdiskusage.ui.main.FileTreePane;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
@@ -30,7 +30,7 @@ abstract public class AbstractTabContentPane
   private final SegmentedButton mi_segmentedButton = new SegmentedButton();
   private AbstractTabContentPane.PaneType mi_currentPaneType;
   private Map<AbstractTabContentPane.PaneType, Node> mi_nodeByPaneTypeMap = new HashMap<>();
-  private TreePaneData mi_currentTreePaneData;
+  private FileTreePane mi_currentTreePaneData;
   private TreeItem<FileNodeIF> mi_currentTreeItem;
 
   private record PaneType(String description, String iconName, Supplier<Node> node) {
@@ -123,7 +123,7 @@ abstract public class AbstractTabContentPane
     return AppPreferences.displayMetricPreference.get();
   }
 
-  public Node getNode(TreePaneData treePaneData)
+  public Node getNode(FileTreePane treePaneData)
   {
     if (mi_currentTreePaneData != treePaneData || getCurrentTreeItem() != m_diskUsageData.getSelectedTreeItem())
     {

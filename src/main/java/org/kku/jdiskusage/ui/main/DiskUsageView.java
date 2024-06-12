@@ -61,7 +61,7 @@ public class DiskUsageView
   {
     private FullScreen mi_fullScreen;
     private final Navigation mi_navigation = new Navigation(this);
-    private final TreePaneData mi_treePaneData = new TreePaneData(this);
+    private final FileTreePane mi_treePaneData = new FileTreePane(this);
     private final TabPaneData mi_tabPaneData = new TabPaneData();
     private final SizePane mi_sizeTab = new SizePane(this);
     private final Top50Pane mi_top50Tab = new Top50Pane(this);
@@ -100,7 +100,7 @@ public class DiskUsageView
       return mi_tabPaneData;
     }
 
-    public TreePaneData getTreePaneData()
+    public FileTreePane getTreePaneData()
     {
       return mi_treePaneData;
     }
