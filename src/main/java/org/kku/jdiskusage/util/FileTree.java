@@ -18,8 +18,7 @@ import java.util.Stack;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.kku.jdiskusage.ui.DiskUsageView;
-import org.kku.jdiskusage.ui.OperatingSystemUtil;
+import org.kku.jdiskusage.ui.main.DiskUsageView;
 
 public class FileTree
 {

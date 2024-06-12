@@ -21,7 +21,7 @@ public enum SizeSystem
   {
     if (size > 1000000000)
     {
-      return String.format("%.1f Gb", (size / Math.pow(getFactor(), 3)));
+      return String.format("%,.1f Gb", (size / Math.pow(getFactor(), 3)));
     }
     else if (size > 1000000)
     {

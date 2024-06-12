@@ -1,4 +1,4 @@
-package org.kku.jdiskusage.ui;
+package org.kku.jdiskusage.util;
 
 public class OperatingSystemUtil
 {
