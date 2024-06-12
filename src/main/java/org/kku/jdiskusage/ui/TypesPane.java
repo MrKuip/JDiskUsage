@@ -1,4 +1,4 @@
-package org.kku.jdiskusage.ui.main;
+package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.ArrayList;
@@ -12,11 +12,11 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
-import org.kku.jdiskusage.ui.main.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.main.DiskUsageView.FileAggregates;
-import org.kku.jdiskusage.ui.main.DiskUsageView.FileNodeIterator;
-import org.kku.jdiskusage.ui.main.common.AbstractTabContentPane;
-import org.kku.jdiskusage.ui.main.common.AbstractTabContentPane.PaneData;
+import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
+import org.kku.jdiskusage.ui.DiskUsageView.FileAggregates;
+import org.kku.jdiskusage.ui.DiskUsageView.FileNodeIterator;
+import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
+import org.kku.jdiskusage.ui.common.AbstractTabContentPane.PaneData;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.util.Performance;

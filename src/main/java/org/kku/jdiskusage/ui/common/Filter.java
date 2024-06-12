@@ -1,4 +1,4 @@
-package org.kku.jdiskusage.ui.main.common;
+package org.kku.jdiskusage.ui.common;
 
 import java.util.function.Predicate;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;

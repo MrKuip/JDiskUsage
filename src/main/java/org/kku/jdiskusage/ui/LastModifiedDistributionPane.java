@@ -1,17 +1,19 @@
-package org.kku.jdiskusage.ui.main;
+package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
-import org.kku.jdiskusage.ui.main.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.main.DiskUsageView.FileNodeIterator;
-import org.kku.jdiskusage.ui.main.common.AbstractTabContentPane;
+import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
+import org.kku.jdiskusage.ui.DiskUsageView.FileNodeIterator;
+import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
 import org.kku.jdiskusage.ui.util.FxUtil;
+import org.kku.jdiskusage.util.CommonUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
@@ -30,66 +32,62 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 
-public class SizeDistributionPane
+class LastModifiedDistributionPane
   extends AbstractTabContentPane
 {
-  private SizeDistributionPaneData mi_data = new SizeDistributionPaneData();
+  private LastModifiedDistributionPaneData mi_data = new LastModifiedDistributionPaneData();
 
-  public enum SizeDistributionBucket
+  private enum LastModifiedDistributionBucket
   {
-    INVALID("Invalid", -Double.MAX_VALUE, 0),
-    SIZE_0_KB_TO_1_KB("0 KB - 1 KB", kilo_bytes(0), kilo_bytes(1)),
-    SIZE_1_KB_TO_4_KB("1 KB - 4 KB", kilo_bytes(1), kilo_bytes(4)),
-    SIZE_4_KB_TO_16_KB("4 KB - 16 KB", kilo_bytes(4), kilo_bytes(16)),
-    SIZE_16_KB_TO_64_KB("16 KB - 64 KB", kilo_bytes(16), kilo_bytes(64)),
-    SIZE_64_KB_TO_256_KB("64 KB - 256 KB", kilo_bytes(64), kilo_bytes(256)),
-    SIZE_256_KB_TO_1_MB("256 KB - 1 MB", kilo_bytes(256), mega_bytes(1)),
-    SIZE_1_MB_TO_4_MB("1 MB - 4 MB", mega_bytes(1), mega_bytes(4)),
-    SIZE_4_MB_TO_16_MB("4 MB - 16 MB", mega_bytes(4), mega_bytes(16)),
-    SIZE_16_MB_TO_64_MB("16 MB - 64 MB", mega_bytes(16), mega_bytes(64)),
-    SIZE_64_MB_TO_256_MB("64 MB - 256 MB", mega_bytes(64), mega_bytes(256)),
-    SIZE_256_MB_TO_1_GB("256 MB - 1 GB", mega_bytes(256), giga_bytes(1)),
-    SIZE_1_GB_TO_4_GB("1 GB - 4 GB", giga_bytes(1), giga_bytes(4)),
-    SIZE_4_GB_TO_16_GB("4 GB - 16 GB", giga_bytes(4), giga_bytes(16)),
-    SIZE_OVER_16_GB("Over 16 GB", giga_bytes(16), Double.MAX_VALUE);
+    INVALID(() -> translate("Invalid"), Long.MIN_VALUE + 1),
+    LAST_MODIFIED_FUTURE(() -> translate("In the future"), 0),
+    LAST_MODIFIED_TODAY(() -> translate("Today"), days(1)),
+    LAST_MODIFIED_YESTERDAY(() -> translate("Yesterday"), days(2)),
+    LAST_MODIFIED_1_DAY_TILL_7_DAYS(() -> "2 - 7 " + translate("days"), days(8)),
+    LAST_MODIFIED_7_DAYs_TILL_30_DAYS(() -> "7 - 30 " + translate("days"), days(31)),
+    LAST_MODIFIED_30_DAYS_TILL_90_DAYS(() -> "30 - 90 " + translate("days"), days(91)),
+    LAST_MODIFIED_90_DAYS_TILL_180_DAYS(() -> "90 - 180 " + translate("days"), days(181)),
+    LAST_MODIFIED_180_DAYS_TILL_365_DAYS(() -> "180 - 365 " + translate("days"), years(1)),
+    LAST_MODIFIED_1_YEAR_TILL_2_YEAR(() -> "1 - 2 " + translate("years"), years(2)),
+    LAST_MODIFIED_2_YEAR_TILL_3_YEAR(() -> "2 - 3 " + translate("years"), years(3)),
+    LAST_MODIFIED_3_YEAR_TILL_6_YEAR(() -> "3 - 6 " + translate("years"), years(6)),
+    LAST_MODIFIED_6_YEAR_TILL_10_YEAR(() -> "6 - 10 " + translate("years"), years(10)),
+    LAST_MODIFIED_OVER_10_YEARS(() -> translate("Over") + " 10 " + translate("years"), Long.MAX_VALUE);
 
-    private final String mi_text;
-    private final double mi_from;
-    private final double mi_to;
+    private final Supplier<String> mi_text;
+    private final long mi_to;
 
-    SizeDistributionBucket(String text, double from, double to)
+    LastModifiedDistributionBucket(Supplier<String> text, long to)
     {
       mi_text = text;
-      mi_from = from;
       mi_to = to;
     }
 
     public String getText()
     {
-      return translate(mi_text);
+      return mi_text.get();
     }
 
-    double getFrom()
-    {
-      return mi_from;
-    }
-
-    double getTo()
+    long getTo()
     {
       return mi_to;
     }
 
-    static public SizeDistributionBucket findBucket(long value)
+    static public LastModifiedDistributionBucket findBucket(long todayMidnight, long lastModified)
     {
-      int length;
-      SizeDistributionPane.SizeDistributionBucket[] buckets;
+      long ago;
 
-      buckets = SizeDistributionBucket.values();
+      ago = todayMidnight - lastModified;
+
+      int length;
+      LastModifiedDistributionBucket[] buckets;
+
+      buckets = LastModifiedDistributionBucket.values();
       length = buckets.length;
       for (int i = 0; i < length; i++)
       {
         // Buckets are ordered by size. So there is no need to check the getFrom()
-        if (value < buckets[i].getTo())
+        if (ago < buckets[i].getTo())
         {
           return buckets[i];
         }
@@ -98,28 +96,23 @@ public class SizeDistributionPane
       return INVALID;
     }
 
-    static private double kilo_bytes(double value)
+    private static long days(long days)
     {
-      return 1000 * value;
+      return days * 24 * 60 * 60 * 1000;
     }
 
-    static private double mega_bytes(double value)
+    private static long years(long years)
     {
-      return kilo_bytes(value) * 1000;
-    }
-
-    static private double giga_bytes(double value)
-    {
-      return mega_bytes(value) * 1000;
+      return days(years * 365);
     }
   }
 
-  private class SizeDistributionBucketData
+  private class LastModifiedDistributionBucketData
   {
     public long mi_numberOfFiles;
     public long mi_sizeOfFiles;
 
-    public SizeDistributionBucketData(Long numberOfFiles, Long sizeOfFiles)
+    public LastModifiedDistributionBucketData(Long numberOfFiles, Long sizeOfFiles)
     {
       mi_numberOfFiles = numberOfFiles;
       mi_sizeOfFiles = sizeOfFiles;
@@ -140,17 +133,18 @@ public class SizeDistributionPane
     }
   }
 
-  private class SizeDistributionPaneData
+  private class LastModifiedDistributionPaneData
     extends PaneData
   {
-    private Map<SizeDistributionBucket, SizeDistributionBucketData> mi_map;
-    private ObservableList<Entry<SizeDistributionBucket, SizeDistributionBucketData>> mi_list;
+    private final long mi_todayMidnight = CommonUtil.getMidnight();
+    private Map<LastModifiedDistributionBucket, LastModifiedDistributionBucketData> mi_map;
+    private ObservableList<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>> mi_list;
 
-    private SizeDistributionPaneData()
+    private LastModifiedDistributionPaneData()
     {
     }
 
-    public ObservableList<Entry<SizeDistributionBucket, SizeDistributionBucketData>> getList()
+    public ObservableList<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>> getList()
     {
       if (mi_list == null)
       {
@@ -160,24 +154,24 @@ public class SizeDistributionPane
       return mi_list;
     }
 
-    public Map<SizeDistributionBucket, SizeDistributionBucketData> getMap()
+    public Map<LastModifiedDistributionBucket, LastModifiedDistributionBucketData> getMap()
     {
       if (mi_map == null)
       {
-        try (PerformancePoint pp = Performance.start("Collecting data for size distribution"))
+        try (PerformancePoint pp = Performance.start("Collecting data for last modified table"))
         {
           mi_map = new LinkedHashMap<>();
-          Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
-            mi_map.put(bucket, new SizeDistributionBucketData(0l, 0l));
+          Stream.of(LastModifiedDistributionBucket.values()).forEach(bucket -> {
+            mi_map.put(bucket, new LastModifiedDistributionBucketData(0l, 0l));
           });
 
           new FileNodeIterator(getCurrentTreeItem().getValue()).forEach(fn -> {
             if (fn.isFile())
             {
-              SizeDistributionPane.SizeDistributionBucket bucket;
-              SizeDistributionBucketData data;
+              LastModifiedDistributionBucket bucket;
+              LastModifiedDistributionBucketData data;
 
-              bucket = SizeDistributionBucket.findBucket(fn.getSize());
+              bucket = findBucket(fn);
               data = mi_map.get(bucket);
               data.mi_numberOfFiles += 1;
               data.mi_sizeOfFiles += (fn.getSize() / 1000000);
@@ -192,32 +186,32 @@ public class SizeDistributionPane
     @Override
     public void currentTreeItemChanged()
     {
-      mi_map = null;
       mi_list = null;
+      mi_map = null;
     }
 
     @Override
     public void currentDisplayMetricChanged()
     {
-      mi_map = null;
       mi_list = null;
+      mi_map = null;
     }
   }
 
-  SizeDistributionPane(DiskUsageData diskUsageData)
+  LastModifiedDistributionPane(DiskUsageData diskUsageData)
   {
     super(diskUsageData);
 
     createPaneType("PIECHART", "Show details table", "chart-pie", this::getPieChartNode);
-    createPaneType("BARCHART", "Show bar chart", "chart-bar", this::getBarChartNode, true);
+    createPaneType("BARCHART", "Show bar chart", "chart-bar", this::getBarChartNode);
     createPaneType("TABLE", "Show details table", "table", this::getTableNode);
 
     init();
   }
 
-  private SizeDistributionBucket findBucket(FileNodeIF fileNode)
+  private LastModifiedDistributionBucket findBucket(FileNodeIF fileNode)
   {
-    return SizeDistributionBucket.findBucket(fileNode.getSize());
+    return LastModifiedDistributionBucket.findBucket(mi_data.mi_todayMidnight, fileNode.getLastModifiedTime());
   }
 
   Node getPieChartNode()
@@ -226,8 +220,8 @@ public class SizeDistributionPane
 
     pieChart = FxUtil.createPieChart();
     mi_data.getMap().entrySet().forEach(entry -> {
-      SizeDistributionBucket bucket;
-      SizeDistributionBucketData bucketData;
+      LastModifiedDistributionBucket bucket;
+      LastModifiedDistributionBucketData bucketData;
       PieChart.Data data;
 
       bucket = entry.getKey();
@@ -235,7 +229,7 @@ public class SizeDistributionPane
       data = new PieChart.Data(bucket.getText(), bucketData.getSize(getCurrentDisplayMetric()));
       pieChart.getData().add(data);
 
-      addFilter(data.getNode(), "Size", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
+      addFilter(data.getNode(), "Modification date", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
     });
 
     return pieChart;
@@ -246,7 +240,7 @@ public class SizeDistributionPane
     TreeItem<FileNodeIF> treeItem;
 
     treeItem = getDiskUsageData().getSelectedTreeItem();
-    if (!treeItem.getChildren().isEmpty())
+    if (treeItem != null && !treeItem.getChildren().isEmpty())
     {
       GridPane pane;
       NumberAxis xAxis;
@@ -254,29 +248,30 @@ public class SizeDistributionPane
       BarChart<Number, String> barChart;
       XYChart.Series<Number, String> series1;
       XYChart.Series<Number, String> series2;
-      SizeDistributionBucketData dataDefault;
+      LastModifiedDistributionBucketData dataDefault;
 
-      dataDefault = new SizeDistributionBucketData(0l, 0l);
+      dataDefault = new LastModifiedDistributionBucketData(0l, 0l);
+
       pane = new GridPane();
 
       xAxis = new NumberAxis();
       yAxis = new CategoryAxis();
       barChart = FxUtil.createBarChart(xAxis, yAxis);
-      barChart.setTitle(translate("Distribution of file sizes in") + " " + treeItem.getValue().getName());
+      barChart.setTitle(translate("Distribution of last modified dates in") + " " + treeItem.getValue().getName());
       xAxis.setLabel(translate("Number of files"));
-      yAxis.setLabel(translate("File sizes"));
+      yAxis.setLabel(translate("Last modified date"));
 
       series1 = new XYChart.Series<>();
       barChart.getData().add(series1);
 
-      Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
-        SizeDistributionBucketData value;
+      Stream.of(LastModifiedDistributionBucket.values()).forEach(bucket -> {
+        LastModifiedDistributionBucketData value;
         XYChart.Data<Number, String> data;
 
         value = mi_data.getMap().getOrDefault(bucket, dataDefault);
         data = new XYChart.Data<Number, String>(value.mi_numberOfFiles, bucket.getText());
         series1.getData().add(data);
-        addFilter(data.getNode(), "File size", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
+        addFilter(data.getNode(), "Modification date", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
       });
 
       pane.add(barChart, 0, 0);
@@ -287,19 +282,19 @@ public class SizeDistributionPane
       yAxis = new CategoryAxis();
       barChart = FxUtil.createBarChart(xAxis, yAxis);
       xAxis.setLabel(translate("Total size of files (in Gb)"));
-      yAxis.setLabel(translate("File sizes"));
+      yAxis.setLabel(translate("Last modified date"));
 
       series2 = new XYChart.Series<>();
       barChart.getData().add(series2);
 
-      Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
-        SizeDistributionBucketData value;
+      Stream.of(LastModifiedDistributionBucket.values()).forEach(bucket -> {
+        LastModifiedDistributionBucketData value;
         XYChart.Data<Number, String> data;
 
         value = mi_data.getMap().getOrDefault(bucket, dataDefault);
         data = new XYChart.Data<Number, String>(value.mi_sizeOfFiles, bucket.getText());
         series2.getData().add(data);
-        addFilter(data.getNode(), "File size", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
+        addFilter(data.getNode(), "Modification date", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
       });
 
       pane.add(barChart, 0, 1);
@@ -320,25 +315,25 @@ public class SizeDistributionPane
     if (treeItem != null && !treeItem.getChildren().isEmpty())
     {
       GridPane pane;
-      MyTableView<Entry<SizeDistributionBucket, SizeDistributionBucketData>> table;
-      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, String> timeIntervalColumn;
-      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, Long> sumOfFileSizesColumn;
-      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, Long> numberOfFilesColumn;
+      MyTableView<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>> table;
+      MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, String> timeIntervalColumn;
+      MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, Long> sumOfFileSizesColumn;
+      MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, Long> numberOfFilesColumn;
 
       pane = new GridPane();
-      table = new MyTableView<>("SizeDistribution");
+      table = new MyTableView<>("LastModifiedDistribution");
       table.setEditable(false);
 
-      timeIntervalColumn = table.addColumn("Size");
-      timeIntervalColumn.initPersistentPrefWidth(100.0);
+      timeIntervalColumn = table.addColumn("Time interval");
+      timeIntervalColumn.initPersistentPrefWidth(300.0);
       timeIntervalColumn.setCellValueGetter((o) -> o.getKey().getText());
       sumOfFileSizesColumn = table.addColumn("Sum of file sizes");
       sumOfFileSizesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-      sumOfFileSizesColumn.initPersistentPrefWidth(150.0);
+      sumOfFileSizesColumn.initPersistentPrefWidth(100.0);
       sumOfFileSizesColumn.setCellValueGetter((o) -> o.getValue().mi_sizeOfFiles);
       numberOfFilesColumn = table.addColumn("Sum of file sizes");
       numberOfFilesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-      numberOfFilesColumn.initPersistentPrefWidth(150.0);
+      numberOfFilesColumn.initPersistentPrefWidth(100.0);
       numberOfFilesColumn.setCellValueGetter((o) -> o.getValue().mi_numberOfFiles);
 
       table.setItems(mi_data.getList());
@@ -352,4 +347,5 @@ public class SizeDistributionPane
 
     return new Label("No data");
   }
+
 }

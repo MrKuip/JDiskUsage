@@ -1,4 +1,4 @@
-package org.kku.jdiskusage.ui.main;
+package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.Date;
@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
-import org.kku.jdiskusage.ui.main.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.main.DiskUsageView.ObjectWithIndex;
-import org.kku.jdiskusage.ui.main.DiskUsageView.ObjectWithIndexFactory;
-import org.kku.jdiskusage.ui.main.common.AbstractTabContentPane;
+import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
+import org.kku.jdiskusage.ui.DiskUsageView.ObjectWithIndex;
+import org.kku.jdiskusage.ui.DiskUsageView.ObjectWithIndexFactory;
+import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.StreamUtil;

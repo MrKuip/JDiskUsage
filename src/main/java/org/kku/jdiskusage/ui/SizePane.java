@@ -1,8 +1,8 @@
-package org.kku.jdiskusage.ui.main;
+package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-import org.kku.jdiskusage.ui.main.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.main.common.AbstractTabContentPane;
+import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
+import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;

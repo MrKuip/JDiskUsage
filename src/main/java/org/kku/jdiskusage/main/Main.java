@@ -3,7 +3,7 @@ package org.kku.jdiskusage.main;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
-import org.kku.jdiskusage.ui.main.DiskUsageView;
+import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import javafx.application.Application;

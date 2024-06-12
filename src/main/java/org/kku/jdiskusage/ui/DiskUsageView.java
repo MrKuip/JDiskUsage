@@ -1,4 +1,4 @@
-package org.kku.jdiskusage.ui.main;
+package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.nio.file.Path;
@@ -16,9 +16,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
-import org.kku.jdiskusage.ui.main.common.Filter;
-import org.kku.jdiskusage.ui.main.common.FullScreen;
-import org.kku.jdiskusage.ui.main.common.Navigation;
+import org.kku.jdiskusage.ui.common.Filter;
+import org.kku.jdiskusage.ui.common.FullScreen;
+import org.kku.jdiskusage.ui.common.Navigation;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;

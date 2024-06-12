@@ -1,4 +1,4 @@
-package org.kku.jdiskusage.ui.main;
+package org.kku.jdiskusage.ui;
 
 import java.util.List;
 import java.util.stream.Collectors;

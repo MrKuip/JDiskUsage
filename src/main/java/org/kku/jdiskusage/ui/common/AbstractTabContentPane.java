@@ -1,4 +1,4 @@
-package org.kku.jdiskusage.ui.main.common;
+package org.kku.jdiskusage.ui.common;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -7,8 +7,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
-import org.kku.jdiskusage.ui.main.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.main.FileTreePane;
+import org.kku.jdiskusage.ui.FileTreePane;
+import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;

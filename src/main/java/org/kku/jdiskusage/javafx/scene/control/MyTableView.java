@@ -1,10 +1,6 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.stream.Stream;
-import org.kku.jdiskusage.ui.MyTableFilter.Totals;
 import org.kku.jdiskusage.ui.util.TableUtils;
 import javafx.scene.control.Skin;
 import javafx.scene.control.TableColumnBase;
@@ -17,8 +13,6 @@ import javafx.scene.control.skin.TableViewSkin;
 public class MyTableView<T>
   extends TableView<T>
 {
-  private EnumSet<Totals> mi_totalsSet = EnumSet.noneOf(Totals.class);
-
   public MyTableView(String id)
   {
     super();
@@ -80,24 +74,5 @@ public class MyTableView<T>
   public <R> MyTableColumn<T, R> addColumn(String name)
   {
     return addColumn(null, name);
-  }
-
-  @SuppressWarnings("unchecked")
-  public void initTotals()
-  {
-    Stream.of(Totals.values()).forEach(totals -> {
-      if (getColumns().stream().map(MyTableColumn.class::cast).filter(c -> c.hasTotal(totals)).findFirst().isPresent())
-      {
-        @SuppressWarnings("rawtypes")
-        List items = getItems();
-        items.add(totals);
-        mi_totalsSet.add(totals);
-      }
-    });
-  }
-
-  public boolean hasTotals(Totals totals)
-  {
-    return !mi_totalsSet.isEmpty();
   }
 }

@@ -1,7 +1,7 @@
-package org.kku.jdiskusage.ui.main;
+package org.kku.jdiskusage.ui;
 
 import org.controlsfx.control.BreadCrumbBar;
-import org.kku.jdiskusage.ui.main.DiskUsageView.DiskUsageData;
+import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.FileTree.FilterIF;

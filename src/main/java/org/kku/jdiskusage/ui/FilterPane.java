@@ -1,4 +1,4 @@
-package org.kku.jdiskusage.ui.main;
+package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.HashMap;
@@ -11,8 +11,8 @@ import java.util.stream.Stream;
 import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconColor;
 import org.kku.fonticons.ui.FxIcon.IconSize;
-import org.kku.jdiskusage.ui.main.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.main.common.Filter;
+import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
+import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import javafx.geometry.Insets;

@@ -1,4 +1,4 @@
-package org.kku.jdiskusage.ui.main.common;
+package org.kku.jdiskusage.ui.common;
 
 import org.kku.jdiskusage.util.OperatingSystemUtil;
 import javafx.scene.Scene;

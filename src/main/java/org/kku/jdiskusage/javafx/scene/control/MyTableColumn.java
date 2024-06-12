@@ -1,20 +1,16 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
-import java.util.EnumSet;
 import java.util.function.Function;
-import org.kku.jdiskusage.ui.MyTableFilter.Totals;
 import org.kku.jdiskusage.ui.util.FormatterIF;
 import org.kku.jdiskusage.util.ApplicationProperties.Props;
 import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
@@ -29,7 +25,6 @@ public class MyTableColumn<T, R>
   extends TableColumn<T, R>
     implements ApplicationPropertyExtensionIF
 {
-  private EnumSet<Totals> mi_totalsSet = EnumSet.noneOf(Totals.class);
   private FormatterIF<R> mi_formatter;
   private Pos m_alignment;
 
@@ -121,9 +116,6 @@ public class MyTableColumn<T, R>
   {
     this.setCellFactory(column -> {
       TableCell<T, R> cell;
-      MyTableColumn myTableColumn;
-
-      myTableColumn = (MyTableColumn) column;
 
       cell = new TableCell<>()
       {
@@ -178,29 +170,7 @@ public class MyTableColumn<T, R>
         }
       };
 
-      cell.addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>()
-      {
-        @Override
-        public void handle(MouseEvent event)
-        {
-          if (event.getClickCount() > 1)
-          {
-            TableCell c = (TableCell) event.getSource();
-          }
-        }
-      });
-
       return cell;
     });
-  }
-
-  public void addTotals(Totals totals)
-  {
-    mi_totalsSet.add(totals);
-  }
-
-  public boolean hasTotal(Totals totals)
-  {
-    return mi_totalsSet.contains(totals);
   }
 }
