@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
-import org.kku.jdiskusage.ui.ScanFileTreeDialog;
 import org.kku.jdiskusage.ui.main.common.Filter;
 import org.kku.jdiskusage.ui.main.common.FullScreen;
 import org.kku.jdiskusage.ui.main.common.Navigation;

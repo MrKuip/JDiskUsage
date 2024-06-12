@@ -1,4 +1,4 @@
-package org.kku.jdiskusage.ui;
+package org.kku.jdiskusage.ui.main;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.nio.file.Path;
