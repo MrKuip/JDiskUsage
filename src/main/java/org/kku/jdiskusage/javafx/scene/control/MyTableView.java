@@ -58,12 +58,28 @@ public class MyTableView<T>
     };
   }
 
-  public <R> MyTableColumn<T, R> addColumn(String name)
+  @SuppressWarnings(
+  {
+      "rawtypes", "unchecked"
+  })
+  public <R> MyTableColumn<T, R> addColumn(MyTableColumn nestedColumn, String name)
   {
     MyTableColumn<T, R> column;
     column = translate(new MyTableColumn<T, R>(name));
-    getColumns().add(column);
+    if (nestedColumn != null)
+    {
+      nestedColumn.getColumns().add(column);
+    }
+    else
+    {
+      getColumns().add(column);
+    }
     return column;
+  }
+
+  public <R> MyTableColumn<T, R> addColumn(String name)
+  {
+    return addColumn(null, name);
   }
 
   @SuppressWarnings("unchecked")
