@@ -1,20 +1,29 @@
 package org.kku.jdiskusage.ui.main;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
+import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.main.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.main.DiskUsageView.FileNodeIterator;
 import org.kku.jdiskusage.ui.main.common.AbstractTabContentPane;
 import org.kku.jdiskusage.ui.util.FxUtil;
-import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
+import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
+import org.kku.jdiskusage.util.preferences.DisplayMetric;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
@@ -24,6 +33,8 @@ import javafx.scene.layout.Priority;
 public class SizeDistributionPane
   extends AbstractTabContentPane
 {
+  private SizeDistributionPaneData mi_data = new SizeDistributionPaneData();
+
   public enum SizeDistributionBucket
   {
     INVALID("Invalid", -Double.MAX_VALUE, 0),
@@ -68,7 +79,7 @@ public class SizeDistributionPane
       return mi_to;
     }
 
-    static public SizeDistributionPane.SizeDistributionBucket findBucket(long value)
+    static public SizeDistributionBucket findBucket(long value)
     {
       int length;
       SizeDistributionPane.SizeDistributionBucket[] buckets;
@@ -113,6 +124,84 @@ public class SizeDistributionPane
       mi_numberOfFiles = numberOfFiles;
       mi_sizeOfFiles = sizeOfFiles;
     }
+
+    public double getSize(DisplayMetric currentDisplayMetric)
+    {
+      switch (currentDisplayMetric)
+      {
+        case FILE_COUNT:
+          return mi_numberOfFiles;
+        case FILE_SIZE:
+          return mi_sizeOfFiles;
+        default:
+          break;
+      }
+      return 0;
+    }
+  }
+
+  private class SizeDistributionPaneData
+    extends PaneData
+  {
+    private Map<SizeDistributionBucket, SizeDistributionBucketData> mi_map;
+    private ObservableList<Entry<SizeDistributionBucket, SizeDistributionBucketData>> mi_list;
+
+    private SizeDistributionPaneData()
+    {
+    }
+
+    public ObservableList<Entry<SizeDistributionBucket, SizeDistributionBucketData>> getList()
+    {
+      if (mi_list == null)
+      {
+        mi_list = mi_map.entrySet().stream().collect(Collectors.toCollection(FXCollections::observableArrayList));
+      }
+
+      return mi_list;
+    }
+
+    public Map<SizeDistributionBucket, SizeDistributionBucketData> getMap()
+    {
+      if (mi_map == null)
+      {
+        try (PerformancePoint pp = Performance.start("Collecting data for size distribution"))
+        {
+          mi_map = new LinkedHashMap<>();
+          Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
+            mi_map.put(bucket, new SizeDistributionBucketData(0l, 0l));
+          });
+
+          new FileNodeIterator(getCurrentTreeItem().getValue()).forEach(fn -> {
+            if (fn.isFile())
+            {
+              SizeDistributionPane.SizeDistributionBucket bucket;
+              SizeDistributionBucketData data;
+
+              bucket = SizeDistributionBucket.findBucket(fn.getSize());
+              data = mi_map.get(bucket);
+              data.mi_numberOfFiles += 1;
+              data.mi_sizeOfFiles += (fn.getSize() / 1000000);
+            }
+          });
+        }
+      }
+
+      return mi_map;
+    }
+
+    @Override
+    public void currentTreeItemChanged()
+    {
+      mi_map = null;
+      mi_list = null;
+    }
+
+    @Override
+    public void currentDisplayMetricChanged()
+    {
+      mi_map = null;
+      mi_list = null;
+    }
   }
 
   SizeDistributionPane(DiskUsageData diskUsageData)
@@ -126,9 +215,30 @@ public class SizeDistributionPane
     init();
   }
 
+  private SizeDistributionBucket findBucket(FileNodeIF fileNode)
+  {
+    return SizeDistributionBucket.findBucket(fileNode.getSize());
+  }
+
   Node getPieChartNode()
   {
-    return new Label("Pie chart");
+    PieChart pieChart;
+
+    pieChart = FxUtil.createPieChart();
+    mi_data.getMap().entrySet().forEach(entry -> {
+      SizeDistributionBucket bucket;
+      SizeDistributionBucketData bucketData;
+      PieChart.Data data;
+
+      bucket = entry.getKey();
+      bucketData = entry.getValue();
+      data = new PieChart.Data(bucket.getText(), bucketData.getSize(getCurrentDisplayMetric()));
+      pieChart.getData().add(data);
+
+      addFilter(data.getNode(), "Size", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
+    });
+
+    return pieChart;
   }
 
   Node getBarChartNode()
@@ -144,33 +254,10 @@ public class SizeDistributionPane
       BarChart<Number, String> barChart;
       XYChart.Series<Number, String> series1;
       XYChart.Series<Number, String> series2;
-      FileNodeIF node;
-      Map<SizeDistributionPane.SizeDistributionBucket, SizeDistributionBucketData> map;
-      Map<SizeDistributionPane.SizeDistributionBucket, SizeDistributionBucketData> map2;
       SizeDistributionBucketData dataDefault;
 
       dataDefault = new SizeDistributionBucketData(0l, 0l);
-
       pane = new GridPane();
-
-      node = treeItem.getValue();
-
-      try (PerformancePoint pp = Performance.start("Collecting data for last modified barchart"))
-      {
-        map = new HashMap<>();
-        new FileNodeIterator(node).forEach(fn -> {
-          if (fn.isFile())
-          {
-            SizeDistributionPane.SizeDistributionBucket bucket;
-            SizeDistributionBucketData data;
-
-            bucket = SizeDistributionBucket.findBucket(fn.getSize());
-            data = map.computeIfAbsent(bucket, (a) -> new SizeDistributionBucketData(0l, 0l));
-            data.mi_numberOfFiles += 1;
-            data.mi_sizeOfFiles += (fn.getSize() / 1000000);
-          }
-        });
-      }
 
       xAxis = new NumberAxis();
       yAxis = new CategoryAxis();
@@ -180,13 +267,18 @@ public class SizeDistributionPane
       yAxis.setLabel(translate("File sizes"));
 
       series1 = new XYChart.Series<>();
+      barChart.getData().add(series1);
+
       Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
         SizeDistributionBucketData value;
-        value = map.getOrDefault(bucket, dataDefault);
-        series1.getData().add(new XYChart.Data<Number, String>(value.mi_numberOfFiles, bucket.getText()));
+        XYChart.Data<Number, String> data;
+
+        value = mi_data.getMap().getOrDefault(bucket, dataDefault);
+        data = new XYChart.Data<Number, String>(value.mi_numberOfFiles, bucket.getText());
+        series1.getData().add(data);
+        addFilter(data.getNode(), "File size", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
       });
 
-      barChart.getData().add(series1);
       pane.add(barChart, 0, 0);
       GridPane.setHgrow(barChart, Priority.ALWAYS);
       GridPane.setVgrow(barChart, Priority.ALWAYS);
@@ -198,13 +290,18 @@ public class SizeDistributionPane
       yAxis.setLabel(translate("File sizes"));
 
       series2 = new XYChart.Series<>();
+      barChart.getData().add(series2);
+
       Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
         SizeDistributionBucketData value;
-        value = map.getOrDefault(bucket, dataDefault);
-        series2.getData().add(new XYChart.Data<Number, String>(value.mi_sizeOfFiles, bucket.getText()));
+        XYChart.Data<Number, String> data;
+
+        value = mi_data.getMap().getOrDefault(bucket, dataDefault);
+        data = new XYChart.Data<Number, String>(value.mi_sizeOfFiles, bucket.getText());
+        series2.getData().add(data);
+        addFilter(data.getNode(), "File size", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
       });
 
-      barChart.getData().add(series2);
       pane.add(barChart, 0, 1);
       GridPane.setHgrow(barChart, Priority.ALWAYS);
       GridPane.setVgrow(barChart, Priority.ALWAYS);
@@ -217,6 +314,42 @@ public class SizeDistributionPane
 
   Node getTableNode()
   {
-    return new Label("Table");
+    TreeItem<FileNodeIF> treeItem;
+
+    treeItem = getDiskUsageData().getSelectedTreeItem();
+    if (treeItem != null && !treeItem.getChildren().isEmpty())
+    {
+      GridPane pane;
+      MyTableView<Entry<SizeDistributionBucket, SizeDistributionBucketData>> table;
+      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, String> timeIntervalColumn;
+      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, Long> sumOfFileSizesColumn;
+      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, Long> numberOfFilesColumn;
+
+      pane = new GridPane();
+      table = new MyTableView<>("SizeDistribution");
+      table.setEditable(false);
+
+      timeIntervalColumn = table.addColumn("Size");
+      timeIntervalColumn.initPersistentPrefWidth(100.0);
+      timeIntervalColumn.setCellValueGetter((o) -> o.getKey().getText());
+      sumOfFileSizesColumn = table.addColumn("Sum of file sizes");
+      sumOfFileSizesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+      sumOfFileSizesColumn.initPersistentPrefWidth(150.0);
+      sumOfFileSizesColumn.setCellValueGetter((o) -> o.getValue().mi_sizeOfFiles);
+      numberOfFilesColumn = table.addColumn("Sum of file sizes");
+      numberOfFilesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+      numberOfFilesColumn.initPersistentPrefWidth(150.0);
+      numberOfFilesColumn.setCellValueGetter((o) -> o.getValue().mi_numberOfFiles);
+
+      table.setItems(mi_data.getList());
+
+      pane.add(table, 0, 1);
+      GridPane.setHgrow(table, Priority.ALWAYS);
+      GridPane.setVgrow(table, Priority.ALWAYS);
+
+      return pane;
+    }
+
+    return new Label("No data");
   }
 }
