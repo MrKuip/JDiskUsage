@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -20,6 +19,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kku.jdiskusage.ui.DiskUsageView;
+import org.kku.jdiskusage.ui.OperatingSystemUtil;
 
 public class FileTree
 {
@@ -276,37 +276,29 @@ public class FileTree
     private final long mi_size;
     private final long mi_lastModifiedTime;
 
-    private FileNode(Path path)
+    private FileNode(Path path, BasicFileAttributes basicAttributes)
     {
       super(path.getFileName().toString());
 
       mi_fileType = determineFileType(getName());
 
       Map<String, Object> unixAttributes;
-      BasicFileAttributes basicAttributes;
 
       unixAttributes = null;
-      basicAttributes = null;
-
-      try
+      if (OperatingSystemUtil.isLinux())
       {
-        unixAttributes = Files.readAttributes(path, ATTRIBUTE_IDS);
-      }
-      catch (Exception e)
-      {
+        try
+        {
+          unixAttributes = Files.readAttributes(path, ATTRIBUTE_IDS);
+        }
+        catch (Exception e)
+        {
+        }
       }
 
       mi_inodeNumber = unixAttributes == null ? -1 : ((Long) UnixAttribute.INODE.get(unixAttributes)).intValue();
       mi_numberOfLinks = unixAttributes == null ? -1
           : ((Integer) UnixAttribute.NUMBER_OF_LINKS.get(unixAttributes)).intValue();
-
-      try
-      {
-        basicAttributes = Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
-      }
-      catch (Exception e)
-      {
-      }
 
       mi_size = basicAttributes == null ? -1 : basicAttributes.size();
       mi_lastModifiedTime = basicAttributes == null ? -1 : basicAttributes.lastModifiedTime().toMillis();
@@ -481,8 +473,7 @@ public class FileTree
       {
         FileNode node;
 
-        //System.out.println("file:" + file.toString() + " add to " + mi_parentNodeStack.peek());
-        node = new FileNode(file);
+        node = new FileNode(file, attrs);
         mi_parentNodeStack.peek().addChild(node);
         mi_numberOfFiles++;
 
@@ -579,7 +570,7 @@ public class FileTree
     try
     {
       String pathName = "/media/kees/CubeSSD/export/hoorn/snapshot_001_2024_03_13__11_53_56/";
-      pathName = "/home/kees";
+      //pathName = "/home/kees";
       Path path = Path.of(args.length >= 1 ? args[0] : pathName);
       StopWatch sw = new StopWatch();
       FileTree ft = new FileTree(path);

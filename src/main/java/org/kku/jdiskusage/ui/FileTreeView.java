@@ -106,12 +106,6 @@ public class FileTreeView
     {
       super(node);
 
-      if (node.toString().contains("home") && node.toString().contains("snap"))
-      {
-        System.out.println("node = " + node.getClass());
-        System.out.println("pathName = " + node.toString());
-      }
-
       // Release memory
       expandedProperty().addListener((observable, wasExpanded, isExpanded) -> {
         if (wasExpanded && !isExpanded && !mi_isFirstTimeChildren)

@@ -38,7 +38,8 @@ import org.kku.jdiskusage.util.CommonUtil;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.FileTree.FilterIF;
-import org.kku.jdiskusage.util.StopWatch;
+import org.kku.jdiskusage.util.Performance;
+import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.StreamUtil;
 import org.kku.jdiskusage.util.Translator;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
@@ -215,7 +216,6 @@ public class DiskUsageView
     showFileSizeButton = new ToggleButton("", IconUtil.createIconNode("sigma", IconSize.SMALL));
     showFileSizeButton.setTooltip(translate(new Tooltip("Show file size")));
     showFileSizeButton.setToggleGroup(showDisplayMetricGroup);
-    System.out.println(AppPreferences.displayMetricPreference.get());
     showFileSizeButton.setSelected(DisplayMetric.FILE_SIZE == AppPreferences.displayMetricPreference.get());
     showFileSizeButton.setOnAction((e) -> {
       AppPreferences.displayMetricPreference.set(DisplayMetric.FILE_SIZE);
@@ -723,14 +723,12 @@ public class DiskUsageView
 
       Node fillContent(DiskUsageMainData mainData)
       {
-        StopWatch sw;
         Node node;
 
-        sw = new StopWatch();
-        sw.start();
-
-        node = m_fillContent.apply(mainData);
-        System.out.println("fillContent took: " + sw.getElapsedTime());
+        try (PerformancePoint pp = Performance.start("Filling content for %s", getName()))
+        {
+          node = m_fillContent.apply(mainData);
+        }
 
         return node;
       }
@@ -811,7 +809,7 @@ public class DiskUsageView
       mi_contentByTabId.clear();
 
       selectedTab = mi_tabPane.getSelectionModel().getSelectedItem();
-      m_diskUsageMainData.mi_tabPaneData.fillContent(selectedTab, m_diskUsageMainData.getSelectedTreeItem());
+      //m_diskUsageMainData.mi_tabPaneData.fillContent(selectedTab, m_diskUsageMainData.getSelectedTreeItem());
 
       m_diskUsageMainData.mi_navigation.navigateTo(m_diskUsageMainData.getSelectedTreeItem());
     }
@@ -1109,16 +1107,14 @@ public class DiskUsageView
 
         node = treeItem.getValue();
 
-        StopWatch sw = new StopWatch();
-        sw.start();
+        try (PerformancePoint pp = Performance.start("Collecting data for top 50 table"))
+        {
+          fnList = node.streamNode().filter(FileNodeIF::isFile)
+              .collect(StreamUtil.createTopCollector(FileNodeIF.getSizeComparator(), 50));
 
-        fnList = node.streamNode().filter(FileNodeIF::isFile)
-            .collect(StreamUtil.createTopCollector(FileNodeIF.getSizeComparator(), 50));
-
-        list = fnList.stream().map(objectWithIndexFactory::create)
-            .collect(Collectors.toCollection(FXCollections::observableArrayList));
-
-        System.out.println("stream top 50 size took " + sw.getElapsedTime() + " msec.");
+          list = fnList.stream().map(objectWithIndexFactory::create)
+              .collect(Collectors.toCollection(FXCollections::observableArrayList));
+        }
 
         table = new MyTableView<>("Top50");
         table.setEditable(false);
@@ -1294,24 +1290,22 @@ public class DiskUsageView
 
         node = treeItem.getValue();
 
-        StopWatch sw = new StopWatch();
-        sw.start();
+        try (PerformancePoint pp = Performance.start("Collecting data for last modified barchart"))
+        {
+          map = new HashMap<>();
+          new FileNodeIterator(node).forEach(fn -> {
+            if (fn.isFile())
+            {
+              SizeDistributionBucket bucket;
+              SizeDistributionBucketData data;
 
-        map = new HashMap<>();
-        new FileNodeIterator(node).forEach(fn -> {
-          if (fn.isFile())
-          {
-            SizeDistributionBucket bucket;
-            SizeDistributionBucketData data;
-
-            bucket = SizeDistributionBucket.findBucket(fn.getSize());
-            data = map.computeIfAbsent(bucket, (a) -> new SizeDistributionBucketData(0l, 0l));
-            data.mi_numberOfFiles += 1;
-            data.mi_sizeOfFiles += (fn.getSize() / 1000000);
-          }
-        });
-
-        System.out.println("stream size distribution took " + sw.getElapsedTime() + " msec.");
+              bucket = SizeDistributionBucket.findBucket(fn.getSize());
+              data = map.computeIfAbsent(bucket, (a) -> new SizeDistributionBucketData(0l, 0l));
+              data.mi_numberOfFiles += 1;
+              data.mi_sizeOfFiles += (fn.getSize() / 1000000);
+            }
+          });
+        }
 
         xAxis = new NumberAxis();
         yAxis = new CategoryAxis();
@@ -1482,30 +1476,26 @@ public class DiskUsageView
         MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, Long> numberOfFilesColumn;
 
         pane = new GridPane();
-
         node = treeItem.getValue();
-        /*
-        map = node.streamNode().filter(FileNodeIF::isFile)
-            .collect(Collectors.groupingBy(this::findBucket, Collectors.teeing(Collectors.counting(),
-                Collectors.summingLong(fileNode -> fileNode.getSize() / 1000000),
-                (numberOfFiles, sizeOfFiles) -> new LastModifiedDistributionBucketData(numberOfFiles, sizeOfFiles))));
-                */
 
-        map = new HashMap<>();
-        new FileNodeIterator(node).forEach(fn -> {
-          if (fn.isFile())
-          {
-            LastModifiedDistributionBucket bucket;
-            LastModifiedDistributionBucketData data;
+        try (PerformancePoint pp = Performance.start("Collecting data for last modified table"))
+        {
+          map = new HashMap<>();
+          new FileNodeIterator(node).forEach(fn -> {
+            if (fn.isFile())
+            {
+              LastModifiedDistributionBucket bucket;
+              LastModifiedDistributionBucketData data;
 
-            bucket = findBucket(fn);
-            data = map.computeIfAbsent(bucket, (a) -> new LastModifiedDistributionBucketData(0l, 0l));
-            data.mi_numberOfFiles += 1;
-            data.mi_sizeOfFiles += (fn.getSize() / 1000000);
-          }
-        });
+              bucket = findBucket(fn);
+              data = map.computeIfAbsent(bucket, (a) -> new LastModifiedDistributionBucketData(0l, 0l));
+              data.mi_numberOfFiles += 1;
+              data.mi_sizeOfFiles += (fn.getSize() / 1000000);
+            }
+          });
 
-        list = map.entrySet().stream().collect(Collectors.toCollection(FXCollections::observableArrayList));
+          list = map.entrySet().stream().collect(Collectors.toCollection(FXCollections::observableArrayList));
+        }
 
         table = new MyTableView<>("LastModifiedDistribution");
         table.setEditable(false);
@@ -1740,25 +1730,23 @@ public class DiskUsageView
         MyTableView<Entry<String, FileAggregates>> table;
         MyTableColumn<Entry<String, FileAggregates>, String> extensionColumn;
         MyTableColumn<Entry<String, FileAggregates>, Long> fileSizeColumn;
+        MyTableColumn<Entry<String, FileAggregates>, Long> fileSizeBytesColumn;
         MyTableColumn<Entry<String, FileAggregates>, Double> fileSizePercentageColumn;
         MyTableColumn<Entry<String, FileAggregates>, Long> numberOfFilesColumn;
+        MyTableColumn<Entry<String, FileAggregates>, Long> numberOfFilesCountColumn;
         MyTableColumn<Entry<String, FileAggregates>, Double> numberOfFilesPercentageColumn;
         Map<String, FileAggregates> fullMap;
         long totalFileSize;
         long totalNumberOfFiles;
 
-        StopWatch sw = new StopWatch();
-        sw.start();
+        try (PerformancePoint pp = Performance.start("Collecting data for types table"))
+        {
+          fullMap = mi_data.getFullMap();
+          list = fullMap.entrySet().stream().collect(Collectors.toCollection(FXCollections::observableArrayList));
 
-        fullMap = mi_data.getFullMap();
-        list = fullMap.entrySet().stream().collect(Collectors.toCollection(FXCollections::observableArrayList));
-
-        totalFileSize = fullMap.values().stream().map(FileAggregates::getFileSize).reduce(0l, (a, b) -> a + b);
-        System.out.println("totalFileSize = " + totalFileSize);
-        totalNumberOfFiles = fullMap.values().stream().map(FileAggregates::getFileCount).reduce(0l, (a, b) -> a + b);
-        System.out.println("totalNumberOfFiles = " + totalNumberOfFiles);
-
-        System.out.println("Types table took " + sw.getElapsedTime() + " msec.");
+          totalFileSize = fullMap.values().stream().map(FileAggregates::getFileSize).reduce(0l, (a, b) -> a + b);
+          totalNumberOfFiles = fullMap.values().stream().map(FileAggregates::getFileCount).reduce(0l, (a, b) -> a + b);
+        }
 
         table = new MyTableView<>("File types in %d");
         table.setEditable(false);
@@ -1767,25 +1755,29 @@ public class DiskUsageView
         extensionColumn.initPersistentPrefWidth(100.0);
         extensionColumn.setCellValueGetter(Entry::getKey);
 
-        fileSizeColumn = table.addColumn("File sizes");
-        fileSizeColumn.initPersistentPrefWidth(200.0);
-        fileSizeColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
-        fileSizeColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-        fileSizeColumn.setCellValueGetter((e) -> e.getValue().getFileSize());
+        fileSizeColumn = table.addColumn("File size");
 
-        fileSizePercentageColumn = table.addColumn("%");
+        fileSizeBytesColumn = table.addColumn(fileSizeColumn, "Bytes");
+        fileSizeBytesColumn.initPersistentPrefWidth(200.0);
+        fileSizeBytesColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
+        fileSizeBytesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+        fileSizeBytesColumn.setCellValueGetter((e) -> e.getValue().getFileSize());
+
+        fileSizePercentageColumn = table.addColumn(fileSizeColumn, "%");
         fileSizePercentageColumn.initPersistentPrefWidth(200.0);
         fileSizePercentageColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2f %%"));
         fileSizePercentageColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
         fileSizePercentageColumn.setCellValueGetter((e) -> (e.getValue().getFileSize() * 100.0) / totalFileSize);
 
-        numberOfFilesColumn = table.addColumn("# Files");
-        numberOfFilesColumn.initPersistentPrefWidth(200.0);
-        numberOfFilesColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
-        numberOfFilesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-        numberOfFilesColumn.setCellValueGetter((e) -> e.getValue().getFileCount());
+        numberOfFilesColumn = table.addColumn("Number of Files");
 
-        numberOfFilesPercentageColumn = table.addColumn("%");
+        numberOfFilesCountColumn = table.addColumn(numberOfFilesColumn, "Count");
+        numberOfFilesCountColumn.initPersistentPrefWidth(200.0);
+        numberOfFilesCountColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
+        numberOfFilesCountColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+        numberOfFilesCountColumn.setCellValueGetter((e) -> e.getValue().getFileCount());
+
+        numberOfFilesPercentageColumn = table.addColumn(numberOfFilesColumn, "%");
         numberOfFilesPercentageColumn.initPersistentPrefWidth(200.0);
         numberOfFilesPercentageColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2f %%"));
         numberOfFilesPercentageColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
@@ -2026,7 +2018,6 @@ public class DiskUsageView
 
     public ObjectWithIndex<T> create(T object)
     {
-      System.out.println("create object " + nextRank);
       return new ObjectWithIndex<>(object, nextRank++);
     }
   }

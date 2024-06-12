@@ -361,7 +361,6 @@ public class DirectoryChooser
       }
       catch (IOException e)
       {
-        System.out.println(e);
         return;
       }
     }
