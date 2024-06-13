@@ -39,7 +39,6 @@ public class TableUtils
   public static class TableKeyEventHandler
       implements EventHandler<KeyEvent>
   {
-
     KeyCodeCombination copyKeyCodeCompination = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_ANY);
 
     @Override

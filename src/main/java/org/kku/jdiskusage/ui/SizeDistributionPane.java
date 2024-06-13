@@ -140,70 +140,6 @@ public class SizeDistributionPane
     }
   }
 
-  private class SizeDistributionPaneData
-    extends PaneData
-  {
-    private Map<SizeDistributionBucket, SizeDistributionBucketData> mi_map;
-    private ObservableList<Entry<SizeDistributionBucket, SizeDistributionBucketData>> mi_list;
-
-    private SizeDistributionPaneData()
-    {
-    }
-
-    public ObservableList<Entry<SizeDistributionBucket, SizeDistributionBucketData>> getList()
-    {
-      if (mi_list == null)
-      {
-        mi_list = mi_map.entrySet().stream().collect(Collectors.toCollection(FXCollections::observableArrayList));
-      }
-
-      return mi_list;
-    }
-
-    public Map<SizeDistributionBucket, SizeDistributionBucketData> getMap()
-    {
-      if (mi_map == null)
-      {
-        try (PerformancePoint pp = Performance.start("Collecting data for size distribution"))
-        {
-          mi_map = new LinkedHashMap<>();
-          Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
-            mi_map.put(bucket, new SizeDistributionBucketData(0l, 0l));
-          });
-
-          new FileNodeIterator(getCurrentTreeItem().getValue()).forEach(fn -> {
-            if (fn.isFile())
-            {
-              SizeDistributionPane.SizeDistributionBucket bucket;
-              SizeDistributionBucketData data;
-
-              bucket = SizeDistributionBucket.findBucket(fn.getSize());
-              data = mi_map.get(bucket);
-              data.mi_numberOfFiles += 1;
-              data.mi_sizeOfFiles += (fn.getSize() / 1000000);
-            }
-          });
-        }
-      }
-
-      return mi_map;
-    }
-
-    @Override
-    public void currentTreeItemChanged()
-    {
-      mi_map = null;
-      mi_list = null;
-    }
-
-    @Override
-    public void currentDisplayMetricChanged()
-    {
-      mi_map = null;
-      mi_list = null;
-    }
-  }
-
   SizeDistributionPane(DiskUsageData diskUsageData)
   {
     super(diskUsageData);
@@ -329,6 +265,7 @@ public class SizeDistributionPane
       table = new MyTableView<>("SizeDistribution");
       table.setEditable(false);
 
+      table.addRankColumn("Rank");
       timeIntervalColumn = table.addColumn("Size");
       timeIntervalColumn.initPersistentPrefWidth(100.0);
       timeIntervalColumn.setCellValueGetter((o) -> o.getKey().getText());
@@ -351,5 +288,62 @@ public class SizeDistributionPane
     }
 
     return new Label("No data");
+  }
+
+  private class SizeDistributionPaneData
+    extends PaneData
+  {
+    private Map<SizeDistributionBucket, SizeDistributionBucketData> mi_map;
+    private ObservableList<Entry<SizeDistributionBucket, SizeDistributionBucketData>> mi_list;
+
+    private SizeDistributionPaneData()
+    {
+    }
+
+    public ObservableList<Entry<SizeDistributionBucket, SizeDistributionBucketData>> getList()
+    {
+      if (mi_list == null)
+      {
+        mi_list = mi_map.entrySet().stream().collect(Collectors.toCollection(FXCollections::observableArrayList));
+      }
+
+      return mi_list;
+    }
+
+    public Map<SizeDistributionBucket, SizeDistributionBucketData> getMap()
+    {
+      if (mi_map == null)
+      {
+        try (PerformancePoint pp = Performance.start("Collecting data for size distribution"))
+        {
+          mi_map = new LinkedHashMap<>();
+          Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
+            mi_map.put(bucket, new SizeDistributionBucketData(0l, 0l));
+          });
+
+          new FileNodeIterator(getCurrentTreeItem().getValue()).forEach(fn -> {
+            if (fn.isFile())
+            {
+              SizeDistributionPane.SizeDistributionBucket bucket;
+              SizeDistributionBucketData data;
+
+              bucket = SizeDistributionBucket.findBucket(fn.getSize());
+              data = mi_map.get(bucket);
+              data.mi_numberOfFiles += 1;
+              data.mi_sizeOfFiles += (fn.getSize() / 1000000);
+            }
+          });
+        }
+      }
+
+      return mi_map;
+    }
+
+    @Override
+    public void reset()
+    {
+      mi_map = null;
+      mi_list = null;
+    }
   }
 }

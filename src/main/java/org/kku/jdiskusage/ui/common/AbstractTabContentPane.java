@@ -26,11 +26,12 @@ import javafx.scene.layout.BorderPane;
 abstract public class AbstractTabContentPane
 {
   private DiskUsageData m_diskUsageData;
-  private Map<String, AbstractTabContentPane.PaneType> m_paneTypeByIdMap = new LinkedHashMap<>();
+  private PaneData m_paneData;
+  private Map<String, PaneType> m_paneTypeByIdMap = new LinkedHashMap<>();
   private final BorderPane mi_node = new BorderPane();
   private final SegmentedButton mi_segmentedButton = new SegmentedButton();
-  private AbstractTabContentPane.PaneType mi_currentPaneType;
-  private Map<AbstractTabContentPane.PaneType, Node> mi_nodeByPaneTypeMap = new HashMap<>();
+  private PaneType mi_currentPaneType;
+  private Map<PaneType, Node> mi_nodeByPaneTypeMap = new HashMap<>();
   private FileTreePane mi_currentTreePaneData;
   private TreeItem<FileNodeIF> mi_currentTreeItem;
 
@@ -42,12 +43,26 @@ abstract public class AbstractTabContentPane
     m_diskUsageData = diskUsageData;
   }
 
+  public void reset()
+  {
+    mi_nodeByPaneTypeMap.clear();
+    if (m_paneData != null)
+    {
+      m_paneData.reset();
+    }
+  }
+
+  protected BorderPane getNode()
+  {
+    return mi_node;
+  }
+
   protected DiskUsageData getDiskUsageData()
   {
     return m_diskUsageData;
   }
 
-  protected void init()
+  protected final void init()
   {
     m_paneTypeByIdMap.values().stream().map(paneType -> {
       ToggleButton button;
@@ -64,7 +79,7 @@ abstract public class AbstractTabContentPane
       }
       button.setUserData(paneType);
       button.setOnAction((ae) -> {
-        setCurrentPaneType((AbstractTabContentPane.PaneType) ((Node) ae.getSource()).getUserData());
+        setCurrentPaneType((PaneType) ((Node) ae.getSource()).getUserData());
       });
       if (mi_currentPaneType == paneType)
       {
@@ -80,16 +95,15 @@ abstract public class AbstractTabContentPane
     mi_node.setBottom(mi_segmentedButton);
   }
 
-  protected AbstractTabContentPane.PaneType createPaneType(String paneTypeId, String description, String iconName,
-      Supplier<Node> node)
+  protected PaneType createPaneType(String paneTypeId, String description, String iconName, Supplier<Node> node)
   {
     return createPaneType(paneTypeId, description, iconName, node, false);
   }
 
-  protected AbstractTabContentPane.PaneType createPaneType(String paneTypeId, String description, String iconName,
-      Supplier<Node> node, boolean current)
+  protected PaneType createPaneType(String paneTypeId, String description, String iconName, Supplier<Node> node,
+      boolean current)
   {
-    AbstractTabContentPane.PaneType paneType;
+    PaneType paneType;
 
     paneType = m_paneTypeByIdMap.computeIfAbsent(paneTypeId,
         (panelTypeId) -> new PaneType(description, iconName, node));
@@ -101,7 +115,7 @@ abstract public class AbstractTabContentPane
     return paneType;
   }
 
-  private void setCurrentPaneType(AbstractTabContentPane.PaneType paneType)
+  private void setCurrentPaneType(PaneType paneType)
   {
     mi_currentPaneType = paneType;
     initCurrentNode();
@@ -112,6 +126,7 @@ abstract public class AbstractTabContentPane
     if (mi_currentPaneType != null)
     {
       mi_node.setCenter(mi_nodeByPaneTypeMap.computeIfAbsent(mi_currentPaneType, type -> {
+
         return type.node().get();
       }));
     }
@@ -131,7 +146,7 @@ abstract public class AbstractTabContentPane
     return AppPreferences.displayMetricPreference.get();
   }
 
-  public Node getNode(FileTreePane treePaneData)
+  public Node initNode(FileTreePane treePaneData)
   {
     if (mi_currentTreePaneData != treePaneData || getCurrentTreeItem() != m_diskUsageData.getSelectedTreeItem())
     {
@@ -153,35 +168,19 @@ abstract public class AbstractTabContentPane
 
   public abstract class PaneData
   {
-    private TreeItem<FileNodeIF> mii_currentTreeItem;
-    private DisplayMetric mii_currentDisplayMetric;
-
     public PaneData()
     {
+      m_diskUsageData.getSelectedTreeItemProperty().addListener((o, oldValue, newValue) -> reset());
+      AppPreferences.displayMetricPreference.addListener((o, oldValue, newValue) -> reset());
+
+      m_paneData = this;
     }
-
-    public abstract void currentTreeItemChanged();
-
-    public abstract void currentDisplayMetricChanged();
 
     public DisplayMetric getCurrentDisplayMetric()
     {
-      return mii_currentDisplayMetric;
+      return AppPreferences.displayMetricPreference.get();
     }
 
-    protected void checkInitData()
-    {
-      if (mii_currentTreeItem != m_diskUsageData.getSelectedTreeItem())
-      {
-        mii_currentTreeItem = m_diskUsageData.getSelectedTreeItem();
-        currentTreeItemChanged();
-      }
-
-      if (mii_currentDisplayMetric != AbstractTabContentPane.this.getCurrentDisplayMetric())
-      {
-        mii_currentDisplayMetric = AbstractTabContentPane.this.getCurrentDisplayMetric();
-        currentDisplayMetricChanged();
-      }
-    }
+    protected abstract void reset();
   }
 }

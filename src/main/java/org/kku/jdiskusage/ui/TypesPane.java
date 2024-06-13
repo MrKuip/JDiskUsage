@@ -169,6 +169,8 @@ class TypesPane
       table = new MyTableView<>("File types in %d");
       table.setEditable(false);
 
+      table.addRankColumn("Rank");
+
       extensionColumn = table.addColumn("Extension");
       extensionColumn.initPersistentPrefWidth(100.0);
       extensionColumn.setCellValueGetter(Entry::getKey);
@@ -222,7 +224,6 @@ class TypesPane
 
     private Map<String, FileAggregates> getFullMap()
     {
-      checkInitData();
       if (mi_fullMap == null)
       {
         mi_fullMap = new HashMap<String, FileAggregates>();
@@ -248,7 +249,6 @@ class TypesPane
 
     private Map<String, FileAggregates> getReducedMap()
     {
-      checkInitData();
       if (mi_reducedMap == null)
       {
         long totalCount;
@@ -275,15 +275,9 @@ class TypesPane
     }
 
     @Override
-    public void currentTreeItemChanged()
+    public void reset()
     {
       mi_fullMap = null;
-      mi_reducedMap = null;
-    }
-
-    @Override
-    public void currentDisplayMetricChanged()
-    {
       mi_reducedMap = null;
     }
   }

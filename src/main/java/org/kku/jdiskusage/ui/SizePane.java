@@ -60,7 +60,10 @@ class SizePane
         chart.getData().add(tuple.pieChartData);
         tuple.pieChartData.getNode().setUserData(tuple.treeItem);
         tuple.pieChartData.getNode().addEventHandler(MouseEvent.MOUSE_CLICKED, (me) -> {
-          getDiskUsageData().getNavigation().navigateTo(tuple.treeItem);
+          if (tuple.treeItem.getValue().isDirectory())
+          {
+            getDiskUsageData().getNavigation().navigateTo(tuple.treeItem);
+          }
         });
       });
 

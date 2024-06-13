@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
+import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.common.FullScreen;
 import org.kku.jdiskusage.ui.common.Navigation;
@@ -30,6 +31,8 @@ import org.kku.jdiskusage.util.Translator;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.kku.jdiskusage.util.preferences.Sort;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -45,8 +48,6 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -59,6 +60,7 @@ public class DiskUsageView
   public class DiskUsageData
   {
     private FullScreen mi_fullScreen;
+    private final ObjectProperty<TreeItem<FileNodeIF>> mi_selectedItemProperty = new SimpleObjectProperty<>();
     private final Navigation mi_navigation = new Navigation(this);
     private final FileTreePane mi_treePaneData = new FileTreePane(this);
     private final TabPaneData mi_tabPaneData = new TabPaneData();
@@ -67,12 +69,23 @@ public class DiskUsageView
     private final SizeDistributionPane mi_sizeDistributionTab = new SizeDistributionPane(this);
     private final LastModifiedDistributionPane mi_modifiedDistributionTab = new LastModifiedDistributionPane(this);
     private final TypesPane mi_typesTab = new TypesPane(this);
+    private final SearchPane mi_searchTab = new SearchPane(this);
     private final RecentFilesMenu mi_recentFiles = new RecentFilesMenu();
     private final PreferencesMenu mi_preferences = new PreferencesMenu();
     private final FilterPane mi_filterPane = new FilterPane(this);
 
     private DiskUsageData()
     {
+    }
+
+    public void refresh()
+    {
+      mi_tabPaneData.refresh();
+    }
+
+    public ObjectProperty<TreeItem<FileNodeIF>> getSelectedTreeItemProperty()
+    {
+      return mi_selectedItemProperty;
     }
 
     public TreeItem<FileNodeIF> getSelectedTreeItem()
@@ -183,7 +196,7 @@ public class DiskUsageView
     homeButton.setOnAction((e) -> navigation.home());
 
     refreshButton = new Button("", IconUtil.createIconNode("refresh", IconSize.SMALL));
-    refreshButton.setOnAction((e) -> System.out.println("refresh"));
+    refreshButton.setOnAction((e) -> m_diskUsageMainData.refresh());
 
     fullScreenButton = new ToggleButton("", IconUtil.createIconNode("fullscreen", IconSize.SMALL));
     fullScreenButton.setOnAction((e) -> m_diskUsageMainData.mi_fullScreen.toggleFullScreen());
@@ -231,7 +244,7 @@ public class DiskUsageView
 
     filterPaneNode = createFilterPane().getNode();
     filterPaneNode.setId("filterButton");
-    HBox.setHgrow(filterPaneNode, Priority.ALWAYS);
+    //HBox.setHgrow(filterPaneNode, Priority.ALWAYS);
 
     toolBar.getItems().addAll(backButton, forwardButton, homeButton, FxUtil.createHorizontalSpacer(200),
         fullScreenButton, refreshButton, FxUtil.createHorizontalSpacer(20), showDisplayMetricButton,
@@ -285,21 +298,23 @@ public class DiskUsageView
   {
     private enum TabData
     {
-      SIZE("Size", "chart-pie", TabPaneData::fillSizeTab),
-      TOP50("Top 50", "trophy", TabPaneData::fillTop50Tab),
-      DISTRIBUTION_SIZE("Size distribution", "chart-bell-curve", TabPaneData::fillSizeDistributionTab),
-      DISTRIBUTION_MODIFIED("Last modified", "sort-calendar-ascending", TabPaneData::fillModifiedDistributionTab),
-      DISTRIBUTION_TYPES("Types", "chart-pie", TabPaneData::fillTypeDistributionTab);
+      SIZE("Size", "chart-pie", (md) -> md.mi_sizeTab),
+      TOP50("Top 50", "trophy", (md) -> md.mi_top50Tab),
+      DISTRIBUTION_SIZE("Size distribution", "chart-bell-curve", (md) -> md.mi_sizeDistributionTab),
+      DISTRIBUTION_MODIFIED("Last modified", "sort-calendar-ascending", (md) -> md.mi_modifiedDistributionTab),
+      DISTRIBUTION_TYPES("Types", "chart-pie", (md) -> md.mi_typesTab),
+      SEARCH_TYPES("Search", "magnify", (md) -> md.mi_searchTab);
 
       private final String m_name;
       private final String m_iconName;
-      private final Function<DiskUsageData, Node> m_fillContent;
+      private final Function<DiskUsageData, ? extends AbstractTabContentPane> m_tabPaneSupplier;
 
-      private TabData(String name, String iconName, Function<DiskUsageData, Node> fillContent)
+      private TabData(String name, String iconName,
+          Function<DiskUsageData, ? extends AbstractTabContentPane> tabPaneGetter)
       {
         m_name = name;
         m_iconName = iconName;
-        m_fillContent = fillContent;
+        m_tabPaneSupplier = tabPaneGetter;
       }
 
       public String getName()
@@ -337,7 +352,7 @@ public class DiskUsageView
 
         try (PerformancePoint pp = Performance.start("Filling content for %s", getName()))
         {
-          node = m_fillContent.apply(mainData);
+          node = m_tabPaneSupplier.apply(mainData).initNode(mainData.getTreePaneData());
         }
 
         return node;
@@ -412,37 +427,18 @@ public class DiskUsageView
       }
     }
 
+    public void refresh()
+    {
+      mi_contentByTabId.clear();
+      Stream.of(TabData.values()).forEach(tabData -> tabData.m_tabPaneSupplier.apply(m_diskUsageMainData).reset());
+      m_diskUsageMainData.getTreePaneData().navigateTo(m_diskUsageMainData.getSelectedTreeItem());
+    }
+
     public void itemSelected()
     {
       mi_contentByTabId.clear();
       m_diskUsageMainData.getNavigation().navigateTo(m_diskUsageMainData.getSelectedTreeItem());
     }
-
-    private static Node fillSizeTab(DiskUsageData mainData)
-    {
-      return mainData.mi_sizeTab.getNode(mainData.getTreePaneData());
-    }
-
-    private static Node fillTop50Tab(DiskUsageData mainData)
-    {
-      return mainData.mi_top50Tab.getNode(mainData.getTreePaneData());
-    }
-
-    private static Node fillSizeDistributionTab(DiskUsageData mainData)
-    {
-      return mainData.mi_sizeDistributionTab.getNode(mainData.getTreePaneData());
-    }
-
-    private static Node fillModifiedDistributionTab(DiskUsageData mainData)
-    {
-      return mainData.mi_modifiedDistributionTab.getNode(mainData.getTreePaneData());
-    }
-
-    private static Node fillTypeDistributionTab(DiskUsageData mainData)
-    {
-      return mainData.mi_typesTab.getNode(mainData.getTreePaneData());
-    }
-
   }
 
   private class RecentFilesMenu
@@ -581,38 +577,6 @@ public class DiskUsageView
     {
       return "FileAggregates(" + getValueDescription(DisplayMetric.FILE_COUNT) + ", "
           + getValueDescription(DisplayMetric.FILE_SIZE) + ")";
-    }
-  }
-
-  public static class ObjectWithIndexFactory<T>
-  {
-    private int nextRank = 1;
-
-    public ObjectWithIndex<T> create(T object)
-    {
-      return new ObjectWithIndex<>(object, nextRank++);
-    }
-  }
-
-  public static class ObjectWithIndex<T>
-  {
-    private final T m_object;
-    private final int m_index;
-
-    private ObjectWithIndex(T object, int index)
-    {
-      m_object = object;
-      m_index = index;
-    }
-
-    public int getIndex()
-    {
-      return m_index;
-    }
-
-    public T getObject()
-    {
-      return m_object;
     }
   }
 

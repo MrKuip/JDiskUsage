@@ -107,97 +107,6 @@ class LastModifiedDistributionPane
     }
   }
 
-  private class LastModifiedDistributionBucketData
-  {
-    public long mi_numberOfFiles;
-    public long mi_sizeOfFiles;
-
-    public LastModifiedDistributionBucketData(Long numberOfFiles, Long sizeOfFiles)
-    {
-      mi_numberOfFiles = numberOfFiles;
-      mi_sizeOfFiles = sizeOfFiles;
-    }
-
-    public double getSize(DisplayMetric currentDisplayMetric)
-    {
-      switch (currentDisplayMetric)
-      {
-        case FILE_COUNT:
-          return mi_numberOfFiles;
-        case FILE_SIZE:
-          return mi_sizeOfFiles;
-        default:
-          break;
-      }
-      return 0;
-    }
-  }
-
-  private class LastModifiedDistributionPaneData
-    extends PaneData
-  {
-    private final long mi_todayMidnight = CommonUtil.getMidnight();
-    private Map<LastModifiedDistributionBucket, LastModifiedDistributionBucketData> mi_map;
-    private ObservableList<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>> mi_list;
-
-    private LastModifiedDistributionPaneData()
-    {
-    }
-
-    public ObservableList<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>> getList()
-    {
-      if (mi_list == null)
-      {
-        mi_list = mi_map.entrySet().stream().collect(Collectors.toCollection(FXCollections::observableArrayList));
-      }
-
-      return mi_list;
-    }
-
-    public Map<LastModifiedDistributionBucket, LastModifiedDistributionBucketData> getMap()
-    {
-      if (mi_map == null)
-      {
-        try (PerformancePoint pp = Performance.start("Collecting data for last modified table"))
-        {
-          mi_map = new LinkedHashMap<>();
-          Stream.of(LastModifiedDistributionBucket.values()).forEach(bucket -> {
-            mi_map.put(bucket, new LastModifiedDistributionBucketData(0l, 0l));
-          });
-
-          new FileNodeIterator(getCurrentTreeItem().getValue()).forEach(fn -> {
-            if (fn.isFile())
-            {
-              LastModifiedDistributionBucket bucket;
-              LastModifiedDistributionBucketData data;
-
-              bucket = findBucket(fn);
-              data = mi_map.get(bucket);
-              data.mi_numberOfFiles += 1;
-              data.mi_sizeOfFiles += (fn.getSize() / 1000000);
-            }
-          });
-        }
-      }
-
-      return mi_map;
-    }
-
-    @Override
-    public void currentTreeItemChanged()
-    {
-      mi_list = null;
-      mi_map = null;
-    }
-
-    @Override
-    public void currentDisplayMetricChanged()
-    {
-      mi_list = null;
-      mi_map = null;
-    }
-  }
-
   LastModifiedDistributionPane(DiskUsageData diskUsageData)
   {
     super(diskUsageData);
@@ -324,6 +233,7 @@ class LastModifiedDistributionPane
       table = new MyTableView<>("LastModifiedDistribution");
       table.setEditable(false);
 
+      table.addRankColumn("Rank");
       timeIntervalColumn = table.addColumn("Time interval");
       timeIntervalColumn.initPersistentPrefWidth(300.0);
       timeIntervalColumn.setCellValueGetter((o) -> o.getKey().getText());
@@ -348,4 +258,87 @@ class LastModifiedDistributionPane
     return new Label("No data");
   }
 
+  class LastModifiedDistributionPaneData
+    extends PaneData
+  {
+    private final long mi_todayMidnight = CommonUtil.getMidnight();
+    private Map<LastModifiedDistributionBucket, LastModifiedDistributionBucketData> mi_map;
+    private ObservableList<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>> mi_list;
+
+    private LastModifiedDistributionPaneData()
+    {
+    }
+
+    public ObservableList<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>> getList()
+    {
+      if (mi_list == null)
+      {
+        mi_list = getMap().entrySet().stream().collect(Collectors.toCollection(FXCollections::observableArrayList));
+      }
+
+      return mi_list;
+    }
+
+    public Map<LastModifiedDistributionBucket, LastModifiedDistributionBucketData> getMap()
+    {
+      if (mi_map == null)
+      {
+        try (PerformancePoint pp = Performance.start("Collecting data for last modified table"))
+        {
+          mi_map = new LinkedHashMap<>();
+          Stream.of(LastModifiedDistributionBucket.values()).forEach(bucket -> {
+            mi_map.put(bucket, new LastModifiedDistributionBucketData(0l, 0l));
+          });
+
+          new FileNodeIterator(getCurrentTreeItem().getValue()).forEach(fn -> {
+            if (fn.isFile())
+            {
+              LastModifiedDistributionBucket bucket;
+              LastModifiedDistributionBucketData data;
+
+              bucket = findBucket(fn);
+              data = mi_map.get(bucket);
+              data.mi_numberOfFiles += 1;
+              data.mi_sizeOfFiles += (fn.getSize() / 1000000);
+            }
+          });
+        }
+      }
+
+      return mi_map;
+    }
+
+    @Override
+    public void reset()
+    {
+      mi_list = null;
+      mi_map = null;
+    }
+  }
+
+  private class LastModifiedDistributionBucketData
+  {
+    public long mi_numberOfFiles;
+    public long mi_sizeOfFiles;
+
+    public LastModifiedDistributionBucketData(Long numberOfFiles, Long sizeOfFiles)
+    {
+      mi_numberOfFiles = numberOfFiles;
+      mi_sizeOfFiles = sizeOfFiles;
+    }
+
+    public double getSize(DisplayMetric currentDisplayMetric)
+    {
+      switch (currentDisplayMetric)
+      {
+        case FILE_COUNT:
+          return mi_numberOfFiles;
+        case FILE_SIZE:
+          return mi_sizeOfFiles;
+        default:
+          break;
+      }
+      return 0;
+    }
+  }
 }

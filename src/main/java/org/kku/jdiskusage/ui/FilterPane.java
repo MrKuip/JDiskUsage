@@ -5,13 +5,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconColor;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
+import org.kku.jdiskusage.ui.common.CollapsableButtonPane;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
@@ -45,7 +46,7 @@ class FilterPane
 
     mi_diskUsageData = diskUsageData;
 
-    contentPane = new BorderPane();
+    contentPane = new CollapsableButtonPane("Filter", IconUtil.createIconNode("filter", IconSize.SMALLER));
 
     filterTextPane = new HBox();
     filterTextPane.setPadding(new Insets(5, 10, 5, 10));
@@ -59,7 +60,7 @@ class FilterPane
     mi_filterActivationPane.setAlignment(Pos.CENTER);
     mi_filterActivationPane.setSpacing(2);
 
-    contentPane.setLeft(filterTextPane);
+    //contentPane.setLeft(filterTextPane);
     contentPane.setCenter(mi_filterPane);
     contentPane.setRight(mi_filterActivationPane);
 

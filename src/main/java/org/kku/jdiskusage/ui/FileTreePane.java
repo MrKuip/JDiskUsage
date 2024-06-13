@@ -49,6 +49,9 @@ public class FileTreePane
     });
 
     mi_treePane.setCenter(mi_treeTableView);
+
+    mi_treeTableView.getSelectionModel().selectedItemProperty()
+        .addListener((o, oldValue, newValue) -> mi_diskUsageData.getSelectedTreeItemProperty().set(newValue));
   }
 
   public void navigateTo(TreeItem<FileNodeIF> treeItem)

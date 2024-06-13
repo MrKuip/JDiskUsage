@@ -1,7 +1,10 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import java.util.HashMap;
+import java.util.Map;
 import org.kku.jdiskusage.ui.util.TableUtils;
+import javafx.geometry.Pos;
 import javafx.scene.control.Skin;
 import javafx.scene.control.TableColumnBase;
 import javafx.scene.control.TableView;
@@ -13,6 +16,8 @@ import javafx.scene.control.skin.TableViewSkin;
 public class MyTableView<T>
   extends TableView<T>
 {
+  private final Map<Integer, Integer> m_lineNumberMap = new HashMap<>();
+
   public MyTableView(String id)
   {
     super();
@@ -74,5 +79,34 @@ public class MyTableView<T>
   public <R> MyTableColumn<T, R> addColumn(String name)
   {
     return addColumn(null, name);
+  }
+
+  public MyTableColumn<T, Integer> addRankColumn(String columnName)
+  {
+    MyTableColumn<T, Integer> rankColumn;
+
+    rankColumn = addColumn(columnName);
+    rankColumn.initPersistentPrefWidth(70.0);
+    rankColumn.setCellValueGetter(this::getLineNumber);
+    rankColumn.setCellValueAlignment(Pos.BASELINE_RIGHT);
+
+    itemsProperty().addListener((o, oldValue, newValue) -> {
+      System.out.println("Clear line numbers");
+      m_lineNumberMap.clear();
+    });
+
+    return rankColumn;
+  }
+
+  private Integer getLineNumber(T t1)
+  {
+    return m_lineNumberMap.computeIfAbsent(System.identityHashCode(t1), (key) -> {
+      int index = getItems().indexOf(t1);
+      if (index < 0)
+      {
+        return 0;
+      }
+      return index + 1;
+    });
   }
 }
