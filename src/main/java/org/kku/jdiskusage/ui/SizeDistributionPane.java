@@ -304,7 +304,7 @@ public class SizeDistributionPane
     {
       if (mi_list == null)
       {
-        mi_list = mi_map.entrySet().stream().collect(Collectors.toCollection(FXCollections::observableArrayList));
+        mi_list = getMap().entrySet().stream().collect(Collectors.toCollection(FXCollections::observableArrayList));
       }
 
       return mi_list;
