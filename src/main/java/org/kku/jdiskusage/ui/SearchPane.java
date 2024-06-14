@@ -9,8 +9,8 @@ import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.DiskUsageView.FileNodeIterator;
 import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
+import org.kku.jdiskusage.ui.common.FileNodeIterator;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
@@ -18,10 +18,11 @@ import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.StringUtils;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -83,13 +84,13 @@ public class SearchPane
 
     maxCountTextField = new TextField();
     maxCountTextField.setPrefColumnCount(5);
-    maxCountLabel = new Label(translate("Max results"));
+    maxCountLabel = new Label(translate("Max items"));
     maxCountLabel.setLabelFor(maxCountTextField);
     maxCountTextField.setText(AppPreferences.searchMaxCountPreference.get().toString());
     maxCountTextField
         .setOnAction((ae) -> AppPreferences.searchMaxCountPreference.set(Integer.valueOf(maxCountTextField.getText())));
     mi_data.mi_maxCountProperty = maxCountTextField.textProperty();
-    mi_data.mi_stoppedOnMaxCount.addListener(FxUtil.showWarning(maxCountTextField));
+    mi_data.mi_stoppedOnMaxCountProperty.addListener(FxUtil.showWarning(maxCountTextField));
 
     maxTimeTextField = new TextField();
     maxTimeTextField.setPrefColumnCount(5);
@@ -99,7 +100,7 @@ public class SearchPane
     maxTimeTextField
         .setOnAction((ae) -> AppPreferences.searchMaxTimePreference.set(Integer.valueOf(maxTimeTextField.getText())));
     mi_data.mi_maxTimeProperty = maxTimeTextField.textProperty();
-    mi_data.mi_stoppedOnMaxTime.addListener(FxUtil.showWarning(maxTimeTextField));
+    mi_data.mi_stoppedOnTimeoutProperty.addListener(FxUtil.showWarning(maxTimeTextField));
 
     cancelButton = new Button(null, IconUtil.createFxIcon("cancel", IconSize.SMALLER).fillColor(Color.RED).getCanvas());
 
@@ -112,7 +113,7 @@ public class SearchPane
     progressBar.setMaxWidth(Double.MAX_VALUE);
     progressBar.setProgress(0.25f);
     progressBar.getStyleClass().add("thin-progress-bar");
-    progressBar.progressProperty().bind(mi_data.mi_progress);
+    progressBar.progressProperty().bind(Bindings.divide(mi_data.mi_progressProperty, 100.0));
 
     box = new VBox();
     box.getChildren().addAll(toolBar, progressBar);
@@ -147,7 +148,19 @@ public class SearchPane
       fileSizeColumn.setColumnCount(8);
       fileSizeColumn.setCellValueGetter((fn) -> fn.getSize());
 
-      table.setItems(mi_data.getList());
+      table.getPlaceholder();
+      table.setPlaceholder(new Label("Searching..."));
+      new Thread(() -> {
+        System.out.println("size =" + mi_data.getList().size());
+        table.setItems(mi_data.getList());
+        if (mi_data.getList().size() == 0)
+        {
+          table.setPlaceholder(new Label("No search data"));
+        }
+
+      }).start();
+
+      //table.setItems(mi_data.getList());
 
       pane.add(table, 0, 1);
       GridPane.setHgrow(table, Priority.ALWAYS);
@@ -167,9 +180,9 @@ public class SearchPane
     public BooleanProperty mi_regexSelectedProperty;
     public StringProperty mi_searchTextProperty;
     private ObservableList<FileNodeIF> mi_list;
-    private final BooleanProperty mi_stoppedOnMaxCount = new SimpleBooleanProperty();
-    private final BooleanProperty mi_stoppedOnMaxTime = new SimpleBooleanProperty();
-    private final DoubleProperty mi_progress = new SimpleDoubleProperty(0.0);
+    private final BooleanProperty mi_stoppedOnMaxCountProperty = new SimpleBooleanProperty();
+    private final BooleanProperty mi_stoppedOnTimeoutProperty = new SimpleBooleanProperty();
+    private final IntegerProperty mi_progressProperty = new SimpleIntegerProperty(0);
 
     private SearchPaneData()
     {
@@ -211,62 +224,36 @@ public class SearchPane
           if (!StringUtils.isEmpty(searchText))
           {
             String searchText2;
-            int maxCount;
-            int maxTime;
-            long timeout;
-            Counter totalNumberOfFiles;
-            Counter numberOfFiles;
+            FileNodeIterator fnIterator;
 
             searchText2 = searchText;
-            maxCount = Integer.valueOf(mi_data.mi_maxCountProperty.get());
-            maxTime = Integer.valueOf(mi_data.mi_maxTimeProperty.get());
-            mi_data.mi_stoppedOnMaxCount.set(false);
-            mi_data.mi_stoppedOnMaxTime.set(false);
-            mi_data.mi_progress.set(0.0);
-            timeout = System.currentTimeMillis() + (maxTime * 1000);
 
-            totalNumberOfFiles = new Counter(0);
-            numberOfFiles = new Counter(0);
-            new FileNodeIterator(getCurrentTreeItem().getValue()).forEach(fn -> {
-              if (fn.isFile())
+            fnIterator = new FileNodeIterator(getCurrentTreeItem().getValue());
+            fnIterator.setStoppedOnMaxCountProperty(mi_data.mi_stoppedOnMaxCountProperty);
+            fnIterator.setStoppedOnTimeoutProperty(mi_data.mi_stoppedOnTimeoutProperty);
+            fnIterator.enableProgress(mi_data.mi_progressProperty);
+            fnIterator.setMaxCount(Integer.valueOf(mi_data.mi_maxCountProperty.get()));
+            fnIterator.setTimeoutInSeconds(Integer.valueOf(mi_data.mi_maxTimeProperty.get()));
+            fnIterator.forEach(fn -> {
+              if (!fn.isFile())
               {
-                totalNumberOfFiles.increment();
-              }
-              return true;
-            });
-
-            new FileNodeIterator(getCurrentTreeItem().getValue()).forEach(fn -> {
-              if (list.size() >= maxCount)
-              {
-                mi_data.mi_stoppedOnMaxCount.set(true);
                 return false;
               }
 
-              if (System.currentTimeMillis() > timeout)
+              if (pattern != null)
               {
-                mi_data.mi_stoppedOnMaxTime.set(true);
-                return false;
-              }
-
-              if (fn.isFile())
-              {
-                numberOfFiles.increment();
-                mi_data.mi_progress.set((double) numberOfFiles.get() / (double) totalNumberOfFiles.get());
-                System.out.println("progress=" + mi_data.mi_progress.get());
-
-                if (pattern != null)
+                if (matcher.reset(fn.getAbsolutePath()).find())
                 {
-                  if (matcher.reset(fn.getAbsolutePath()).find())
-                  {
-                    list.add(fn);
-                  }
+                  list.add(fn);
+                  return true;
                 }
-                else
+              }
+              else
+              {
+                if (fn.getAbsolutePath().contains(searchText2))
                 {
-                  if (fn.getAbsolutePath().contains(searchText2))
-                  {
-                    list.add(fn);
-                  }
+                  list.add(fn);
+                  return true;
                 }
               }
               return true;

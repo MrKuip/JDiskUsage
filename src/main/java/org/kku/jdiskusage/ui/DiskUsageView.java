@@ -589,32 +589,4 @@ public class DiskUsageView
   {
     return translate("<None>");
   }
-
-  public static class FileNodeIterator
-  {
-    final FileNodeIF mi_dirNode;
-
-    public FileNodeIterator(FileNodeIF dirNode)
-    {
-      mi_dirNode = dirNode;
-    }
-
-    public void forEach(Function<FileNodeIF, Boolean> action)
-    {
-      forEach(action, mi_dirNode);
-    }
-
-    private void forEach(Function<FileNodeIF, Boolean> action, FileNodeIF node)
-    {
-      if (!action.apply(node))
-      {
-        return;
-      }
-
-      if (node.isDirectory())
-      {
-        ((DirNode) node).getChildList().forEach(n -> forEach(action, n));
-      }
-    }
-  }
 }
