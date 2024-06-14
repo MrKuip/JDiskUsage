@@ -12,6 +12,11 @@ public class IconUtil
 
   public static Node createIconNode(String iconName, IconSize iconSize)
   {
-    return new FxIcon(iconName).size(iconSize).getCanvas();
+    return createFxIcon(iconName, iconSize).getCanvas();
+  }
+
+  public static FxIcon createFxIcon(String iconName, IconSize iconSize)
+  {
+    return new FxIcon(iconName).size(iconSize);
   }
 }

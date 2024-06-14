@@ -2,6 +2,8 @@ package org.kku.jdiskusage.ui.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import javafx.beans.value.ChangeListener;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
@@ -83,5 +85,37 @@ public class FxUtil
 
       return field.prefWidth(-1);
     });
+  }
+
+  /**
+   * Set a node in 'warning' mode if the boolean is true.
+   * <p>
+   * The warning style is in the css file.
+   * <p>
+   * Usage:
+   * 
+   * <pre>
+   * TextField textField = new TextField("text");
+   * BooleanProperty warningProperty = new SimpleBooleanProperty();
+   * 
+   * warningProperty.addListener(showWarning(textField));
+   * </pre>
+   * 
+   * @param node
+   * @return the changelistener
+   */
+
+  public static ChangeListener<? super Boolean> showWarning(Node node)
+  {
+    return (o, oldValue, newValue) -> {
+      if (newValue)
+      {
+        node.getStyleClass().add("warning");
+      }
+      else
+      {
+        node.getStyleClass().remove("warning");
+      }
+    };
   }
 }

@@ -3,27 +3,33 @@ package org.kku.jdiskusage.ui;
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.DiskUsageView.FileNodeIterator;
 import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
+import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.StringUtils;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
-import com.google.re2j.Matcher;
-import com.google.re2j.Pattern;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
@@ -31,6 +37,8 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 
 public class SearchPane
   extends AbstractTabContentPane
@@ -52,9 +60,14 @@ public class SearchPane
     ToolBar toolBar;
     Label searchLabel;
     ToggleButton regexButton;
+    Button cancelButton;
     TextField searchTextField;
-    Label maxResultLabel;
-    TextField maxResultTextField;
+    Label maxCountLabel;
+    TextField maxCountTextField;
+    Label maxTimeLabel;
+    TextField maxTimeTextField;
+    VBox box;
+    ProgressBar progressBar;
 
     toolBar = new ToolBar();
 
@@ -68,20 +81,43 @@ public class SearchPane
     searchTextField.setOnAction((ae) -> getDiskUsageData().refresh());
     mi_data.mi_searchTextProperty = searchTextField.textProperty();
 
-    maxResultTextField = new TextField();
-    maxResultTextField.setPrefColumnCount(5);
-    maxResultLabel = new Label(translate("Max results"));
-    maxResultLabel.setLabelFor(maxResultTextField);
-    maxResultTextField.setText(AppPreferences.searchMaxResultPreference.get().toString());
-    maxResultTextField.setOnAction(
-        (ae) -> AppPreferences.searchMaxResultPreference.set(Integer.valueOf(maxResultTextField.getText())));
-    mi_data.mi_maxResultProperty = maxResultTextField.textProperty();
+    maxCountTextField = new TextField();
+    maxCountTextField.setPrefColumnCount(5);
+    maxCountLabel = new Label(translate("Max results"));
+    maxCountLabel.setLabelFor(maxCountTextField);
+    maxCountTextField.setText(AppPreferences.searchMaxCountPreference.get().toString());
+    maxCountTextField
+        .setOnAction((ae) -> AppPreferences.searchMaxCountPreference.set(Integer.valueOf(maxCountTextField.getText())));
+    mi_data.mi_maxCountProperty = maxCountTextField.textProperty();
+    mi_data.mi_stoppedOnMaxCount.addListener(FxUtil.showWarning(maxCountTextField));
+
+    maxTimeTextField = new TextField();
+    maxTimeTextField.setPrefColumnCount(5);
+    maxTimeLabel = new Label(translate("Max time (seconds)"));
+    maxTimeLabel.setLabelFor(maxTimeTextField);
+    maxTimeTextField.setText(AppPreferences.searchMaxTimePreference.get().toString());
+    maxTimeTextField
+        .setOnAction((ae) -> AppPreferences.searchMaxTimePreference.set(Integer.valueOf(maxTimeTextField.getText())));
+    mi_data.mi_maxTimeProperty = maxTimeTextField.textProperty();
+    mi_data.mi_stoppedOnMaxTime.addListener(FxUtil.showWarning(maxTimeTextField));
+
+    cancelButton = new Button(null, IconUtil.createFxIcon("cancel", IconSize.SMALLER).fillColor(Color.RED).getCanvas());
 
     HBox.setHgrow(searchTextField, Priority.ALWAYS);
 
-    toolBar.getItems().addAll(searchLabel, searchTextField, regexButton, maxResultLabel, maxResultTextField);
+    toolBar.getItems().addAll(cancelButton, searchLabel, searchTextField, regexButton, maxCountLabel, maxCountTextField,
+        maxTimeLabel, maxTimeTextField);
 
-    getNode().setTop(toolBar);
+    progressBar = new ProgressBar();
+    progressBar.setMaxWidth(Double.MAX_VALUE);
+    progressBar.setProgress(0.25f);
+    progressBar.getStyleClass().add("thin-progress-bar");
+    progressBar.progressProperty().bind(mi_data.mi_progress);
+
+    box = new VBox();
+    box.getChildren().addAll(toolBar, progressBar);
+
+    getNode().setTop(box);
   }
 
   Node getTableNode()
@@ -103,7 +139,7 @@ public class SearchPane
       table.addRankColumn("Rank");
 
       nameColumn = table.addColumn("Name");
-      nameColumn.setColumnCount(20);
+      nameColumn.setColumnCount(300);
       nameColumn.setCellValueGetter((fn) -> fn.getAbsolutePath());
 
       fileSizeColumn = table.addColumn("File size");
@@ -126,10 +162,14 @@ public class SearchPane
   private class SearchPaneData
     extends PaneData
   {
-    public StringProperty mi_maxResultProperty;
+    public StringProperty mi_maxCountProperty;
+    public StringProperty mi_maxTimeProperty;
     public BooleanProperty mi_regexSelectedProperty;
     public StringProperty mi_searchTextProperty;
     private ObservableList<FileNodeIF> mi_list;
+    private final BooleanProperty mi_stoppedOnMaxCount = new SimpleBooleanProperty();
+    private final BooleanProperty mi_stoppedOnMaxTime = new SimpleBooleanProperty();
+    private final DoubleProperty mi_progress = new SimpleDoubleProperty(0.0);
 
     private SearchPaneData()
     {
@@ -171,18 +211,49 @@ public class SearchPane
           if (!StringUtils.isEmpty(searchText))
           {
             String searchText2;
-            int maxResult;
+            int maxCount;
+            int maxTime;
+            long timeout;
+            Counter totalNumberOfFiles;
+            Counter numberOfFiles;
 
             searchText2 = searchText;
-            maxResult = Integer.valueOf(mi_data.mi_maxResultProperty.get());
+            maxCount = Integer.valueOf(mi_data.mi_maxCountProperty.get());
+            maxTime = Integer.valueOf(mi_data.mi_maxTimeProperty.get());
+            mi_data.mi_stoppedOnMaxCount.set(false);
+            mi_data.mi_stoppedOnMaxTime.set(false);
+            mi_data.mi_progress.set(0.0);
+            timeout = System.currentTimeMillis() + (maxTime * 1000);
+
+            totalNumberOfFiles = new Counter(0);
+            numberOfFiles = new Counter(0);
             new FileNodeIterator(getCurrentTreeItem().getValue()).forEach(fn -> {
-              if (list.size() >= maxResult)
+              if (fn.isFile())
               {
+                totalNumberOfFiles.increment();
+              }
+              return true;
+            });
+
+            new FileNodeIterator(getCurrentTreeItem().getValue()).forEach(fn -> {
+              if (list.size() >= maxCount)
+              {
+                mi_data.mi_stoppedOnMaxCount.set(true);
+                return false;
+              }
+
+              if (System.currentTimeMillis() > timeout)
+              {
+                mi_data.mi_stoppedOnMaxTime.set(true);
                 return false;
               }
 
               if (fn.isFile())
               {
+                numberOfFiles.increment();
+                mi_data.mi_progress.set((double) numberOfFiles.get() / (double) totalNumberOfFiles.get());
+                System.out.println("progress=" + mi_data.mi_progress.get());
+
                 if (pattern != null)
                 {
                   if (matcher.reset(fn.getAbsolutePath()).find())
@@ -218,4 +289,23 @@ public class SearchPane
     }
   }
 
+  static public class Counter
+  {
+    private int mi_counter;
+
+    public Counter(int initialCount)
+    {
+      mi_counter = initialCount;
+    }
+
+    public void increment()
+    {
+      mi_counter++;
+    }
+
+    public int get()
+    {
+      return mi_counter;
+    }
+  }
 }

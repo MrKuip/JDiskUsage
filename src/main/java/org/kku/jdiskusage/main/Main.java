@@ -8,6 +8,7 @@ import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import javafx.application.Application;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -16,6 +17,8 @@ public class Main
   extends Application
     implements ApplicationPropertyExtensionIF
 {
+  static private Node m_rootNode;
+
   @Override
   public void start(Stage stage)
   {
@@ -45,9 +48,16 @@ public class Main
     stage.setScene(scene);
     stage.show();
 
+    m_rootNode = diskUsageView;
+
     getParameters().getRaw().stream().map(Path::of).filter(path -> {
       return Files.exists(path) && Files.isDirectory(path);
     }).findFirst().ifPresent(diskUsageView::scanDirectory);
+  }
+
+  static public Node getRootNode()
+  {
+    return m_rootNode;
   }
 
   private Rectangle2D getDefaultScreenBounds()

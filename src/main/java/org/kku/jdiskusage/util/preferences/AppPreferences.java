@@ -18,7 +18,8 @@ public class AppPreferences
   public final static AppPreference<DisplayMetric> displayMetricPreference;
   public final static AppPreference<Sort> sortPreference;
   public final static AppPreference<Locale> localePreference;
-  public final static AppPreference<Integer> searchMaxResultPreference;
+  public final static AppPreference<Integer> searchMaxCountPreference;
+  public final static AppPreference<Integer> searchMaxTimePreference;
   public final static AppPreference<Boolean> searchRegexPreference;
 
   static
@@ -28,7 +29,9 @@ public class AppPreferences
     sortPreference = new AppPreference<>("Sort", Sort.NUMERIC);
     localePreference = new AppPreference<>("Locale", new Locale("nl"), AppPreferences::convertStringToLocale,
         AppPreferences::convertLocaleToString);
-    searchMaxResultPreference = new AppPreference<>("Max search results", Integer.valueOf(100),
+    searchMaxCountPreference = new AppPreference<>("Max count", Integer.valueOf(100),
+        AppPreferences::convertStringToInteger, AppPreferences::convertIntegerToString);
+    searchMaxTimePreference = new AppPreference<>("Max time", Integer.valueOf(10),
         AppPreferences::convertStringToInteger, AppPreferences::convertIntegerToString);
     searchRegexPreference = new AppPreference<>("Use regex search", Boolean.FALSE);
   }
