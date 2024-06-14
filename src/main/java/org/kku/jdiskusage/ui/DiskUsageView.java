@@ -10,7 +10,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -138,7 +137,8 @@ public class DiskUsageView
         .addListener(getProps().getChangeListener(Property.SPLIT_PANE_POSITION));
     SplitPane.setResizableWithParent(m_diskUsageMainData.getTreePaneData().getNode(), false);
     SplitPane.setResizableWithParent(m_diskUsageMainData.getTabPaneData().getNode(), false);
-    splitPane.getDividers().get(0).setPosition(getProps().getDouble(Property.SPLIT_PANE_POSITION, 25.0));
+
+    splitPane.getDividers().get(0).setPosition(getProps().getDouble(Property.SPLIT_PANE_POSITION, 0.40));
 
     setTop(toolBars);
     setCenter(splitPane);
@@ -599,14 +599,18 @@ public class DiskUsageView
       mi_dirNode = dirNode;
     }
 
-    public void forEach(Consumer<FileNodeIF> action)
+    public void forEach(Function<FileNodeIF, Boolean> action)
     {
       forEach(action, mi_dirNode);
     }
 
-    private void forEach(Consumer<FileNodeIF> action, FileNodeIF node)
+    private void forEach(Function<FileNodeIF, Boolean> action, FileNodeIF node)
     {
-      action.accept(node);
+      if (!action.apply(node))
+      {
+        return;
+      }
+
       if (node.isDirectory())
       {
         ((DirNode) node).getChildList().forEach(n -> forEach(action, n));

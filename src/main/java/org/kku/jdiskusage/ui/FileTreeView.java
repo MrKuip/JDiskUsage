@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.kku.jdiskusage.javafx.scene.control.MyTreeTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTreeTableView;
-import org.kku.jdiskusage.javafx.scene.control.MyTreeTableView.SelectedItem;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
@@ -37,17 +36,17 @@ public class FileTreeView
     mi_treeTableView = new MyTreeTableView<FileNodeIF>(getClass().getSimpleName(), new FileTreeItem(m_dirNode));
 
     treeTableColumn1 = mi_treeTableView.addColumn("File");
-    treeTableColumn1.initPersistentPrefWidth(200.0);
+    treeTableColumn1.setColumnCount(20);
     treeTableColumn1.setCellValueGetter((treeItem) -> treeItem.getValue().getName());
 
     treeTableColumn2 = mi_treeTableView.addColumn("File size");
-    treeTableColumn2.initPersistentPrefWidth(100.0);
+    treeTableColumn2.setColumnCount(8);
     treeTableColumn2.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
     treeTableColumn2.setCellValueAlignment(Pos.CENTER_RIGHT);
     treeTableColumn2.setCellValueGetter((treeItem) -> treeItem.getValue().getSize());
 
     treeTableColumn3 = mi_treeTableView.addColumn("%");
-    treeTableColumn3.initPersistentPrefWidth(100.0);
+    treeTableColumn3.setColumnCount(5);
     treeTableColumn3.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2f %%"));
     treeTableColumn3.setCellValueAlignment(Pos.CENTER_RIGHT);
     treeTableColumn3.setCellValueGetter((treeItem) -> {
@@ -62,7 +61,7 @@ public class FileTreeView
     });
 
     treeTableColumn4 = mi_treeTableView.addColumn("Number\nof links\nto file");
-    treeTableColumn4.initPersistentPrefWidth(100.0);
+    treeTableColumn4.setColumnCount(6);
     treeTableColumn4.setCellValueAlignment(Pos.CENTER_RIGHT);
     treeTableColumn4.setCellValueGetter((treeItem) -> treeItem.getValue().getNumberOfLinks());
 
@@ -73,7 +72,7 @@ public class FileTreeView
 
   public void setFilter(FilterIF filter)
   {
-    SelectedItem selectedPathList;
+    MyTreeTableView<FileNodeIF>.SelectedItem selectedPathList;
 
     mi_filter = filter;
 
@@ -114,11 +113,6 @@ public class FileTreeView
           mi_isFirstTimeChildren = true;
         }
       });
-    }
-
-    private void reset()
-    {
-      mi_isFirstTimeChildren = true;
     }
 
     @Override

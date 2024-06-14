@@ -1,6 +1,5 @@
 package org.kku.jdiskusage.ui.util;
 
-import java.text.NumberFormat;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -15,8 +14,6 @@ import javafx.scene.input.KeyEvent;
 
 public class TableUtils
 {
-
-  private static NumberFormat numberFormatter = NumberFormat.getNumberInstance();
 
   /**
    * Install the keyboard handler: + CTRL + C = copy to clipboard + CTRL + V =
@@ -120,4 +117,5 @@ public class TableUtils
     // set clipboard content
     Clipboard.getSystemClipboard().setContent(clipboardContent);
   }
+
 }

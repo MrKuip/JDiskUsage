@@ -85,23 +85,23 @@ class Top50Pane
       table.addRankColumn("Rank");
 
       nameColumn = table.addColumn("Name");
-      nameColumn.initPersistentPrefWidth(200.0);
+      nameColumn.setColumnCount(20);
       nameColumn.setCellValueGetter(FileNodeIF::getName);
 
       fileSizeColumn = table.addColumn("File size");
-      fileSizeColumn.initPersistentPrefWidth(100.0);
+      fileSizeColumn.setColumnCount(8);
       fileSizeColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
       fileSizeColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
       fileSizeColumn.setCellValueGetter(FileNodeIF::getSize);
 
       lastModifiedColumn = table.addColumn("Last modified");
-      lastModifiedColumn.initPersistentPrefWidth(200.0);
+      lastModifiedColumn.setColumnCount(15);
       lastModifiedColumn.setCellValueGetter(fn -> new Date(fn.getLastModifiedTime()));
       lastModifiedColumn.setCellValueFormatter(FormatterFactory.createSimpleDateFormatter("dd/MM/yyyy HH:mm:ss"));
       lastModifiedColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
 
       numberOfLinksColumn = table.addColumn("Number\nof links\nto file");
-      numberOfLinksColumn.initPersistentPrefWidth(100.0);
+      numberOfLinksColumn.setColumnCount(8);
       numberOfLinksColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
       numberOfLinksColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
       numberOfLinksColumn.setCellValueGetter(FileNodeIF::getNumberOfLinks);

@@ -8,8 +8,9 @@ module org.kku.jdiskusage
   requires org.kku.materialdesignicons;
   requires org.controlsfx.controls;
   requires java.prefs;
-requires com.miglayout.swing;
-requires com.miglayout.javafx;
+  requires com.miglayout.swing;
+  requires com.miglayout.javafx;
+  requires re2j;
 
   exports org.kku.jdiskusage.main;
 }

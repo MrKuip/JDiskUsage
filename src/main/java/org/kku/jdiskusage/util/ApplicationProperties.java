@@ -3,6 +3,7 @@ package org.kku.jdiskusage.util;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -100,6 +101,16 @@ public class ApplicationProperties
       return getPropertyValue(propertyName) == null ? defaultValue : Double.valueOf(getPropertyValue(propertyName));
     }
 
+    public Integer getInteger(CharSequence propertyName, Integer defaultValue)
+    {
+      return getPropertyValue(propertyName) == null ? defaultValue : Integer.valueOf(getPropertyValue(propertyName));
+    }
+
+    public Long getLong(CharSequence propertyName, Long defaultValue)
+    {
+      return getPropertyValue(propertyName) == null ? defaultValue : Long.valueOf(getPropertyValue(propertyName));
+    }
+
     public String getString(CharSequence propertyName, String defaultValue)
     {
       return getPropertyValue(propertyName) == null ? defaultValue : getPropertyValue(propertyName);
@@ -134,6 +145,10 @@ public class ApplicationProperties
         m_properties.load(Files.newInputStream(getPropertyPath()));
       }
       catch (FileNotFoundException e)
+      {
+        // This can happen! First time the application is started.
+      }
+      catch (NoSuchFileException e)
       {
         // This can happen! First time the application is started.
       }

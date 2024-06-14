@@ -13,7 +13,7 @@ public class Test
   {
     startSwing();
   }
-  
+
   public void startSwing()
   {
     JPanel pane;
@@ -29,7 +29,7 @@ public class Test
     frame = new JFrame("Test");
     frame.setContentPane(pane);
     frame.setSize(new Dimension(600, 400));
-    frame.show();
+    frame.setVisible(true);
   }
 
   public static void main(String[] args)

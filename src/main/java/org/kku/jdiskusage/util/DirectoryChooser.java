@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -299,9 +298,6 @@ public class DirectoryChooser
       MyTableView<Path> tableView;
       MyTableColumn<Path, Node> pathTypeColumn;
       MyTableColumn<Path, String> nameColumn;
-      MyTableColumn<Path, Long> fileSizeColumn;
-      MyTableColumn<Path, Long> typeColumn;
-      MyTableColumn<Path, Date> lastModifiedColumn;
 
       tableView = new MyTableView<>("Directories");
       tableView.getSelectionModel().selectionModeProperty().bind(m_selectionMode);
@@ -320,29 +316,12 @@ public class DirectoryChooser
       });
 
       pathTypeColumn = tableView.addColumn("");
-      pathTypeColumn.initPersistentPrefWidth(20.0);
+      pathTypeColumn.setColumnCount(3);
       pathTypeColumn.setCellValueGetter(this::pathToImage);
 
       nameColumn = tableView.addColumn("Name");
-      nameColumn.initPersistentPrefWidth(200.0);
+      nameColumn.setColumnCount(40);
       nameColumn.setCellValueGetter((path) -> path.getFileName().toString());
-
-      /*
-       * fileSizeColumn = table.addColumn("File size");
-       * fileSizeColumn.initPersistentPrefWidth(100.0);
-       * fileSizeColumn.setCellValueFormatter(FormatterFactory.
-       * createStringFormatFormatter("%,d"));
-       * fileSizeColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-       * fileSizeColumn.setCellValueGetter((owi) -> owi.getObject().getSize());
-       * 
-       * lastModifiedColumn = table.addColumn("Last modified");
-       * lastModifiedColumn.initPersistentPrefWidth(200.0);
-       * lastModifiedColumn.setCellValueGetter((owi) -> new
-       * Date(owi.getObject().getLastModifiedTime()));
-       * lastModifiedColumn.setCellValueFormatter(FormatterFactory.
-       * createSimpleDateFormatter("dd/MM/yyyy HH:mm:ss"));
-       * lastModifiedColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-       */
 
       return tableView;
     }

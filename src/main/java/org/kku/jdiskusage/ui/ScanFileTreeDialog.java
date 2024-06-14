@@ -51,7 +51,7 @@ public class ScanFileTreeDialog
     }
 
     dirPathList = directoryChooser.showOpenMultipleDialog(stage);
-    if (dirPathList == null)
+    if (dirPathList == null || dirPathList.isEmpty())
     {
       return null;
     }

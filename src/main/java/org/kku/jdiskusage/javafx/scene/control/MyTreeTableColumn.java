@@ -2,6 +2,7 @@ package org.kku.jdiskusage.javafx.scene.control;
 
 import java.util.function.Function;
 import org.kku.jdiskusage.ui.util.FormatterIF;
+import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.util.ApplicationProperties.Props;
 import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -41,12 +42,12 @@ public class MyTreeTableColumn<T, R>
     });
   }
 
-  public void initPersistentPrefWidth(double defaultWidth)
+  public void setColumnCount(int columnCount)
   {
     Props props;
 
     props = getProps(getTreeTableView().getId() + "_" + getId());
-    setPrefWidth(props.getDouble(Property.PREF_SIZE, defaultWidth));
+    setPrefWidth(props.getDouble(Property.PREF_SIZE, FxUtil.getColumnCountWidth(columnCount)));
     widthProperty().addListener(props.getChangeListener(Property.PREF_SIZE));
   }
 

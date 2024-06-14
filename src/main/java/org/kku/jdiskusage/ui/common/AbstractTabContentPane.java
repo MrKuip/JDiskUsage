@@ -64,35 +64,38 @@ abstract public class AbstractTabContentPane
 
   protected final void init()
   {
-    m_paneTypeByIdMap.values().stream().map(paneType -> {
-      ToggleButton button;
+    if (m_paneTypeByIdMap.size() > 1)
+    {
+      m_paneTypeByIdMap.values().stream().map(paneType -> {
+        ToggleButton button;
 
-      button = new ToggleButton();
-      if (paneType.iconName() != null)
-      {
-        button.setGraphic(IconUtil.createIconNode(paneType.iconName(), IconSize.SMALLER));
-        button.setTooltip(new Tooltip(translate(paneType.description())));
-      }
-      else
-      {
-        button.setText(translate(paneType.description()));
-      }
-      button.setUserData(paneType);
-      button.setOnAction((ae) -> {
-        setCurrentPaneType((PaneType) ((Node) ae.getSource()).getUserData());
+        button = new ToggleButton();
+        if (paneType.iconName() != null)
+        {
+          button.setGraphic(IconUtil.createIconNode(paneType.iconName(), IconSize.SMALLER));
+          button.setTooltip(new Tooltip(translate(paneType.description())));
+        }
+        else
+        {
+          button.setText(translate(paneType.description()));
+        }
+        button.setUserData(paneType);
+        button.setOnAction((ae) -> {
+          setCurrentPaneType((PaneType) ((Node) ae.getSource()).getUserData());
+        });
+        if (mi_currentPaneType == paneType)
+        {
+          button.setSelected(true);
+        }
+
+        return button;
+      }).forEach(button -> {
+        mi_segmentedButton.getButtons().add(button);
       });
-      if (mi_currentPaneType == paneType)
-      {
-        button.setSelected(true);
-      }
 
-      return button;
-    }).forEach(button -> {
-      mi_segmentedButton.getButtons().add(button);
-    });
-
-    BorderPane.setMargin(mi_segmentedButton, new Insets(2, 2, 2, 2));
-    mi_node.setBottom(mi_segmentedButton);
+      BorderPane.setMargin(mi_segmentedButton, new Insets(2, 2, 2, 2));
+      mi_node.setBottom(mi_segmentedButton);
+    }
   }
 
   protected PaneType createPaneType(String paneTypeId, String description, String iconName, Supplier<Node> node)

@@ -86,7 +86,7 @@ public class MyTableView<T>
     MyTableColumn<T, Integer> rankColumn;
 
     rankColumn = addColumn(columnName);
-    rankColumn.initPersistentPrefWidth(70.0);
+    rankColumn.setColumnCount(5);
     rankColumn.setCellValueGetter(this::getLineNumber);
     rankColumn.setCellValueAlignment(Pos.BASELINE_RIGHT);
 

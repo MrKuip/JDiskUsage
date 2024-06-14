@@ -3,7 +3,6 @@ package org.kku.jdiskusage.ui;
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
@@ -14,17 +13,23 @@ import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
+import org.kku.jdiskusage.util.StringUtils;
+import org.kku.jdiskusage.util.preferences.AppPreferences;
+import com.google.re2j.Matcher;
+import com.google.re2j.Pattern;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeItem;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
 public class SearchPane
@@ -44,24 +49,39 @@ public class SearchPane
 
   private void initPane()
   {
-    BorderPane buttonPane;
+    ToolBar toolBar;
     Label searchLabel;
+    ToggleButton regexButton;
     TextField searchTextField;
+    Label maxResultLabel;
+    TextField maxResultTextField;
 
-    buttonPane = new BorderPane();
-    buttonPane.setPadding(new Insets(5, 10, 5, 10));
+    toolBar = new ToolBar();
 
-    searchLabel = new Label(null, IconUtil.createIconNode("magnify", IconSize.SMALL));
+    searchLabel = new Label(null, IconUtil.createIconNode("magnify", IconSize.SMALLER));
+
+    regexButton = new ToggleButton(null, IconUtil.createIconNode("regex", IconSize.SMALLER));
+    mi_data.mi_regexSelectedProperty = regexButton.selectedProperty();
+
     searchTextField = new TextField();
     searchTextField.setPromptText(translate("search"));
     searchTextField.setOnAction((ae) -> getDiskUsageData().refresh());
+    mi_data.mi_searchTextProperty = searchTextField.textProperty();
 
-    mi_data.mi_textProperty = searchTextField.textProperty();
+    maxResultTextField = new TextField();
+    maxResultTextField.setPrefColumnCount(5);
+    maxResultLabel = new Label(translate("Max results"));
+    maxResultLabel.setLabelFor(maxResultTextField);
+    maxResultTextField.setText(AppPreferences.searchMaxResultPreference.get().toString());
+    maxResultTextField.setOnAction(
+        (ae) -> AppPreferences.searchMaxResultPreference.set(Integer.valueOf(maxResultTextField.getText())));
+    mi_data.mi_maxResultProperty = maxResultTextField.textProperty();
 
-    buttonPane.setLeft(searchLabel);
-    buttonPane.setCenter(searchTextField);
+    HBox.setHgrow(searchTextField, Priority.ALWAYS);
 
-    getNode().setTop(buttonPane);
+    toolBar.getItems().addAll(searchLabel, searchTextField, regexButton, maxResultLabel, maxResultTextField);
+
+    getNode().setTop(toolBar);
   }
 
   Node getTableNode()
@@ -83,12 +103,12 @@ public class SearchPane
       table.addRankColumn("Rank");
 
       nameColumn = table.addColumn("Name");
-      nameColumn.initPersistentPrefWidth(500.0);
+      nameColumn.setColumnCount(20);
       nameColumn.setCellValueGetter((fn) -> fn.getAbsolutePath());
 
       fileSizeColumn = table.addColumn("File size");
       fileSizeColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-      fileSizeColumn.initPersistentPrefWidth(150.0);
+      fileSizeColumn.setColumnCount(8);
       fileSizeColumn.setCellValueGetter((fn) -> fn.getSize());
 
       table.setItems(mi_data.getList());
@@ -106,7 +126,9 @@ public class SearchPane
   private class SearchPaneData
     extends PaneData
   {
-    public StringProperty mi_textProperty;
+    public StringProperty mi_maxResultProperty;
+    public BooleanProperty mi_regexSelectedProperty;
+    public StringProperty mi_searchTextProperty;
     private ObservableList<FileNodeIF> mi_list;
 
     private SearchPaneData()
@@ -117,40 +139,73 @@ public class SearchPane
     {
       if (mi_list == null)
       {
-        try (PerformancePoint pp = Performance.start("Collecting data for last modified table"))
+        String searchText;
+        List<FileNodeIF> list;
+
+        searchText = mi_searchTextProperty.get();
+        try (PerformancePoint pp = Performance.start("Collecting data for search '%s'", searchText))
         {
-          String searchText;
-          List<FileNodeIF> list;
+          Pattern pattern;
+          Matcher matcher;
 
           list = new ArrayList<>();
 
-          searchText = mi_textProperty.get();
-          System.out.println("searchText=" + searchText);
-          if (searchText.startsWith("*"))
+          if (mi_data.mi_regexSelectedProperty.get())
           {
-            // java throws a 'dangling meta character' exception which is the proper way
-            // to do things (because * means repeat the letter before. And there is no letter)
-            // But other regular expression handlers are way more lenient
-            searchText = "." + searchText;
-          }
-          Pattern pattern = Pattern.compile(searchText);
-
-          new FileNodeIterator(getCurrentTreeItem().getValue()).forEach(fn -> {
-            if (fn.isFile())
+            if (searchText.startsWith("*"))
             {
-              //if (searchText != null && fn.getName().contains(searchText))
-              if (pattern != null && pattern.matcher(fn.getName()).matches())
-              {
-                list.add(fn);
-              }
+              // java throws a 'dangling meta character' exception which is the proper way
+              // to do things (because * means repeat the letter before. And there is no letter)
+              // But other regular expression handlers are way more lenient
+              searchText = "." + searchText;
             }
-          });
+            pattern = Pattern.compile(searchText);
+            matcher = pattern.matcher("");
+          }
+          else
+          {
+            pattern = null;
+            matcher = null;
+          }
+
+          if (!StringUtils.isEmpty(searchText))
+          {
+            String searchText2;
+            int maxResult;
+
+            searchText2 = searchText;
+            maxResult = Integer.valueOf(mi_data.mi_maxResultProperty.get());
+            new FileNodeIterator(getCurrentTreeItem().getValue()).forEach(fn -> {
+              if (list.size() >= maxResult)
+              {
+                return false;
+              }
+
+              if (fn.isFile())
+              {
+                if (pattern != null)
+                {
+                  if (matcher.reset(fn.getAbsolutePath()).find())
+                  {
+                    list.add(fn);
+                  }
+                }
+                else
+                {
+                  if (fn.getAbsolutePath().contains(searchText2))
+                  {
+                    list.add(fn);
+                  }
+                }
+              }
+              return true;
+            });
+          }
 
           list.sort(FileNodeIF.getSizeComparator());
-
-          mi_list = FXCollections.observableArrayList();
-          mi_list.addAll(list);
         }
+
+        mi_list = FXCollections.observableArrayList(list);
       }
 
       return mi_list;

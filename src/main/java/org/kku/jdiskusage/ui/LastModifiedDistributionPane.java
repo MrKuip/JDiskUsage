@@ -234,16 +234,19 @@ class LastModifiedDistributionPane
       table.setEditable(false);
 
       table.addRankColumn("Rank");
+
       timeIntervalColumn = table.addColumn("Time interval");
-      timeIntervalColumn.initPersistentPrefWidth(300.0);
+      timeIntervalColumn.setColumnCount(12);
       timeIntervalColumn.setCellValueGetter((o) -> o.getKey().getText());
+
       sumOfFileSizesColumn = table.addColumn("Sum of file sizes");
       sumOfFileSizesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-      sumOfFileSizesColumn.initPersistentPrefWidth(100.0);
+      sumOfFileSizesColumn.setColumnCount(8);
       sumOfFileSizesColumn.setCellValueGetter((o) -> o.getValue().mi_sizeOfFiles);
+
       numberOfFilesColumn = table.addColumn("Sum of number of files");
       numberOfFilesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-      numberOfFilesColumn.initPersistentPrefWidth(100.0);
+      numberOfFilesColumn.setColumnCount(8);
       numberOfFilesColumn.setCellValueGetter((o) -> o.getValue().mi_numberOfFiles);
 
       table.setItems(mi_data.getList());
@@ -301,6 +304,7 @@ class LastModifiedDistributionPane
               data.mi_numberOfFiles += 1;
               data.mi_sizeOfFiles += (fn.getSize() / 1000000);
             }
+            return true;
           });
         }
       }

@@ -18,6 +18,8 @@ public class AppPreferences
   public final static AppPreference<DisplayMetric> displayMetricPreference;
   public final static AppPreference<Sort> sortPreference;
   public final static AppPreference<Locale> localePreference;
+  public final static AppPreference<Integer> searchMaxResultPreference;
+  public final static AppPreference<Boolean> searchRegexPreference;
 
   static
   {
@@ -26,6 +28,9 @@ public class AppPreferences
     sortPreference = new AppPreference<>("Sort", Sort.NUMERIC);
     localePreference = new AppPreference<>("Locale", new Locale("nl"), AppPreferences::convertStringToLocale,
         AppPreferences::convertLocaleToString);
+    searchMaxResultPreference = new AppPreference<>("Max search results", Integer.valueOf(100),
+        AppPreferences::convertStringToInteger, AppPreferences::convertIntegerToString);
+    searchRegexPreference = new AppPreference<>("Use regex search", Boolean.FALSE);
   }
 
   public static class AppPreference<T>
@@ -150,8 +155,29 @@ public class AppPreferences
     return (T) Locale.forLanguageTag(stringValue);
   }
 
+  public static String convertIntegerToString(AppPreference<Integer> preference, Integer value)
+  {
+    return value.toString();
+  }
+
+  public static Integer convertStringToInteger(AppPreference<Integer> preference, String stringValue)
+  {
+    return Integer.valueOf(stringValue);
+  }
+
+  public static String convertBooleanToString(AppPreference<Boolean> preference, Boolean value)
+  {
+    return value.toString();
+  }
+
+  public static Boolean convertStringToBoolean(AppPreference<Boolean> preference, String stringValue)
+  {
+    return Boolean.valueOf(stringValue);
+  }
+
   public static <T> String convertObjectToString(AppPreference<T> preference, T value)
   {
     return value.toString();
   }
+
 }

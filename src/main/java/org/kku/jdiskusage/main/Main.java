@@ -7,7 +7,9 @@ import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import javafx.application.Application;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class Main
@@ -19,6 +21,7 @@ public class Main
   {
     DiskUsageView diskUsageView;
     Scene scene;
+    Rectangle2D defaultScreenBounds;
 
     Locale.setDefault(AppPreferences.localePreference.get());
 
@@ -26,10 +29,12 @@ public class Main
     scene = new Scene(diskUsageView);
     scene.getStylesheets().add("jdiskusage.css");
 
-    stage.setHeight(getProps().getDouble(Property.HEIGHT, 400));
-    stage.setWidth(getProps().getDouble(Property.WIDTH, 600));
-    stage.setX(getProps().getDouble(Property.X, 0));
-    stage.setY(getProps().getDouble(Property.Y, 0));
+    defaultScreenBounds = getDefaultScreenBounds();
+
+    stage.setX(getProps().getDouble(Property.X, defaultScreenBounds.getMinX()));
+    stage.setY(getProps().getDouble(Property.Y, defaultScreenBounds.getMinY()));
+    stage.setWidth(getProps().getDouble(Property.WIDTH, defaultScreenBounds.getWidth()));
+    stage.setHeight(getProps().getDouble(Property.HEIGHT, defaultScreenBounds.getHeight()));
 
     stage.heightProperty().addListener(getProps().getChangeListener(Property.HEIGHT));
     stage.widthProperty().addListener(getProps().getChangeListener(Property.WIDTH));
@@ -43,6 +48,17 @@ public class Main
     getParameters().getRaw().stream().map(Path::of).filter(path -> {
       return Files.exists(path) && Files.isDirectory(path);
     }).findFirst().ifPresent(diskUsageView::scanDirectory);
+  }
+
+  private Rectangle2D getDefaultScreenBounds()
+  {
+    Rectangle2D screenBounds;
+
+    screenBounds = Screen.getPrimary().getBounds();
+
+    return new Rectangle2D(screenBounds.getMinX() + (screenBounds.getWidth() * 0.1),
+        screenBounds.getMinY() + (screenBounds.getHeight() * 0.1), screenBounds.getWidth() * 0.8,
+        screenBounds.getHeight() * 0.8);
   }
 
   public static void main(String[] args)

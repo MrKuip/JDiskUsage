@@ -172,19 +172,19 @@ class TypesPane
       table.addRankColumn("Rank");
 
       extensionColumn = table.addColumn("Extension");
-      extensionColumn.initPersistentPrefWidth(100.0);
+      extensionColumn.setColumnCount(10);
       extensionColumn.setCellValueGetter(Entry::getKey);
 
       fileSizeColumn = table.addColumn("File size");
 
       fileSizeBytesColumn = table.addColumn(fileSizeColumn, "Bytes");
-      fileSizeBytesColumn.initPersistentPrefWidth(200.0);
+      fileSizeBytesColumn.setColumnCount(8);
       fileSizeBytesColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
       fileSizeBytesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
       fileSizeBytesColumn.setCellValueGetter((e) -> e.getValue().getFileSize());
 
       fileSizePercentageColumn = table.addColumn(fileSizeColumn, "%");
-      fileSizePercentageColumn.initPersistentPrefWidth(200.0);
+      fileSizePercentageColumn.setColumnCount(5);
       fileSizePercentageColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2f%%"));
       fileSizePercentageColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
       fileSizePercentageColumn.setCellValueGetter((e) -> (e.getValue().getFileSize() * 100.0) / totalFileSize);
@@ -192,13 +192,13 @@ class TypesPane
       numberOfFilesColumn = table.addColumn("Number of Files");
 
       numberOfFilesCountColumn = table.addColumn(numberOfFilesColumn, "Count");
-      numberOfFilesCountColumn.initPersistentPrefWidth(200.0);
+      numberOfFilesCountColumn.setColumnCount(8);
       numberOfFilesCountColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
       numberOfFilesCountColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
       numberOfFilesCountColumn.setCellValueGetter((e) -> e.getValue().getFileCount());
 
       numberOfFilesPercentageColumn = table.addColumn(numberOfFilesColumn, "%");
-      numberOfFilesPercentageColumn.initPersistentPrefWidth(200.0);
+      numberOfFilesPercentageColumn.setColumnCount(5);
       numberOfFilesPercentageColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2f%%"));
       numberOfFilesPercentageColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
       numberOfFilesPercentageColumn
@@ -238,6 +238,7 @@ class TypesPane
             data.mi_fileCount += 1;
             data.mi_fileSize += fn.getSize();
           }
+          return true;
         });
         mi_fullMap = mi_fullMap.entrySet().stream()
             .sorted(
