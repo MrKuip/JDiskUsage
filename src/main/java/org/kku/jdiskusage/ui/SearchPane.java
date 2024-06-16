@@ -150,16 +150,9 @@ public class SearchPane
 
       table.getPlaceholder();
       table.setPlaceholder(new Label("Searching..."));
-      new Thread(() -> {
-        System.out.println("size =" + mi_data.getList().size());
-        table.setItems(mi_data.getList());
-        if (mi_data.getList().size() == 0)
-        {
-          table.setPlaceholder(new Label("No search data"));
-        }
-
-      }).start();
-
+      
+      table.setItemsAsync(() -> table.setItems(mi_data.getList()));
+      
       //table.setItems(mi_data.getList());
 
       pane.add(table, 0, 1);
@@ -171,6 +164,8 @@ public class SearchPane
 
     return new Label("No data");
   }
+  
+  
 
   private class SearchPaneData
     extends PaneData

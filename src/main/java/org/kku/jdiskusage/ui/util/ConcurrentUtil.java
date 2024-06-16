@@ -7,33 +7,37 @@ import java.util.concurrent.Executors;
 
 // Example: https://stackoverflow.com/questions/29733004/properly-doing-multithreading-and-thread-pools-with-javafx-tasks
 
-public class Workers
+public class ConcurrentUtil
 {
-  static final Workers m_instance = new Workers();
+  static final ConcurrentUtil m_instance = new ConcurrentUtil();
+  static final String DEFAULT_EXECUTOR = "DEFAULT_EXECUTOR";
 
   final Map<String, Executor> m_executorByNameMap = new HashMap<>();
 
-  private Workers()
+  private ConcurrentUtil()
   {
   }
 
-  static public Workers getInstance()
+  static public ConcurrentUtil getInstance()
   {
     return m_instance;
   }
 
   public Executor getDefaultExecutor()
   {
-    return getExecutor("DEFAULT");
+    return getExecutor(DEFAULT_EXECUTOR);
   }
 
-  public Executor getExecutor(String executorName)
+  private Executor getExecutor(String executorName)
   {
     return m_executorByNameMap.computeIfAbsent(executorName, (key) -> {
-      return Executors.newFixedThreadPool(1, runnable -> {
-        Thread t = new Thread(runnable);
-        t.setDaemon(true);
-        return t;
+      return Executors.newSingleThreadExecutor(runnable -> {
+        Thread thread;
+
+        thread = new Thread(runnable);
+        thread.setDaemon(true);
+
+        return thread;
       });
     });
   }

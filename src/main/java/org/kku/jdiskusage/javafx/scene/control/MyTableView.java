@@ -4,7 +4,10 @@ import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.HashMap;
 import java.util.Map;
 import org.kku.jdiskusage.ui.util.TableUtils;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.Skin;
 import javafx.scene.control.TableColumnBase;
 import javafx.scene.control.TableView;
@@ -108,5 +111,26 @@ public class MyTableView<T>
       }
       return index + 1;
     });
+  }
+
+  public void setItemsAsync(Runnable runnable)
+  {
+    Node originalPlaceHolder;
+
+    originalPlaceHolder = getPlaceholder();
+    setPlaceholder(new Label("Searching..."));
+    new Thread(() -> {
+      runnable.run();
+      Platform.runLater(() -> {
+        if (getItems().size() == 0)
+        {
+          setPlaceholder(new Label("No search data"));
+        }
+        else
+        {
+          setPlaceholder(originalPlaceHolder);
+        }
+      });
+    }).start();
   }
 }
