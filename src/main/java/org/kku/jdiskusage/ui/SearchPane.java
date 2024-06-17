@@ -3,6 +3,8 @@ package org.kku.jdiskusage.ui;
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.kku.fonticons.ui.FxIcon.IconSize;
@@ -18,6 +20,7 @@ import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.StringUtils;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -150,10 +153,8 @@ public class SearchPane
 
       table.getPlaceholder();
       table.setPlaceholder(new Label("Searching..."));
-      
-      table.setItemsAsync(() -> table.setItems(mi_data.getList()));
-      
-      //table.setItems(mi_data.getList());
+
+      new TaskRunner<>(() -> mi_data.getList(), (itemList) -> table.setItems(itemList)).run();
 
       pane.add(table, 0, 1);
       GridPane.setHgrow(table, Priority.ALWAYS);
@@ -164,8 +165,31 @@ public class SearchPane
 
     return new Label("No data");
   }
-  
-  
+
+  static class TaskRunner<T>
+  {
+    private final Supplier<T> mi_async;
+    private final Consumer<T> mi_sync;
+
+    public TaskRunner(Supplier<T> async, Consumer<T> sync)
+    {
+      mi_async = async;
+      mi_sync = sync;
+    }
+
+    public void run()
+    {
+      new Thread(() -> {
+        T result;
+
+        result = mi_async.get();
+        Platform.runLater(() -> {
+          mi_sync.accept(result);
+        });
+
+      }).start();
+    }
+  }
 
   private class SearchPaneData
     extends PaneData
@@ -248,6 +272,15 @@ public class SearchPane
                 if (fn.getAbsolutePath().contains(searchText2))
                 {
                   list.add(fn);
+                  try
+                  {
+                    Thread.sleep(1);
+                  }
+                  catch (InterruptedException e)
+                  {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                  }
                   return true;
                 }
               }

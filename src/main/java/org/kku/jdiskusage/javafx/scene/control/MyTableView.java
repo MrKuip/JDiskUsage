@@ -2,9 +2,13 @@ package org.kku.jdiskusage.javafx.scene.control;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import org.kku.jdiskusage.ui.util.TableUtils;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -113,16 +117,20 @@ public class MyTableView<T>
     });
   }
 
-  public void setItemsAsync(Runnable runnable)
+  public void setItems(Supplier<List<T>> itemSupplier)
   {
     Node originalPlaceHolder;
 
     originalPlaceHolder = getPlaceholder();
     setPlaceholder(new Label("Searching..."));
+
     new Thread(() -> {
-      runnable.run();
+      List<T> itemList;
+
+      itemList = itemSupplier.get();
       Platform.runLater(() -> {
-        if (getItems().size() == 0)
+        setItems(FXCollections.observableArrayList(itemList));
+        if (itemList.size() == 0)
         {
           setPlaceholder(new Label("No search data"));
         }
@@ -132,5 +140,19 @@ public class MyTableView<T>
         }
       });
     }).start();
+  }
+
+  public <T> void async(Supplier<T> itemSupplier)
+  {
+    Task<T> task;
+
+    task = new Task<T>()
+    {
+      @Override
+      protected T call() throws Exception
+      {
+        return itemSupplier.get();
+      }
+    };
   }
 }
