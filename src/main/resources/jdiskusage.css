@@ -43,5 +43,12 @@
   -fx-padding: 0.20em;
 }
 
+.task-item {
+  -fx-background-color: lightgray;
+  -fx-border-color: gray;
+  -fx-border-insets: 3;
+  -fx-border-width: 1;
+}
+
 
 

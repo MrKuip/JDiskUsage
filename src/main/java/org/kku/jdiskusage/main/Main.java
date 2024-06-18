@@ -10,6 +10,7 @@ import javafx.application.Application;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -17,7 +18,7 @@ public class Main
   extends Application
     implements ApplicationPropertyExtensionIF
 {
-  static private Node m_rootNode;
+  static private Pane m_rootNode;
 
   @Override
   public void start(Stage stage)
@@ -29,7 +30,9 @@ public class Main
     Locale.setDefault(AppPreferences.localePreference.get());
 
     diskUsageView = new DiskUsageView(stage);
-    scene = new Scene(diskUsageView);
+    m_rootNode = diskUsageView.getContent();
+
+    scene = new Scene(m_rootNode);
     scene.getStylesheets().add("jdiskusage.css");
 
     defaultScreenBounds = getDefaultScreenBounds();
@@ -47,8 +50,6 @@ public class Main
     stage.setTitle("JDiskUsage");
     stage.setScene(scene);
     stage.show();
-
-    m_rootNode = diskUsageView;
 
     getParameters().getRaw().stream().map(Path::of).filter(path -> {
       return Files.exists(path) && Files.isDirectory(path);

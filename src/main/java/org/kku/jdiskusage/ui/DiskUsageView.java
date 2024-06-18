@@ -19,6 +19,7 @@ import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.common.FullScreen;
 import org.kku.jdiskusage.ui.common.Navigation;
+import org.kku.jdiskusage.ui.common.TaskView;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
@@ -30,6 +31,7 @@ import org.kku.jdiskusage.util.Translator;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.kku.jdiskusage.util.preferences.Sort;
+import org.tbee.javafx.scene.layout.MigPane;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
@@ -47,14 +49,15 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class DiskUsageView
-  extends BorderPane
     implements ApplicationPropertyExtensionIF
 {
-  private DiskUsageData m_diskUsageMainData = new DiskUsageData();
+  private DiskUsageData m_data = new DiskUsageData();
+  private MigPane m_content = new MigPane();
 
   public class DiskUsageData
   {
@@ -72,6 +75,7 @@ public class DiskUsageView
     private final RecentFilesMenu mi_recentFiles = new RecentFilesMenu();
     private final PreferencesMenu mi_preferences = new PreferencesMenu();
     private final FilterPane mi_filterPane = new FilterPane(this);
+    private final TaskView mi_taskView = new TaskView();
 
     private DiskUsageData()
     {
@@ -124,26 +128,34 @@ public class DiskUsageView
 
     getProps().getDouble(Property.HEIGHT, 0);
 
-    m_diskUsageMainData.mi_fullScreen = new FullScreen(stage);
+    m_data.mi_fullScreen = new FullScreen(stage);
 
     toolBars = new VBox(createMenuBar(), createToolBar());
     splitPane = new SplitPane();
 
-    m_diskUsageMainData.getTabPaneData().init();
+    m_data.getTabPaneData().init();
 
-    splitPane.getItems().addAll(m_diskUsageMainData.getTreePaneData().getNode(),
-        m_diskUsageMainData.getTabPaneData().getNode());
+    splitPane.getItems().addAll(m_data.getTreePaneData().getNode(), m_data.getTabPaneData().getNode());
     splitPane.getDividers().get(0).positionProperty()
         .addListener(getProps().getChangeListener(Property.SPLIT_PANE_POSITION));
-    SplitPane.setResizableWithParent(m_diskUsageMainData.getTreePaneData().getNode(), false);
-    SplitPane.setResizableWithParent(m_diskUsageMainData.getTabPaneData().getNode(), false);
+    SplitPane.setResizableWithParent(m_data.getTreePaneData().getNode(), false);
+    SplitPane.setResizableWithParent(m_data.getTabPaneData().getNode(), false);
 
     splitPane.getDividers().get(0).setPosition(getProps().getDouble(Property.SPLIT_PANE_POSITION, 0.40));
 
-    setTop(toolBars);
-    setCenter(splitPane);
+    m_content.add(toolBars, "dock north");
+    m_content.add(splitPane, "dock center");
+    // This places the taskview in the lower right corner of the content pane.
+    // container.x2 = the leftmost point of the container
+    // container.y2 = the lowest point of the container
+    m_content.add(m_data.mi_taskView, "pos null null container.x2 container.y2");
 
-    m_diskUsageMainData.getTabPaneData().getNode().setTop(m_diskUsageMainData.getTreePaneData().createBreadCrumbBar());
+    m_data.getTabPaneData().getNode().setTop(m_data.getTreePaneData().createBreadCrumbBar());
+  }
+
+  public Pane getContent()
+  {
+    return m_content;
   }
 
   private MenuBar createMenuBar()
@@ -181,7 +193,7 @@ public class DiskUsageView
     Node filterPaneNode;
 
     toolBar = new ToolBar();
-    navigation = m_diskUsageMainData.getNavigation();
+    navigation = m_data.getNavigation();
 
     backButton = new Button("", IconUtil.createIconNode("arrow-left", IconSize.SMALL));
     backButton.disableProperty().bind(navigation.backNavigationDisabledProperty());
@@ -196,10 +208,10 @@ public class DiskUsageView
     homeButton.setOnAction((e) -> navigation.home());
 
     refreshButton = new Button("", IconUtil.createIconNode("refresh", IconSize.SMALL));
-    refreshButton.setOnAction((e) -> m_diskUsageMainData.refresh());
+    refreshButton.setOnAction((e) -> m_data.refresh());
 
     fullScreenButton = new ToggleButton("", IconUtil.createIconNode("fullscreen", IconSize.SMALL));
-    fullScreenButton.setOnAction((e) -> m_diskUsageMainData.mi_fullScreen.toggleFullScreen());
+    fullScreenButton.setOnAction((e) -> m_data.mi_fullScreen.toggleFullScreen());
 
     showDisplayMetricGroup = new ToggleGroup();
 
@@ -260,7 +272,7 @@ public class DiskUsageView
     menuItem = translate(new MenuItem("Scan directory"));
     menuItem.setGraphic(IconUtil.createIconNode("file-search", IconSize.SMALLER));
     menuItem.setOnAction(e -> {
-      scanDirectory(new ScanFileTreeDialog().chooseDirectory(m_diskUsageMainData.mi_fullScreen.getCurrentStage()));
+      scanDirectory(new ScanFileTreeDialog().chooseDirectory(m_data.mi_fullScreen.getCurrentStage()));
     });
 
     return menuItem;
@@ -268,12 +280,12 @@ public class DiskUsageView
 
   private Menu createRecentFilesMenu()
   {
-    return m_diskUsageMainData.mi_recentFiles.createMenu();
+    return m_data.mi_recentFiles.createMenu();
   }
 
   private MenuItem createPreferencesMenuItem()
   {
-    return m_diskUsageMainData.mi_preferences.createMenuItem();
+    return m_data.mi_preferences.createMenuItem();
   }
 
   private MenuItem createExitMenuItem()
@@ -291,7 +303,7 @@ public class DiskUsageView
 
   private FilterPane createFilterPane()
   {
-    return m_diskUsageMainData.mi_filterPane;
+    return m_data.mi_filterPane;
   }
 
   public class TabPaneData
@@ -379,7 +391,7 @@ public class DiskUsageView
 
       mi_tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
         // Fill the new selected tab with data.
-        fillContent(newTab, m_diskUsageMainData.getSelectedTreeItem());
+        fillContent(newTab, m_data.getSelectedTreeItem());
 
         // Remember the last selected tab
         getProps().set(Property.SELECTED_ID, ((TabData) newTab.getUserData()).name());
@@ -418,8 +430,7 @@ public class DiskUsageView
         TabData tabData;
 
         tabData = tabEntry.get().getKey();
-        tab.setContent(
-            mi_contentByTabId.computeIfAbsent(tabData, td -> tabEntry.get().getKey().fillContent(m_diskUsageMainData)));
+        tab.setContent(mi_contentByTabId.computeIfAbsent(tabData, td -> tabEntry.get().getKey().fillContent(m_data)));
       }
       else
       {
@@ -430,14 +441,14 @@ public class DiskUsageView
     public void refresh()
     {
       mi_contentByTabId.clear();
-      Stream.of(TabData.values()).forEach(tabData -> tabData.m_tabPaneSupplier.apply(m_diskUsageMainData).reset());
-      m_diskUsageMainData.getTreePaneData().navigateTo(m_diskUsageMainData.getSelectedTreeItem());
+      Stream.of(TabData.values()).forEach(tabData -> tabData.m_tabPaneSupplier.apply(m_data).reset());
+      m_data.getTreePaneData().navigateTo(m_data.getSelectedTreeItem());
     }
 
     public void itemSelected()
     {
       mi_contentByTabId.clear();
-      m_diskUsageMainData.getNavigation().navigateTo(m_diskUsageMainData.getSelectedTreeItem());
+      m_data.getNavigation().navigateTo(m_data.getSelectedTreeItem());
     }
   }
 
@@ -505,8 +516,8 @@ public class DiskUsageView
   {
     if (dirNode != null)
     {
-      m_diskUsageMainData.getTreePaneData().createTreeTableView(dirNode);
-      m_diskUsageMainData.mi_recentFiles.addPath(Path.of(dirNode.getName()));
+      m_data.getTreePaneData().createTreeTableView(dirNode);
+      m_data.mi_recentFiles.addPath(Path.of(dirNode.getName()));
     }
   }
 
