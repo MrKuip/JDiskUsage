@@ -2,7 +2,9 @@ package org.kku.jdiskusage.ui.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -13,7 +15,7 @@ public class ConcurrentUtil
   static final ConcurrentUtil m_instance = new ConcurrentUtil();
   static final String DEFAULT_EXECUTOR = "DEFAULT_EXECUTOR";
 
-  final Map<String, ThreadPoolExecutor> m_executorByNameMap = new HashMap<>();
+  final Map<String, MyExecutor> m_executorByNameMap = new HashMap<>();
 
   private ConcurrentUtil()
   {
@@ -24,7 +26,7 @@ public class ConcurrentUtil
     return m_instance;
   }
 
-  public ThreadPoolExecutor getDefaultExecutor()
+  public MyExecutor getDefaultExecutor()
   {
     return getExecutor(DEFAULT_EXECUTOR);
   }
@@ -33,17 +35,40 @@ public class ConcurrentUtil
   {
   }
 
-  private ThreadPoolExecutor getExecutor(String executorName)
+  private MyExecutor getExecutor(String executorName)
   {
-    return m_executorByNameMap.computeIfAbsent(executorName, (key) -> {
-      return new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), (runnable -> {
+    return m_executorByNameMap.computeIfAbsent(executorName, (key) -> new MyExecutor());
+  }
+
+  public class MyExecutor
+  {
+    private final ThreadPoolExecutor mi_executor;
+
+    public MyExecutor()
+    {
+      mi_executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
+          createThreadFactory());
+    }
+
+    private static ThreadFactory createThreadFactory()
+    {
+      return runnable -> {
         Thread thread;
 
         thread = new Thread(runnable);
         thread.setDaemon(true);
 
         return thread;
-      }));
-    });
+      };
+    }
+
+    public Future<?> submit(Runnable runnable)
+    {
+      Future<?> future;
+
+      future = mi_executor.submit(runnable);
+
+      return future;
+    }
   }
 }

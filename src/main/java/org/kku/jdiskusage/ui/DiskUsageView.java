@@ -19,7 +19,7 @@ import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.common.FullScreen;
 import org.kku.jdiskusage.ui.common.Navigation;
-import org.kku.jdiskusage.ui.common.TaskView;
+import org.kku.jdiskusage.ui.common.NotificationView;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
@@ -75,7 +75,7 @@ public class DiskUsageView
     private final RecentFilesMenu mi_recentFiles = new RecentFilesMenu();
     private final PreferencesMenu mi_preferences = new PreferencesMenu();
     private final FilterPane mi_filterPane = new FilterPane(this);
-    private final TaskView mi_taskView = new TaskView();
+    private final NotificationView mi_taskView = new NotificationView();
 
     private DiskUsageData()
     {
