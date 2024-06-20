@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.util.IconUtil;
-import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
+import org.kku.jdiskusage.util.AppPropertyExtensionIF;
 import org.kku.jdiskusage.util.DirectoryChooser;
 import org.kku.jdiskusage.util.FileTree;
 import org.kku.jdiskusage.util.FileTree.DirNode;
@@ -25,7 +25,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public class ScanFileTreeDialog
-    implements ApplicationPropertyExtensionIF
+    implements AppPropertyExtensionIF
 {
   private Dialog<ButtonType> m_dialog;
   private Label m_currentDirectoryLabel;

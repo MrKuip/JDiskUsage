@@ -1,15 +1,16 @@
 package org.kku.jdiskusage.ui.common;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+
 import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.tbee.javafx.scene.layout.MigPane;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -18,8 +19,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
-public class NotificationView
-  extends VBox
+public class NotificationView extends VBox
 {
   public NotificationView()
   {
@@ -29,9 +29,9 @@ public class NotificationView
   {
     getChildren().add(0,
         new MessageItemView(new FxIcon("information").size(IconSize.LARGE).getImageView(), title, text, 10));
-    new EventHandler();
+    //new EventHandler();
 
-    addEventHandler();
+    //addEventHandler();
   }
 
   public void addTask(Task<?> task)
@@ -39,8 +39,7 @@ public class NotificationView
     getChildren().add(new TaskItemView<>(task));
   }
 
-  class TaskItemView<T>
-    extends MigPane
+  class TaskItemView<T> extends MigPane
   {
     private final Node graphic;
     private final ProgressBar progressBar;
@@ -88,8 +87,7 @@ public class NotificationView
     }
   }
 
-  class MessageItemView
-    extends MigPane
+  class MessageItemView extends MigPane
   {
     MessageItemView(Node graphicNode, String title, String text, int durationInSeconds)
     {

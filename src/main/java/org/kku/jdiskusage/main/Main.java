@@ -3,9 +3,11 @@ package org.kku.jdiskusage.main;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
+
 import org.kku.jdiskusage.ui.DiskUsageView;
-import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
+import org.kku.jdiskusage.util.AppPropertyExtensionIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
+
 import javafx.application.Application;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
@@ -14,11 +16,10 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-public class Main
-  extends Application
-    implements ApplicationPropertyExtensionIF
+public class Main extends Application implements AppPropertyExtensionIF
 {
   static private Pane m_rootNode;
+  static private Stage m_rootStage;
 
   @Override
   public void start(Stage stage)
@@ -26,6 +27,8 @@ public class Main
     DiskUsageView diskUsageView;
     Scene scene;
     Rectangle2D defaultScreenBounds;
+
+    m_rootStage = stage;
 
     Locale.setDefault(AppPreferences.localePreference.get());
 
@@ -59,6 +62,11 @@ public class Main
   static public Node getRootNode()
   {
     return m_rootNode;
+  }
+
+  static public Stage getRootStage()
+  {
+    return m_rootStage;
   }
 
   private Rectangle2D getDefaultScreenBounds()

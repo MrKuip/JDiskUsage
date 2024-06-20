@@ -22,7 +22,7 @@ import org.kku.jdiskusage.ui.common.Navigation;
 import org.kku.jdiskusage.ui.common.NotificationView;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
-import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
+import org.kku.jdiskusage.util.AppPropertyExtensionIF;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
@@ -54,7 +54,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class DiskUsageView
-    implements ApplicationPropertyExtensionIF
+    implements AppPropertyExtensionIF
 {
   private DiskUsageData m_data = new DiskUsageData();
   private MigPane m_content = new MigPane();

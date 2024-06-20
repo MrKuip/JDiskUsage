@@ -50,5 +50,9 @@
   -fx-border-width: 1;
 }
 
+.directory-chooser {
+  -fx-border-color: lightgray;
+}
+
 
 

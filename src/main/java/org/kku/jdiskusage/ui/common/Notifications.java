@@ -6,6 +6,7 @@ import javafx.concurrent.Task;
 
 public class Notifications
 {
+  /*
   private List<MessageListenerIF> mi_messageListenerList = new ArrayList<>();
 
   public Notifications()
@@ -24,4 +25,5 @@ public class Notifications
 
   record Message(String title, String message, String iconName, int timeToLive) {
   }
+  */
 }

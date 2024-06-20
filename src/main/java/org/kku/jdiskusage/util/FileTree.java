@@ -18,15 +18,14 @@ import java.util.Stack;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.kku.jdiskusage.ui.DiskUsageView;
 
 public class FileTree
 {
   private enum UnixAttribute
   {
-    NUMBER_OF_LINKS("nlink"),
-    INODE("ino"),
-    FILE_SIZE("size");
+    NUMBER_OF_LINKS("nlink"), INODE("ino"), FILE_SIZE("size");
 
     private final String m_id;
 
@@ -122,8 +121,7 @@ public class FileTree
     public String getAbsolutePath();
   }
 
-  public static abstract class AbstractFileNode
-      implements FileNodeIF
+  public static abstract class AbstractFileNode implements FileNodeIF
   {
     private final String m_pathName;
     private DirNode mi_parentNode;
@@ -164,11 +162,15 @@ public class FileTree
     }
   }
 
-  public static class DirNode
-    extends AbstractFileNode
+  public static class DirNode extends AbstractFileNode
   {
     private List<FileNodeIF> mi_childList;
     private long mi_fileSize = -1;
+
+    private DirNode(boolean root, Path path)
+    {
+      this(root, path, -1);
+    }
 
     private DirNode(boolean root, Path path, int size)
     {
@@ -266,8 +268,7 @@ public class FileTree
     }
   }
 
-  public static class FileNode
-    extends AbstractFileNode
+  public static class FileNode extends AbstractFileNode
   {
     private final String mi_fileType;
     private final int mi_inodeNumber;
@@ -385,25 +386,39 @@ public class FileTree
     public DirNode scan(List<Path> directoryList)
     {
       DirNode rootNode;
-      Path rootDir;
 
-      rootDir = directoryList.get(0).getParent();
-      rootNode = new DirNode(true, rootDir, directoryList.size());
-      directoryList.forEach(path -> {
+      if (directoryList.size() > 1)
+      {
+        Path rootDir;
+
+        rootDir = directoryList.get(0).getParent();
+        rootNode = new DirNode(true, rootDir, directoryList.size());
+      }
+      else
+      {
+        rootNode = null;
+      }
+
+      for (int i = 0; i < directoryList.size(); i++)
+      {
+        Path path;
+
+        path = directoryList.get(i);
         try
         {
-          ScanVisitor visitor = new ScanVisitor();
+          ScanVisitor visitor = new ScanVisitor(rootNode);
           Files.walkFileTree(path, visitor);
           if (!visitor.isCancelled())
           {
-            rootNode.addChild(visitor.getRootDirNode());
+            rootNode = visitor.getRootDirNode();
           }
         }
         catch (IOException e)
         {
           e.printStackTrace();
         }
-      });
+      }
+
       if (m_scanListener != null)
       {
         m_scanListener.progress(null, mi_numberOfDirectories, mi_numberOfFiles, true);
@@ -412,15 +427,19 @@ public class FileTree
       return rootNode;
     }
 
-    private class ScanVisitor
-      extends SimpleFileVisitor<Path>
+    private class ScanVisitor extends SimpleFileVisitor<Path>
     {
       private Stack<DirNode> mi_parentNodeStack = new Stack<>();
       private DirNode mi_rootDirNode;
       private boolean mi_cancelled;
 
-      private ScanVisitor()
+      private ScanVisitor(DirNode rootDirNode)
       {
+        mi_rootDirNode = rootDirNode;
+        if (rootDirNode != null)
+        {
+          mi_parentNodeStack.push(rootDirNode);
+        }
       }
 
       public boolean isCancelled()
@@ -444,7 +463,7 @@ public class FileTree
           return FileVisitResult.SKIP_SUBTREE;
         }
 
-        node = new DirNode(dir);
+        node = new DirNode(mi_rootDirNode == null, dir);
         if (mi_rootDirNode == null)
         {
           mi_rootDirNode = node;

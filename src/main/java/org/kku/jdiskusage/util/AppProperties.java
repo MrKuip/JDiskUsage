@@ -10,19 +10,21 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import javafx.beans.value.ChangeListener;
 
-public class ApplicationProperties
+public class AppProperties
 {
-  private static ApplicationProperties m_instance = new ApplicationProperties();
+  private static AppProperties m_instance = new AppProperties();
+  private static String APP_PROPERTIES_FILE_NAME = "JDiskUsage.properties";
 
   private Properties m_properties;
 
-  private ApplicationProperties()
+  private AppProperties()
   {
   }
 
-  public static ApplicationProperties getInstance()
+  public static AppProperties getInstance()
   {
     return m_instance;
   }
@@ -175,6 +177,6 @@ public class ApplicationProperties
 
   private Path getPropertyPath()
   {
-    return Path.of(System.getProperty("user.home"), "JDiskUsage2.properties");
+    return Path.of(System.getProperty("user.home"), APP_PROPERTIES_FILE_NAME);
   }
 }

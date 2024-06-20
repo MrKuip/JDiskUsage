@@ -5,11 +5,11 @@ import org.controlsfx.control.Notifications;
 import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.main.Main;
-import org.kku.jdiskusage.util.ApplicationProperties.Props;
+import org.kku.jdiskusage.util.AppProperties.Props;
 import javafx.application.Platform;
 import javafx.util.Duration;
 
-public interface ApplicationPropertyExtensionIF
+public interface AppPropertyExtensionIF
 {
   public enum Property implements CharSequence
   {
@@ -49,7 +49,7 @@ public interface ApplicationPropertyExtensionIF
 
   default public Props getProps(String subject)
   {
-    return ApplicationProperties.getInstance().getProps(subject);
+    return AppProperties.getInstance().getProps(subject);
   }
 
   default public void showInformationNotification(String title, String text)

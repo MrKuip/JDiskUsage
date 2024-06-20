@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.util;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -11,14 +12,17 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.controlsfx.control.BreadCrumbBar;
 import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconColor;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
+import org.kku.jdiskusage.main.Main;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.tbee.javafx.scene.layout.MigPane;
+
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -98,15 +102,16 @@ public class DirectoryChooser
     MigPane content;
 
     content = new MigPane("insets 6", "[grow]", "[grow]");
-    content.setId("directory-chooser");
+    content.getStyleClass().add("directory-chooser");
 
     content.add(m_toolBarPane, "dock north");
     content.add(new Separator(), "dock north");
-    content.add(m_breadCrumbPane, "dock north");
     content.add(m_sidePane, "dock west");
+    content.add(m_breadCrumbPane, "dock north");
     content.add(m_directoryPane, "grow");
 
     m_dialog = new Dialog<>();
+    m_dialog.initOwner(Main.getRootStage());
     m_dialog.initModality(Modality.APPLICATION_MODAL);
     m_dialog.initStyle(StageStyle.UNDECORATED);
     m_dialog.getDialogPane().setContent(content);
@@ -115,8 +120,7 @@ public class DirectoryChooser
     return m_dialog.getResult();
   }
 
-  private class ToolBarPane
-    extends MigPane
+  private class ToolBarPane extends MigPane
   {
     private ToolBarPane()
     {
@@ -156,8 +160,7 @@ public class DirectoryChooser
     }
   }
 
-  private class SidePane
-    extends MigPane
+  private class SidePane extends MigPane
   {
     private SidePane()
     {
@@ -204,8 +207,7 @@ public class DirectoryChooser
     }
   }
 
-  private class BreadCrumbPane
-    extends BreadCrumbBar<MyPath>
+  private class BreadCrumbPane extends BreadCrumbBar<MyPath>
   {
     private BreadCrumbPane()
     {
@@ -265,8 +267,7 @@ public class DirectoryChooser
     }
   }
 
-  private class DirectoryPane
-    extends MigPane
+  private class DirectoryPane extends MigPane
   {
     private MyTableView<Path> mi_tableView;
 
@@ -392,8 +393,7 @@ public class DirectoryChooser
     }
   }
 
-  private class DirectoryNode
-    extends Button
+  private class DirectoryNode extends Button
   {
     private final String m_name;
     private final String m_iconName;

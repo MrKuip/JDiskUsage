@@ -3,8 +3,8 @@ package org.kku.jdiskusage.javafx.scene.control;
 import java.util.function.Function;
 import org.kku.jdiskusage.ui.util.FormatterIF;
 import org.kku.jdiskusage.ui.util.FxUtil;
-import org.kku.jdiskusage.util.ApplicationProperties.Props;
-import org.kku.jdiskusage.util.ApplicationPropertyExtensionIF;
+import org.kku.jdiskusage.util.AppProperties.Props;
+import org.kku.jdiskusage.util.AppPropertyExtensionIF;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
@@ -15,7 +15,7 @@ import javafx.util.Callback;
 
 public class MyTreeTableColumn<T, R>
   extends TreeTableColumn<T, R>
-    implements ApplicationPropertyExtensionIF
+    implements AppPropertyExtensionIF
 {
   public MyTreeTableColumn(String id, String text)
   {

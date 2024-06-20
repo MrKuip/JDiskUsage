@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.event.EventType;
+
 public class EventHandler<T extends EventType>
 {
   private Map<T, List<EventListenerIF<T>>> mi_listenerByEventTypeMap = new HashMap<>();
