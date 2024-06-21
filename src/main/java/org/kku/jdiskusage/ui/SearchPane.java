@@ -1,12 +1,14 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
@@ -20,6 +22,7 @@ import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.StringUtils;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -44,8 +47,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
-public class SearchPane
-  extends AbstractTabContentPane
+public class SearchPane extends AbstractTabContentPane
 {
   private SearchPaneData mi_data = new SearchPaneData();
 
@@ -191,8 +193,7 @@ public class SearchPane
     }
   }
 
-  private class SearchPaneData
-    extends PaneData
+  private class SearchPaneData extends PaneData
   {
     public StringProperty mi_maxCountProperty;
     public StringProperty mi_maxTimeProperty;
@@ -272,6 +273,7 @@ public class SearchPane
                 if (fn.getAbsolutePath().contains(searchText2))
                 {
                   list.add(fn);
+                  /*
                   try
                   {
                     Thread.sleep(1);
@@ -281,6 +283,7 @@ public class SearchPane
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                   }
+                  */
                   return true;
                 }
               }

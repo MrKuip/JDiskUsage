@@ -1,21 +1,25 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
+import org.kku.jdiskusage.util.OperatingSystemUtil;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.StreamUtil;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
@@ -23,8 +27,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
 
-class Top50Pane
-  extends AbstractTabContentPane
+class Top50Pane extends AbstractTabContentPane
 {
   private final Top50PaneData mi_data = new Top50PaneData();
 
@@ -100,11 +103,14 @@ class Top50Pane
       lastModifiedColumn.setCellValueFormatter(FormatterFactory.createSimpleDateFormatter("dd/MM/yyyy HH:mm:ss"));
       lastModifiedColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
 
-      numberOfLinksColumn = table.addColumn("Number\nof links\nto file");
-      numberOfLinksColumn.setColumnCount(8);
-      numberOfLinksColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
-      numberOfLinksColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-      numberOfLinksColumn.setCellValueGetter(FileNodeIF::getNumberOfLinks);
+      if (OperatingSystemUtil.isLinux())
+      {
+        numberOfLinksColumn = table.addColumn("Number\nof links\nto file");
+        numberOfLinksColumn.setColumnCount(8);
+        numberOfLinksColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
+        numberOfLinksColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+        numberOfLinksColumn.setCellValueGetter(FileNodeIF::getNumberOfLinks);
+      }
 
       pathColumn = table.addColumn("Path");
       pathColumn.setCellValueGetter(FileNodeIF::getAbsolutePath);
@@ -117,8 +123,7 @@ class Top50Pane
     return translate(new Label("No data"));
   }
 
-  class Top50PaneData
-    extends PaneData
+  class Top50PaneData extends PaneData
   {
     private Map<FileNodeComparator, ObservableList<FileNodeIF>> mi_map = new HashMap<>();
 

@@ -21,6 +21,16 @@ public class AppProperties
   private final static AppProperties m_instance = new AppProperties();
   private final static String APP_PROPERTIES_FILE_NAME = "JDiskUsage.properties";
 
+  public final static AppProperty INITIAL_DIRECTORY = new AppProperty("ÏNITIAL_DIRECTORY", 10);
+  public final static AppProperty RECENT_SCANS = new AppProperty("RECENT_SCANS");
+  public final static AppProperty WIDTH = new AppProperty("WIDTH");
+  public final static AppProperty HEIGHT = new AppProperty("HEIGHT");
+  public final static AppProperty X = new AppProperty("X");
+  public final static AppProperty Y = new AppProperty("Y");
+  public final static AppProperty SPLIT_PANE_POSITION = new AppProperty("SPLIT_PANE_POSITION");
+  public final static AppProperty PREF_SIZE = new AppProperty("PREF_SIZE");
+  public final static AppProperty SELECTED_ID = new AppProperty("SELECTED_ID");
+
   private Properties m_properties;
 
   private AppProperties()
@@ -37,6 +47,38 @@ public class AppProperties
     return new Props(subject);
   }
 
+  public static class AppProperty
+  {
+    private final String mi_name;
+    private final int mi_arrayLength;
+
+    public AppProperty(String name, int arrayLength)
+    {
+      mi_name = name;
+      mi_arrayLength = arrayLength;
+    }
+
+    public AppProperty(String name)
+    {
+      this(name, -1);
+    }
+
+    public String getName()
+    {
+      return mi_name;
+    }
+
+    public int getArrayLength()
+    {
+      return mi_arrayLength;
+    }
+
+    public AppProperty getIndexedProperty(int index)
+    {
+      return new AppProperty(mi_name + "." + index);
+    }
+  }
+
   public class Props
   {
     private final String mi_subject;
@@ -46,18 +88,18 @@ public class AppProperties
       mi_subject = subject;
     }
 
-    public void set(CharSequence propertyName, Path path)
+    public void set(AppProperty property, Path path)
     {
-      setPropertyValue(propertyName, path != null ? path.toString() : "");
+      setPropertyValue(property, path != null ? path.toString() : "");
     }
 
-    public void setPathLists(CharSequence propertyName, List<PathList> pathLists)
+    public void setPathLists(AppProperty property, List<PathList> pathLists)
     {
       for (int index = 0; index < MAX_SIZE_LIST; index++)
       {
-        String propertyKey;
+        AppProperty indexedProperty;
 
-        propertyKey = propertyName + "." + index;
+        indexedProperty = property.getIndexedProperty(index);
         if (index < pathLists.size())
         {
           String propertyValue;
@@ -65,43 +107,43 @@ public class AppProperties
           propertyValue = pathLists.get(index).getPathList().stream().map(Path::toString)
               .collect(Collectors.joining(","));
 
-          setPropertyValue(propertyKey, propertyValue);
+          setPropertyValue(indexedProperty, propertyValue);
         }
         else
         {
-          removePropertyValue(propertyKey);
+          removePropertyValue(indexedProperty);
         }
       }
     }
 
-    public void set(CharSequence propertyName, Number value)
+    public void set(AppProperty property, Number value)
     {
-      setPropertyValue(propertyName, value.toString());
+      setPropertyValue(property, value.toString());
     }
 
-    public void set(CharSequence propertyName, String value)
+    public void set(AppProperty property, String value)
     {
-      setPropertyValue(propertyName, value);
+      setPropertyValue(property, value);
     }
 
-    private void setPropertyValue(CharSequence propertyName, String propertyValue)
+    private void setPropertyValue(AppProperty property, String propertyValue)
     {
-      getProperties().setProperty(getPropertyName(propertyName), propertyValue);
+      getProperties().setProperty(getPropertyName(property), propertyValue);
       storeProperties();
     }
 
-    private void removePropertyValue(CharSequence propertyName)
+    private void removePropertyValue(AppProperty property)
     {
-      getProperties().remove(getPropertyName(propertyName));
+      getProperties().remove(getPropertyName(property));
       storeProperties();
     }
 
-    public Path getPath(CharSequence propertyName)
+    public Path getPath(AppProperty property)
     {
       Path path;
       String pathName;
 
-      pathName = getPropertyValue(propertyName);
+      pathName = getPropertyValue(property);
       if (pathName == null)
       {
         return null;
@@ -111,7 +153,7 @@ public class AppProperties
       return Files.exists(path) ? path : null;
     }
 
-    public List<PathList> getPathLists(CharSequence propertyName)
+    public List<PathList> getPathLists(AppProperty property)
     {
       String pathListString;
       List<PathList> result;
@@ -122,7 +164,7 @@ public class AppProperties
       {
         List<Path> fileList;
 
-        pathListString = getPropertyValue(propertyName + "." + index);
+        pathListString = getPropertyValue(property.getIndexedProperty(index));
         if (pathListString != null)
         {
           fileList = Stream.of(pathListString.split(",")).map(fileName -> Path.of(fileName))
@@ -137,40 +179,40 @@ public class AppProperties
       return result;
     }
 
-    public double getDouble(CharSequence propertyName, double defaultValue)
+    public double getDouble(AppProperty property, double defaultValue)
     {
-      return getPropertyValue(propertyName) == null ? defaultValue : Double.valueOf(getPropertyValue(propertyName));
+      return getPropertyValue(property) == null ? defaultValue : Double.valueOf(getPropertyValue(property));
     }
 
-    public Integer getInteger(CharSequence propertyName, Integer defaultValue)
+    public Integer getInteger(AppProperty property, Integer defaultValue)
     {
-      return getPropertyValue(propertyName) == null ? defaultValue : Integer.valueOf(getPropertyValue(propertyName));
+      return getPropertyValue(property) == null ? defaultValue : Integer.valueOf(getPropertyValue(property));
     }
 
-    public Long getLong(CharSequence propertyName, Long defaultValue)
+    public Long getLong(AppProperty property, Long defaultValue)
     {
-      return getPropertyValue(propertyName) == null ? defaultValue : Long.valueOf(getPropertyValue(propertyName));
+      return getPropertyValue(property) == null ? defaultValue : Long.valueOf(getPropertyValue(property));
     }
 
-    public String getString(CharSequence propertyName, String defaultValue)
+    public String getString(AppProperty property, String defaultValue)
     {
-      return getPropertyValue(propertyName) == null ? defaultValue : getPropertyValue(propertyName);
+      return getPropertyValue(property) == null ? defaultValue : getPropertyValue(property);
     }
 
-    private String getPropertyValue(CharSequence propertyName)
+    private String getPropertyValue(AppProperty property)
     {
-      return (String) getProperties().get(getPropertyName(propertyName));
+      return (String) getProperties().get(getPropertyName(property));
     }
 
-    private String getPropertyName(CharSequence propertyName)
+    private String getPropertyName(AppProperty property)
     {
-      return (mi_subject + propertyName).toUpperCase().replace(' ', '_').replace('-', '_');
+      return (mi_subject + property.getName()).toUpperCase().replace(' ', '_').replace('-', '_');
     }
 
-    public ChangeListener<Number> getChangeListener(CharSequence propertyName)
+    public ChangeListener<Number> getChangeListener(AppProperty property)
     {
       return (observable, oldValue, newValue) -> {
-        set(propertyName, newValue);
+        set(property, newValue);
       };
     }
   }

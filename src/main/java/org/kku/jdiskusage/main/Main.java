@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.Locale;
 
 import org.kku.jdiskusage.ui.DiskUsageView;
+import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppPropertyExtensionIF;
 import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
@@ -41,15 +42,15 @@ public class Main extends Application implements AppPropertyExtensionIF
 
     defaultScreenBounds = getDefaultScreenBounds();
 
-    stage.setX(getProps().getDouble(Property.X, defaultScreenBounds.getMinX()));
-    stage.setY(getProps().getDouble(Property.Y, defaultScreenBounds.getMinY()));
-    stage.setWidth(getProps().getDouble(Property.WIDTH, defaultScreenBounds.getWidth()));
-    stage.setHeight(getProps().getDouble(Property.HEIGHT, defaultScreenBounds.getHeight()));
+    stage.setX(getProps().getDouble(AppProperties.X, defaultScreenBounds.getMinX()));
+    stage.setY(getProps().getDouble(AppProperties.Y, defaultScreenBounds.getMinY()));
+    stage.setWidth(getProps().getDouble(AppProperties.WIDTH, defaultScreenBounds.getWidth()));
+    stage.setHeight(getProps().getDouble(AppProperties.HEIGHT, defaultScreenBounds.getHeight()));
 
-    stage.heightProperty().addListener(getProps().getChangeListener(Property.HEIGHT));
-    stage.widthProperty().addListener(getProps().getChangeListener(Property.WIDTH));
-    stage.xProperty().addListener(getProps().getChangeListener(Property.X));
-    stage.yProperty().addListener(getProps().getChangeListener(Property.Y));
+    stage.heightProperty().addListener(getProps().getChangeListener(AppProperties.HEIGHT));
+    stage.widthProperty().addListener(getProps().getChangeListener(AppProperties.WIDTH));
+    stage.xProperty().addListener(getProps().getChangeListener(AppProperties.X));
+    stage.yProperty().addListener(getProps().getChangeListener(AppProperties.Y));
 
     stage.setTitle("JDiskUsage");
     stage.setScene(scene);

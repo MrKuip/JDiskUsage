@@ -1,10 +1,13 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
 import java.util.function.Function;
+
 import org.kku.jdiskusage.ui.util.FormatterIF;
 import org.kku.jdiskusage.ui.util.FxUtil;
+import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppProperties.Props;
 import org.kku.jdiskusage.util.AppPropertyExtensionIF;
+
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
@@ -13,9 +16,7 @@ import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.util.Callback;
 
-public class MyTreeTableColumn<T, R>
-  extends TreeTableColumn<T, R>
-    implements AppPropertyExtensionIF
+public class MyTreeTableColumn<T, R> extends TreeTableColumn<T, R> implements AppPropertyExtensionIF
 {
   public MyTreeTableColumn(String id, String text)
   {
@@ -47,8 +48,8 @@ public class MyTreeTableColumn<T, R>
     Props props;
 
     props = getProps(getTreeTableView().getId() + "_" + getId());
-    setPrefWidth(props.getDouble(Property.PREF_SIZE, FxUtil.getColumnCountWidth(columnCount)));
-    widthProperty().addListener(props.getChangeListener(Property.PREF_SIZE));
+    setPrefWidth(props.getDouble(AppProperties.PREF_SIZE, FxUtil.getColumnCountWidth(columnCount)));
+    widthProperty().addListener(props.getChangeListener(AppProperties.PREF_SIZE));
   }
 
   public void setCellValueAlignment(Pos pos)
@@ -56,8 +57,7 @@ public class MyTreeTableColumn<T, R>
     setStyle("-fx-alignment: " + pos + ";");
   }
 
-  static class MyTreeTableCell<T, R>
-    extends TreeTableCell<T, R>
+  static class MyTreeTableCell<T, R> extends TreeTableCell<T, R>
   {
     private final FormatterIF<R> mi_formatter;
 

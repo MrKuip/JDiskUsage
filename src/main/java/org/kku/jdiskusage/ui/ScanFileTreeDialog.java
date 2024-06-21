@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.main.Main;
 import org.kku.jdiskusage.ui.util.IconUtil;
+import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppPropertyExtensionIF;
 import org.kku.jdiskusage.util.DirectoryChooser;
 import org.kku.jdiskusage.util.DirectoryChooser.PathList;
@@ -47,7 +48,7 @@ public class ScanFileTreeDialog implements AppPropertyExtensionIF
     PathList dirPathList;
     Path initialDirectory;
 
-    initialDirectory = getProps().getPath(Property.INITIAL_DIRECTORY);
+    initialDirectory = getProps().getPath(AppProperties.INITIAL_DIRECTORY);
     directoryChooser = new DirectoryChooser();
     if (initialDirectory != null)
     {
@@ -103,7 +104,6 @@ public class ScanFileTreeDialog implements AppPropertyExtensionIF
     scan = new Scan(directoryList.getPathList());
 
     content = new GridPane();
-    content.getStyleClass().add("undecorated-dialog");
     content.setMinSize(1000, 200);
     content.setHgap(10);
     content.setVgap(10);
@@ -142,6 +142,7 @@ public class ScanFileTreeDialog implements AppPropertyExtensionIF
 
     m_dialog = new Dialog<>();
     m_dialog.getDialogPane().setContent(content);
+    m_dialog.getDialogPane().getStyleClass().add("undecorated-dialog");
     m_dialog.initOwner(Main.getRootStage());
     m_dialog.initModality(Modality.APPLICATION_MODAL);
     m_dialog.initStyle(StageStyle.UNDECORATED);
@@ -180,7 +181,7 @@ public class ScanFileTreeDialog implements AppPropertyExtensionIF
         mi_rootDirectory = mi_rootDirectory.getParent();
       }
 
-      getProps().set(Property.INITIAL_DIRECTORY, mi_rootDirectory);
+      getProps().set(AppProperties.INITIAL_DIRECTORY, mi_rootDirectory);
     }
 
     public Path getRootDirectory()

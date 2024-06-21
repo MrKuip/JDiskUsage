@@ -25,7 +25,9 @@ public class FileTree
 {
   private enum UnixAttribute
   {
-    NUMBER_OF_LINKS("nlink"), INODE("ino"), FILE_SIZE("size");
+    NUMBER_OF_LINKS("nlink"),
+    INODE("ino"),
+    FILE_SIZE("size");
 
     private final String m_id;
 
@@ -45,10 +47,10 @@ public class FileTree
     }
   }
 
-  private static String ATTRIBUTE_IDS;
+  private static String UNIX_ATTRIBUTE_IDS;
 
   {
-    ATTRIBUTE_IDS = "unix:"
+    UNIX_ATTRIBUTE_IDS = "unix:"
         + Stream.of(UnixAttribute.values()).map(UnixAttribute::getId).collect(Collectors.joining(","));
   }
 
@@ -152,7 +154,8 @@ public class FileTree
     @Override
     public String getAbsolutePath()
     {
-      return (getParent() != null ? (getParent().getAbsolutePath() + File.separator) : "") + getName();
+      return (getParent() != null && getParent().getParent() != null ? (getParent().getAbsolutePath() + File.separator)
+          : "") + getName();
     }
 
     @Override
@@ -289,7 +292,7 @@ public class FileTree
       {
         try
         {
-          unixAttributes = Files.readAttributes(path, ATTRIBUTE_IDS);
+          unixAttributes = Files.readAttributes(path, UNIX_ATTRIBUTE_IDS);
         }
         catch (Exception e)
         {

@@ -2,12 +2,15 @@ package org.kku.jdiskusage.ui;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.kku.jdiskusage.javafx.scene.control.MyTreeTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTreeTableView;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.FileTree.FilterIF;
+import org.kku.jdiskusage.util.OperatingSystemUtil;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -60,10 +63,13 @@ public class FileTreeView
       }
     });
 
-    treeTableColumn4 = mi_treeTableView.addColumn("Number\nof links\nto file");
-    treeTableColumn4.setColumnCount(6);
-    treeTableColumn4.setCellValueAlignment(Pos.CENTER_RIGHT);
-    treeTableColumn4.setCellValueGetter((treeItem) -> treeItem.getValue().getNumberOfLinks());
+    if (OperatingSystemUtil.isLinux())
+    {
+      treeTableColumn4 = mi_treeTableView.addColumn("Number\nof links\nto file");
+      treeTableColumn4.setColumnCount(6);
+      treeTableColumn4.setCellValueAlignment(Pos.CENTER_RIGHT);
+      treeTableColumn4.setCellValueGetter((treeItem) -> treeItem.getValue().getNumberOfLinks());
+    }
 
     selectFirstItem();
 
@@ -96,8 +102,7 @@ public class FileTreeView
     });
   }
 
-  public class FileTreeItem
-    extends TreeItem<FileNodeIF>
+  public class FileTreeItem extends TreeItem<FileNodeIF>
   {
     private boolean mi_isFirstTimeChildren = true;
 

@@ -23,6 +23,7 @@ import org.kku.jdiskusage.ui.common.Navigation;
 import org.kku.jdiskusage.ui.common.NotificationView;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
+import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppPropertyExtensionIF;
 import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
@@ -127,7 +128,7 @@ public class DiskUsageView implements AppPropertyExtensionIF
     VBox toolBars;
     SplitPane splitPane;
 
-    getProps().getDouble(Property.HEIGHT, 0);
+    getProps().getDouble(AppProperties.HEIGHT, 0);
 
     m_data.mi_fullScreen = new FullScreen(stage);
 
@@ -138,11 +139,11 @@ public class DiskUsageView implements AppPropertyExtensionIF
 
     splitPane.getItems().addAll(m_data.getTreePaneData().getNode(), m_data.getTabPaneData().getNode());
     splitPane.getDividers().get(0).positionProperty()
-        .addListener(getProps().getChangeListener(Property.SPLIT_PANE_POSITION));
+        .addListener(getProps().getChangeListener(AppProperties.SPLIT_PANE_POSITION));
     SplitPane.setResizableWithParent(m_data.getTreePaneData().getNode(), false);
     SplitPane.setResizableWithParent(m_data.getTabPaneData().getNode(), false);
 
-    splitPane.getDividers().get(0).setPosition(getProps().getDouble(Property.SPLIT_PANE_POSITION, 0.40));
+    splitPane.getDividers().get(0).setPosition(getProps().getDouble(AppProperties.SPLIT_PANE_POSITION, 0.40));
 
     m_content.add(toolBars, "dock north");
     m_content.add(splitPane, "dock center");
@@ -311,7 +312,8 @@ public class DiskUsageView implements AppPropertyExtensionIF
   {
     private enum TabData
     {
-      SIZE("Size", "chart-pie", (md) -> md.mi_sizeTab), TOP50("Top 50", "trophy", (md) -> md.mi_top50Tab),
+      SIZE("Size", "chart-pie", (md) -> md.mi_sizeTab),
+      TOP50("Top 50", "trophy", (md) -> md.mi_top50Tab),
       DISTRIBUTION_SIZE("Size distribution", "chart-bell-curve", (md) -> md.mi_sizeDistributionTab),
       DISTRIBUTION_MODIFIED("Last modified", "sort-calendar-ascending", (md) -> md.mi_modifiedDistributionTab),
       DISTRIBUTION_TYPES("Types", "chart-pie", (md) -> md.mi_typesTab),
@@ -394,11 +396,11 @@ public class DiskUsageView implements AppPropertyExtensionIF
         fillContent(newTab, m_data.getSelectedTreeItem());
 
         // Remember the last selected tab
-        getProps().set(Property.SELECTED_ID, ((TabData) newTab.getUserData()).name());
+        getProps().set(AppProperties.SELECTED_ID, ((TabData) newTab.getUserData()).name());
       });
 
       // Select the tab that was in a previous version the last tab selected
-      selectedTabDataName = getProps().getString(Property.SELECTED_ID, TabPaneData.TabData.values()[0].name());
+      selectedTabDataName = getProps().getString(AppProperties.SELECTED_ID, TabPaneData.TabData.values()[0].name());
       mi_tabPane.getTabs().stream().filter(tab -> ((TabData) tab.getUserData()).name().equals(selectedTabDataName))
           .findFirst().ifPresent(tab -> {
             mi_tabPane.getSelectionModel().select(tab);
@@ -470,8 +472,8 @@ public class DiskUsageView implements AppPropertyExtensionIF
 
     public void addPath(PathList pathList)
     {
-      getProps().setPathLists(Property.RECENT_SCANS,
-          Stream.concat(Stream.of(pathList), getProps().getPathLists(Property.RECENT_SCANS).stream()).distinct()
+      getProps().setPathLists(AppProperties.RECENT_SCANS,
+          Stream.concat(Stream.of(pathList), getProps().getPathLists(AppProperties.RECENT_SCANS).stream()).distinct()
               .limit(10).collect(Collectors.toList()));
       update();
     }
@@ -489,7 +491,7 @@ public class DiskUsageView implements AppPropertyExtensionIF
 
     private List<MenuItem> getItems()
     {
-      return getProps().getPathLists(Property.RECENT_SCANS).stream().map(this::createMenuItem)
+      return getProps().getPathLists(AppProperties.RECENT_SCANS).stream().map(this::createMenuItem)
           .collect(Collectors.toList());
     }
 

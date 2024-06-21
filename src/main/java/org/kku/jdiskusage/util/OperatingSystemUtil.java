@@ -10,4 +10,9 @@ public class OperatingSystemUtil
   {
     return System.getProperty("os.name").toLowerCase().contains("linux");
   }
+
+  public static boolean isWindows()
+  {
+    return System.getProperty("os.name").toLowerCase().contains("windows");
+  }
 }
