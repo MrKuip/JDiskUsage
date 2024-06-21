@@ -1,9 +1,8 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-import java.nio.file.Path;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -13,8 +12,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
+import org.kku.jdiskusage.ui.ScanFileTreeDialog.ScanResult;
 import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.common.FullScreen;
@@ -23,7 +24,7 @@ import org.kku.jdiskusage.ui.common.NotificationView;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppPropertyExtensionIF;
-import org.kku.jdiskusage.util.FileTree.DirNode;
+import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
@@ -32,6 +33,7 @@ import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.kku.jdiskusage.util.preferences.Sort;
 import org.tbee.javafx.scene.layout.MigPane;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
@@ -53,8 +55,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class DiskUsageView
-    implements AppPropertyExtensionIF
+public class DiskUsageView implements AppPropertyExtensionIF
 {
   private DiskUsageData m_data = new DiskUsageData();
   private MigPane m_content = new MigPane();
@@ -310,8 +311,7 @@ public class DiskUsageView
   {
     private enum TabData
     {
-      SIZE("Size", "chart-pie", (md) -> md.mi_sizeTab),
-      TOP50("Top 50", "trophy", (md) -> md.mi_top50Tab),
+      SIZE("Size", "chart-pie", (md) -> md.mi_sizeTab), TOP50("Top 50", "trophy", (md) -> md.mi_top50Tab),
       DISTRIBUTION_SIZE("Size distribution", "chart-bell-curve", (md) -> md.mi_sizeDistributionTab),
       DISTRIBUTION_MODIFIED("Last modified", "sort-calendar-ascending", (md) -> md.mi_modifiedDistributionTab),
       DISTRIBUTION_TYPES("Types", "chart-pie", (md) -> md.mi_typesTab),
@@ -468,11 +468,11 @@ public class DiskUsageView
       return menu;
     }
 
-    public void addPath(Path path)
+    public void addPath(PathList pathList)
     {
-      getProps().set(Property.RECENT_FILES,
-          Stream.concat(Stream.of(path), getProps().getPathList(Property.RECENT_FILES).stream()).distinct().limit(10)
-              .collect(Collectors.toList()));
+      getProps().setPathLists(Property.RECENT_SCANS,
+          Stream.concat(Stream.of(pathList), getProps().getPathLists(Property.RECENT_SCANS).stream()).distinct()
+              .limit(10).collect(Collectors.toList()));
       update();
     }
 
@@ -489,35 +489,35 @@ public class DiskUsageView
 
     private List<MenuItem> getItems()
     {
-      return getProps().getPathList(Property.RECENT_FILES).stream().map(this::createMenuItem)
+      return getProps().getPathLists(Property.RECENT_SCANS).stream().map(this::createMenuItem)
           .collect(Collectors.toList());
     }
 
-    private MenuItem createMenuItem(Path path)
+    private MenuItem createMenuItem(PathList pathList)
     {
       MenuItem menuItem;
 
-      menuItem = translate(new MenuItem(path.toString()));
+      menuItem = translate(new MenuItem(pathList.toString()));
       menuItem.setGraphic(IconUtil.createIconNode("folder-outline", IconSize.SMALLER));
       menuItem.setOnAction(e -> {
-        scanDirectory(path);
+        scanDirectory(pathList);
       });
 
       return menuItem;
     }
   }
 
-  public void scanDirectory(Path path)
+  public void scanDirectory(PathList pathList)
   {
-    scanDirectory(new ScanFileTreeDialog().scanDirectory(Arrays.asList(path)));
+    scanDirectory(new ScanFileTreeDialog().scanDirectory(pathList));
   }
 
-  private void scanDirectory(DirNode dirNode)
+  private void scanDirectory(ScanResult scanResult)
   {
-    if (dirNode != null)
+    if (scanResult.hasResult())
     {
-      m_data.getTreePaneData().createTreeTableView(dirNode);
-      m_data.mi_recentFiles.addPath(Path.of(dirNode.getName()));
+      m_data.getTreePaneData().createTreeTableView(scanResult.getResult());
+      m_data.mi_recentFiles.addPath(scanResult.getDirectoryList());
     }
   }
 
@@ -561,12 +561,12 @@ public class DiskUsageView
     {
       switch (displayMetric)
       {
-        case FILE_SIZE:
-          return getFileSize();
-        case FILE_COUNT:
-          return getFileCount();
-        default:
-          return -1;
+      case FILE_SIZE:
+        return getFileSize();
+      case FILE_COUNT:
+        return getFileCount();
+      default:
+        return -1;
       }
     }
 
@@ -574,12 +574,12 @@ public class DiskUsageView
     {
       switch (displayMetric)
       {
-        case FILE_SIZE:
-          return AppPreferences.sizeSystemPreference.get().getFileSize(getFileSize());
-        case FILE_COUNT:
-          return getFileCount() + " files";
-        default:
-          return "";
+      case FILE_SIZE:
+        return AppPreferences.sizeSystemPreference.get().getFileSize(getFileSize());
+      case FILE_COUNT:
+        return getFileCount() + " files";
+      default:
+        return "";
       }
     }
 

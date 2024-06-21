@@ -1,35 +1,52 @@
 
 package org.kku.jdiskusage.main;
 
-import java.awt.Dimension;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import net.miginfocom.swing.MigLayout;
+import java.nio.file.Path;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class Test
+import org.kku.jdiskusage.util.AppPropertyExtensionIF;
+import org.kku.jdiskusage.util.DirectoryChooser.PathList;
+
+public class Test implements AppPropertyExtensionIF
 {
   public Test()
   {
-    startSwing();
+    test();
   }
 
-  public void startSwing()
+  public void test()
   {
-    JPanel pane;
-    MigLayout layout;
-    JFrame frame;
+    System.out.println("--- before ----");
+    System.out.println(getProps().getPathLists(Property.RECENT_SCANS));
 
-    layout = new MigLayout();
-    pane = new JPanel();
-    pane.setLayout(layout);
-    pane.add("sizegroup test", new JButton("Text"));
-    pane.add("sizegroup test", new JButton("Long text"));
+    PathList pathList = PathList.of(Path.of("C:/Kees2"));
+    System.out.println("---- add -----");
+    Stream.concat(Stream.of(pathList), getProps().getPathLists(Property.RECENT_SCANS).stream())
+        .forEach(System.out::println);
+    System.out.println("---- distinct -----");
+    Stream.concat(Stream.of(pathList), getProps().getPathLists(Property.RECENT_SCANS).stream()).distinct()
+        .forEach(System.out::println);
+    System.out.println(" ---- to list ----");
+    System.out.println(Stream.concat(Stream.of(pathList), getProps().getPathLists(Property.RECENT_SCANS).stream())
+        .distinct().toList());
+    System.out.println(" ---- to props ----");
+    getProps().setPathLists(Property.RECENT_SCANS, Stream
+        .concat(Stream.of(pathList), getProps().getPathLists(Property.RECENT_SCANS).stream()).distinct().toList());
 
-    frame = new JFrame("Test");
-    frame.setContentPane(pane);
-    frame.setSize(new Dimension(600, 400));
-    frame.setVisible(true);
+    addPath(PathList.of(Path.of("C:/Kees2")));
+    addPath(PathList.of(Path.of("C:/Kees1")));
+    addPath(PathList.of(Path.of("C:/Kees3"), Path.of("C:/Kees1")));
+
+    System.out.println("--- after ----");
+    System.out.println(getProps().getPathLists(Property.RECENT_SCANS));
+  }
+
+  public void addPath(PathList pathList)
+  {
+    getProps().setPathLists(Property.RECENT_SCANS,
+        Stream.concat(Stream.of(pathList), getProps().getPathLists(Property.RECENT_SCANS).stream()).distinct().limit(10)
+            .collect(Collectors.toList()));
   }
 
   public static void main(String[] args)

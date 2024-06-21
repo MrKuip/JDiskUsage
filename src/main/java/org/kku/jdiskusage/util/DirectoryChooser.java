@@ -7,6 +7,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -46,7 +47,7 @@ public class DirectoryChooser
   private final ObjectProperty<Path> m_directory = new SimpleObjectProperty<>();
   private final ObjectProperty<SelectionMode> m_selectionMode = new SimpleObjectProperty<>(SelectionMode.SINGLE);
 
-  private Dialog<List<Path>> m_dialog;
+  private Dialog<PathList> m_dialog;
   private final ToolBarPane m_toolBarPane = new ToolBarPane();
   private final SidePane m_sidePane = new SidePane();
   private final DirectoryPane m_directoryPane = new DirectoryPane();
@@ -67,17 +68,10 @@ public class DirectoryChooser
    * @return the selected directory or {@code null} if no directory has been
    *         selected
    */
-  public Path showDialog(final Window ownerWindow)
+  public PathList showDialog(final Window ownerWindow)
   {
-    List<Path> pathList;
-
     m_selectionMode.set(SelectionMode.SINGLE);
-    pathList = showAndWait();
-    if (!pathList.isEmpty())
-    {
-      return pathList.get(0);
-    }
-    return null;
+    return showAndWait();
   }
 
   /**
@@ -91,18 +85,19 @@ public class DirectoryChooser
    * @return the selected directories or an empty list if no directory has been
    *         selected
    */
-  public List<Path> showOpenMultipleDialog(final Window ownerWindow)
+  public PathList showOpenMultipleDialog(final Window ownerWindow)
   {
     m_selectionMode.set(SelectionMode.MULTIPLE);
     return showAndWait();
   }
 
-  private List<Path> showAndWait()
+  private PathList showAndWait()
   {
     MigPane content;
+    PathList result;
 
     content = new MigPane("insets 6", "[grow]", "[grow]");
-    content.getStyleClass().add("directory-chooser");
+    content.getStyleClass().add("undecorated-dialog");
 
     content.add(m_toolBarPane, "dock north");
     content.add(new Separator(), "dock north");
@@ -111,13 +106,16 @@ public class DirectoryChooser
     content.add(m_directoryPane, "grow");
 
     m_dialog = new Dialog<>();
+    m_dialog.getDialogPane().setContent(content);
     m_dialog.initOwner(Main.getRootStage());
     m_dialog.initModality(Modality.APPLICATION_MODAL);
     m_dialog.initStyle(StageStyle.UNDECORATED);
-    m_dialog.getDialogPane().setContent(content);
     m_dialog.showAndWait();
 
-    return m_dialog.getResult();
+    result = m_dialog.getResult();
+    result = result == null ? PathList.empty() : result;
+
+    return result;
   }
 
   private class ToolBarPane extends MigPane
@@ -137,7 +135,6 @@ public class DirectoryChooser
       cancelButton = new Button(translate("Cancel"),
           new FxIcon("close").size(IconSize.SMALL).fillColor(IconColor.RED).getImageView());
       cancelButton.setOnAction((ae) -> {
-        m_dialog.setResult(Collections.emptyList());
         m_dialog.close();
       });
 
@@ -149,7 +146,7 @@ public class DirectoryChooser
         result = new ArrayList<>();
         result.addAll(m_directoryPane.getSelectedPaths());
         result.sort(Comparator.comparing(Path::toString));
-        m_dialog.setResult(result);
+        m_dialog.setResult(new PathList(result));
 
         m_dialog.close();
       });
@@ -450,4 +447,127 @@ public class DirectoryChooser
     return m_directory;
   }
 
+  public static class PathList
+  {
+    private final List<Path> mi_directoryList;
+    private final String mi_description;
+
+    private PathList(List<Path> directoryList)
+    {
+      mi_directoryList = directoryList;
+      mi_description = initDescription();
+    }
+
+    public List<Path> getPathList()
+    {
+      return mi_directoryList;
+    }
+
+    public static PathList empty()
+    {
+      return new PathList(Collections.emptyList());
+    }
+
+    public static PathList of(Path path)
+    {
+      return new PathList(Arrays.asList(path));
+    }
+
+    public static PathList of(Path... pathArray)
+    {
+      return new PathList(Arrays.asList(pathArray));
+    }
+
+    public static PathList of(List<Path> pathList)
+    {
+      return new PathList(pathList);
+    }
+
+    public boolean isEmpty()
+    {
+      return getPathList().isEmpty();
+    }
+
+    private String initDescription()
+    {
+      List<Path> pathList;
+      List<String> pathNameList;
+      int commonPrefixIndex;
+      int commonPrefixIndex2;
+      boolean commonPrefixIndexFound;
+      String shortestDirectoryName;
+      StringBuilder description;
+
+      pathList = getPathList();
+      if (pathList.size() <= 1)
+      {
+        return pathList.get(0).toString();
+      }
+
+      pathNameList = pathList.stream().map(Path::toString).toList();
+
+      shortestDirectoryName = pathNameList.stream().min(Comparator.comparing(String::length)).get();
+      commonPrefixIndex = 0;
+      commonPrefixIndexFound = false;
+
+      for (int index = 0; index < shortestDirectoryName.length(); index++)
+      {
+        for (int dirIndex = 0; dirIndex < pathNameList.size(); dirIndex++)
+        {
+          if (shortestDirectoryName.charAt(index) != pathNameList.get(dirIndex).charAt(index))
+          {
+            commonPrefixIndex = index;
+            commonPrefixIndexFound = true;
+            break;
+          }
+        }
+
+        if (commonPrefixIndexFound)
+        {
+          break;
+        }
+      }
+
+      description = new StringBuilder();
+      if (commonPrefixIndex > 0)
+      {
+        description.append(shortestDirectoryName.substring(0, commonPrefixIndex));
+      }
+      commonPrefixIndex2 = commonPrefixIndex;
+
+      description.append(" -> ");
+      description.append(pathNameList.stream().map(pn -> "'" + pn.substring(commonPrefixIndex2) + "'")
+          .collect(Collectors.joining(" ")));
+
+      return description.toString();
+    }
+
+    @Override
+    public int hashCode()
+    {
+      return toString().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+      if (!(o instanceof PathList))
+      {
+        return false;
+      }
+
+      if (((PathList) o).toString().equals(toString()))
+      {
+        return true;
+      }
+
+      return super.equals(o);
+    }
+
+    @Override
+    public String toString()
+    {
+      return mi_description;
+    }
+  }
 }

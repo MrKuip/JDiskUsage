@@ -6,6 +6,7 @@ import java.util.Locale;
 
 import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.util.AppPropertyExtensionIF;
+import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 
 import javafx.application.Application;
@@ -56,7 +57,7 @@ public class Main extends Application implements AppPropertyExtensionIF
 
     getParameters().getRaw().stream().map(Path::of).filter(path -> {
       return Files.exists(path) && Files.isDirectory(path);
-    }).findFirst().ifPresent(diskUsageView::scanDirectory);
+    }).map(PathList::of).findFirst().ifPresent(diskUsageView::scanDirectory);
   }
 
   static public Node getRootNode()

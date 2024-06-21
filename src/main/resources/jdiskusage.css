@@ -50,7 +50,7 @@
   -fx-border-width: 1;
 }
 
-.directory-chooser {
+.undecorated-dialog {
   -fx-border-color: lightgray;
 }
 

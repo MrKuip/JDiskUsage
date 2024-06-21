@@ -1,15 +1,20 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+
 import org.kku.fonticons.ui.FxIcon.IconSize;
+import org.kku.jdiskusage.main.Main;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppPropertyExtensionIF;
 import org.kku.jdiskusage.util.DirectoryChooser;
+import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 import org.kku.jdiskusage.util.FileTree;
 import org.kku.jdiskusage.util.FileTree.DirNode;
+
 import javafx.application.Platform;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
@@ -24,8 +29,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-public class ScanFileTreeDialog
-    implements AppPropertyExtensionIF
+public class ScanFileTreeDialog implements AppPropertyExtensionIF
 {
   private Dialog<ButtonType> m_dialog;
   private Label m_currentDirectoryLabel;
@@ -37,10 +41,10 @@ public class ScanFileTreeDialog
   {
   }
 
-  public DirNode chooseDirectory(Stage stage)
+  public ScanResult chooseDirectory(Stage stage)
   {
     DirectoryChooser directoryChooser;
-    List<Path> dirPathList;
+    PathList dirPathList;
     Path initialDirectory;
 
     initialDirectory = getProps().getPath(Property.INITIAL_DIRECTORY);
@@ -59,29 +63,50 @@ public class ScanFileTreeDialog
     return scanDirectory(dirPathList);
   }
 
-  public DirNode scanDirectory(List<Path> directoryList)
+  public static class ScanResult
+  {
+    private final PathList mi_directoryList;
+    private final DirNode mi_result;
+
+    private ScanResult(PathList directoryList, DirNode result)
+    {
+      mi_directoryList = directoryList;
+      mi_result = result;
+    }
+
+    public PathList getDirectoryList()
+    {
+      return mi_directoryList;
+    }
+
+    public DirNode getResult()
+    {
+      return mi_result;
+    }
+
+    public boolean hasResult()
+    {
+      return getResult() != null;
+    }
+
+  }
+
+  public ScanResult scanDirectory(PathList directoryList)
   {
     Optional<ButtonType> scanDialogResult;
-    GridPane grid;
+    GridPane content;
     Label currentDirectory;
     Label currentCount;
     Label elapsedTime;
     Scan scan;
 
-    scan = new Scan(directoryList);
+    scan = new Scan(directoryList.getPathList());
 
-    m_dialog = new Dialog<>();
-    m_dialog.initModality(Modality.APPLICATION_MODAL);
-    m_dialog.initStyle(StageStyle.UNDECORATED);
-    m_dialog.setTitle(translate("Scan directory"));
-    m_dialog.setHeaderText(translate("Scan") + " " + scan.getRootDirectory());
-    m_dialog.getDialogPane().getButtonTypes().addAll(new ButtonType(translate("Cancel"), ButtonData.CANCEL_CLOSE));
-    m_dialog.setGraphic(IconUtil.createIconNode("file-search", IconSize.LARGE));
-
-    grid = new GridPane();
-    grid.setMinSize(1000, 200);
-    grid.setHgap(10);
-    grid.setVgap(10);
+    content = new GridPane();
+    content.getStyleClass().add("undecorated-dialog");
+    content.setMinSize(1000, 200);
+    content.setHgap(10);
+    content.setVgap(10);
 
     currentDirectory = translate(new Label("Current directory"));
     currentDirectory.setMinWidth(currentDirectory.getPrefWidth());
@@ -100,22 +125,30 @@ public class ScanFileTreeDialog
     column1.setPrefWidth(Region.USE_COMPUTED_SIZE);
     column1.setMinWidth(Region.USE_PREF_SIZE);
     column1.setMaxWidth(Region.USE_PREF_SIZE);
-    grid.getColumnConstraints().addAll(column1, new ColumnConstraints());
+    content.getColumnConstraints().addAll(column1, new ColumnConstraints());
 
-    grid.add(currentDirectory, 0, 0);
-    grid.add(m_currentDirectoryLabel, 1, 0);
-    grid.add(currentCount, 0, 1);
-    grid.add(m_currentFileCountLabel, 1, 1);
-    grid.add(elapsedTime, 0, 2);
-    grid.add(m_elapsedTimeLabel, 1, 2);
-    grid.add(m_progressLabel, 0, 3, 2, 1);
+    content.add(currentDirectory, 0, 0);
+    content.add(m_currentDirectoryLabel, 1, 0);
+    content.add(currentCount, 0, 1);
+    content.add(m_currentFileCountLabel, 1, 1);
+    content.add(elapsedTime, 0, 2);
+    content.add(m_elapsedTimeLabel, 1, 2);
+    content.add(m_progressLabel, 0, 3, 2, 1);
 
     GridPane.setHgrow(m_currentDirectoryLabel, Priority.SOMETIMES);
     GridPane.setHgrow(m_currentFileCountLabel, Priority.SOMETIMES);
     GridPane.setHgrow(m_elapsedTimeLabel, Priority.SOMETIMES);
     GridPane.setHgrow(m_progressLabel, Priority.SOMETIMES);
 
-    m_dialog.getDialogPane().setContent(grid);
+    m_dialog = new Dialog<>();
+    m_dialog.getDialogPane().setContent(content);
+    m_dialog.initOwner(Main.getRootStage());
+    m_dialog.initModality(Modality.APPLICATION_MODAL);
+    m_dialog.initStyle(StageStyle.UNDECORATED);
+    m_dialog.setTitle(translate("Scan directory"));
+    m_dialog.setHeaderText(translate("Scan") + " " + scan.getRootDirectory());
+    m_dialog.getDialogPane().getButtonTypes().addAll(new ButtonType(translate("Cancel"), ButtonData.CANCEL_CLOSE));
+    m_dialog.setGraphic(IconUtil.createIconNode("file-search", IconSize.LARGE));
 
     new Thread(scan).start();
 
@@ -125,11 +158,10 @@ public class ScanFileTreeDialog
       scan.cancel();
     }
 
-    return scan.getResult();
+    return new ScanResult(directoryList, scan.getResult());
   }
 
-  private class Scan
-      implements Runnable
+  private class Scan implements Runnable
   {
     private List<Path> mi_directoryList;
     private Path mi_rootDirectory;

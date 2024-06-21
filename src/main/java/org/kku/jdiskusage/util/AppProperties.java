@@ -5,18 +5,21 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.kku.jdiskusage.util.DirectoryChooser.PathList;
+
 import javafx.beans.value.ChangeListener;
 
 public class AppProperties
 {
-  private static AppProperties m_instance = new AppProperties();
-  private static String APP_PROPERTIES_FILE_NAME = "JDiskUsage.properties";
+  private final static int MAX_SIZE_LIST = 20;
+  private final static AppProperties m_instance = new AppProperties();
+  private final static String APP_PROPERTIES_FILE_NAME = "JDiskUsage.properties";
 
   private Properties m_properties;
 
@@ -48,9 +51,27 @@ public class AppProperties
       setPropertyValue(propertyName, path != null ? path.toString() : "");
     }
 
-    public void set(CharSequence propertyName, List<Path> pathList)
+    public void setPathLists(CharSequence propertyName, List<PathList> pathLists)
     {
-      setPropertyValue(propertyName, pathList.stream().map(Path::toString).collect(Collectors.joining(",")));
+      for (int index = 0; index < MAX_SIZE_LIST; index++)
+      {
+        String propertyKey;
+
+        propertyKey = propertyName + "." + index;
+        if (index < pathLists.size())
+        {
+          String propertyValue;
+
+          propertyValue = pathLists.get(index).getPathList().stream().map(Path::toString)
+              .collect(Collectors.joining(","));
+
+          setPropertyValue(propertyKey, propertyValue);
+        }
+        else
+        {
+          removePropertyValue(propertyKey);
+        }
+      }
     }
 
     public void set(CharSequence propertyName, Number value)
@@ -69,6 +90,12 @@ public class AppProperties
       storeProperties();
     }
 
+    private void removePropertyValue(CharSequence propertyName)
+    {
+      getProperties().remove(getPropertyName(propertyName));
+      storeProperties();
+    }
+
     public Path getPath(CharSequence propertyName)
     {
       Path path;
@@ -84,18 +111,30 @@ public class AppProperties
       return Files.exists(path) ? path : null;
     }
 
-    public List<Path> getPathList(CharSequence propertyName)
+    public List<PathList> getPathLists(CharSequence propertyName)
     {
-      String paths;
+      String pathListString;
+      List<PathList> result;
 
-      paths = getPropertyValue(propertyName);
-      if (paths == null)
+      result = new ArrayList<>();
+
+      for (int index = 0; index < MAX_SIZE_LIST; index++)
       {
-        return Collections.emptyList();
+        List<Path> fileList;
+
+        pathListString = getPropertyValue(propertyName + "." + index);
+        if (pathListString != null)
+        {
+          fileList = Stream.of(pathListString.split(",")).map(fileName -> Path.of(fileName))
+              .filter(file -> Files.exists(file)).collect(Collectors.toList());
+          fileList = Stream.of(pathListString.split(",")).map(fileName -> Path.of(fileName))
+              .collect(Collectors.toList());
+
+          result.add(PathList.of(fileList));
+        }
       }
 
-      return Stream.of(paths.split(",")).map(fileName -> Path.of(fileName)).filter(file -> Files.exists(file))
-          .collect(Collectors.toList());
+      return result;
     }
 
     public double getDouble(CharSequence propertyName, double defaultValue)

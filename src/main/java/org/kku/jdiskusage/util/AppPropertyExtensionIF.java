@@ -14,7 +14,7 @@ public interface AppPropertyExtensionIF
   public enum Property implements CharSequence
   {
     INITIAL_DIRECTORY,
-    RECENT_FILES,
+    RECENT_SCANS,
     WIDTH,
     HEIGHT,
     X,
