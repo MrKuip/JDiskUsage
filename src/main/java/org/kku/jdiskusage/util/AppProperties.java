@@ -8,29 +8,40 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import org.kku.jdiskusage.util.Converters.Converter;
 import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 
 import javafx.beans.value.ChangeListener;
 
 public class AppProperties
 {
-  private final static int MAX_SIZE_LIST = 20;
   private final static AppProperties m_instance = new AppProperties();
-  private final static String APP_PROPERTIES_FILE_NAME = "JDiskUsage.properties";
 
-  public final static AppProperty INITIAL_DIRECTORY = new AppProperty("ÏNITIAL_DIRECTORY", 10);
-  public final static AppProperty RECENT_SCANS = new AppProperty("RECENT_SCANS");
-  public final static AppProperty WIDTH = new AppProperty("WIDTH");
-  public final static AppProperty HEIGHT = new AppProperty("HEIGHT");
-  public final static AppProperty X = new AppProperty("X");
-  public final static AppProperty Y = new AppProperty("Y");
-  public final static AppProperty SPLIT_PANE_POSITION = new AppProperty("SPLIT_PANE_POSITION");
-  public final static AppProperty PREF_SIZE = new AppProperty("PREF_SIZE");
-  public final static AppProperty SELECTED_ID = new AppProperty("SELECTED_ID");
+  public final static AppPropertyType<Path> INITIAL_DIRECTORY;
+  public final static AppPropertyType<PathList> RECENT_SCANS;
+  public final static AppPropertyType<Double> WIDTH;
+  public final static AppPropertyType<Double> HEIGHT;
+  public final static AppPropertyType<Double> X;
+  public final static AppPropertyType<Double> Y;
+  public final static AppPropertyType<Double> SPLIT_PANE_POSITION;
+  public final static AppPropertyType<Double> PREF_SIZE;
+  public final static AppPropertyType<String> SELECTED_ID;
 
+  static
+  {
+    INITIAL_DIRECTORY = new AppPropertyType<>("INITIAL_DIRECTORY", Converters.getPathConverter());
+    RECENT_SCANS = new AppPropertyType<>("RECENT_SCANS", Converters.getPathListConverter(), 10);
+    WIDTH = new AppPropertyType<>("WIDTH", Converters.getDoubleConverter());
+    HEIGHT = new AppPropertyType<>("HEIGHT", Converters.getDoubleConverter());
+    X = new AppPropertyType<>("X", Converters.getDoubleConverter());
+    Y = new AppPropertyType<>("Y", Converters.getDoubleConverter());
+    SPLIT_PANE_POSITION = new AppPropertyType<>("SPLIT_PANE_POSITION", Converters.getDoubleConverter());
+    PREF_SIZE = new AppPropertyType<>("PREF_SIZE", Converters.getDoubleConverter());
+    SELECTED_ID = new AppPropertyType<>("SELECTED_ID", Converters.getStringConverter());
+  }
+
+  private String m_propertyFileName = "JDiskUsage2.properties";
   private Properties m_properties;
 
   private AppProperties()
@@ -42,25 +53,129 @@ public class AppProperties
     return m_instance;
   }
 
-  public Props getProps(String subject)
+  public void setPropertyFileName(String propertyFileName)
   {
-    return new Props(subject);
+    m_propertyFileName = propertyFileName;
   }
 
-  public static class AppProperty
+  public static class AppProperty<T>
   {
-    private final String mi_name;
-    private final int mi_arrayLength;
+    private final AppPropertyType<T> mi_type;
+    private final String mi_subject;
 
-    public AppProperty(String name, int arrayLength)
+    public AppProperty(AppPropertyType<T> type, String subject)
     {
-      mi_name = name;
-      mi_arrayLength = arrayLength;
+      mi_type = type;
+      mi_subject = subject;
     }
 
-    public AppProperty(String name)
+    public String getName()
     {
-      this(name, -1);
+      return mi_type.getName();
+    }
+
+    public List<T> getList()
+    {
+      List<T> list;
+
+      list = new ArrayList<>();
+      for (int index = 0; index < mi_type.getListSize(); index++)
+      {
+        T value;
+
+        value = get(getPropertyName() + "_" + index, null);
+        if (value != null)
+        {
+          list.add(value);
+        }
+      }
+
+      return list;
+    }
+
+    public void setList(List<T> list)
+    {
+      for (int index = 0; index < mi_type.getListSize(); index++)
+      {
+        T value;
+
+        value = index < list.size() ? list.get(index) : null;
+
+        set(getPropertyName() + "_" + index, value);
+      }
+    }
+
+    public T get(T defaultValue)
+    {
+      return get(getPropertyName(), defaultValue);
+    }
+
+    public T get(String propertyName, T defaultValue)
+    {
+      String stringValue;
+
+      stringValue = (String) getInstance().getProperties().get(propertyName);
+      if (stringValue != null)
+      {
+        return mi_type.getConverter().fromString(stringValue);
+      }
+
+      return defaultValue;
+    }
+
+    public void set(T value)
+    {
+      set(getPropertyName(), value);
+    }
+
+    private void set(String propertyName, T value)
+    {
+      String stringValue;
+
+      stringValue = mi_type.getConverter().toString(value);
+      getInstance().getProperties().put(propertyName, stringValue);
+      getInstance().storeProperties();
+    }
+
+    public ChangeListener<T> getChangeListener()
+    {
+      return (observable, oldValue, newValue) -> {
+        set(newValue);
+      };
+    }
+
+    private String getPropertyName()
+    {
+      return (mi_subject + "_" + getName()).toUpperCase().replace(' ', '_').replace('-', '_');
+    }
+  }
+
+  public static class AppPropertyType<T>
+  {
+    private final String mi_name;
+    private final Converter<T> mi_converter;
+    private final int mi_listSize;
+
+    public AppPropertyType(String name, Converter<T> converter)
+    {
+      this(name, converter, -1);
+    }
+
+    public AppPropertyType(String name, Converter<T> converter, int listSize)
+    {
+      mi_name = name;
+      mi_converter = converter;
+      mi_listSize = listSize;
+    }
+
+    public AppProperty<T> forSubject(Object subject)
+    {
+      return new AppProperty<>(this, subject.getClass().getSimpleName());
+    }
+
+    public AppProperty<T> forSubject(String subject)
+    {
+      return new AppProperty<>(this, subject);
     }
 
     public String getName()
@@ -68,152 +183,14 @@ public class AppProperties
       return mi_name;
     }
 
-    public int getArrayLength()
+    public Converter<T> getConverter()
     {
-      return mi_arrayLength;
+      return mi_converter;
     }
 
-    public AppProperty getIndexedProperty(int index)
+    public int getListSize()
     {
-      return new AppProperty(mi_name + "." + index);
-    }
-  }
-
-  public class Props
-  {
-    private final String mi_subject;
-
-    private Props(String subject)
-    {
-      mi_subject = subject;
-    }
-
-    public void set(AppProperty property, Path path)
-    {
-      setPropertyValue(property, path != null ? path.toString() : "");
-    }
-
-    public void setPathLists(AppProperty property, List<PathList> pathLists)
-    {
-      for (int index = 0; index < MAX_SIZE_LIST; index++)
-      {
-        AppProperty indexedProperty;
-
-        indexedProperty = property.getIndexedProperty(index);
-        if (index < pathLists.size())
-        {
-          String propertyValue;
-
-          propertyValue = pathLists.get(index).getPathList().stream().map(Path::toString)
-              .collect(Collectors.joining(","));
-
-          setPropertyValue(indexedProperty, propertyValue);
-        }
-        else
-        {
-          removePropertyValue(indexedProperty);
-        }
-      }
-    }
-
-    public void set(AppProperty property, Number value)
-    {
-      setPropertyValue(property, value.toString());
-    }
-
-    public void set(AppProperty property, String value)
-    {
-      setPropertyValue(property, value);
-    }
-
-    private void setPropertyValue(AppProperty property, String propertyValue)
-    {
-      getProperties().setProperty(getPropertyName(property), propertyValue);
-      storeProperties();
-    }
-
-    private void removePropertyValue(AppProperty property)
-    {
-      getProperties().remove(getPropertyName(property));
-      storeProperties();
-    }
-
-    public Path getPath(AppProperty property)
-    {
-      Path path;
-      String pathName;
-
-      pathName = getPropertyValue(property);
-      if (pathName == null)
-      {
-        return null;
-      }
-
-      path = Path.of(pathName);
-      return Files.exists(path) ? path : null;
-    }
-
-    public List<PathList> getPathLists(AppProperty property)
-    {
-      String pathListString;
-      List<PathList> result;
-
-      result = new ArrayList<>();
-
-      for (int index = 0; index < MAX_SIZE_LIST; index++)
-      {
-        List<Path> fileList;
-
-        pathListString = getPropertyValue(property.getIndexedProperty(index));
-        if (pathListString != null)
-        {
-          fileList = Stream.of(pathListString.split(",")).map(fileName -> Path.of(fileName))
-              .filter(file -> Files.exists(file)).collect(Collectors.toList());
-          fileList = Stream.of(pathListString.split(",")).map(fileName -> Path.of(fileName))
-              .collect(Collectors.toList());
-
-          result.add(PathList.of(fileList));
-        }
-      }
-
-      return result;
-    }
-
-    public double getDouble(AppProperty property, double defaultValue)
-    {
-      return getPropertyValue(property) == null ? defaultValue : Double.valueOf(getPropertyValue(property));
-    }
-
-    public Integer getInteger(AppProperty property, Integer defaultValue)
-    {
-      return getPropertyValue(property) == null ? defaultValue : Integer.valueOf(getPropertyValue(property));
-    }
-
-    public Long getLong(AppProperty property, Long defaultValue)
-    {
-      return getPropertyValue(property) == null ? defaultValue : Long.valueOf(getPropertyValue(property));
-    }
-
-    public String getString(AppProperty property, String defaultValue)
-    {
-      return getPropertyValue(property) == null ? defaultValue : getPropertyValue(property);
-    }
-
-    private String getPropertyValue(AppProperty property)
-    {
-      return (String) getProperties().get(getPropertyName(property));
-    }
-
-    private String getPropertyName(AppProperty property)
-    {
-      return (mi_subject + property.getName()).toUpperCase().replace(' ', '_').replace('-', '_');
-    }
-
-    public ChangeListener<Number> getChangeListener(AppProperty property)
-    {
-      return (observable, oldValue, newValue) -> {
-        set(property, newValue);
-      };
+      return mi_listSize;
     }
   }
 
@@ -256,8 +233,8 @@ public class AppProperties
     }
   }
 
-  private Path getPropertyPath()
+  public Path getPropertyPath()
   {
-    return Path.of(System.getProperty("user.home"), APP_PROPERTIES_FILE_NAME);
+    return Path.of(System.getProperty("user.home"), m_propertyFileName);
   }
 }

@@ -48,7 +48,8 @@ public class ScanFileTreeDialog implements AppPropertyExtensionIF
     PathList dirPathList;
     Path initialDirectory;
 
-    initialDirectory = getProps().getPath(AppProperties.INITIAL_DIRECTORY);
+    //initialDirectory = getProps().getPath(AppProperties.INITIAL_DIRECTORY);
+    initialDirectory = AppProperties.INITIAL_DIRECTORY.forSubject(this).get(null);
     directoryChooser = new DirectoryChooser();
     if (initialDirectory != null)
     {
@@ -181,7 +182,8 @@ public class ScanFileTreeDialog implements AppPropertyExtensionIF
         mi_rootDirectory = mi_rootDirectory.getParent();
       }
 
-      getProps().set(AppProperties.INITIAL_DIRECTORY, mi_rootDirectory);
+      //getProps().set(AppProperties.INITIAL_DIRECTORY, mi_rootDirectory);
+      AppProperties.INITIAL_DIRECTORY.forSubject(ScanFileTreeDialog.this).set(mi_rootDirectory);
     }
 
     public Path getRootDirectory()

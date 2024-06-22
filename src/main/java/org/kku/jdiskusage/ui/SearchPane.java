@@ -273,17 +273,6 @@ public class SearchPane extends AbstractTabContentPane
                 if (fn.getAbsolutePath().contains(searchText2))
                 {
                   list.add(fn);
-                  /*
-                  try
-                  {
-                    Thread.sleep(1);
-                  }
-                  catch (InterruptedException e)
-                  {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                  }
-                  */
                   return true;
                 }
               }

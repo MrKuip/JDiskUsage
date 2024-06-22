@@ -24,6 +24,7 @@ import org.kku.jdiskusage.ui.common.NotificationView;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties;
+import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.AppPropertyExtensionIF;
 import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
@@ -127,8 +128,7 @@ public class DiskUsageView implements AppPropertyExtensionIF
   {
     VBox toolBars;
     SplitPane splitPane;
-
-    getProps().getDouble(AppProperties.HEIGHT, 0);
+    AppProperty<Double> splitPaneProperty;
 
     m_data.mi_fullScreen = new FullScreen(stage);
 
@@ -137,13 +137,14 @@ public class DiskUsageView implements AppPropertyExtensionIF
 
     m_data.getTabPaneData().init();
 
+    splitPaneProperty = AppProperties.SPLIT_PANE_POSITION.forSubject(DiskUsageView.this);
+
     splitPane.getItems().addAll(m_data.getTreePaneData().getNode(), m_data.getTabPaneData().getNode());
-    splitPane.getDividers().get(0).positionProperty()
-        .addListener(getProps().getChangeListener(AppProperties.SPLIT_PANE_POSITION));
+    splitPane.getDividers().get(0).positionProperty().asObject().addListener(splitPaneProperty.getChangeListener());
     SplitPane.setResizableWithParent(m_data.getTreePaneData().getNode(), false);
     SplitPane.setResizableWithParent(m_data.getTabPaneData().getNode(), false);
 
-    splitPane.getDividers().get(0).setPosition(getProps().getDouble(AppProperties.SPLIT_PANE_POSITION, 0.40));
+    splitPane.getDividers().get(0).setPosition(splitPaneProperty.get(0.40));
 
     m_content.add(toolBars, "dock north");
     m_content.add(splitPane, "dock center");
@@ -388,19 +389,22 @@ public class DiskUsageView implements AppPropertyExtensionIF
     public void init()
     {
       String selectedTabDataName;
+      AppProperty<String> selectedIdProperty;
 
       Stream.of(TabPaneData.TabData.values()).forEach(this::createTab);
+
+      selectedIdProperty = AppProperties.SELECTED_ID.forSubject(DiskUsageView.this);
 
       mi_tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
         // Fill the new selected tab with data.
         fillContent(newTab, m_data.getSelectedTreeItem());
 
         // Remember the last selected tab
-        getProps().set(AppProperties.SELECTED_ID, ((TabData) newTab.getUserData()).name());
+        selectedIdProperty.set(((TabData) newTab.getUserData()).name());
       });
 
       // Select the tab that was in a previous version the last tab selected
-      selectedTabDataName = getProps().getString(AppProperties.SELECTED_ID, TabPaneData.TabData.values()[0].name());
+      selectedTabDataName = selectedIdProperty.get(TabPaneData.TabData.values()[0].name());
       mi_tabPane.getTabs().stream().filter(tab -> ((TabData) tab.getUserData()).name().equals(selectedTabDataName))
           .findFirst().ifPresent(tab -> {
             mi_tabPane.getSelectionModel().select(tab);
@@ -472,9 +476,14 @@ public class DiskUsageView implements AppPropertyExtensionIF
 
     public void addPath(PathList pathList)
     {
-      getProps().setPathLists(AppProperties.RECENT_SCANS,
-          Stream.concat(Stream.of(pathList), getProps().getPathLists(AppProperties.RECENT_SCANS).stream()).distinct()
-              .limit(10).collect(Collectors.toList()));
+      AppProperty<PathList> receptScansProperty;
+      List<PathList> list;
+
+      receptScansProperty = AppProperties.RECENT_SCANS.forSubject(this);
+
+      list = receptScansProperty.getList();
+      list.add(0, pathList);
+
       update();
     }
 
@@ -491,7 +500,7 @@ public class DiskUsageView implements AppPropertyExtensionIF
 
     private List<MenuItem> getItems()
     {
-      return getProps().getPathLists(AppProperties.RECENT_SCANS).stream().map(this::createMenuItem)
+      return AppProperties.RECENT_SCANS.forSubject(this).getList().stream().map(this::createMenuItem)
           .collect(Collectors.toList());
     }
 

@@ -452,7 +452,7 @@ public class DirectoryChooser
     private final List<Path> mi_directoryList;
     private final String mi_description;
 
-    private PathList(List<Path> directoryList)
+    PathList(List<Path> directoryList)
     {
       mi_directoryList = directoryList;
       mi_description = initDescription();
@@ -499,7 +499,12 @@ public class DirectoryChooser
       StringBuilder description;
 
       pathList = getPathList();
-      if (pathList.size() <= 1)
+      if (pathList.size() == 0)
+      {
+        return "";
+      }
+
+      if (pathList.size() == 1)
       {
         return pathList.get(0).toString();
       }

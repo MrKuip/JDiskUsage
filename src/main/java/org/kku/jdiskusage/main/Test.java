@@ -1,53 +1,22 @@
 
 package org.kku.jdiskusage.main;
 
-import java.nio.file.Path;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppPropertyExtensionIF;
-import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 
 public class Test implements AppPropertyExtensionIF
 {
   public Test()
   {
-    test();
+    test2();
   }
 
-  public void test()
+  public void test2()
   {
-    System.out.println("--- before ----");
-    System.out.println(getProps().getPathLists(AppProperties.RECENT_SCANS));
-
-    PathList pathList = PathList.of(Path.of("C:/Kees2"));
-    System.out.println("---- add -----");
-    Stream.concat(Stream.of(pathList), getProps().getPathLists(AppProperties.RECENT_SCANS).stream())
-        .forEach(System.out::println);
-    System.out.println("---- distinct -----");
-    Stream.concat(Stream.of(pathList), getProps().getPathLists(AppProperties.RECENT_SCANS).stream()).distinct()
-        .forEach(System.out::println);
-    System.out.println(" ---- to list ----");
-    System.out.println(Stream.concat(Stream.of(pathList), getProps().getPathLists(AppProperties.RECENT_SCANS).stream())
-        .distinct().toList());
-    System.out.println(" ---- to props ----");
-    getProps().setPathLists(AppProperties.RECENT_SCANS, Stream
-        .concat(Stream.of(pathList), getProps().getPathLists(AppProperties.RECENT_SCANS).stream()).distinct().toList());
-
-    addPath(PathList.of(Path.of("C:/Kees2")));
-    addPath(PathList.of(Path.of("C:/Kees1")));
-    addPath(PathList.of(Path.of("C:/Kees3"), Path.of("C:/Kees1")));
-
-    System.out.println("--- after ----");
-    System.out.println(getProps().getPathLists(AppProperties.RECENT_SCANS));
-  }
-
-  public void addPath(PathList pathList)
-  {
-    getProps().setPathLists(AppProperties.RECENT_SCANS,
-        Stream.concat(Stream.of(pathList), getProps().getPathLists(AppProperties.RECENT_SCANS).stream()).distinct()
-            .limit(10).collect(Collectors.toList()));
+    /*
+    System.out.println("get:" + AppProperties2.WIDTH.forSubject(this).get(10l));
+    AppProperties2.WIDTH.forSubject(this).set(12l);
+    System.out.println("get:" + AppProperties2.WIDTH.forSubject(this).get(11l));
+    */
   }
 
   public static void main(String[] args)

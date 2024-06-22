@@ -5,7 +5,7 @@ import java.util.function.Function;
 import org.kku.jdiskusage.ui.util.FormatterIF;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.util.AppProperties;
-import org.kku.jdiskusage.util.AppProperties.Props;
+import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.AppPropertyExtensionIF;
 
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -30,11 +30,12 @@ public class MyTableColumn<T, R> extends TableColumn<T, R> implements AppPropert
 
   public void setColumnCount(int columnCount)
   {
-    Props props;
+    AppProperty<Double> prefSizeProperty;
 
-    props = getProps(getTableView().getId() + "_" + getId());
-    setPrefWidth(props.getDouble(AppProperties.PREF_SIZE, FxUtil.getColumnCountWidth(columnCount)));
-    widthProperty().addListener(props.getChangeListener(AppProperties.PREF_SIZE));
+    prefSizeProperty = AppProperties.PREF_SIZE.forSubject(getTableView().getId() + "_" + getId());
+
+    setPrefWidth(prefSizeProperty.get(FxUtil.getColumnCountWidth(columnCount)));
+    widthProperty().asObject().addListener(prefSizeProperty.getChangeListener());
   }
 
   public void setCellValueAlignment(Pos alignment)

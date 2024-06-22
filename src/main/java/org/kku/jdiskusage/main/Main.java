@@ -6,6 +6,7 @@ import java.util.Locale;
 
 import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.util.AppProperties;
+import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.AppPropertyExtensionIF;
 import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
@@ -29,6 +30,10 @@ public class Main extends Application implements AppPropertyExtensionIF
     DiskUsageView diskUsageView;
     Scene scene;
     Rectangle2D defaultScreenBounds;
+    AppProperty<Double> xProperty;
+    AppProperty<Double> yProperty;
+    AppProperty<Double> widthProperty;
+    AppProperty<Double> heightProperty;
 
     m_rootStage = stage;
 
@@ -42,15 +47,20 @@ public class Main extends Application implements AppPropertyExtensionIF
 
     defaultScreenBounds = getDefaultScreenBounds();
 
-    stage.setX(getProps().getDouble(AppProperties.X, defaultScreenBounds.getMinX()));
-    stage.setY(getProps().getDouble(AppProperties.Y, defaultScreenBounds.getMinY()));
-    stage.setWidth(getProps().getDouble(AppProperties.WIDTH, defaultScreenBounds.getWidth()));
-    stage.setHeight(getProps().getDouble(AppProperties.HEIGHT, defaultScreenBounds.getHeight()));
+    xProperty = AppProperties.X.forSubject(Main.this);
+    yProperty = AppProperties.Y.forSubject(Main.this);
+    widthProperty = AppProperties.WIDTH.forSubject(Main.this);
+    heightProperty = AppProperties.HEIGHT.forSubject(Main.this);
 
-    stage.heightProperty().addListener(getProps().getChangeListener(AppProperties.HEIGHT));
-    stage.widthProperty().addListener(getProps().getChangeListener(AppProperties.WIDTH));
-    stage.xProperty().addListener(getProps().getChangeListener(AppProperties.X));
-    stage.yProperty().addListener(getProps().getChangeListener(AppProperties.Y));
+    stage.setX(xProperty.get(defaultScreenBounds.getMinX()));
+    stage.setY(AppProperties.Y.forSubject(Main.this).get(defaultScreenBounds.getMinY()));
+    stage.setWidth(AppProperties.WIDTH.forSubject(Main.this).get(defaultScreenBounds.getWidth()));
+    stage.setHeight(AppProperties.HEIGHT.forSubject(Main.this).get(defaultScreenBounds.getHeight()));
+
+    stage.xProperty().asObject().addListener(xProperty.getChangeListener());
+    stage.yProperty().asObject().addListener(yProperty.getChangeListener());
+    stage.widthProperty().asObject().addListener(widthProperty.getChangeListener());
+    stage.heightProperty().asObject().addListener(heightProperty.getChangeListener());
 
     stage.setTitle("JDiskUsage");
     stage.setScene(scene);
