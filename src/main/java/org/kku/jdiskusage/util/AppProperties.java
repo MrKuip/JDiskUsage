@@ -83,7 +83,7 @@ public class AppProperties
       {
         T value;
 
-        value = get(getPropertyName() + "_" + index, null);
+        value = get(getPropertyNameList(index), null);
         if (value != null)
         {
           list.add(value);
@@ -100,9 +100,20 @@ public class AppProperties
         T value;
 
         value = index < list.size() ? list.get(index) : null;
-
-        set(getPropertyName() + "_" + index, value);
+        if (value != null)
+        {
+          set(getPropertyNameList(index), value);
+        }
+        else
+        {
+          remove(getPropertyNameList(index));
+        }
       }
+    }
+
+    private String getPropertyNameList(int index)
+    {
+      return getPropertyName() + "_" + index;
     }
 
     public T get(T defaultValue)
@@ -134,6 +145,12 @@ public class AppProperties
 
       stringValue = mi_type.getConverter().toString(value);
       getInstance().getProperties().put(propertyName, stringValue);
+      getInstance().storeProperties();
+    }
+
+    private void remove(String propertyName)
+    {
+      getInstance().getProperties().remove(propertyName);
       getInstance().storeProperties();
     }
 

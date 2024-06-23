@@ -62,11 +62,19 @@ public class Converters
 
     public T fromString(String s)
     {
+      if (s == null)
+      {
+        return null;
+      }
       return mi_fromString.apply(s);
     }
 
     public String toString(T value)
     {
+      if (value == null)
+      {
+        return null;
+      }
       return mi_toString.apply(value);
     }
   }

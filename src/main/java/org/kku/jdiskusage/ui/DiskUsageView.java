@@ -476,13 +476,14 @@ public class DiskUsageView implements AppPropertyExtensionIF
 
     public void addPath(PathList pathList)
     {
-      AppProperty<PathList> receptScansProperty;
+      AppProperty<PathList> recentScansProperty;
       List<PathList> list;
 
-      receptScansProperty = AppProperties.RECENT_SCANS.forSubject(this);
+      recentScansProperty = AppProperties.RECENT_SCANS.forSubject(this);
 
-      list = receptScansProperty.getList();
+      list = recentScansProperty.getList();
       list.add(0, pathList);
+      recentScansProperty.setList(list);
 
       update();
     }
