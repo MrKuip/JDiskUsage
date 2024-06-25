@@ -50,7 +50,7 @@ application {
   mainModule.set('org.kku.jdiskusage');
 }
 
-mainClassName = 'org.kku.jdiskusage.main.Main';
+//mainClassName = 'org.kku.jdiskusage.main.Main';
 
 jlink {
   launcher {
