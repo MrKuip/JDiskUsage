@@ -1,11 +1,9 @@
 package org.kku.jdiskusage.main;
 
 import java.awt.Dimension;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-
 import net.miginfocom.swing.MigLayout;
 
 public class TestSwing
@@ -30,7 +28,7 @@ public class TestSwing
     frame = new JFrame("Test");
     frame.setContentPane(pane);
     frame.setSize(new Dimension(600, 400));
-    frame.show();
+    frame.setVisible(true);
   }
 
   public static void main(String[] args)
