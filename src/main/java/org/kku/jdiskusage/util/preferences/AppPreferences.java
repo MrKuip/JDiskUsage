@@ -127,6 +127,7 @@ public class AppPreferences
     }
   }
 
+  @SuppressWarnings("unchecked")
   public static <T> T convertStringToEnum(AppPreference<T> preference, String stringValue)
   {
     Class<?> clazz;
@@ -153,6 +154,7 @@ public class AppPreferences
     return value.toLanguageTag();
   }
 
+  @SuppressWarnings("unchecked")
   public static <T> T convertStringToLocale(AppPreference<T> preference, String stringValue)
   {
     return (T) Locale.forLanguageTag(stringValue);
