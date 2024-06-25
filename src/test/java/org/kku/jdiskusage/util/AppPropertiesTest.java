@@ -1,18 +1,14 @@
 package org.kku.jdiskusage.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import org.junit.jupiter.api.Test;
-import org.kku.jdiskusage.util.AppProperties.AppProperty;
-import org.kku.jdiskusage.util.AppProperties.AppPropertyType;
-
+import org.kku.jdiskusage.util.AppSettings.AppSetting;
+import org.kku.jdiskusage.util.AppSettings.AppSettingType;
 import javafx.beans.property.SimpleStringProperty;
 
 class AppPropertiesTest
@@ -22,24 +18,26 @@ class AppPropertiesTest
   }
 
   @Test
-  void test()
+  void test() throws Exception
   {
-    AppPropertyType<String> type;
-    AppProperty<String> property;
+    AppSettingType<String> type;
+    AppSetting<String> property;
     SimpleStringProperty stringProperty;
+    TestProperties properties;
 
-    initAppProperties("Test.properties");
+    properties = new TestProperties();
+    properties.reset();
 
-    type = new AppPropertyType<>("Test", Converters.getStringConverter());
-    property = type.forSubject("Test");
+    type = properties.createAppSettingType("Test", Converters.getStringConverter());
+    property = type.forSubject("Test", "Test2");
 
-    assertEquals(property.get("Test2"), "Test2");
+    assertEquals(property.get(), "Test2");
 
     property.set("Test1");
-    assertEquals(property.get("Test2"), "Test1");
+    assertEquals(property.get(), "Test1");
 
-    property = type.forSubject("Test");
-    assertEquals(property.get("Test2"), "Test1");
+    property = type.forSubject("Test", "Test2");
+    assertEquals(property.get(), "Test1");
 
     stringProperty = new SimpleStringProperty("Hallo");
     stringProperty.addListener(property.getChangeListener());
@@ -47,20 +45,22 @@ class AppPropertiesTest
     stringProperty.set("Hallo2");
     assertEquals(property.get("Test2"), "Hallo2");
 
-    type = new AppPropertyType<>("Test", Converters.getStringConverter());
+    type = properties.createAppSettingType("Test", Converters.getStringConverter());
     property = type.forSubject("Test");
   }
 
   @Test
-  void testArray()
+  void testArray() throws Exception
   {
-    AppPropertyType<String> type;
-    AppProperty<String> property;
+    AppSettingType<String> type;
+    AppSetting<String> property;
     List<String> list;
+    TestProperties properties;
 
-    initAppProperties("Test.properties");
+    properties = TestProperties.getInstance();
+    properties.reset();
 
-    type = new AppPropertyType<>("Test", Converters.getStringConverter(), 10);
+    type = properties.createAppSettingType("Test", Converters.getStringConverter(), 10);
     property = type.forSubject("Test");
 
     assertEquals(Collections.emptyList(), property.getList());
@@ -75,15 +75,27 @@ class AppPropertiesTest
     assertEquals(Arrays.asList("String0", "String1", "String2", "String3"), property.getList());
   }
 
-  private void initAppProperties(String propertyFileName)
+  public static class TestProperties
+    extends AppSettings
   {
-    AppProperties.getInstance().setPropertyFileName(propertyFileName);
-    try
+    private final static TestProperties mi_instance = new TestProperties();
+
+    private TestProperties()
     {
-      Files.delete(AppProperties.getInstance().getPropertyPath());
+      super("JDiskUsageTest.properties");
     }
-    catch (IOException e)
+
+    public static TestProperties getInstance()
     {
+      return mi_instance;
+    }
+
+    public void reset() throws Exception
+    {
+      if (Files.exists(getSettingPath()))
+      {
+        Files.delete(getSettingPath());
+      }
     }
   }
 }

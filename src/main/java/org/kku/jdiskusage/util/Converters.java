@@ -1,10 +1,10 @@
 package org.kku.jdiskusage.util;
 
 import java.nio.file.Path;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 
 public class Converters
@@ -29,24 +29,31 @@ public class Converters
     return new Converter<Integer>(Integer::valueOf, (value) -> value.toString());
   }
 
+  public static Converter<Boolean> getBooleanConverter()
+  {
+    return new Converter<Boolean>(Boolean::valueOf, (value) -> value.toString());
+  }
+
+  public static Converter<Locale> getLocaleConverter()
+  {
+    return new Converter<Locale>(Locale::forLanguageTag, Locale::toLanguageTag);
+  }
+
   public static Converter<Path> getPathConverter()
   {
     return new Converter<Path>(Path::of, Path::toString);
   }
 
+  public static <E extends Enum<E>> Converter<E> getEnumConverter(Class<E> enumClass)
+  {
+    return new Converter<E>((s) -> Enum.valueOf(enumClass, s), (e) -> e.name());
+  }
+
   public static Converter<PathList> getPathListConverter()
   {
-    return new Converter<PathList>(Converters::fromStringToPathList, Converters::fromPathListToString);
-  }
-
-  static private PathList fromStringToPathList(String text)
-  {
-    return new PathList(Stream.of(text.split(",")).map(fileName -> Path.of(fileName)).toList());
-  }
-
-  static private String fromPathListToString(PathList pathList)
-  {
-    return pathList.getPathList().stream().map(Path::toString).collect(Collectors.joining(","));
+    return new Converter<PathList>(
+        (s) -> new PathList(Stream.of(s.split(",")).map(fileName -> Path.of(fileName)).toList()),
+        (pl) -> pl.getPathList().stream().map(Path::toString).collect(Collectors.joining(",")));
   }
 
   static class Converter<T>

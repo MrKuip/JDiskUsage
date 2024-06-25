@@ -1,7 +1,6 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +11,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.ScanFileTreeDialog.ScanResult;
@@ -24,8 +22,7 @@ import org.kku.jdiskusage.ui.common.NotificationView;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties;
-import org.kku.jdiskusage.util.AppProperties.AppProperty;
-import org.kku.jdiskusage.util.AppPropertyExtensionIF;
+import org.kku.jdiskusage.util.AppSettings.AppSetting;
 import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
@@ -35,7 +32,6 @@ import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.kku.jdiskusage.util.preferences.Sort;
 import org.tbee.javafx.scene.layout.MigPane;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
@@ -57,7 +53,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class DiskUsageView implements AppPropertyExtensionIF
+public class DiskUsageView
 {
   private DiskUsageData m_data = new DiskUsageData();
   private MigPane m_content = new MigPane();
@@ -128,7 +124,7 @@ public class DiskUsageView implements AppPropertyExtensionIF
   {
     VBox toolBars;
     SplitPane splitPane;
-    AppProperty<Double> splitPaneProperty;
+    AppSetting<Double> splitPaneProperty;
 
     m_data.mi_fullScreen = new FullScreen(stage);
 
@@ -389,7 +385,7 @@ public class DiskUsageView implements AppPropertyExtensionIF
     public void init()
     {
       String selectedTabDataName;
-      AppProperty<String> selectedIdProperty;
+      AppSetting<String> selectedIdProperty;
 
       Stream.of(TabPaneData.TabData.values()).forEach(this::createTab);
 
@@ -476,7 +472,7 @@ public class DiskUsageView implements AppPropertyExtensionIF
 
     public void addPath(PathList pathList)
     {
-      AppProperty<PathList> recentScansProperty;
+      AppSetting<PathList> recentScansProperty;
       List<PathList> list;
 
       recentScansProperty = AppProperties.RECENT_SCANS.forSubject(this);
@@ -573,12 +569,12 @@ public class DiskUsageView implements AppPropertyExtensionIF
     {
       switch (displayMetric)
       {
-      case FILE_SIZE:
-        return getFileSize();
-      case FILE_COUNT:
-        return getFileCount();
-      default:
-        return -1;
+        case FILE_SIZE:
+          return getFileSize();
+        case FILE_COUNT:
+          return getFileCount();
+        default:
+          return -1;
       }
     }
 
@@ -586,12 +582,12 @@ public class DiskUsageView implements AppPropertyExtensionIF
     {
       switch (displayMetric)
       {
-      case FILE_SIZE:
-        return AppPreferences.sizeSystemPreference.get().getFileSize(getFileSize());
-      case FILE_COUNT:
-        return getFileCount() + " files";
-      default:
-        return "";
+        case FILE_SIZE:
+          return AppPreferences.sizeSystemPreference.get().getFileSize(getFileSize());
+        case FILE_COUNT:
+          return getFileCount() + " files";
+        default:
+          return "";
       }
     }
 

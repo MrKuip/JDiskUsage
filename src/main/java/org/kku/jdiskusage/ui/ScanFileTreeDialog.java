@@ -1,21 +1,18 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
-
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.main.Main;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties;
-import org.kku.jdiskusage.util.AppPropertyExtensionIF;
 import org.kku.jdiskusage.util.DirectoryChooser;
 import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 import org.kku.jdiskusage.util.FileTree;
 import org.kku.jdiskusage.util.FileTree.DirNode;
-
+import org.kku.jdiskusage.util.Notification;
 import javafx.application.Platform;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
@@ -30,7 +27,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-public class ScanFileTreeDialog implements AppPropertyExtensionIF
+public class ScanFileTreeDialog
 {
   private Dialog<ButtonType> m_dialog;
   private Label m_currentDirectoryLabel;
@@ -48,8 +45,7 @@ public class ScanFileTreeDialog implements AppPropertyExtensionIF
     PathList dirPathList;
     Path initialDirectory;
 
-    //initialDirectory = getProps().getPath(AppProperties.INITIAL_DIRECTORY);
-    initialDirectory = AppProperties.INITIAL_DIRECTORY.forSubject(this).get(null);
+    initialDirectory = AppProperties.INITIAL_DIRECTORY.forSubject(this).get();
     directoryChooser = new DirectoryChooser();
     if (initialDirectory != null)
     {
@@ -163,7 +159,8 @@ public class ScanFileTreeDialog implements AppPropertyExtensionIF
     return new ScanResult(directoryList, scan.getResult());
   }
 
-  private class Scan implements Runnable
+  private class Scan
+      implements Runnable
   {
     private List<Path> mi_directoryList;
     private Path mi_rootDirectory;
@@ -238,7 +235,7 @@ public class ScanFileTreeDialog implements AppPropertyExtensionIF
 
             m_dialog.close();
 
-            showInformationNotification("Scan ready", text);
+            Notification.showInformation("Scan ready", text);
           }
         });
 

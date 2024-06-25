@@ -1,13 +1,12 @@
 package org.kku.jdiskusage.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
-
 import org.junit.jupiter.api.Test;
 import org.kku.jdiskusage.util.DirectoryChooser.PathList;
+import org.kku.jdiskusage.util.preferences.SizeSystem;
 
 class ConvertersTest
 {
@@ -88,5 +87,31 @@ class ConvertersTest
 
     assertEquals(value, Converters.getPathListConverter().fromString(stringValue));
     assertEquals(stringValue, Converters.getPathListConverter().toString(value));
+  }
+
+  @Test
+  void testEnumConverter()
+  {
+    SizeSystem value;
+    String stringValue;
+
+    value = SizeSystem.BINARY;
+    stringValue = "BINARY";
+
+    assertEquals(value, Converters.getEnumConverter(SizeSystem.class).fromString(stringValue));
+    assertEquals(stringValue, Converters.getEnumConverter(SizeSystem.class).toString(value));
+  }
+
+  @Test
+  void testBooleanConverter()
+  {
+    Boolean value;
+    String stringValue;
+
+    value = Boolean.TRUE;
+    stringValue = "true";
+
+    assertEquals(value, Converters.getBooleanConverter().fromString(stringValue));
+    assertEquals(stringValue, Converters.getBooleanConverter().toString(value));
   }
 }

@@ -35,8 +35,7 @@ abstract public class AbstractTabContentPane
   private FileTreePane mi_currentTreePaneData;
   private TreeItem<FileNodeIF> mi_currentTreeItem;
 
-  private record PaneType(String description, String iconName, Supplier<Node> node) {
-  };
+  private record PaneType(String description, String iconName, Supplier<Node> node) {};
 
   public AbstractTabContentPane(DiskUsageData diskUsageData)
   {

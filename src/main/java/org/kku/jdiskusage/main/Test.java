@@ -1,9 +1,9 @@
 
 package org.kku.jdiskusage.main;
 
-import org.kku.jdiskusage.util.AppPropertyExtensionIF;
+import javafx.beans.property.SimpleDoubleProperty;
 
-public class Test implements AppPropertyExtensionIF
+public class Test
 {
   public Test()
   {
@@ -12,11 +12,15 @@ public class Test implements AppPropertyExtensionIF
 
   public void test2()
   {
-    /*
-    System.out.println("get:" + AppProperties2.WIDTH.forSubject(this).get(10l));
-    AppProperties2.WIDTH.forSubject(this).set(12l);
-    System.out.println("get:" + AppProperties2.WIDTH.forSubject(this).get(11l));
-    */
+    SimpleDoubleProperty p;
+
+    p = new SimpleDoubleProperty();
+
+    p.addListener((a) -> { System.out.println("invalid"); });
+    p.addListener((a, b, c) -> { System.out.println("changed"); });
+
+    p.set(10.0);
+    p.set(11.0);
   }
 
   public static void main(String[] args)

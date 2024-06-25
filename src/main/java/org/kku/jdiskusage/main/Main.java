@@ -3,14 +3,11 @@ package org.kku.jdiskusage.main;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
-
 import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.util.AppProperties;
-import org.kku.jdiskusage.util.AppProperties.AppProperty;
-import org.kku.jdiskusage.util.AppPropertyExtensionIF;
+import org.kku.jdiskusage.util.AppSettings.AppSetting;
 import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
-
 import javafx.application.Application;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
@@ -19,7 +16,8 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-public class Main extends Application implements AppPropertyExtensionIF
+public class Main
+  extends Application
 {
   static private Pane m_rootNode;
   static private Stage m_rootStage;
@@ -30,10 +28,10 @@ public class Main extends Application implements AppPropertyExtensionIF
     DiskUsageView diskUsageView;
     Scene scene;
     Rectangle2D defaultScreenBounds;
-    AppProperty<Double> xProperty;
-    AppProperty<Double> yProperty;
-    AppProperty<Double> widthProperty;
-    AppProperty<Double> heightProperty;
+    AppSetting<Double> xProperty;
+    AppSetting<Double> yProperty;
+    AppSetting<Double> widthProperty;
+    AppSetting<Double> heightProperty;
 
     m_rootStage = stage;
 
@@ -57,10 +55,14 @@ public class Main extends Application implements AppPropertyExtensionIF
     stage.setWidth(AppProperties.WIDTH.forSubject(Main.this).get(defaultScreenBounds.getWidth()));
     stage.setHeight(AppProperties.HEIGHT.forSubject(Main.this).get(defaultScreenBounds.getHeight()));
 
-    stage.xProperty().asObject().addListener(xProperty.getChangeListener());
-    stage.yProperty().asObject().addListener(yProperty.getChangeListener());
-    stage.widthProperty().asObject().addListener(widthProperty.getChangeListener());
-    stage.heightProperty().asObject().addListener(heightProperty.getChangeListener());
+    stage.xProperty().addListener(xProperty.getChangeListener());
+    stage.yProperty().addListener(yProperty.getChangeListener());
+    stage.widthProperty().addListener(widthProperty.getChangeListener());
+    stage.heightProperty().addListener(heightProperty.getChangeListener());
+
+    //stage.xProperty().addListener((a, b, c) -> { System.out.println("changed 1!"); });
+    //stage.xProperty().addListener((a, b, c) -> { System.out.println("changed 3!"); });
+    //stage.xProperty().asObject().addListener((a, b, c) -> { System.out.println("changed 2!"); });
 
     stage.setTitle("JDiskUsage");
     stage.setScene(scene);

@@ -1,13 +1,10 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
 import java.util.function.Function;
-
 import org.kku.jdiskusage.ui.util.FormatterIF;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.util.AppProperties;
-import org.kku.jdiskusage.util.AppProperties.AppProperty;
-import org.kku.jdiskusage.util.AppPropertyExtensionIF;
-
+import org.kku.jdiskusage.util.AppSettings.AppSetting;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
@@ -16,7 +13,8 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
 
-public class MyTableColumn<T, R> extends TableColumn<T, R> implements AppPropertyExtensionIF
+public class MyTableColumn<T, R>
+  extends TableColumn<T, R>
 {
   private FormatterIF<R> mi_formatter;
   private Pos m_alignment;
@@ -30,12 +28,12 @@ public class MyTableColumn<T, R> extends TableColumn<T, R> implements AppPropert
 
   public void setColumnCount(int columnCount)
   {
-    AppProperty<Double> prefSizeProperty;
+    AppSetting<Double> prefSizeProperty;
 
     prefSizeProperty = AppProperties.PREF_SIZE.forSubject(getTableView().getId() + "_" + getId());
 
     setPrefWidth(prefSizeProperty.get(FxUtil.getColumnCountWidth(columnCount)));
-    widthProperty().asObject().addListener(prefSizeProperty.getChangeListener());
+    widthProperty().addListener(prefSizeProperty.getChangeListener());
   }
 
   public void setCellValueAlignment(Pos alignment)
