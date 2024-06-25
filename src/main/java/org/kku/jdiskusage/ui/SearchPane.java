@@ -170,13 +170,13 @@ public class SearchPane extends AbstractTabContentPane
 
   static class TaskRunner<T>
   {
-    private final Supplier<T> mi_async;
-    private final Consumer<T> mi_sync;
+    private final Supplier<T> mi_asyncCommand;
+    private final Consumer<T> mi_syncCommand;
 
     public TaskRunner(Supplier<T> async, Consumer<T> sync)
     {
-      mi_async = async;
-      mi_sync = sync;
+      mi_asyncCommand = async;
+      mi_syncCommand = sync;
     }
 
     public void run()
@@ -184,9 +184,9 @@ public class SearchPane extends AbstractTabContentPane
       new Thread(() -> {
         T result;
 
-        result = mi_async.get();
+        result = mi_asyncCommand.get();
         Platform.runLater(() -> {
-          mi_sync.accept(result);
+          mi_syncCommand.accept(result);
         });
 
       }).start();
