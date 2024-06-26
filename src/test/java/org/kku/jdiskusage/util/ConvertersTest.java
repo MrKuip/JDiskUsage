@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Locale;
 import org.junit.jupiter.api.Test;
 import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 import org.kku.jdiskusage.util.preferences.SizeSystem;
@@ -100,6 +101,19 @@ class ConvertersTest
 
     assertEquals(value, Converters.getEnumConverter(SizeSystem.class).fromString(stringValue));
     assertEquals(stringValue, Converters.getEnumConverter(SizeSystem.class).toString(value));
+  }
+
+  @Test
+  void testLocaleConverter()
+  {
+    Locale value;
+    String stringValue;
+
+    value = new Locale("nl");
+    stringValue = "nl";
+
+    assertEquals(value, Converters.getLocaleConverter().fromString(stringValue));
+    assertEquals(stringValue, Converters.getLocaleConverter().toString(value));
   }
 
   @Test

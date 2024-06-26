@@ -1,14 +1,14 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
@@ -17,12 +17,12 @@ import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
+import org.kku.jdiskusage.ui.util.StyledText;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.StringUtils;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
-
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -47,7 +47,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
-public class SearchPane extends AbstractTabContentPane
+public class SearchPane
+  extends AbstractTabContentPane
 {
   private SearchPaneData mi_data = new SearchPaneData();
 
@@ -135,7 +136,7 @@ public class SearchPane extends AbstractTabContentPane
     {
       GridPane pane;
       MyTableView<FileNodeIF> table;
-      MyTableColumn<FileNodeIF, String> nameColumn;
+      MyTableColumn<FileNodeIF, StyledText> nameColumn;
       MyTableColumn<FileNodeIF, Long> fileSizeColumn;
 
       pane = new GridPane();
@@ -146,7 +147,9 @@ public class SearchPane extends AbstractTabContentPane
 
       nameColumn = table.addColumn("Name");
       nameColumn.setColumnCount(300);
-      nameColumn.setCellValueGetter((fn) -> fn.getAbsolutePath());
+      nameColumn.setCellValueGetter((fn) -> {
+        return mi_data.getAbsolutePathWithSearchHighlighted(fn);
+      });
 
       fileSizeColumn = table.addColumn("File size");
       fileSizeColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
@@ -193,13 +196,15 @@ public class SearchPane extends AbstractTabContentPane
     }
   }
 
-  private class SearchPaneData extends PaneData
+  private class SearchPaneData
+    extends PaneData
   {
     public StringProperty mi_maxCountProperty;
     public StringProperty mi_maxTimeProperty;
     public BooleanProperty mi_regexSelectedProperty;
     public StringProperty mi_searchTextProperty;
     private ObservableList<FileNodeIF> mi_list;
+    private Map<String, SearchMatch> mi_searchPositionByPathMap = new HashMap<>();
     private final BooleanProperty mi_stoppedOnMaxCountProperty = new SimpleBooleanProperty();
     private final BooleanProperty mi_stoppedOnTimeoutProperty = new SimpleBooleanProperty();
     private final IntegerProperty mi_progressProperty = new SimpleIntegerProperty(0);
@@ -255,23 +260,32 @@ public class SearchPane extends AbstractTabContentPane
             fnIterator.setMaxCount(Integer.valueOf(mi_data.mi_maxCountProperty.get()));
             fnIterator.setTimeoutInSeconds(Integer.valueOf(mi_data.mi_maxTimeProperty.get()));
             fnIterator.forEach(fn -> {
+              String searchedString;
+
               if (!fn.isFile())
               {
                 return false;
               }
 
+              searchedString = fn.getAbsolutePath();
               if (pattern != null)
               {
-                if (matcher.reset(fn.getAbsolutePath()).find())
+                if (matcher.reset(searchedString).find())
                 {
+                  mi_data.addSearchMatch(searchedString, matcher.start(), matcher.end());
+                  matcher.end();
                   list.add(fn);
                   return true;
                 }
               }
               else
               {
-                if (fn.getAbsolutePath().contains(searchText2))
+                int index;
+
+                index = searchedString.indexOf(searchText2);
+                if (index != -1)
                 {
+                  mi_data.addSearchMatch(searchedString, index, index + searchText2.length());
                   list.add(fn);
                   return true;
                 }
@@ -289,10 +303,63 @@ public class SearchPane extends AbstractTabContentPane
       return mi_list;
     }
 
+    public StyledText getAbsolutePathWithSearchHighlighted(FileNodeIF fileNode)
+    {
+      SearchMatch searchMatch;
+      String absolutePath;
+      StyledText styledText;
+
+      styledText = new StyledText();
+      absolutePath = fileNode.getAbsolutePath();
+
+      searchMatch = mi_searchPositionByPathMap.get(absolutePath);
+      if (searchMatch != null)
+      {
+        styledText.addItem(absolutePath.substring(0, searchMatch.getBegin()));
+        styledText.addItem(absolutePath.substring(searchMatch.getBegin(), searchMatch.getEnd()),
+            "-fx-font-weight: bold");
+        styledText.addItem(absolutePath.substring(searchMatch.getEnd()));
+      }
+      else
+      {
+        styledText.addItem(absolutePath);
+      }
+
+      return styledText;
+    }
+
+    private void addSearchMatch(String searchString, int start, int end)
+    {
+      mi_data.mi_searchPositionByPathMap.put(searchString, new SearchMatch(start, end));
+    }
+
     @Override
     protected void reset()
     {
       mi_list = null;
+      mi_searchPositionByPathMap.clear();
+    }
+  }
+
+  public static class SearchMatch
+  {
+    private final int mi_begin;
+    private final int mi_end;
+
+    private SearchMatch(int begin, int end)
+    {
+      mi_begin = begin;
+      mi_end = end;
+    }
+
+    private int getBegin()
+    {
+      return mi_begin;
+    }
+
+    private int getEnd()
+    {
+      return mi_end;
     }
   }
 

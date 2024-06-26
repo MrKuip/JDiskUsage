@@ -3,6 +3,7 @@ package org.kku.jdiskusage.javafx.scene.control;
 import java.util.function.Function;
 import org.kku.jdiskusage.ui.util.FormatterIF;
 import org.kku.jdiskusage.ui.util.FxUtil;
+import org.kku.jdiskusage.ui.util.StyledText;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppSettings.AppSetting;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -73,7 +74,24 @@ public class MyTableColumn<T, R>
 
           super.updateItem(value, empty);
 
-          if (value != null && value instanceof Node)
+          if (value != null && value instanceof StyledText)
+          {
+            StyledText styledText;
+
+            styledText = (StyledText) value;
+            if (styledText.isPlainText())
+            {
+              text = styledText.getPlainText();
+              graphic = null;
+            }
+            else
+            {
+              text = null;
+              graphic = styledText.getTextFlow();
+              setPrefHeight(1);
+            }
+          }
+          else if (value != null && value instanceof Node)
           {
             text = "";
             graphic = (Node) value;

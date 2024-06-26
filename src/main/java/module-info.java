@@ -10,7 +10,6 @@ module org.kku.jdiskusage
   requires java.prefs;
   requires com.miglayout.swing;
   requires com.miglayout.javafx;
-  //requires org.junit.jupiter.api;
 
   exports org.kku.jdiskusage.main;
 }

@@ -18,7 +18,6 @@ import java.util.Stack;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.kku.jdiskusage.ui.DiskUsageView;
 
 public class FileTree
@@ -123,7 +122,8 @@ public class FileTree
     public String getAbsolutePath();
   }
 
-  public static abstract class AbstractFileNode implements FileNodeIF
+  public static abstract class AbstractFileNode
+      implements FileNodeIF
   {
     private final String m_pathName;
     private DirNode mi_parentNode;
@@ -165,7 +165,8 @@ public class FileTree
     }
   }
 
-  public static class DirNode extends AbstractFileNode
+  public static class DirNode
+    extends AbstractFileNode
   {
     private List<FileNodeIF> mi_childList;
     private long mi_fileSize = -1;
@@ -271,7 +272,8 @@ public class FileTree
     }
   }
 
-  public static class FileNode extends AbstractFileNode
+  public static class FileNode
+    extends AbstractFileNode
   {
     private final String mi_fileType;
     private final int mi_inodeNumber;
@@ -430,7 +432,8 @@ public class FileTree
       return rootNode;
     }
 
-    private class ScanVisitor extends SimpleFileVisitor<Path>
+    private class ScanVisitor
+      extends SimpleFileVisitor<Path>
     {
       private Stack<DirNode> mi_parentNodeStack = new Stack<>();
       private DirNode mi_rootDirNode;

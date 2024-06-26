@@ -27,7 +27,7 @@ import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
-import org.kku.jdiskusage.util.Translator;
+import org.kku.jdiskusage.util.Translator2;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.kku.jdiskusage.util.preferences.Sort;
@@ -136,7 +136,7 @@ public class DiskUsageView
     splitPaneProperty = AppProperties.SPLIT_PANE_POSITION.forSubject(DiskUsageView.this);
 
     splitPane.getItems().addAll(m_data.getTreePaneData().getNode(), m_data.getTabPaneData().getNode());
-    splitPane.getDividers().get(0).positionProperty().asObject().addListener(splitPaneProperty.getChangeListener());
+    splitPane.getDividers().get(0).positionProperty().addListener(splitPaneProperty.getChangeListener());
     SplitPane.setResizableWithParent(m_data.getTreePaneData().getNode(), false);
     SplitPane.setResizableWithParent(m_data.getTabPaneData().getNode(), false);
 
@@ -239,7 +239,7 @@ public class DiskUsageView
     sortNumericButton.setToggleGroup(sortGroup);
     sortNumericButton.setOnAction((e) -> {
       AppPreferences.sortPreference.set(Sort.NUMERIC);
-      Translator.getInstance().changeLocale(new Locale("nl"));
+      Translator2.getInstance().changeLocale(new Locale("nl"));
     });
 
     sortAlphabeticallyButton = new ToggleButton("",
@@ -247,7 +247,7 @@ public class DiskUsageView
     sortAlphabeticallyButton.setToggleGroup(sortGroup);
     sortAlphabeticallyButton.setOnAction((e) -> {
       AppPreferences.sortPreference.set(Sort.ALPHABETICALLY);
-      Translator.getInstance().changeLocale(Locale.CANADA);
+      Translator2.getInstance().changeLocale(Locale.CANADA);
     });
 
     sortButton = new SegmentedButton();
@@ -479,6 +479,7 @@ public class DiskUsageView
 
       list = recentScansProperty.getList();
       list.add(0, pathList);
+      list = list.stream().distinct().toList();
       recentScansProperty.setList(list);
 
       update();

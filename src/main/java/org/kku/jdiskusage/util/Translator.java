@@ -55,7 +55,11 @@ public class Translator
     if (bundle != null)
     {
       bundle.keySet().forEach(key -> {
-        put(toResourceKey(key), bundle.getString(key));
+        String resourceKey = toResourceKey(key);
+        String value = bundle.getString(key);
+
+        System.out.println(resourceKey + " -> " + value);
+        put(resourceKey, value);
       });
     }
   }
