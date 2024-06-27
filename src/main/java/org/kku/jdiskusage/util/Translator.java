@@ -14,7 +14,7 @@ public class Translator
   private Map<String, String> mi_translationByIdMap = new HashMap<>();
   private Map<String, StringProperty> mi_translationPropertyByIdMap = new HashMap<>();
 
-  private String bundleName = "language"; // a file language.properties must be present at the root of your classpath
+  private String bundleName = "messages"; // a file language.properties must be present at the root of your classpath
 
   private Translator()
   {

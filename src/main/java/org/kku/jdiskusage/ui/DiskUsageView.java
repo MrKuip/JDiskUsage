@@ -542,6 +542,7 @@ public class DiskUsageView
       menuItem = translate(new MenuItem("Preferences"));
       menuItem.setGraphic(IconUtil.createIconNode("cog", IconSize.SMALLER));
       menuItem.setOnAction(e -> {
+        new PreferencesDialog().show();
       });
 
       return menuItem;
