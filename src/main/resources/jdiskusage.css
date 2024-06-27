@@ -55,4 +55,22 @@
 }
 
 
+.notification-item {
+    -fx-background-color: -fx-outer-border, -fx-inner-border, -fx-body-color;
+    -fx-padding: 7 7 7 7;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.4), 5, 0, 5, 5);
+    -fx-background-insets: 0, 1, 2;
+}
+
+.notification-item > .title {
+    -fx-font-size: 1.166667em; /*15px;*/
+    -fx-text-fill: #292929;
+    -fx-font-weight: bold;
+}
+
+.notification-item > .message {
+    -fx-font-size: 1.166667em; /*15px;*/
+    -fx-text-fill: #292929;
+    -fx-alignment: top-left;
+}
 

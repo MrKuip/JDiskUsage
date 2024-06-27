@@ -18,7 +18,7 @@ import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.common.FullScreen;
 import org.kku.jdiskusage.ui.common.Navigation;
-import org.kku.jdiskusage.ui.common.NotificationView;
+import org.kku.jdiskusage.ui.common.Notifications;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties;
@@ -74,7 +74,8 @@ public class DiskUsageView
     private final RecentFilesMenu mi_recentFiles = new RecentFilesMenu();
     private final PreferencesMenu mi_preferences = new PreferencesMenu();
     private final FilterPane mi_filterPane = new FilterPane(this);
-    private final NotificationView mi_taskView = new NotificationView();
+    private final Notifications mi_taskView = Notifications.getInstance();
+    //
 
     private DiskUsageData()
     {
@@ -147,7 +148,7 @@ public class DiskUsageView
     // This places the taskview in the lower right corner of the content pane.
     // container.x2 = the leftmost point of the container
     // container.y2 = the lowest point of the container
-    m_content.add(m_data.mi_taskView, "pos null null container.x2 container.y2");
+    m_content.add(m_data.mi_taskView.getView(), "pos null null container.x2 container.y2");
 
     m_data.getTabPaneData().getNode().setTop(m_data.getTreePaneData().createBreadCrumbBar());
   }
@@ -240,6 +241,7 @@ public class DiskUsageView
     sortNumericButton.setOnAction((e) -> {
       AppPreferences.sortPreference.set(Sort.NUMERIC);
       Translator.getInstance().changeLocale(new Locale("nl"));
+      Notifications.showMessage("Language change", "Language changed to netherlands");
     });
 
     sortAlphabeticallyButton = new ToggleButton("",
@@ -248,6 +250,7 @@ public class DiskUsageView
     sortAlphabeticallyButton.setOnAction((e) -> {
       AppPreferences.sortPreference.set(Sort.ALPHABETICALLY);
       Translator.getInstance().changeLocale(Locale.CANADA);
+      Notifications.showMessage("Language change", "Language changed to canada");
     });
 
     sortButton = new SegmentedButton();

@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Optional;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.main.Main;
+import org.kku.jdiskusage.ui.common.Notifications;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.DirectoryChooser;
 import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 import org.kku.jdiskusage.util.FileTree;
 import org.kku.jdiskusage.util.FileTree.DirNode;
-import org.kku.jdiskusage.util.Notification;
 import javafx.application.Platform;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
@@ -235,7 +235,7 @@ public class ScanFileTreeDialog
 
             m_dialog.close();
 
-            Notification.showInformation("Scan ready", text);
+            Notifications.showMessage("Scan ready", text);
           }
         });
 
