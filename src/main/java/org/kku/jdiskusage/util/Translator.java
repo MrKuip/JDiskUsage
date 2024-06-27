@@ -1,23 +1,23 @@
 package org.kku.jdiskusage.util;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.ObjectBinding;
-import javafx.beans.binding.StringBinding;
-import javafx.beans.property.SimpleMapProperty;
-import javafx.collections.FXCollections;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 public class Translator
-  extends SimpleMapProperty<String, Object>
 {
   private static Translator m_instance = new Translator();
+
+  private Map<String, String> mi_translationByIdMap = new HashMap<>();
+  private Map<String, StringProperty> mi_translationPropertyByIdMap = new HashMap<>();
 
   private String bundleName = "language"; // a file language.properties must be present at the root of your classpath
 
   private Translator()
   {
-    super(FXCollections.observableHashMap());
     reload();
   }
 
@@ -32,36 +32,55 @@ public class Translator
     reload();
   }
 
-  public static StringBinding translatedTextProperty(String text)
+  public static StringProperty translatedTextProperty(String text)
   {
+    StringProperty stringProperty;
+
+    stringProperty = m_instance.mi_translationPropertyByIdMap.computeIfAbsent(toResourceKey(text),
+        (k) -> new SimpleStringProperty());
+    stringProperty.set(getTranslatedText(text));
+
+    return stringProperty;
+  }
+
+  public static String getTranslatedText(String text)
+  {
+    String translatedText;
     String resourceKey;
-    ObjectBinding<Object> binding;
 
     resourceKey = toResourceKey(text);
-    binding = Bindings.valueAt(getInstance(), resourceKey);
 
-    // if the text to be translated is not in the resourcebundle the text itself is
-    // returned
-    return Bindings.when(binding.isNull()).then(text).otherwise(binding.asString());
+    translatedText = m_instance.mi_translationByIdMap.get(resourceKey);
+    if (StringUtils.isEmpty(translatedText))
+    {
+      translatedText = text;
+    }
+    return translatedText;
   }
 
   private void reload()
   {
     ResourceBundle bundle;
 
-    clear();
+    mi_translationByIdMap.clear();
 
     bundle = ResourceBundle.getBundle(bundleName);
     if (bundle != null)
     {
       bundle.keySet().forEach(key -> {
-        String resourceKey = toResourceKey(key);
-        String value = bundle.getString(key);
+        String resourceKey;
+        String value;
 
-        System.out.println(resourceKey + " -> " + value);
-        put(resourceKey, value);
+        resourceKey = toResourceKey(key);
+        value = bundle.getString(key);
+
+        mi_translationByIdMap.put(resourceKey, value);
       });
     }
+
+    mi_translationPropertyByIdMap.entrySet().forEach(entry -> {
+      entry.getValue().set(getTranslatedText(entry.getKey()));
+    });
   }
 
   private static String toResourceKey(String text)

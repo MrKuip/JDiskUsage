@@ -1,6 +1,6 @@
 package org.kku.jdiskusage.ui.util;
 
-import org.kku.jdiskusage.util.Translator2;
+import org.kku.jdiskusage.util.Translator;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.MenuItem;
@@ -16,7 +16,7 @@ public class TranslateUtil
 
   public static String translate(String text)
   {
-    return Translator2.getTranslatedText(text);
+    return Translator.getTranslatedText(text);
   }
 
   public static <T extends Labeled> T translate(T node)
@@ -49,8 +49,8 @@ public class TranslateUtil
     return node;
   }
 
-  private static void bind(StringProperty textProperty)
+  public static void bind(StringProperty textProperty)
   {
-    textProperty.bind(Translator2.translatedTextProperty(textProperty.get()));
+    textProperty.bind(Translator.translatedTextProperty(textProperty.get()));
   }
 }

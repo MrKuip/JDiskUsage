@@ -27,7 +27,7 @@ import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
-import org.kku.jdiskusage.util.Translator2;
+import org.kku.jdiskusage.util.Translator;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.kku.jdiskusage.util.preferences.Sort;
@@ -239,7 +239,7 @@ public class DiskUsageView
     sortNumericButton.setToggleGroup(sortGroup);
     sortNumericButton.setOnAction((e) -> {
       AppPreferences.sortPreference.set(Sort.NUMERIC);
-      Translator2.getInstance().changeLocale(new Locale("nl"));
+      Translator.getInstance().changeLocale(new Locale("nl"));
     });
 
     sortAlphabeticallyButton = new ToggleButton("",
@@ -247,7 +247,7 @@ public class DiskUsageView
     sortAlphabeticallyButton.setToggleGroup(sortGroup);
     sortAlphabeticallyButton.setOnAction((e) -> {
       AppPreferences.sortPreference.set(Sort.ALPHABETICALLY);
-      Translator2.getInstance().changeLocale(Locale.CANADA);
+      Translator.getInstance().changeLocale(Locale.CANADA);
     });
 
     sortButton = new SegmentedButton();
