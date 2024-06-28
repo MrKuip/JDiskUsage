@@ -2,11 +2,16 @@ package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import org.kku.jdiskusage.main.Main;
 import org.kku.jdiskusage.ui.util.TranslateUtil;
+import org.kku.jdiskusage.util.Translator;
+import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
@@ -34,6 +39,9 @@ public class PreferencesDialog
     m_dialog.initOwner(Main.getRootStage());
     m_dialog.initModality(Modality.APPLICATION_MODAL);
     m_dialog.setTitle(translate("Preferences"));
+    m_dialog.getDialogPane().getScene().getWindow().setOnCloseRequest((e) -> m_dialog.close());
+    m_dialog.getDialogPane().setPrefSize(600, 200);
+    m_dialog.getDialogPane().setMinSize(600, 400);
     m_dialog.showAndWait();
   }
 
@@ -56,10 +64,24 @@ public class PreferencesDialog
     ComboBox<Language> languageComboBox;
 
     autoExpandCheckBox = new CheckBox("Auto expand selected tree node");
+    autoExpandCheckBox.setSelected(AppPreferences.autoExpandTreeNode.get());
+    autoExpandCheckBox.setOnAction((ae) -> AppPreferences.autoExpandTreeNode.set(autoExpandCheckBox.isSelected()));
+
     autoCollapseCheckBox = new CheckBox("Auto collapse deselected tree nodes");
+    autoCollapseCheckBox.setSelected(AppPreferences.autoCollapseTreeNode.get());
+    autoCollapseCheckBox
+        .setOnAction((ae) -> AppPreferences.autoCollapseTreeNode.set(autoCollapseCheckBox.isSelected()));
 
     languageComboBox = new ComboBox<>();
     languageComboBox.getItems().addAll(getLanguageList());
+    languageComboBox.getSelectionModel().select(getCurrentLanguage());
+    languageComboBox.setOnAction((ae) -> {
+      Locale locale;
+
+      locale = languageComboBox.getSelectionModel().getSelectedItem().getLocale();
+      Translator.getInstance().changeLocale(locale);
+      AppPreferences.localePreference.set(locale);
+    });
 
     pane = new MigPane();
     pane.add(translate(autoExpandCheckBox), "newline, spanx 2");
@@ -71,6 +93,16 @@ public class PreferencesDialog
     tab.setContent(pane);
 
     return tab;
+  }
+
+  private Language getCurrentLanguage()
+  {
+    Locale locale;
+
+    locale = Locale.getDefault();
+
+    return getLanguageList().stream().filter(l -> l.getLanguage().equals(locale.getLanguage())).findFirst()
+        .orElse(getLanguageList().get(0));
   }
 
   private Tab getChartingTab()
@@ -85,13 +117,17 @@ public class PreferencesDialog
   private List<Language> getLanguageList()
   {
     Properties props;
+    List<Language> list;
 
     try
     {
       props = new Properties();
-      props.load(getClass().getResourceAsStream("language.properties"));
-      return props.entrySet().stream().map(entry -> new Language((String) entry.getKey(), (String) entry.getValue()))
-          .toList();
+      props.load(getClass().getResourceAsStream("/language.properties"));
+      list = props.entrySet().stream().map(entry -> new Language((String) entry.getKey(), (String) entry.getValue()))
+          .collect(Collectors.toCollection(ArrayList::new));
+      list.add(0, new Language("English", ""));
+
+      return list;
     }
     catch (IOException e)
     {
@@ -103,12 +139,24 @@ public class PreferencesDialog
   static class Language
   {
     private final String mi_name;
-    private final String mi_bundlePostfix;
+    private final String mi_language;
+    private final Locale mi_locale;
 
-    public Language(String name, String bundlePostfix)
+    public Language(String name, String language)
     {
       mi_name = name;
-      mi_bundlePostfix = bundlePostfix;
+      mi_language = language;
+      mi_locale = new Locale(language);
+    }
+
+    public String getLanguage()
+    {
+      return mi_language;
+    }
+
+    public Locale getLocale()
+    {
+      return mi_locale;
     }
 
     @Override

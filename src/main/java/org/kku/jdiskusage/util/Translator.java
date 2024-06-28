@@ -36,8 +36,7 @@ public class Translator
   {
     StringProperty stringProperty;
 
-    stringProperty = m_instance.mi_translationPropertyByIdMap.computeIfAbsent(toResourceKey(text),
-        (k) -> new SimpleStringProperty());
+    stringProperty = m_instance.mi_translationPropertyByIdMap.computeIfAbsent(text, (k) -> new SimpleStringProperty());
     stringProperty.set(getTranslatedText(text));
 
     return stringProperty;

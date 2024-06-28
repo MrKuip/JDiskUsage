@@ -2,11 +2,11 @@ package org.kku.jdiskusage.main;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Locale;
 import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppSettings.AppSetting;
 import org.kku.jdiskusage.util.DirectoryChooser.PathList;
+import org.kku.jdiskusage.util.Translator;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import javafx.application.Application;
 import javafx.geometry.Rectangle2D;
@@ -35,7 +35,7 @@ public class Main
 
     m_rootStage = stage;
 
-    Locale.setDefault(AppPreferences.localePreference.get());
+    Translator.getInstance().changeLocale(AppPreferences.localePreference.get());
 
     diskUsageView = new DiskUsageView(stage);
     m_rootNode = diskUsageView.getContent();

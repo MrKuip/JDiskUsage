@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Properties;
 import org.kku.jdiskusage.util.Converters.Converter;
 import javafx.beans.value.ChangeListener;
+import javafx.scene.control.CheckBox;
 
 public abstract class AppSettings
 {
@@ -267,5 +268,9 @@ public abstract class AppSettings
   protected Path getSettingPath()
   {
     return Path.of(System.getProperty("user.home"), m_settingFileName);
+  }
+
+  public static void bind(AppSetting<Boolean> autocollapsetreenode2, CheckBox autoExpandCheckBox)
+  {
   }
 }

@@ -16,6 +16,8 @@ public class AppPreferences
   public final static AppSetting<Integer> searchMaxCountPreference;
   public final static AppSetting<Integer> searchMaxTimePreference;
   public final static AppSetting<Boolean> searchRegexPreference;
+  public final static AppSetting<Boolean> autoExpandTreeNode;
+  public final static AppSetting<Boolean> autoCollapseTreeNode;
 
   static
   {
@@ -33,6 +35,10 @@ public class AppPreferences
     searchMaxTimePreference = m_instance.createAppSettingType("Max time", Converters.getIntegerConverter())
         .forSubject(m_instance, 10);
     searchRegexPreference = m_instance.createAppSettingType("Use regex search", Converters.getBooleanConverter())
+        .forSubject(m_instance, Boolean.FALSE);
+    autoExpandTreeNode = m_instance.createAppSettingType("Auto expand tree node", Converters.getBooleanConverter())
+        .forSubject(m_instance, Boolean.FALSE);
+    autoCollapseTreeNode = m_instance.createAppSettingType("Auto collapse tree node", Converters.getBooleanConverter())
         .forSubject(m_instance, Boolean.FALSE);
   }
 
