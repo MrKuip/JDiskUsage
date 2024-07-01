@@ -15,15 +15,25 @@ public class TestFx
     MigPane pane;
     Scene scene;
 
+    Button b = new Button("Press");
+    scene = new Scene(getMigPane());
+
+    b.setOnAction((ae) -> scene.setRoot(getMigPane()));
+
+    stage.setScene(scene);
+    stage.show();
+  }
+
+  public MigPane getMigPane()
+  {
+    MigPane pane;
+
     pane = new MigPane();
     Button b = new Button("hello");
     pane.add(new Button("hello"), "sizegroup test");
     pane.add(new Button("Long text"), "sizegroup test");
 
-    scene = new Scene(pane);
-    stage.setScene(scene);
-
-    stage.show();
+    return pane;
   }
 
   public static void main(String[] args)

@@ -35,11 +35,11 @@ javafx {
 dependencies {
   implementation 'org.controlsfx:controlsfx:11.2.1'
   implementation files('lib/fontIcons-1.0.jar')
-  //implementation files('lib/miglayout-javafx-11.3.jar')
-  //implementation files('lib/miglayout-core-11.3.jar')
-  //implementation files('lib/miglayout-swing-11.3.jar')
-  implementation 'com.miglayout:miglayout-javafx:11.3'
-  implementation 'com.miglayout:miglayout-swing:11.3'
+  implementation files('lib/miglayout-javafx-11.3.jar')
+  implementation files('lib/miglayout-core-11.3.jar')
+  implementation files('lib/miglayout-swing-11.3.jar')
+  //implementation 'com.miglayout:miglayout-javafx:11.3'
+  //implementation 'com.miglayout:miglayout-swing:11.3'
 
   //implementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
   //testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'

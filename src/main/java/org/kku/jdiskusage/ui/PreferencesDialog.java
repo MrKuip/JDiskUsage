@@ -26,6 +26,7 @@ import javafx.stage.Modality;
 public class PreferencesDialog
 {
   private Dialog<ButtonType> m_dialog;
+  private LanguagePreferences m_languagePreferences = new LanguagePreferences();
 
   public PreferencesDialog()
   {
@@ -38,7 +39,8 @@ public class PreferencesDialog
     m_dialog.getDialogPane().setContent(getContent());
     m_dialog.initOwner(Main.getRootStage());
     m_dialog.initModality(Modality.APPLICATION_MODAL);
-    m_dialog.setTitle(translate("Preferences"));
+    m_dialog.setTitle("Preferences");
+    TranslateUtil.bind(m_dialog.titleProperty());
     m_dialog.getDialogPane().getScene().getWindow().setOnCloseRequest((e) -> m_dialog.close());
     m_dialog.getDialogPane().setPrefSize(600, 200);
     m_dialog.getDialogPane().setMinSize(600, 400);
@@ -61,7 +63,7 @@ public class PreferencesDialog
     MigPane pane;
     CheckBox autoExpandCheckBox;
     CheckBox autoCollapseCheckBox;
-    ComboBox<Language> languageComboBox;
+    ComboBox<LanguagePreferences.Language> languageComboBox;
 
     autoExpandCheckBox = new CheckBox("Auto expand selected tree node");
     autoExpandCheckBox.setSelected(AppPreferences.autoExpandTreeNode.get());
@@ -73,8 +75,8 @@ public class PreferencesDialog
         .setOnAction((ae) -> AppPreferences.autoCollapseTreeNode.set(autoCollapseCheckBox.isSelected()));
 
     languageComboBox = new ComboBox<>();
-    languageComboBox.getItems().addAll(getLanguageList());
-    languageComboBox.getSelectionModel().select(getCurrentLanguage());
+    languageComboBox.getItems().addAll(m_languagePreferences.getLanguageList());
+    languageComboBox.getSelectionModel().select(m_languagePreferences.getCurrentLanguage());
     languageComboBox.setOnAction((ae) -> {
       Locale locale;
 
@@ -95,16 +97,6 @@ public class PreferencesDialog
     return tab;
   }
 
-  private Language getCurrentLanguage()
-  {
-    Locale locale;
-
-    locale = Locale.getDefault();
-
-    return getLanguageList().stream().filter(l -> l.getLanguage().equals(locale.getLanguage())).findFirst()
-        .orElse(getLanguageList().get(0));
-  }
-
   private Tab getChartingTab()
   {
     Tab tab;
@@ -114,55 +106,70 @@ public class PreferencesDialog
     return tab;
   }
 
-  private List<Language> getLanguageList()
+  private class LanguagePreferences
   {
-    Properties props;
-    List<Language> list;
 
-    try
+    private Language getCurrentLanguage()
     {
-      props = new Properties();
-      props.load(getClass().getResourceAsStream("/language.properties"));
-      list = props.entrySet().stream().map(entry -> new Language((String) entry.getKey(), (String) entry.getValue()))
-          .collect(Collectors.toCollection(ArrayList::new));
-      list.add(0, new Language("English", ""));
+      Locale locale;
 
-      return list;
-    }
-    catch (IOException e)
-    {
-      e.printStackTrace();
-      return Collections.emptyList();
-    }
-  }
+      locale = Locale.getDefault();
 
-  static class Language
-  {
-    private final String mi_name;
-    private final String mi_language;
-    private final Locale mi_locale;
-
-    public Language(String name, String language)
-    {
-      mi_name = name;
-      mi_language = language;
-      mi_locale = new Locale(language);
+      return getLanguageList().stream().filter(l -> l.getLanguage().equals(locale.getLanguage())).findFirst()
+          .orElse(getLanguageList().get(0));
     }
 
-    public String getLanguage()
+    private List<Language> getLanguageList()
     {
-      return mi_language;
+      Properties props;
+      List<Language> list;
+
+      try
+      {
+        props = new Properties();
+        props.load(getClass().getResourceAsStream("/language.properties"));
+        list = props.entrySet().stream().map(entry -> new Language((String) entry.getKey(), (String) entry.getValue()))
+            .collect(Collectors.toCollection(ArrayList::new));
+        // Always add the default language at index 0
+        list.add(0, new Language("English", ""));
+
+        return list;
+      }
+      catch (IOException e)
+      {
+        e.printStackTrace();
+        return Collections.emptyList();
+      }
     }
 
-    public Locale getLocale()
+    private class Language
     {
-      return mi_locale;
-    }
+      private final String mi_name;
+      private final String mi_language;
+      private final Locale mi_locale;
 
-    @Override
-    public String toString()
-    {
-      return mi_name;
+      public Language(String name, String language)
+      {
+        mi_name = name;
+        mi_language = language;
+        mi_locale = new Locale(language);
+      }
+
+      public String getLanguage()
+      {
+        return mi_language;
+      }
+
+      public Locale getLocale()
+      {
+        return mi_locale;
+      }
+
+      @Override
+      public String toString()
+      {
+        return mi_name;
+      }
     }
   }
 }
