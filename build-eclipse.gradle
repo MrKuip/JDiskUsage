@@ -8,6 +8,7 @@ eclipse.classpath
 
 eclipse.classpath.file 
 {
+  // Fix the problem that this plugin doesn't put libraries on the module path (it puts them on the classpath)
   whenMerged 
   {
     entries.findAll { entry -> isModule(entry) }.each { entry -> entry.entryAttributes['module'] = 'true' }
@@ -17,27 +18,27 @@ eclipse.classpath.file
 
 
 boolean isModule(entry) {
-    // Only libraries can be modules
-    if(entry == null || !entry.kind.equals("lib"))
-    {
-      return false;
-    }
-
-    // Test libraries should not be imported as modules because eclipse then 
-    // needs the library be 'required' in module-info.java
-    if ("true".equals(entry.entryAttributes['test']))
-    {
-      return false;
-    }
-
-    // All libraries that contain the module-info.class should be imported as modules!
-    def moduleDescription = "jar --file $entry.path --describe-module".execute().text
-    if( moduleDescription.contains('module-info.class'))
-    {
-      return true;
-    }
-
+  // Only libraries can be modules
+  if(entry == null || !entry.kind.equals("lib"))
+  {
     return false;
+  }
+
+  // Test libraries should not be imported as modules because eclipse then 
+  // needs the library be 'required' in module-info.java
+  if ("true".equals(entry.entryAttributes['test']))
+  {
+    return false;
+  }
+
+  // All libraries that contain the module-info.class should be imported as modules!
+  def moduleDescription = "jar --file $entry.path --describe-module".execute().text
+  if( moduleDescription.contains('module-info.class'))
+  {
+    return true;
+  }
+
+  return false;
 }
 
 
