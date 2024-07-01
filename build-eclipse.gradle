@@ -1,15 +1,43 @@
 
 
-eclipse.classpath.file {
-    whenMerged {
-        entries.findAll { isModule(it) }.each { it.entryAttributes['module'] = 'true' }
-    }
+eclipse.classpath
+{
+  downloadSources = true
+  downloadJavadoc = true
+}
+
+eclipse.classpath.file 
+{
+  whenMerged 
+  {
+    entries.findAll { entry -> isModule(entry) }.each { entry -> entry.entryAttributes['module'] = 'true' }
+  }
 }
 
 
+
 boolean isModule(entry) {
+    // Only libraries can be modules
+    if(entry == null || !entry.kind.equals("lib"))
+    {
+      return false;
+    }
+
+    // Test libraries should not be imported as modules because eclipse then 
+    // needs the library be 'required' in module-info.java
+    if ("true".equals(entry.entryAttributes['test']))
+    {
+      return false;
+    }
+
+    // All libraries that contain the module-info.class should be imported as modules!
     def moduleDescription = "jar --file $entry.path --describe-module".execute().text
-    return moduleDescription.contains('module-info.class') && !entry.path.contains('junit');
+    if( moduleDescription.contains('module-info.class'))
+    {
+      return true;
+    }
+
+    return false;
 }
 
 
