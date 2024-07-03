@@ -286,7 +286,7 @@ public class ScanFileTreeDialog
       FileTree tree;
 
       tree = new FileTree(mi_directoryList);
-      
+
       return tree.scan();
     }
   }

@@ -102,7 +102,8 @@ public class FileTreeView
     });
   }
 
-  public class FileTreeItem extends TreeItem<FileNodeIF>
+  public class FileTreeItem
+    extends TreeItem<FileNodeIF>
   {
     private boolean mi_isFirstTimeChildren = true;
 

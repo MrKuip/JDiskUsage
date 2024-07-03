@@ -27,7 +27,8 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
 
-class Top50Pane extends AbstractTabContentPane
+class Top50Pane
+  extends AbstractTabContentPane
 {
   private final Top50PaneData mi_data = new Top50PaneData();
 
@@ -123,7 +124,8 @@ class Top50Pane extends AbstractTabContentPane
     return translate(new Label("No data"));
   }
 
-  class Top50PaneData extends PaneData
+  class Top50PaneData
+    extends PaneData
   {
     private Map<FileNodeComparator, ObservableList<FileNodeIF>> mi_map = new HashMap<>();
 

@@ -118,7 +118,8 @@ public class DirectoryChooser
     return result;
   }
 
-  private class ToolBarPane extends MigPane
+  private class ToolBarPane
+    extends MigPane
   {
     private ToolBarPane()
     {
@@ -157,7 +158,8 @@ public class DirectoryChooser
     }
   }
 
-  private class SidePane extends MigPane
+  private class SidePane
+    extends MigPane
   {
     private SidePane()
     {
@@ -204,7 +206,8 @@ public class DirectoryChooser
     }
   }
 
-  private class BreadCrumbPane extends BreadCrumbBar<MyPath>
+  private class BreadCrumbPane
+    extends BreadCrumbBar<MyPath>
   {
     private BreadCrumbPane()
     {
@@ -264,7 +267,8 @@ public class DirectoryChooser
     }
   }
 
-  private class DirectoryPane extends MigPane
+  private class DirectoryPane
+    extends MigPane
   {
     private MyTableView<Path> mi_tableView;
 
@@ -390,7 +394,8 @@ public class DirectoryChooser
     }
   }
 
-  private class DirectoryNode extends Button
+  private class DirectoryNode
+    extends Button
   {
     private final String m_name;
     private final String m_iconName;
