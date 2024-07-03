@@ -5,11 +5,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.kku.fonticons.ui.FxIcon.IconSize;
+import org.kku.jdiskusage.concurrent.FxTask;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
@@ -23,7 +22,6 @@ import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.StringUtils;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -159,7 +157,7 @@ public class SearchPane
       table.getPlaceholder();
       table.setPlaceholder(new Label("Searching..."));
 
-      new TaskRunner<>(() -> mi_data.getList(), (itemList) -> table.setItems(itemList)).run();
+      new FxTask<>(() -> mi_data.getList(), (itemList) -> table.setItems(itemList)).execute();
 
       pane.add(table, 0, 1);
       GridPane.setHgrow(table, Priority.ALWAYS);
@@ -169,31 +167,6 @@ public class SearchPane
     }
 
     return new Label("No data");
-  }
-
-  static class TaskRunner<T>
-  {
-    private final Supplier<T> mi_asyncCommand;
-    private final Consumer<T> mi_syncCommand;
-
-    public TaskRunner(Supplier<T> async, Consumer<T> sync)
-    {
-      mi_asyncCommand = async;
-      mi_syncCommand = sync;
-    }
-
-    public void run()
-    {
-      new Thread(() -> {
-        T result;
-
-        result = mi_asyncCommand.get();
-        Platform.runLater(() -> {
-          mi_syncCommand.accept(result);
-        });
-
-      }).start();
-    }
   }
 
   private class SearchPaneData

@@ -609,7 +609,6 @@ public class FileTree
           Long currentTime = System.currentTimeMillis();
           if (currentTime - 1000 > previousTime)
           {
-            System.out.println("DIR:" + numberOfDirectoriesEvaluated + " FILES:" + numberOfFilesEvaluated);
             previousTime = currentTime;
           }
           return false;

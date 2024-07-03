@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import org.kku.fonticons.ui.FxIcon.IconSize;
+import org.kku.jdiskusage.concurrent.FxTask;
 import org.kku.jdiskusage.main.Main;
 import org.kku.jdiskusage.ui.common.Notifications;
 import org.kku.jdiskusage.ui.util.IconUtil;
@@ -242,6 +243,51 @@ public class ScanFileTreeDialog
         return mi_cancel;
       });
       mi_result = tree.scan();
+    }
+  }
+
+  private class Scan2
+    extends FxTask<DirNode>
+  {
+    private List<Path> mi_directoryList;
+    private Path mi_rootDirectory;
+    private long mi_startTime;
+    private long mi_previousTime;
+    private boolean mi_runLaterActive;
+    private DirNode mi_result;
+
+    private Scan2(List<Path> directoryList)
+    {
+      mi_directoryList = directoryList;
+      mi_rootDirectory = directoryList.get(0);
+      if (directoryList.size() > 1)
+      {
+        mi_rootDirectory = mi_rootDirectory.getParent();
+      }
+
+      //getProps().set(AppProperties.INITIAL_DIRECTORY, mi_rootDirectory);
+      AppProperties.INITIAL_DIRECTORY.forSubject(ScanFileTreeDialog.this).set(mi_rootDirectory);
+
+      setRunNow(this::scan);
+    }
+
+    public Path getRootDirectory()
+    {
+      return mi_rootDirectory;
+    }
+
+    public DirNode getResult()
+    {
+      return mi_result;
+    }
+
+    public DirNode scan()
+    {
+      FileTree tree;
+
+      tree = new FileTree(mi_directoryList);
+      
+      return tree.scan();
     }
   }
 }
