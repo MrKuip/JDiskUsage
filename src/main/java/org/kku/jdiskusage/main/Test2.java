@@ -30,6 +30,7 @@ public class Test2
     pane = new FlowPane();
     pane.getChildren().addAll(b1, b2);
     scene = new Scene(pane);
+    scene.getStylesheets().add("jdiskusage.css");
 
     stage.setScene(scene);
     stage.show();

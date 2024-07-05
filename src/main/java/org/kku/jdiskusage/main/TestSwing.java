@@ -10,7 +10,6 @@ public class TestSwing
 {
   public TestSwing()
   {
-    start();
   }
 
   public void start()
@@ -19,9 +18,11 @@ public class TestSwing
     MigLayout layout;
     JFrame frame;
 
-    layout = new MigLayout();
+    layout = new MigLayout("insets 20");
     pane = new JPanel();
     pane.setLayout(layout);
+    pane.add("dock north", new JButton("north"));
+    pane.add("dock west", new JButton("west"));
     pane.add("sizegroup test", new JButton("Text"));
     pane.add("sizegroup test", new JButton("Long text"));
 
@@ -33,6 +34,6 @@ public class TestSwing
 
   public static void main(String[] args)
   {
-    new Test();
+    new TestSwing().start();
   }
 }

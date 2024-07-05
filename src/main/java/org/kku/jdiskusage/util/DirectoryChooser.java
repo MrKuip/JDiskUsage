@@ -30,14 +30,16 @@ import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
 
@@ -46,7 +48,8 @@ public class DirectoryChooser
   private final ObjectProperty<Path> m_directory = new SimpleObjectProperty<>();
   private final ObjectProperty<SelectionMode> m_selectionMode = new SimpleObjectProperty<>(SelectionMode.SINGLE);
 
-  private Dialog<PathList> m_dialog;
+  private Stage m_stage;
+  private PathList m_result;
   private final ToolBarPane m_toolBarPane = new ToolBarPane();
   private final SidePane m_sidePane = new SidePane();
   private final DirectoryPane m_directoryPane = new DirectoryPane();
@@ -93,10 +96,12 @@ public class DirectoryChooser
   private PathList showAndWait()
   {
     MigPane content;
-    PathList result;
+    Scene scene;
+
+    m_result = PathList.empty();
 
     content = new MigPane("", "[grow]", "[grow]");
-    content.getStyleClass().add("undecorated-dialog");
+    content.getStyleClass().add("jdiskusage-directory-chooser");
     content.add(m_toolBarPane, "dock north");
     content.add(new Separator(), "dock north");
     content.add(m_sidePane, "dock west");
@@ -104,17 +109,21 @@ public class DirectoryChooser
     content.add(m_breadCrumbPane, "dock north");
     content.add(m_directoryPane, "grow");
 
-    m_dialog = new Dialog<>();
-    m_dialog.getDialogPane().getStyleClass().remove("dialog-pane");
-    m_dialog.getDialogPane().setContent(content);
-    m_dialog.initOwner(Main.getRootStage());
-    m_dialog.initModality(Modality.APPLICATION_MODAL);
-    m_dialog.initStyle(StageStyle.UNDECORATED);
-    m_dialog.showAndWait();
+    m_stage = new Stage();
+    scene = new Scene(content);
+    scene.getStylesheets().add("jdiskusage.css");
+    m_stage.initOwner(Main.getRootStage());
+    m_stage.initModality(Modality.APPLICATION_MODAL);
+    m_stage.initStyle(StageStyle.UNDECORATED);
+    m_stage.setScene(scene);
+    m_stage.showAndWait();
 
-    result = m_dialog.getResult();
+    return m_result;
+  }
 
-    return result;
+  private void setResult(PathList result)
+  {
+    m_result = result;
   }
 
   private class ToolBarPane
@@ -136,8 +145,8 @@ public class DirectoryChooser
           new FxIcon("close").size(IconSize.SMALL).fillColor(IconColor.RED).getImageView());
       cancelButton.setAlignment(Pos.BASELINE_LEFT);
       cancelButton.setOnAction((ae) -> {
-        m_dialog.setResult(PathList.empty());
-        m_dialog.close();
+        setResult(PathList.empty());
+        m_stage.close();
       });
 
       spacer = FxUtil.createHorizontalFiller();
@@ -149,14 +158,15 @@ public class DirectoryChooser
         result = new ArrayList<>();
         result.addAll(m_directoryPane.getSelectedPaths());
         result.sort(Comparator.comparing(Path::toString));
-        m_dialog.setResult(new PathList(result));
-        m_dialog.close();
+        setResult(new PathList(result));
+        m_stage.close();
       });
 
       add(cancelButton, "tag cancel, sg buttons");
       add(spacer, "grow");
       add(openButton, "tag ok, sg buttons");
     }
+
   }
 
   private class SidePane
@@ -269,13 +279,12 @@ public class DirectoryChooser
   }
 
   private class DirectoryPane
-    extends MigPane
+    extends BorderPane
   {
     private MyTableView<Path> mi_tableView;
 
     private DirectoryPane()
     {
-      super("insets 0 0 0 0", "[fill]", "[pref][fill]");
       init();
     }
 
@@ -288,7 +297,7 @@ public class DirectoryChooser
     {
       mi_tableView = createTableView();
 
-      add(mi_tableView, "dock center");
+      setCenter(mi_tableView);
 
       m_directory.addListener((a, b, newDirectory) -> {
         fillTableView();

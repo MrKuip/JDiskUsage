@@ -52,9 +52,12 @@
 
 .undecorated-dialog {
   -fx-border-color: lightgray;
-  -fx-padding: 10 10 10 10;
 }
 
+.jdiskusage-directory-chooser {
+  -fx-border-color: transparent;
+  -fx-border-width: 6;
+}
 
 .notification-item {
     -fx-background-color: -fx-outer-border, -fx-inner-border, -fx-body-color;
