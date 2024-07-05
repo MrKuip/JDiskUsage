@@ -28,9 +28,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Separator;
@@ -95,9 +95,8 @@ public class DirectoryChooser
     MigPane content;
     PathList result;
 
-    content = new MigPane("debug, insets dialog", "[grow]", "[grow]");
+    content = new MigPane("", "[grow]", "[grow]");
     content.getStyleClass().add("undecorated-dialog");
-
     content.add(m_toolBarPane, "dock north");
     content.add(new Separator(), "dock north");
     content.add(m_sidePane, "dock west");
@@ -106,7 +105,7 @@ public class DirectoryChooser
     content.add(m_directoryPane, "grow");
 
     m_dialog = new Dialog<>();
-    //m_dialog.getDialogPane().getStyleClass().remove("dialog-pane");
+    m_dialog.getDialogPane().getStyleClass().remove("dialog-pane");
     m_dialog.getDialogPane().setContent(content);
     m_dialog.initOwner(Main.getRootStage());
     m_dialog.initModality(Modality.APPLICATION_MODAL);
@@ -135,6 +134,7 @@ public class DirectoryChooser
 
       cancelButton = new Button(translate("Cancel"),
           new FxIcon("close").size(IconSize.SMALL).fillColor(IconColor.RED).getImageView());
+      cancelButton.setAlignment(Pos.BASELINE_LEFT);
       cancelButton.setOnAction((ae) -> {
         m_dialog.setResult(PathList.empty());
         m_dialog.close();
@@ -142,6 +142,7 @@ public class DirectoryChooser
 
       spacer = FxUtil.createHorizontalFiller();
       openButton = new Button(translate("Open"), new FxIcon("open-in-new").size(IconSize.SMALL).getImageView());
+      openButton.setAlignment(Pos.BASELINE_LEFT);
       openButton.setOnAction((ae) -> {
         List<Path> result;
 
@@ -275,7 +276,6 @@ public class DirectoryChooser
     private DirectoryPane()
     {
       super("insets 0 0 0 0", "[fill]", "[pref][fill]");
-      setId("side-pane");
       init();
     }
 
@@ -404,8 +404,6 @@ public class DirectoryChooser
     private DirectoryNode(Path path)
     {
       this(path.toString(), "folder-outline", path);
-
-      setContentDisplay(ContentDisplay.LEFT);
     }
 
     private DirectoryNode(String name, String iconName, Path path)
@@ -413,6 +411,8 @@ public class DirectoryChooser
       m_name = name;
       m_iconName = iconName;
       m_path = path;
+
+      setAlignment(Pos.BASELINE_LEFT);
 
       init();
     }

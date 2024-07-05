@@ -52,6 +52,7 @@
 
 .undecorated-dialog {
   -fx-border-color: lightgray;
+  -fx-padding: 10 10 10 10;
 }
 
 
