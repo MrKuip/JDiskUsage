@@ -100,9 +100,6 @@ public class FileNodeIterator
       if (mi_progressProperty != null)
       {
         mi_progressProperty.set((int) (mi_currentCount / mi_oneProcentOfTotalCount));
-        System.out.println("progress =" + mi_progressProperty.get());
-        System.out.println("mi_currentCount=" + mi_currentCount);
-        System.out.println("mi_oneProcent=" + mi_oneProcentOfTotalCount);
       }
     }
 

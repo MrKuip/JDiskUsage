@@ -28,7 +28,7 @@ public class TestFx
   {
     MigPane pane;
 
-    pane = new MigPane();
+    pane = new MigPane("insets 2");
     Button b = new Button("hello");
     pane.add(new Button("hello"), "sizegroup test");
     pane.add(new Button("Long text"), "sizegroup test");

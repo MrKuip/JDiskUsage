@@ -15,7 +15,8 @@ public class FxExecutor
     {
       Thread thread;
 
-      thread = new Thread();
+      thread = new Thread(r);
+      thread.setName("FxExecutor");
       thread.setDaemon(true);
 
       return thread;
@@ -26,7 +27,7 @@ public class FxExecutor
   {
   }
 
-  public static <T> void execute(FxTask<T> fxTask)
+  public static <T, P extends ProgressDataIF> void execute(FxTask<T, P> fxTask)
   {
     instance.m_executor.execute(fxTask);
   }

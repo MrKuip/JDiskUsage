@@ -27,6 +27,7 @@ public class MyTableColumn<T, R>
     init();
   }
 
+  @SuppressWarnings("unchecked")
   public void setColumnCount(int columnCount)
   {
     AppSetting<Double> prefSizeProperty;

@@ -1,12 +1,17 @@
 package org.kku.jdiskusage.main;
 
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.Glyph;
+import org.kku.fonticons.ui.FxIcon;
+import org.kku.fonticons.ui.IconFont;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.FontSmoothingType;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 public class TestFx2
@@ -15,25 +20,37 @@ public class TestFx2
   @Override
   public void start(Stage stage)
   {
-    VBox pane;
+    FlowPane pane;
     Scene scene;
-    TextFlow textFlow;
-    Text text;
+    Button button1;
+    Button button2;
+    Button button3;
+    Button button4;
+    Glyph g;
+    Font font;
     Label label;
+    Text text;
+    double size;
 
-    pane = new VBox();
+    size = 30.0;
 
-    text = new Text("abcdefghijklmnopqrstuvwxyz");
-    textFlow = new TextFlow(text);
-    label = new Label("abcdefghijklmnopqrstuvwxyz");
+    font = IconFont.MATERIAL_DESIGN.getIconFont(size);
+    label = new Label("󱃥");
+    label.setFont(font);
 
-    pane.getChildren().addAll(label, textFlow);
+    text = new Text("󱃥");
+    text.setFont(font);
 
-    text = new Text("abcdefghijklmnopqrstuvwxyz");
-    text.setSmooth(true);
-    text.setFontSmoothingType(FontSmoothingType.LCD);
-    textFlow = new TextFlow(text);
-    pane.getChildren().add(textFlow);
+    g = new Glyph("FontAwesome", FontAwesome.Glyph.ARROW_LEFT);
+    g.setFontSize(30);
+
+    pane = new FlowPane();
+    button1 = new Button("", new FxIcon("filter-menu").size(size).fillColor(Color.BLACK).getImageView());
+    button2 = new Button("", g);
+    button3 = new Button("", label);
+    button4 = new Button("", text);
+
+    pane.getChildren().addAll(button1, button4, button2, button3);
 
     scene = new Scene(pane);
     stage.setScene(scene);

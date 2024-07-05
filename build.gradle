@@ -20,13 +20,6 @@ repositories {
   mavenCentral()
 }
 
-java {
-  toolchain {
-    languageVersion = JavaLanguageVersion.of(17);
-    vendor = JvmVendorSpec.ADOPTIUM;
-  }
-}
-
 javafx {
     version = "22.0.1"
     modules = [ 'javafx.controls' ]
@@ -35,11 +28,8 @@ javafx {
 dependencies {
   implementation 'org.controlsfx:controlsfx:11.2.1'
   implementation files('lib/fontIcons-1.0.jar')
-  //implementation files('lib/miglayout-javafx-11.3.jar')
-  //implementation files('lib/miglayout-core-11.3.jar')
-  //implementation files('lib/miglayout-swing-11.3.jar')
-  implementation 'com.miglayout:miglayout-javafx:11.3'
-  implementation 'com.miglayout:miglayout-swing:11.3'
+  implementation 'com.miglayout:miglayout-javafx:11.4'
+  implementation 'com.miglayout:miglayout-swing:11.4'
 
   testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
   testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -62,3 +52,8 @@ jlink {
   }
 }
 
+task initEclipseMetaData {
+  doLast {
+    createLauncher('Main', 'jdiskusage', 'org.kku.jdiskusage', 'org.kku.jdiskusage.main.Main')
+  }
+}

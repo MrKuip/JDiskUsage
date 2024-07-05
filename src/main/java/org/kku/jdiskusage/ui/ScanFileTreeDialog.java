@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.concurrent.FxTask;
+import org.kku.jdiskusage.concurrent.FxTaskIF;
+import org.kku.jdiskusage.concurrent.ProgressData;
 import org.kku.jdiskusage.main.Main;
 import org.kku.jdiskusage.ui.common.Notifications;
 import org.kku.jdiskusage.ui.util.IconUtil;
@@ -246,8 +248,115 @@ public class ScanFileTreeDialog
     }
   }
 
+  private class Scan3
+      implements FxTaskIF<DirNode, ProgressData>
+  {
+    private List<Path> mi_directoryList;
+    private Path mi_rootDirectory;
+    private boolean mi_cancel;
+    private long mi_startTime;
+    private long mi_previousTime;
+    private boolean mi_runLaterActive;
+    private DirNode mi_result;
+
+    private Scan3(List<Path> directoryList)
+    {
+      mi_directoryList = directoryList;
+      mi_rootDirectory = directoryList.get(0);
+      if (directoryList.size() > 1)
+      {
+        mi_rootDirectory = mi_rootDirectory.getParent();
+      }
+
+      //getProps().set(AppProperties.INITIAL_DIRECTORY, mi_rootDirectory);
+      AppProperties.INITIAL_DIRECTORY.forSubject(ScanFileTreeDialog.this).set(mi_rootDirectory);
+    }
+
+    public Path getRootDirectory()
+    {
+      return mi_rootDirectory;
+    }
+
+    public DirNode getResult()
+    {
+      return mi_result;
+    }
+
+    public void cancel()
+    {
+      mi_cancel = true;
+    }
+
+    public void run()
+    {
+      FileTree tree;
+
+      mi_startTime = System.currentTimeMillis();
+      mi_previousTime = mi_startTime;
+      tree = new FileTree(mi_directoryList);
+      tree.setScanListener((currentPath, numberOfDirectories, numberOfFiles, scanReady) -> {
+        long currentTimeMillis;
+
+        currentTimeMillis = System.currentTimeMillis();
+        if (!scanReady && !mi_runLaterActive && mi_previousTime + 100 > currentTimeMillis)
+        {
+          return mi_cancel;
+        }
+
+        mi_previousTime = currentTimeMillis;
+        mi_runLaterActive = true;
+        Platform.runLater(() -> {
+          m_elapsedTimeLabel.setText(
+              String.format("%,d %s", (int) ((currentTimeMillis - mi_startTime) / 1000), translate("seconds")));
+          m_currentDirectoryLabel.setText(currentPath != null ? currentPath.toString() : translate("Ready"));
+          m_currentFileCountLabel.setText(String.format("%,d %s %,d %s", numberOfDirectories, translate("directories"),
+              numberOfFiles, translate("files")));
+
+          mi_runLaterActive = false;
+          if (scanReady)
+          {
+            String text;
+
+            text = String.format("%,d %s , %,d %s %s %d %s", numberOfDirectories, translate("directories"),
+                numberOfFiles, translate("files"), translate("in"), (int) ((currentTimeMillis - mi_startTime) / 1000),
+                translate("seconds"));
+
+            m_dialog.close();
+
+            Notifications.showMessage("Scan ready", text);
+          }
+        });
+
+        return mi_cancel;
+      });
+      mi_result = tree.scan();
+    }
+
+    @Override
+    public DirNode runNow(ProgressData progress)
+    {
+      // TODO Auto-generated method stub
+      return null;
+    }
+
+    @Override
+    public void runLater(DirNode result)
+    {
+      // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public ProgressData createProgressData()
+    {
+      // TODO Auto-generated method stub
+      return null;
+    }
+
+  }
+
   private class Scan2
-    extends FxTask<DirNode>
+    extends FxTask<DirNode, ProgressData>
   {
     private List<Path> mi_directoryList;
     private Path mi_rootDirectory;
@@ -258,6 +367,8 @@ public class ScanFileTreeDialog
 
     private Scan2(List<Path> directoryList)
     {
+      super();
+
       mi_directoryList = directoryList;
       mi_rootDirectory = directoryList.get(0);
       if (directoryList.size() > 1)
@@ -281,13 +392,27 @@ public class ScanFileTreeDialog
       return mi_result;
     }
 
-    public DirNode scan()
+    public DirNode scan(ProgressData progressData)
     {
       FileTree tree;
 
       tree = new FileTree(mi_directoryList);
 
       return tree.scan();
+    }
+
+    public DirNode runNow(ProgressData progress)
+    {
+      return scan(progress);
+    }
+
+    public void runLater(DirNode result)
+    {
+    }
+
+    public ProgressData createProgressData()
+    {
+      return new ProgressData();
     }
   }
 }

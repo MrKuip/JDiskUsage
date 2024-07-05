@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.concurrent.FxTask;
+import org.kku.jdiskusage.concurrent.ProgressData;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
@@ -94,7 +95,7 @@ public class SearchPane
     maxCountTextField
         .setOnAction((ae) -> AppPreferences.searchMaxCountPreference.set(Integer.valueOf(maxCountTextField.getText())));
     mi_data.mi_maxCountProperty = maxCountTextField.textProperty();
-    mi_data.mi_stoppedOnMaxCountProperty.addListener(FxUtil.showWarning(maxCountTextField));
+    mi_data.mi_progress.mi_stoppedOnMaxCountProperty.addListener(FxUtil.showWarning(maxCountTextField));
 
     maxTimeTextField = new TextField();
     maxTimeTextField.setPrefColumnCount(5);
@@ -104,7 +105,7 @@ public class SearchPane
     maxTimeTextField
         .setOnAction((ae) -> AppPreferences.searchMaxTimePreference.set(Integer.valueOf(maxTimeTextField.getText())));
     mi_data.mi_maxTimeProperty = maxTimeTextField.textProperty();
-    mi_data.mi_stoppedOnTimeoutProperty.addListener(FxUtil.showWarning(maxTimeTextField));
+    mi_data.mi_progress.mi_stoppedOnTimeoutProperty.addListener(FxUtil.showWarning(maxTimeTextField));
 
     cancelButton = new Button(null, IconUtil.createFxIcon("cancel", IconSize.SMALLER).fillColor(Color.RED).getCanvas());
 
@@ -117,7 +118,7 @@ public class SearchPane
     progressBar.setMaxWidth(Double.MAX_VALUE);
     progressBar.setProgress(0.25f);
     progressBar.getStyleClass().add("thin-progress-bar");
-    progressBar.progressProperty().bind(Bindings.divide(mi_data.mi_progressProperty, 100.0));
+    progressBar.progressProperty().bind(Bindings.divide(mi_data.mi_progress.mi_progressProperty, 100.0));
 
     box = new VBox();
     box.getChildren().addAll(toolBar, progressBar);
@@ -157,7 +158,8 @@ public class SearchPane
       table.getPlaceholder();
       table.setPlaceholder(new Label("Searching..."));
 
-      new FxTask<>(() -> mi_data.getList(), (itemList) -> table.setItems(itemList)).execute();
+      new FxTask<>((progressData) -> mi_data.getList(progressData), (itemList) -> table.setItems(itemList),
+          SearchProgressData::new).execute();
 
       pane.add(table, 0, 1);
       GridPane.setHgrow(table, Priority.ALWAYS);
@@ -169,6 +171,14 @@ public class SearchPane
     return new Label("No data");
   }
 
+  private static class SearchProgressData
+    extends ProgressData
+  {
+    private final BooleanProperty mi_stoppedOnMaxCountProperty = new SimpleBooleanProperty();
+    private final BooleanProperty mi_stoppedOnTimeoutProperty = new SimpleBooleanProperty();
+    private final IntegerProperty mi_progressProperty = new SimpleIntegerProperty(0);
+  }
+
   private class SearchPaneData
     extends PaneData
   {
@@ -176,24 +186,22 @@ public class SearchPane
     public StringProperty mi_maxTimeProperty;
     public BooleanProperty mi_regexSelectedProperty;
     public StringProperty mi_searchTextProperty;
+    private SearchProgressData mi_progress = new SearchProgressData();
     private ObservableList<FileNodeIF> mi_list;
     private Map<String, SearchMatch> mi_searchPositionByPathMap = new HashMap<>();
-    private final BooleanProperty mi_stoppedOnMaxCountProperty = new SimpleBooleanProperty();
-    private final BooleanProperty mi_stoppedOnTimeoutProperty = new SimpleBooleanProperty();
-    private final IntegerProperty mi_progressProperty = new SimpleIntegerProperty(0);
 
-    private SearchPaneData()
+    public SearchPaneData()
     {
     }
 
-    public ObservableList<FileNodeIF> getList()
+    public ObservableList<FileNodeIF> getList(SearchProgressData progressData)
     {
       if (mi_list == null)
       {
         String searchText;
         List<FileNodeIF> list;
 
-        searchText = mi_searchTextProperty.get();
+        searchText = mi_data.mi_searchTextProperty.get();
         try (PerformancePoint pp = Performance.start("Collecting data for search '%s'", searchText))
         {
           Pattern pattern;
@@ -227,9 +235,9 @@ public class SearchPane
             searchText2 = searchText;
 
             fnIterator = new FileNodeIterator(getCurrentTreeItem().getValue());
-            fnIterator.setStoppedOnMaxCountProperty(mi_data.mi_stoppedOnMaxCountProperty);
-            fnIterator.setStoppedOnTimeoutProperty(mi_data.mi_stoppedOnTimeoutProperty);
-            fnIterator.enableProgress(mi_data.mi_progressProperty);
+            fnIterator.setStoppedOnMaxCountProperty(mi_progress.mi_stoppedOnMaxCountProperty);
+            fnIterator.setStoppedOnTimeoutProperty(mi_progress.mi_stoppedOnTimeoutProperty);
+            fnIterator.enableProgress(mi_progress.mi_progressProperty);
             fnIterator.setMaxCount(Integer.valueOf(mi_data.mi_maxCountProperty.get()));
             fnIterator.setTimeoutInSeconds(Integer.valueOf(mi_data.mi_maxTimeProperty.get()));
             fnIterator.forEach(fn -> {
@@ -245,7 +253,7 @@ public class SearchPane
               {
                 if (matcher.reset(searchedString).find())
                 {
-                  mi_data.addSearchMatch(searchedString, matcher.start(), matcher.end());
+                  addSearchMatch(searchedString, matcher.start(), matcher.end());
                   matcher.end();
                   list.add(fn);
                   return true;
@@ -258,7 +266,7 @@ public class SearchPane
                 index = searchedString.indexOf(searchText2);
                 if (index != -1)
                 {
-                  mi_data.addSearchMatch(searchedString, index, index + searchText2.length());
+                  addSearchMatch(searchedString, index, index + searchText2.length());
                   list.add(fn);
                   return true;
                 }
@@ -303,7 +311,7 @@ public class SearchPane
 
     private void addSearchMatch(String searchString, int start, int end)
     {
-      mi_data.mi_searchPositionByPathMap.put(searchString, new SearchMatch(start, end));
+      mi_searchPositionByPathMap.put(searchString, new SearchMatch(start, end));
     }
 
     @Override

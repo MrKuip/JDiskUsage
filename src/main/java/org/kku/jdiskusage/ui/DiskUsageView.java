@@ -526,7 +526,7 @@ public class DiskUsageView
 
   private void scanDirectory(ScanResult scanResult)
   {
-    if (scanResult.hasResult())
+    if (scanResult != null && scanResult.hasResult())
     {
       m_data.getTreePaneData().createTreeTableView(scanResult.getResult());
       m_data.mi_recentFiles.addPath(scanResult.getDirectoryList());

@@ -1,11 +1,10 @@
 package org.kku.jdiskusage.main;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.IntStream;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.TextField;
+import javafx.scene.control.Button;
+import javafx.scene.layout.FlowPane;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 public class Test2
@@ -14,26 +13,26 @@ public class Test2
   @Override
   public void start(Stage stage)
   {
-    IntStream.range(0, 20).forEach(cc -> {
-      System.out.println(cc + " -> " + getColumnCountWidth(cc));
+    Scene scene;
+    FlowPane pane;
+    Button b1, b2;
+
+    b1 = new Button("Native directoryChooser");
+    b1.setOnAction((ae) -> {
+      new DirectoryChooser().showDialog(stage);
     });
-  }
 
-  private static Map<Integer, Double> m_columnWidthByColumnCountMap = new HashMap<>();
-
-  static public double getColumnCountWidth(int columnCount)
-  {
-    return m_columnWidthByColumnCountMap.computeIfAbsent(columnCount, cc -> {
-      TextField field;
-      Scene scene;
-
-      field = new TextField();
-      scene = new Scene(field);
-      field.applyCss();
-      field.setPrefColumnCount(columnCount);
-
-      return field.prefWidth(-1);
+    b2 = new Button("Own directoryChooser");
+    b2.setOnAction((ae) -> {
+      new org.kku.jdiskusage.util.DirectoryChooser().showDialog(stage);
     });
+
+    pane = new FlowPane();
+    pane.getChildren().addAll(b1, b2);
+    scene = new Scene(pane);
+
+    stage.setScene(scene);
+    stage.show();
   }
 
   public static void main(String[] args)
