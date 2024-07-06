@@ -5,7 +5,7 @@ module org.kku.jdiskusage
   requires java.desktop;
   requires java.logging;
   requires java.base;
-  requires org.kku.materialdesignicons;
+  requires org.kku.fonticons;
   requires org.controlsfx.controls;
   requires java.prefs;
   requires com.miglayout.swing;

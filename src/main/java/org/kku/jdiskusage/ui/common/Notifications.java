@@ -48,7 +48,7 @@ public class Notifications
   {
     Node node;
 
-    node = new MessageItemView(new FxIcon("information").size(IconSize.LARGE).getImageView(), translate(title),
+    node = new MessageItemView(new FxIcon("information").size(IconSize.LARGE).getIconLabel(), translate(title),
         translate(text), MESSAGE_SHOW_DURATION_IN_SECONDS);
 
     m_instance.getView().getChildren().add(0, node);

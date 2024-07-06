@@ -149,7 +149,7 @@ class FilterPane
 
     // Wrap in HBox because adding a mouselistener to the ImageView does not work!
     // (Bug in JavaFX!)
-    closeNode = new HBox(new FxIcon("close").size(IconSize.SMALLER).fillColor(IconColor.RED).getImageView());
+    closeNode = new HBox(new FxIcon("close").size(IconSize.SMALLER).fillColor(IconColor.RED).getIconLabel());
     closeNode.setStyle("-fx-padding:2px 0px 1px 0px;");
 
     filterNode = translate(new Label(filter.getFilterValue(), closeNode));

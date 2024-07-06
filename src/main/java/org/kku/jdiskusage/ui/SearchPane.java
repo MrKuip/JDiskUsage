@@ -107,7 +107,8 @@ public class SearchPane
     mi_data.mi_maxTimeProperty = maxTimeTextField.textProperty();
     mi_data.mi_progress.mi_stoppedOnTimeoutProperty.addListener(FxUtil.showWarning(maxTimeTextField));
 
-    cancelButton = new Button(null, IconUtil.createFxIcon("cancel", IconSize.SMALLER).fillColor(Color.RED).getCanvas());
+    cancelButton = new Button(null,
+        IconUtil.createFxIcon("cancel", IconSize.SMALLER).fillColor(Color.RED).getIconLabel());
 
     HBox.setHgrow(searchTextField, Priority.ALWAYS);
 

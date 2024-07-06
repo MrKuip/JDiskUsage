@@ -45,7 +45,7 @@ public class TestFx2
     g.setFontSize(30);
 
     pane = new FlowPane();
-    button1 = new Button("", new FxIcon("filter-menu").size(size).fillColor(Color.BLACK).getImageView());
+    button1 = new Button("", new FxIcon("filter-menu").size(size).fillColor(Color.BLACK).getIconLabel());
     button2 = new Button("", g);
     button3 = new Button("", label);
     button4 = new Button("", text);

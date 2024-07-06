@@ -142,7 +142,7 @@ public class DirectoryChooser
       Region spacer;
 
       cancelButton = new Button(translate("Cancel"),
-          new FxIcon("close").size(IconSize.SMALL).fillColor(IconColor.RED).getImageView());
+          new FxIcon("close").size(IconSize.SMALL).fillColor(IconColor.RED).getIconLabel());
       cancelButton.setAlignment(Pos.BASELINE_LEFT);
       cancelButton.setOnAction((ae) -> {
         setResult(PathList.empty());
@@ -150,7 +150,7 @@ public class DirectoryChooser
       });
 
       spacer = FxUtil.createHorizontalFiller();
-      openButton = new Button(translate("Open"), new FxIcon("open-in-new").size(IconSize.SMALL).getImageView());
+      openButton = new Button(translate("Open"), new FxIcon("open-in-new").size(IconSize.SMALL).getIconLabel());
       openButton.setAlignment(Pos.BASELINE_LEFT);
       openButton.setOnAction((ae) -> {
         List<Path> result;
@@ -359,12 +359,12 @@ public class DirectoryChooser
     {
       if (Files.isDirectory(path))
       {
-        return new FxIcon("folder-outline").size(IconSize.SMALLER).getImageView();
+        return new FxIcon("folder-outline").size(IconSize.SMALLER).getIconLabel();
       }
 
       if (Files.isRegularFile(path))
       {
-        return new FxIcon("file-outline").size(IconSize.SMALLER).getImageView();
+        return new FxIcon("file-outline").size(IconSize.SMALLER).getIconLabel();
       }
 
       return new Region();
@@ -431,7 +431,7 @@ public class DirectoryChooser
       setText(m_name);
       if (m_iconName != null)
       {
-        setGraphic(new FxIcon(m_iconName).size(IconSize.SMALL).getImageView());
+        setGraphic(new FxIcon(m_iconName).size(IconSize.SMALL).getIconLabel());
       }
       setOnAction((ae) -> {
         setDirectory(m_path);
