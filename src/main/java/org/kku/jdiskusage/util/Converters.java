@@ -62,8 +62,8 @@ public class Converters
   {
     return new Converter<DirectoryList>(
         (s) -> new DirectoryList(Stream.of(s.split(",")).filter(Predicate.not(StringUtils::isEmpty))
-            .map(text -> Directory.fromText(text.split(":"))).toList()),
-        (pl) -> pl.getDirectoryList().stream().map(d -> d.getName() + ":" + d.getPath().toString())
+            .map(text -> Directory.fromText(text.split(":::"))).toList()),
+        (pl) -> pl.getDirectoryList().stream().map(d -> d.getName() + ":::" + d.getPath().toString())
             .collect(Collectors.joining(",")));
   }
 
