@@ -35,7 +35,7 @@ public class AppProperties
 
   private AppProperties()
   {
-    super("JDiskUsage2.properties");
+    super("JDiskUsage.properties");
   }
 
   public static AppProperties getInstance()
