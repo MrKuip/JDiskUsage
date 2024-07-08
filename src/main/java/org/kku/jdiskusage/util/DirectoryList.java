@@ -50,7 +50,7 @@ public class DirectoryList
       return mi_path;
     }
 
-    public static Directory fromText(String[] text)
+    public static Directory parseText(String[] text)
     {
       if (text.length == 2)
       {

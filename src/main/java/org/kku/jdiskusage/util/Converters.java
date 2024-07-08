@@ -2,6 +2,7 @@ package org.kku.jdiskusage.util;
 
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -62,7 +63,7 @@ public class Converters
   {
     return new Converter<DirectoryList>(
         (s) -> new DirectoryList(Stream.of(s.split(",")).filter(Predicate.not(StringUtils::isEmpty))
-            .map(text -> Directory.fromText(text.split(":::"))).toList()),
+            .map(text -> Directory.parseText(text.split(":::"))).filter(Objects::nonNull).toList()),
         (pl) -> pl.getDirectoryList().stream().map(d -> d.getName() + ":::" + d.getPath().toString())
             .collect(Collectors.joining(",")));
   }
