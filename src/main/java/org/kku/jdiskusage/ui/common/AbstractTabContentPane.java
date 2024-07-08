@@ -28,12 +28,12 @@ abstract public class AbstractTabContentPane
   private DiskUsageData m_diskUsageData;
   private PaneData m_paneData;
   private Map<String, PaneType> m_paneTypeByIdMap = new LinkedHashMap<>();
-  private final BorderPane mi_node = new BorderPane();
-  private final SegmentedButton mi_segmentedButton = new SegmentedButton();
-  private PaneType mi_currentPaneType;
-  private Map<PaneType, Node> mi_nodeByPaneTypeMap = new HashMap<>();
-  private FileTreePane mi_currentTreePaneData;
-  private TreeItem<FileNodeIF> mi_currentTreeItem;
+  private final BorderPane m_node = new BorderPane();
+  private final SegmentedButton m_segmentedButton = new SegmentedButton();
+  private PaneType m_currentPaneType;
+  private Map<PaneType, Node> m_nodeByPaneTypeMap = new HashMap<>();
+  private FileTreePane m_currentTreePaneData;
+  private TreeItem<FileNodeIF> m_currentTreeItem;
 
   private record PaneType(String description, String iconName, Supplier<Node> node) {};
 
@@ -44,16 +44,16 @@ abstract public class AbstractTabContentPane
 
   public void reset()
   {
-    mi_nodeByPaneTypeMap.clear();
+    m_nodeByPaneTypeMap.clear();
     if (m_paneData != null)
     {
       m_paneData.reset();
     }
   }
 
-  protected BorderPane getNode()
+  protected void setTop(Node node)
   {
-    return mi_node;
+    m_node.setTop(node);
   }
 
   protected DiskUsageData getDiskUsageData()
@@ -82,18 +82,18 @@ abstract public class AbstractTabContentPane
         button.setOnAction((ae) -> {
           setCurrentPaneType((PaneType) ((Node) ae.getSource()).getUserData());
         });
-        if (mi_currentPaneType == paneType)
+        if (m_currentPaneType == paneType)
         {
           button.setSelected(true);
         }
 
         return button;
       }).forEach(button -> {
-        mi_segmentedButton.getButtons().add(button);
+        m_segmentedButton.getButtons().add(button);
       });
 
-      BorderPane.setMargin(mi_segmentedButton, new Insets(2, 2, 2, 2));
-      mi_node.setBottom(mi_segmentedButton);
+      BorderPane.setMargin(m_segmentedButton, new Insets(2, 2, 2, 2));
+      m_node.setBottom(m_segmentedButton);
     }
   }
 
@@ -109,9 +109,9 @@ abstract public class AbstractTabContentPane
 
     paneType = m_paneTypeByIdMap.computeIfAbsent(paneTypeId,
         (panelTypeId) -> new PaneType(description, iconName, node));
-    if (mi_currentPaneType == null || current)
+    if (m_currentPaneType == null || current)
     {
-      mi_currentPaneType = paneType;
+      m_currentPaneType = paneType;
     }
 
     return paneType;
@@ -119,28 +119,28 @@ abstract public class AbstractTabContentPane
 
   private void setCurrentPaneType(PaneType paneType)
   {
-    mi_currentPaneType = paneType;
+    m_currentPaneType = paneType;
     initCurrentNode();
   }
 
   private void initCurrentNode()
   {
-    if (mi_currentPaneType != null)
+    if (m_currentPaneType != null)
     {
-      mi_node.setCenter(mi_nodeByPaneTypeMap.computeIfAbsent(mi_currentPaneType, type -> {
+      m_node.setCenter(m_nodeByPaneTypeMap.computeIfAbsent(m_currentPaneType, type -> {
 
         return type.node().get();
       }));
     }
     else
     {
-      mi_node.setCenter(new Label(""));
+      m_node.setCenter(new Label(""));
     }
   }
 
   protected TreeItem<FileNodeIF> getCurrentTreeItem()
   {
-    return mi_currentTreeItem;
+    return m_currentTreeItem;
   }
 
   protected DisplayMetric getCurrentDisplayMetric()
@@ -150,15 +150,15 @@ abstract public class AbstractTabContentPane
 
   public Node initNode(FileTreePane treePaneData)
   {
-    if (mi_currentTreePaneData != treePaneData || getCurrentTreeItem() != m_diskUsageData.getSelectedTreeItem())
+    if (m_currentTreePaneData != treePaneData || getCurrentTreeItem() != m_diskUsageData.getSelectedTreeItem())
     {
-      mi_currentTreePaneData = treePaneData;
-      mi_currentTreeItem = m_diskUsageData.getSelectedTreeItem();
-      mi_nodeByPaneTypeMap.clear();
+      m_currentTreePaneData = treePaneData;
+      m_currentTreeItem = m_diskUsageData.getSelectedTreeItem();
+      m_nodeByPaneTypeMap.clear();
     }
 
     initCurrentNode();
-    return mi_node;
+    return m_node;
   }
 
   protected void addFilter(Node node, String filterType, String filterValue, Predicate<FileNodeIF> fileNodePredicate)

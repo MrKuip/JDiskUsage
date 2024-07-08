@@ -18,7 +18,6 @@ import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.common.FxDialog;
-import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.util.DirectoryList.Directory;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.application.Platform;
@@ -40,7 +39,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.stage.Window;
 
@@ -118,7 +116,7 @@ public class DirectoryChooser
   {
     private ToolBarPane()
     {
-      super("insets 0 0 6 0", "[][grow][]", "[pref:pref:pref]");
+      super("insets 0 0 6 0", "[]push[]", "[pref:pref:pref]");
       init();
     }
 
@@ -126,7 +124,6 @@ public class DirectoryChooser
     {
       Button cancelButton;
       Button openButton;
-      Region spacer;
 
       cancelButton = new Button(translate("Cancel"),
           new FxIcon("close").size(IconSize.SMALL).fillColor(IconColor.RED).getIconLabel());
@@ -135,7 +132,6 @@ public class DirectoryChooser
         m_dialog.close();
       });
 
-      spacer = FxUtil.createHorizontalFiller();
       openButton = new Button(translate("Open"), new FxIcon("open-in-new").size(IconSize.SMALL).getIconLabel());
       openButton.setAlignment(Pos.BASELINE_LEFT);
       openButton.setOnAction((ae) -> {
@@ -149,10 +145,8 @@ public class DirectoryChooser
       });
 
       add(cancelButton, "tag cancel, sg buttons");
-      add(spacer, "grow");
       add(openButton, "tag ok, sg buttons");
     }
-
   }
 
   private class SidePane
@@ -320,12 +314,13 @@ public class DirectoryChooser
   }
 
   private class DirectoryPane
-    extends BorderPane
+    extends MigPane
   {
     private MyTableView<Path> mi_tableView;
 
     private DirectoryPane()
     {
+      super("", "[grow, fill]", "[grow, fill]");
       init();
     }
 
@@ -338,7 +333,7 @@ public class DirectoryChooser
     {
       mi_tableView = createTableView();
 
-      setCenter(mi_tableView);
+      add(mi_tableView);
 
       m_directory.addListener((a, b, newDirectory) -> {
         fillTableView();

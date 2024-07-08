@@ -4,8 +4,6 @@ import org.tbee.javafx.scene.layout.MigPane;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 public class TestFx
@@ -15,44 +13,22 @@ public class TestFx
   public void start(Stage stage)
   {
     Scene scene;
+    MigPane pane;
+    Button button1;
+    Button button2;
 
-    Button b = new Button("Press");
-    scene = new Scene(getMigPane());
-    scene.getStylesheets().add("jdiskusage.css");
+    button1 = new Button("Button 1");
+    button1.setStyle("-fx-font-size: 10");
+    button2 = new Button("Button 1");
+    button2.setStyle("-fx-font-size: 20");
 
-    b.setOnAction((ae) -> scene.setRoot(getMigPane()));
+    pane = new MigPane("debug", "", "top");
+    pane.add(button1);
+    pane.add(button2);
 
+    scene = new Scene(pane);
     stage.setScene(scene);
     stage.show();
-  }
-
-  public MigPane getMigPane()
-  {
-    MigPane pane;
-
-    pane = new MigPane("");
-    pane.getStyleClass().add("haha");
-    Button b = new Button("hello");
-    pane.add(new Button("north"), "dock north");
-    pane.add(new Button("west"), "dock west");
-    pane.add(new Button("hello"), "sizegroup test");
-    pane.add(new Button("Long text"), "sizegroup test");
-
-    return pane;
-  }
-
-  public Pane getPane()
-  {
-    FlowPane pane;
-
-    pane = new FlowPane();
-    pane.getStyleClass().add("haha");
-    pane.getChildren().add(new Button("north"));
-    pane.getChildren().add(new Button("west"));
-    pane.getChildren().add(new Button("hello"));
-    pane.getChildren().add(new Button("Long text"));
-
-    return pane;
   }
 
   public static void main(String[] args)

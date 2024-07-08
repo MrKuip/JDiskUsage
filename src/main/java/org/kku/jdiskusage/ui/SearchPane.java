@@ -23,6 +23,7 @@ import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.StringUtils;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
+import org.tbee.javafx.scene.layout.MigPane;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -38,12 +39,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 public class SearchPane
@@ -63,7 +61,7 @@ public class SearchPane
 
   private void initPane()
   {
-    ToolBar toolBar;
+    MigPane toolBar;
     Label searchLabel;
     ToggleButton regexButton;
     Button cancelButton;
@@ -72,10 +70,7 @@ public class SearchPane
     TextField maxCountTextField;
     Label maxTimeLabel;
     TextField maxTimeTextField;
-    VBox box;
     ProgressBar progressBar;
-
-    toolBar = new ToolBar();
 
     searchLabel = new Label(null, IconUtil.createIconNode("magnify", IconSize.SMALLER));
 
@@ -110,10 +105,17 @@ public class SearchPane
     cancelButton = new Button(null,
         IconUtil.createFxIcon("cancel", IconSize.SMALLER).fillColor(Color.RED).getIconLabel());
 
-    HBox.setHgrow(searchTextField, Priority.ALWAYS);
+    //HBox.setHgrow(searchTextField, Priority.ALWAYS);
 
-    toolBar.getItems().addAll(cancelButton, searchLabel, searchTextField, regexButton, maxCountLabel, maxCountTextField,
-        maxTimeLabel, maxTimeTextField);
+    toolBar = new MigPane("", "[pref][pref][grow,fill][pref][pref][pref][pref]", "[pref]1[pref]0");
+    toolBar.add(cancelButton);
+    toolBar.add(searchLabel);
+    toolBar.add(searchTextField);
+    toolBar.add(regexButton);
+    toolBar.add(maxCountLabel);
+    toolBar.add(maxCountTextField);
+    toolBar.add(maxTimeLabel);
+    toolBar.add(maxTimeTextField);
 
     progressBar = new ProgressBar();
     progressBar.setMaxWidth(Double.MAX_VALUE);
@@ -121,10 +123,9 @@ public class SearchPane
     progressBar.getStyleClass().add("thin-progress-bar");
     progressBar.progressProperty().bind(Bindings.divide(mi_data.mi_progress.mi_progressProperty, 100.0));
 
-    box = new VBox();
-    box.getChildren().addAll(toolBar, progressBar);
+    toolBar.add(progressBar, "newline, span, grow, gap 0");
 
-    getNode().setTop(box);
+    setTop(toolBar);
   }
 
   Node getTableNode()

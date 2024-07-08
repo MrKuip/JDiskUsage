@@ -19,15 +19,15 @@ public enum SizeSystem
 
   public String getFileSize(double size)
   {
-    if (size > 1000000000)
+    if (size > Math.pow(getFactor(), 3))
     {
       return String.format("%,.1f Gb", (size / Math.pow(getFactor(), 3)));
     }
-    else if (size > 1000000)
+    if (size > Math.pow(getFactor(), 2))
     {
       return String.format("%.1f Mb", (size / Math.pow(getFactor(), 2)));
     }
-    else if (size > 1000)
+    else if (size > getFactor())
     {
       return String.format("%.1f Kb", (size / getFactor()));
     }

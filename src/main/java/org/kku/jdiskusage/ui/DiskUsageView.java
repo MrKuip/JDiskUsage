@@ -19,7 +19,6 @@ import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.common.FullScreen;
 import org.kku.jdiskusage.ui.common.Navigation;
 import org.kku.jdiskusage.ui.common.Notifications;
-import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppSettings.AppSetting;
@@ -45,7 +44,6 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.layout.BorderPane;
@@ -173,9 +171,9 @@ public class DiskUsageView
     return menuBar;
   }
 
-  private ToolBar createToolBar()
+  private Pane createToolBar()
   {
-    ToolBar toolBar;
+    MigPane toolBar;
     Navigation navigation;
     Button homeButton;
     Button forwardButton;
@@ -192,7 +190,6 @@ public class DiskUsageView
     SegmentedButton sortButton;
     Node filterPaneNode;
 
-    toolBar = new ToolBar();
     navigation = m_data.getNavigation();
 
     backButton = new Button("", IconUtil.createIconNode("arrow-left", IconSize.SMALL));
@@ -260,9 +257,15 @@ public class DiskUsageView
     filterPaneNode.setId("filterButton");
     //HBox.setHgrow(filterPaneNode, Priority.ALWAYS);
 
-    toolBar.getItems().addAll(backButton, forwardButton, homeButton, FxUtil.createHorizontalSpacer(200),
-        fullScreenButton, refreshButton, FxUtil.createHorizontalSpacer(20), showDisplayMetricButton,
-        FxUtil.createHorizontalSpacer(20), sortButton, FxUtil.createHorizontalSpacer(20), filterPaneNode);
+    toolBar = new MigPane("", "[pref][pref][pref]40[pref][pref]20[pref]20[pref]20[grow,fill]", "[pref:pref:pref, top]");
+    toolBar.add(backButton);
+    toolBar.add(forwardButton);
+    toolBar.add(homeButton);
+    toolBar.add(fullScreenButton);
+    toolBar.add(refreshButton);
+    toolBar.add(showDisplayMetricButton);
+    toolBar.add(sortButton);
+    toolBar.add(filterPaneNode);
 
     return toolBar;
   }

@@ -28,6 +28,7 @@ public class CollapsableButtonPane
 
     collapsableButtonPane = new HBox();
     collapsableButtonPane.setPadding(new Insets(5, 10, 5, 10));
+    collapsableButtonPane.setPadding(new Insets(0, 10, 0, 10));
     collapsableButtonPane.setAlignment(Pos.CENTER);
 
     filterButton = new Button(null, IconUtil.createIconNode("filter-menu", IconSize.SMALLER));

@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.main;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -17,14 +18,20 @@ public class TestSwing
     JPanel pane;
     MigLayout layout;
     JFrame frame;
+    JButton button1;
+    JButton button2;
 
-    layout = new MigLayout("insets 20");
+    layout = new MigLayout("debug", "[][]", "[top]");
     pane = new JPanel();
     pane.setLayout(layout);
-    pane.add("dock north", new JButton("north"));
-    pane.add("dock west", new JButton("west"));
-    pane.add("sizegroup test", new JButton("Text"));
-    pane.add("sizegroup test", new JButton("Long text"));
+
+    button1 = new JButton("Button 1");
+    button1.setFont(new Font("Arial", Font.PLAIN, 10));
+    button2 = new JButton("Button 2");
+    button2.setFont(new Font("Arial", Font.PLAIN, 20));
+
+    pane.add(button1);
+    pane.add(button2);
 
     frame = new JFrame("Test");
     frame.setContentPane(pane);

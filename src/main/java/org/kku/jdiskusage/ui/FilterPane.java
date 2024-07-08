@@ -12,101 +12,88 @@ import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconColor;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.common.CollapsableButtonPane;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import org.tbee.javafx.scene.layout.MigPane;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 
 class FilterPane
 {
-  private final DiskUsageData mi_diskUsageData;
-  private final Set<Filter> mi_filterSet = new LinkedHashSet<>();
-  private final Map<String, Set<Filter>> mi_filterByTypeMap = new HashMap<>();
-  private final Map<String, Pane> mi_filterTypePaneByTypeMap = new HashMap<>();
-  private final HBox mi_filterActivationPane = new HBox();
-  private final HBox mi_filterPane = new HBox();
-  private final BorderPane contentPane;
-  private Button mi_activateFilterButton;
-  private Button mi_cancelFilterButton;
-  private Button mi_clearFilterButton;
+  private final DiskUsageData m_diskUsageData;
+  private final Set<Filter> m_filterSet = new LinkedHashSet<>();
+  private final Map<String, Set<Filter>> m_filterByTypeMap = new HashMap<>();
+  private final Map<String, Pane> m_filterTypePaneByTypeMap = new HashMap<>();
+  private final HBox m_filterActivationPane = new HBox();
+  private final FlowPane m_filterPane = new FlowPane();
+  private final MigPane m_contentPane;
+  private Button m_activateFilterButton;
+  private Button m_clearFilterButton;
 
   FilterPane(DiskUsageData diskUsageData)
   {
-    HBox filterTextPane;
+    m_diskUsageData = diskUsageData;
 
-    mi_diskUsageData = diskUsageData;
+    m_contentPane = new MigPane("ins 0", "[][grow][]", "[]");
 
-    contentPane = new CollapsableButtonPane("Filter", IconUtil.createIconNode("filter", IconSize.SMALLER));
+    m_filterPane.setId("filterPane");
+    m_filterPane.setVgap(5);
+    m_filterPane.setHgap(5);
 
-    filterTextPane = new HBox();
-    filterTextPane.setPadding(new Insets(5, 10, 5, 10));
-    filterTextPane.setAlignment(Pos.CENTER);
-    filterTextPane.getChildren()
-        .add(translate(new Label("Filter", IconUtil.createIconNode("filter", IconSize.SMALLER))));
-
-    mi_filterPane.setId("filterPane");
-
-    mi_filterActivationPane.setPadding(new Insets(0, 10, 0, 10));
-    mi_filterActivationPane.setAlignment(Pos.CENTER);
-    mi_filterActivationPane.setSpacing(2);
-
-    //contentPane.setLeft(filterTextPane);
-    contentPane.setCenter(mi_filterPane);
-    contentPane.setRight(mi_filterActivationPane);
+    m_contentPane.add(IconUtil.createIconNode("filter", IconSize.SMALL), "aligny baseline");
+    m_contentPane.add(m_filterPane, "grow");
+    m_contentPane.add(m_filterActivationPane, "top");
 
     updateFilterActivationPane();
   }
 
   public Node getNode()
   {
-    return contentPane;
+    return m_contentPane;
   }
 
   private Set<Filter> getFilterSet()
   {
-    return mi_filterSet;
+    return m_filterSet;
   }
 
   public void addFilter(Filter filter, boolean activateFilterImmediately)
   {
-    mi_filterSet.add(filter);
+    m_filterSet.add(filter);
 
     reInitFilterPanel();
 
-    if (activateFilterImmediately && mi_activateFilterButton != null)
+    if (activateFilterImmediately && m_activateFilterButton != null)
     {
-      mi_activateFilterButton.fire();
+      m_activateFilterButton.fire();
     }
   }
 
   private void reInitFilterPanel()
   {
-    mi_filterPane.getChildren().clear();
-    mi_filterActivationPane.getChildren().clear();
-    mi_filterByTypeMap.clear();
-    mi_filterTypePaneByTypeMap.clear();
+    m_filterPane.getChildren().clear();
+    m_filterActivationPane.getChildren().clear();
+    m_filterByTypeMap.clear();
+    m_filterTypePaneByTypeMap.clear();
 
-    mi_filterSet.forEach(filter -> {
-      if (mi_filterByTypeMap.computeIfAbsent(filter.getFilterType(), (k) -> new HashSet<>()).add(filter))
+    m_filterSet.forEach(filter -> {
+      if (m_filterByTypeMap.computeIfAbsent(filter.getFilterType(), (k) -> new HashSet<>()).add(filter))
       {
         Pane filterTypePane;
         Node filterValueNode;
 
         filterValueNode = createFilterValueNode(filter);
 
-        filterTypePane = mi_filterTypePaneByTypeMap.computeIfAbsent(filter.getFilterType(),
+        filterTypePane = m_filterTypePaneByTypeMap.computeIfAbsent(filter.getFilterType(),
             filterType -> createFilterTypePane(filter));
-        if (mi_filterByTypeMap.get(filter.getFilterType()).size() > 1)
+        if (m_filterByTypeMap.get(filter.getFilterType()).size() > 1)
         {
           filterTypePane.getChildren().add(getFilterTypePaneText("or"));
         }
@@ -137,7 +124,7 @@ class FilterPane
     filterPane.getChildren()
         .add(getFilterTypePaneText(translate(filter.getFilterType()) + " " + translate("is") + " "));
 
-    mi_filterPane.getChildren().add(filterPane);
+    m_filterPane.getChildren().add(filterPane);
 
     return filterPane;
   }
@@ -168,7 +155,7 @@ class FilterPane
   public void removeFilters(Filter... filters)
   {
     Stream.of(filters).forEach(filter -> {
-      mi_filterSet.remove(filter);
+      m_filterSet.remove(filter);
     });
 
     reInitFilterPanel();
@@ -178,7 +165,7 @@ class FilterPane
   {
     Set<Entry<String, Set<Filter>>> entries;
 
-    entries = mi_filterByTypeMap.entrySet();
+    entries = m_filterByTypeMap.entrySet();
     for (Entry<String, Set<Filter>> entry : entries)
     {
       if (entry.getValue().stream().filter(filter -> filter.accept(fileNode)).findFirst().isPresent())
@@ -194,48 +181,52 @@ class FilterPane
 
   private void updateFilterActivationPane()
   {
-    if (!mi_filterPane.getChildren().isEmpty())
+    if (!m_filterPane.getChildren().isEmpty())
     {
       boolean disabled;
 
-      if (mi_filterActivationPane.getChildren().isEmpty())
+      if (m_filterActivationPane.getChildren().isEmpty())
       {
-        mi_activateFilterButton = translate(
-            new Button("Activate filter", IconUtil.createIconNode("filter-plus", IconSize.SMALL)));
-        mi_activateFilterButton.setOnAction((ae) -> getFilterSet().forEach(filter -> {
+        m_activateFilterButton = translate(
+            new Button("Activate filter", IconUtil.createIconNode("filter-check", IconSize.SMALL)));
+        m_activateFilterButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        m_activateFilterButton.setOnAction((ae) -> getFilterSet().forEach(filter -> {
           filter.disable(false);
-          mi_diskUsageData.getTreePaneData().setFilter((fn) -> accept(fn));
+          m_diskUsageData.getTreePaneData().setFilter((fn) -> accept(fn));
           updateFilterActivationPane();
         }));
-        mi_filterActivationPane.getChildren().add(mi_activateFilterButton);
+        m_filterActivationPane.getChildren().add(m_activateFilterButton);
 
-        mi_cancelFilterButton = translate(
-            new Button("Cancel filter", IconUtil.createIconNode("filter-minus", IconSize.SMALL)));
-        mi_cancelFilterButton.setOnAction((ae) -> {
-          removeFilters(getFilterSet().stream().filter(Filter::isDisabled).toArray(Filter[]::new));
-        });
-        mi_filterActivationPane.getChildren().add(mi_cancelFilterButton);
-
-        mi_clearFilterButton = translate(
+        m_clearFilterButton = translate(
             new Button("Clear filter", IconUtil.createIconNode("filter-remove", IconSize.SMALL)));
-        mi_clearFilterButton.setOnAction((ae) -> {
-          removeFilters(getFilterSet().stream().toArray(Filter[]::new));
-          mi_diskUsageData.getTreePaneData().setFilter((fn) -> accept(fn));
+        m_clearFilterButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        m_clearFilterButton.setOnAction((ae) -> {
+          Filter[] filters;
+
+          filters = getFilterSet().stream().filter(Filter::isDisabled).toArray(Filter[]::new);
+          if (filters == null || filters.length == 0)
+          {
+            filters = getFilterSet().stream().toArray(Filter[]::new);
+          }
+
+          if (filters != null)
+          {
+            removeFilters(filters);
+            m_diskUsageData.getTreePaneData().setFilter((fn) -> accept(fn));
+          }
         });
-        mi_filterActivationPane.getChildren().add(mi_clearFilterButton);
+        m_filterActivationPane.getChildren().add(m_clearFilterButton);
       }
 
       disabled = getFilterSet().stream().filter(filter -> filter.isDisabled()).findFirst().isPresent();
-      mi_activateFilterButton.setDisable(!disabled);
-      mi_cancelFilterButton.setDisable(!disabled);
+      m_activateFilterButton.setDisable(!disabled);
     }
     else
     {
-      if (!mi_filterActivationPane.getChildren().isEmpty())
+      if (!m_filterActivationPane.getChildren().isEmpty())
       {
-        mi_filterActivationPane.getChildren().clear();
-        mi_activateFilterButton = null;
-        mi_cancelFilterButton = null;
+        m_filterActivationPane.getChildren().clear();
+        m_activateFilterButton = null;
       }
     }
   }

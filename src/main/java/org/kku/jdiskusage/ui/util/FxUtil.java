@@ -53,16 +53,6 @@ public class FxUtil
     return spacer;
   }
 
-  public static Region createHorizontalFiller()
-  {
-    Region spacer;
-
-    spacer = new Region();
-    spacer.setMaxWidth(Double.MAX_VALUE);
-
-    return spacer;
-  }
-
   /**
    * Given the column count calculate the pixel width of the control.
    * 
