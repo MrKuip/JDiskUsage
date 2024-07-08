@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
-import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 import org.kku.jdiskusage.util.preferences.SizeSystem;
 
 class ConvertersTest

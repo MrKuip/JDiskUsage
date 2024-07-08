@@ -3,9 +3,10 @@ package org.kku.jdiskusage.util;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.kku.jdiskusage.util.DirectoryChooser.PathList;
+import org.kku.jdiskusage.util.DirectoryList.Directory;
 
 public class Converters
 {
@@ -52,8 +53,18 @@ public class Converters
   public static Converter<PathList> getPathListConverter()
   {
     return new Converter<PathList>(
-        (s) -> new PathList(Stream.of(s.split(",")).map(fileName -> Path.of(fileName)).toList()),
+        (s) -> new PathList(Stream.of(s.split(",")).filter(Predicate.not(StringUtils::isEmpty))
+            .map(fileName -> Path.of(fileName)).toList()),
         (pl) -> pl.getPathList().stream().map(Path::toString).collect(Collectors.joining(",")));
+  }
+
+  public static Converter<DirectoryList> getDirectoryListConverter()
+  {
+    return new Converter<DirectoryList>(
+        (s) -> new DirectoryList(Stream.of(s.split(",")).filter(Predicate.not(StringUtils::isEmpty))
+            .map(text -> Directory.fromText(text.split(":"))).toList()),
+        (pl) -> pl.getDirectoryList().stream().map(d -> d.name() + ":" + d.path().toString())
+            .collect(Collectors.joining(",")));
   }
 
   static class Converter<T>

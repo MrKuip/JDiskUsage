@@ -6,7 +6,6 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -18,8 +17,9 @@ import org.kku.fonticons.ui.FxIcon.IconColor;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
-import org.kku.jdiskusage.main.Main;
+import org.kku.jdiskusage.ui.common.FxDialog;
 import org.kku.jdiskusage.ui.util.FxUtil;
+import org.kku.jdiskusage.util.DirectoryList.Directory;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
@@ -27,20 +27,21 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Separator;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.stage.Window;
 
 public class DirectoryChooser
@@ -48,8 +49,8 @@ public class DirectoryChooser
   private final ObjectProperty<Path> m_directory = new SimpleObjectProperty<>();
   private final ObjectProperty<SelectionMode> m_selectionMode = new SimpleObjectProperty<>(SelectionMode.SINGLE);
 
-  private Stage m_stage;
-  private PathList m_result;
+  private FxDialog<PathList> m_dialog;
+  private final FavoriteDirectoryNodes m_favoriteDirectoryNodes = new FavoriteDirectoryNodes();
   private final ToolBarPane m_toolBarPane = new ToolBarPane();
   private final SidePane m_sidePane = new SidePane();
   private final DirectoryPane m_directoryPane = new DirectoryPane();
@@ -96,9 +97,6 @@ public class DirectoryChooser
   private PathList showAndWait()
   {
     MigPane content;
-    Scene scene;
-
-    m_result = PathList.empty();
 
     content = new MigPane("", "[grow]", "[grow]");
     content.getStyleClass().add("jdiskusage-directory-chooser");
@@ -109,21 +107,10 @@ public class DirectoryChooser
     content.add(m_breadCrumbPane, "dock north");
     content.add(m_directoryPane, "grow");
 
-    m_stage = new Stage();
-    scene = new Scene(content);
-    scene.getStylesheets().add("jdiskusage.css");
-    m_stage.initOwner(Main.getRootStage());
-    m_stage.initModality(Modality.APPLICATION_MODAL);
-    m_stage.initStyle(StageStyle.UNDECORATED);
-    m_stage.setScene(scene);
-    m_stage.showAndWait();
+    m_dialog = new FxDialog<>(content, PathList.empty());
+    m_dialog.showAndWait();
 
-    return m_result;
-  }
-
-  private void setResult(PathList result)
-  {
-    m_result = result;
+    return m_dialog.getResult();
   }
 
   private class ToolBarPane
@@ -131,7 +118,7 @@ public class DirectoryChooser
   {
     private ToolBarPane()
     {
-      super("insets 0 0 6 0", "[][grow][]", "[]");
+      super("insets 0 0 6 0", "[][grow][]", "[pref:pref:pref]");
       init();
     }
 
@@ -145,8 +132,7 @@ public class DirectoryChooser
           new FxIcon("close").size(IconSize.SMALL).fillColor(IconColor.RED).getIconLabel());
       cancelButton.setAlignment(Pos.BASELINE_LEFT);
       cancelButton.setOnAction((ae) -> {
-        setResult(PathList.empty());
-        m_stage.close();
+        m_dialog.close();
       });
 
       spacer = FxUtil.createHorizontalFiller();
@@ -158,8 +144,8 @@ public class DirectoryChooser
         result = new ArrayList<>();
         result.addAll(m_directoryPane.getSelectedPaths());
         result.sort(Comparator.comparing(Path::toString));
-        setResult(new PathList(result));
-        m_stage.close();
+        m_dialog.setResult(new PathList(result));
+        m_dialog.close();
       });
 
       add(cancelButton, "tag cancel, sg buttons");
@@ -179,12 +165,19 @@ public class DirectoryChooser
       init();
     }
 
+    public void reInit()
+    {
+      getChildren().clear();
+      init();
+    }
+
     private void init()
     {
       getRootNodes().forEach(rootNode -> {
         add(rootNode);
       });
       add(new Separator(), "wrap");
+      add(getHomeNode());
       getFavoriteNodes().forEach(rootNode -> {
         add(rootNode);
       });
@@ -198,22 +191,68 @@ public class DirectoryChooser
 
     private List<DirectoryNode> getRootNodes()
     {
-      List<DirectoryNode> rootNodes;
+      List<DirectoryNode> rootNodeList;
 
-      rootNodes = new ArrayList<>();
-      FileSystems.getDefault().getRootDirectories().forEach(path -> rootNodes.add(new DirectoryNode(path)));
+      rootNodeList = new ArrayList<>();
+      FileSystems.getDefault().getRootDirectories().forEach(path -> rootNodeList.add(new DirectoryNode(path)));
 
-      return rootNodes;
+      return rootNodeList;
+    }
+
+    private DirectoryNode getHomeNode()
+    {
+      return new DirectoryNode("Home", "home", Path.of(System.getProperty("user.home")));
     }
 
     private List<DirectoryNode> getFavoriteNodes()
     {
-      List<DirectoryNode> rootNodes;
+      return m_favoriteDirectoryNodes.getDirectoryList().stream().map(directory -> {
+        DirectoryNode node;
+        ContextMenu menu;
+        MenuItem removeMenuItem;
+        MenuItem renameMenuItem;
 
-      rootNodes = new ArrayList<>();
-      rootNodes.add(new DirectoryNode("Home", "home", Path.of(System.getProperty("user.home"))));
+        menu = new ContextMenu();
 
-      return rootNodes;
+        node = new DirectoryNode(directory.toString(), "star", directory.path());
+        node.setTooltip(new Tooltip(directory.toString()));
+        node.setContextMenu(menu);
+
+        removeMenuItem = translate(new MenuItem("Remove favorite"));
+        removeMenuItem.setOnAction((ae) -> {
+          m_favoriteDirectoryNodes.removeFavorite(directory);
+        });
+        renameMenuItem = translate(new MenuItem("Rename"));
+        renameMenuItem.setOnAction((ae) -> {
+          FxDialog<String> dialog;
+          TextField nameTextField;
+          Bounds screenBounds;
+
+          screenBounds = node.localToScreen(node.getBoundsInLocal());
+
+          nameTextField = new TextField(directory.name());
+          dialog = new FxDialog<>(nameTextField, "");
+
+          nameTextField.setOnAction((ae2) -> {
+            String directoryName;
+
+            directoryName = nameTextField.getText();
+            if (!StringUtils.isEmpty(directoryName))
+            {
+              System.out.println("rename to " + directoryName);
+            }
+            dialog.close();
+          });
+          dialog.setLocation(screenBounds.getMinX(), screenBounds.getMinY());
+          dialog.setOnShown((we) -> {
+            nameTextField.requestFocus();
+          });
+          dialog.showAndWait();
+        });
+
+        menu.getItems().addAll(removeMenuItem, renameMenuItem);
+        return node;
+      }).toList();
     }
   }
 
@@ -309,6 +348,8 @@ public class DirectoryChooser
       MyTableView<Path> tableView;
       MyTableColumn<Path, Node> pathTypeColumn;
       MyTableColumn<Path, String> nameColumn;
+      ContextMenu menu;
+      MenuItem menuItem;
 
       tableView = new MyTableView<>("Directories");
       tableView.getSelectionModel().selectionModeProperty().bind(m_selectionMode);
@@ -325,6 +366,20 @@ public class DirectoryChooser
           }
         }
       });
+
+      menu = new ContextMenu();
+      menuItem = translate(new MenuItem("Add to favorites"));
+      menuItem.setOnAction((ae) -> {
+        Path path;
+        String name;
+
+        path = tableView.getSelectionModel().getSelectedItem();
+        name = path.getName(path.getNameCount() - 1).toString();
+
+        m_favoriteDirectoryNodes.addFavorite(new Directory(name, path));
+      });
+      menu.getItems().add(menuItem);
+      tableView.setContextMenu(menu);
 
       pathTypeColumn = tableView.addColumn("");
       pathTypeColumn.setColumnCount(3);
@@ -439,6 +494,50 @@ public class DirectoryChooser
     }
   }
 
+  private class FavoriteDirectoryNodes
+  {
+    private void addFavorite(Directory directory)
+    {
+      DirectoryList directoryList;
+      List<Directory> list;
+
+      directoryList = getFavoriteDirectoryList();
+      list = new ArrayList<>(directoryList.getDirectoryList());
+      list.add(directory);
+      setFavoriteDirectoryList(new DirectoryList(list));
+
+      m_sidePane.reInit();
+    }
+
+    public List<Directory> getDirectoryList()
+    {
+      return getFavoriteDirectoryList().getDirectoryList();
+    }
+
+    private void removeFavorite(Directory directory)
+    {
+      DirectoryList directoryList;
+      List<Directory> list;
+
+      directoryList = getFavoriteDirectoryList();
+      list = new ArrayList<>(directoryList.getDirectoryList());
+      list.remove(directory);
+      setFavoriteDirectoryList(new DirectoryList(list));
+
+      m_sidePane.reInit();
+    }
+
+    private void setFavoriteDirectoryList(DirectoryList pathList)
+    {
+      AppProperties.FAVORITE_DIRECTORIES.forSubject(this.getClass()).set(pathList);
+    }
+
+    private DirectoryList getFavoriteDirectoryList()
+    {
+      return AppProperties.FAVORITE_DIRECTORIES.forSubject(this.getClass()).get(DirectoryList.empty());
+    }
+  }
+
   public void setInitialDirectory(Path directory)
   {
     setDirectory(directory);
@@ -461,134 +560,5 @@ public class DirectoryChooser
   public final ObjectProperty<Path> directoryProperty()
   {
     return m_directory;
-  }
-
-  public static class PathList
-  {
-    private final List<Path> mi_directoryList;
-    private final String mi_description;
-
-    PathList(List<Path> directoryList)
-    {
-      mi_directoryList = directoryList;
-      mi_description = initDescription();
-    }
-
-    public List<Path> getPathList()
-    {
-      return mi_directoryList;
-    }
-
-    public static PathList empty()
-    {
-      return new PathList(Collections.emptyList());
-    }
-
-    public static PathList of(Path path)
-    {
-      return new PathList(Arrays.asList(path));
-    }
-
-    public static PathList of(Path... pathArray)
-    {
-      return new PathList(Arrays.asList(pathArray));
-    }
-
-    public static PathList of(List<Path> pathList)
-    {
-      return new PathList(pathList);
-    }
-
-    public boolean isEmpty()
-    {
-      return getPathList().isEmpty();
-    }
-
-    private String initDescription()
-    {
-      List<Path> pathList;
-      List<String> pathNameList;
-      int commonPrefixIndex;
-      int commonPrefixIndex2;
-      boolean commonPrefixIndexFound;
-      String shortestDirectoryName;
-      StringBuilder description;
-
-      pathList = getPathList();
-      if (pathList.size() == 0)
-      {
-        return "";
-      }
-
-      if (pathList.size() == 1)
-      {
-        return pathList.get(0).toString();
-      }
-
-      pathNameList = pathList.stream().map(Path::toString).toList();
-
-      shortestDirectoryName = pathNameList.stream().min(Comparator.comparing(String::length)).get();
-      commonPrefixIndex = 0;
-      commonPrefixIndexFound = false;
-
-      for (int index = 0; index < shortestDirectoryName.length(); index++)
-      {
-        for (int dirIndex = 0; dirIndex < pathNameList.size(); dirIndex++)
-        {
-          if (shortestDirectoryName.charAt(index) != pathNameList.get(dirIndex).charAt(index))
-          {
-            commonPrefixIndex = index;
-            commonPrefixIndexFound = true;
-            break;
-          }
-        }
-
-        if (commonPrefixIndexFound)
-        {
-          break;
-        }
-      }
-
-      description = new StringBuilder();
-      if (commonPrefixIndex > 0)
-      {
-        description.append(shortestDirectoryName.substring(0, commonPrefixIndex));
-      }
-      commonPrefixIndex2 = commonPrefixIndex;
-
-      description.append(" -> ");
-      description.append(pathNameList.stream().map(pn -> "'" + pn.substring(commonPrefixIndex2) + "'")
-          .collect(Collectors.joining(" ")));
-
-      return description.toString();
-    }
-
-    @Override
-    public int hashCode()
-    {
-      return toString().hashCode();
-    }
-
-    @Override
-    public boolean equals(Object o)
-    {
-      if (!(o instanceof PathList))
-      {
-        return false;
-      }
-
-      if (((PathList) o).toString().equals(toString()))
-      {
-        return true;
-      }
-
-      return super.equals(o);
-    }
-
-    @Override
-    public String toString()
-    {
-      return mi_description;
-    }
   }
 }

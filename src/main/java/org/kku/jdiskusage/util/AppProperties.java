@@ -1,7 +1,6 @@
 package org.kku.jdiskusage.util;
 
 import java.nio.file.Path;
-import org.kku.jdiskusage.util.DirectoryChooser.PathList;
 
 public class AppProperties
   extends AppSettings
@@ -10,6 +9,7 @@ public class AppProperties
 
   public final static AppSettingType<Path> INITIAL_DIRECTORY;
   public final static AppSettingType<PathList> RECENT_SCANS;
+  public final static AppSettingType<DirectoryList> FAVORITE_DIRECTORIES;
   public final static AppSettingType<Double> WIDTH;
   public final static AppSettingType<Double> HEIGHT;
   public final static AppSettingType<Double> X;
@@ -22,6 +22,8 @@ public class AppProperties
   {
     INITIAL_DIRECTORY = m_instance.createAppSettingType("INITIAL_DIRECTORY", Converters.getPathConverter());
     RECENT_SCANS = m_instance.createAppSettingType("RECENT_SCANS", Converters.getPathListConverter(), 10);
+    FAVORITE_DIRECTORIES = m_instance.createAppSettingType("FAVORITE_DIRECTORIES",
+        Converters.getDirectoryListConverter(), 100);
     WIDTH = m_instance.createAppSettingType("WIDTH", Converters.getDoubleConverter());
     HEIGHT = m_instance.createAppSettingType("HEIGHT", Converters.getDoubleConverter());
     X = m_instance.createAppSettingType("X", Converters.getDoubleConverter());

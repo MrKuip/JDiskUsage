@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppSettings.AppSetting;
-import org.kku.jdiskusage.util.DirectoryChooser.PathList;
+import org.kku.jdiskusage.util.PathList;
 import org.kku.jdiskusage.util.Translator;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import javafx.application.Application;
