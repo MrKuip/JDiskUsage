@@ -4,6 +4,8 @@ import org.kku.jdiskusage.main.Main;
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -55,6 +57,17 @@ public class FxDialog<R>
   public R getResult()
   {
     return m_result;
+  }
+
+  public void closeOnEscape()
+  {
+    m_stage.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
+      if (KeyCode.ESCAPE == event.getCode())
+      {
+        m_stage.close();
+        m_result = null;
+      }
+    });
   }
 
   public void close()

@@ -186,7 +186,7 @@ public class DirectoryChooser
     private void add(DirectoryNode directoryNode)
     {
       directoryNode.setId("button");
-      add(directoryNode, "grow, width 120px, height 30px, wrap");
+      add(directoryNode, "grow, width 180px, height 30px, wrap");
     }
 
     private List<DirectoryNode> getRootNodes()
@@ -214,7 +214,7 @@ public class DirectoryChooser
 
         menu = new ContextMenu();
 
-        node = new DirectoryNode(directory.toString(), "star", directory.path());
+        node = new DirectoryNode(directory.toString(), "star", directory.getPath());
         node.setTooltip(new Tooltip(directory.toString()));
         node.setContextMenu(menu);
 
@@ -230,7 +230,7 @@ public class DirectoryChooser
 
           screenBounds = node.localToScreen(node.getBoundsInLocal());
 
-          nameTextField = new TextField(directory.name());
+          nameTextField = new TextField(directory.getName());
           dialog = new FxDialog<>(nameTextField, "");
 
           nameTextField.setOnAction((ae2) -> {
@@ -239,11 +239,13 @@ public class DirectoryChooser
             directoryName = nameTextField.getText();
             if (!StringUtils.isEmpty(directoryName))
             {
-              System.out.println("rename to " + directoryName);
+              directory.setName(directoryName);
+              m_favoriteDirectoryNodes.renameFavorite(directory);
             }
             dialog.close();
           });
           dialog.setLocation(screenBounds.getMinX(), screenBounds.getMinY());
+          dialog.closeOnEscape();
           dialog.setOnShown((we) -> {
             nameTextField.requestFocus();
           });
@@ -498,33 +500,29 @@ public class DirectoryChooser
   {
     private void addFavorite(Directory directory)
     {
-      DirectoryList directoryList;
-      List<Directory> list;
+      setFavoriteDirectoryList(new DirectoryList(
+          Stream.concat(getFavoriteDirectoryList().getDirectoryList().stream(), Stream.of(directory)).toList()));
+      m_sidePane.reInit();
+    }
 
-      directoryList = getFavoriteDirectoryList();
-      list = new ArrayList<>(directoryList.getDirectoryList());
-      list.add(directory);
-      setFavoriteDirectoryList(new DirectoryList(list));
+    private void removeFavorite(Directory directory)
+    {
+      setFavoriteDirectoryList(new DirectoryList(
+          getFavoriteDirectoryList().getDirectoryList().stream().filter(d -> !d.equals(directory)).toList()));
+      m_sidePane.reInit();
+    }
 
+    private void renameFavorite(Directory directory)
+    {
+      setFavoriteDirectoryList(new DirectoryList(getFavoriteDirectoryList().getDirectoryList().stream().map(d -> {
+        return d.getPath().equals(directory.getPath()) ? directory : d;
+      }).toList()));
       m_sidePane.reInit();
     }
 
     public List<Directory> getDirectoryList()
     {
       return getFavoriteDirectoryList().getDirectoryList();
-    }
-
-    private void removeFavorite(Directory directory)
-    {
-      DirectoryList directoryList;
-      List<Directory> list;
-
-      directoryList = getFavoriteDirectoryList();
-      list = new ArrayList<>(directoryList.getDirectoryList());
-      list.remove(directory);
-      setFavoriteDirectoryList(new DirectoryList(list));
-
-      m_sidePane.reInit();
     }
 
     private void setFavoriteDirectoryList(DirectoryList pathList)

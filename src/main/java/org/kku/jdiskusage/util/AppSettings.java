@@ -253,7 +253,7 @@ public abstract class AppSettings
     return m_settings;
   }
 
-  private void storeProperties()
+  public void storeProperties()
   {
     try
     {

@@ -3,6 +3,7 @@ package org.kku.jdiskusage.util;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DirectoryList
 {
@@ -23,7 +24,32 @@ public class DirectoryList
     return mi_directoryList;
   }
 
-  public record Directory(String name, Path path) {
+  public static class Directory
+  {
+    private String mi_name;
+    private final Path mi_path;
+
+    public Directory(String name, Path path)
+    {
+      mi_name = name;
+      mi_path = path;
+    }
+
+    public String getName()
+    {
+      return mi_name;
+    }
+
+    public void setName(String name)
+    {
+      mi_name = name;
+    }
+
+    public Path getPath()
+    {
+      return mi_path;
+    }
+
     public static Directory fromText(String[] text)
     {
       if (text.length == 2)
@@ -35,14 +61,40 @@ public class DirectoryList
     }
 
     @Override
-    public String toString()
+    public int hashCode()
     {
-      if (!StringUtils.isEmpty(name))
+      return Objects.hash(mi_path, mi_name);
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+      Directory o;
+
+      if (!(obj instanceof Directory))
       {
-        return name;
+        return false;
       }
 
-      return path.getName(path.getNameCount() - 1).toString();
+      o = (Directory) obj;
+
+      if (!Objects.equals(o.getName(), getName()) || !Objects.equals(o.getPath(), getPath()))
+      {
+        return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public String toString()
+    {
+      if (!StringUtils.isEmpty(mi_name))
+      {
+        return mi_name;
+      }
+
+      return mi_path.getName(mi_path.getNameCount() - 1).toString();
     }
   }
 }
