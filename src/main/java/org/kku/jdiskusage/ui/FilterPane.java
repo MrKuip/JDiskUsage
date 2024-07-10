@@ -168,7 +168,7 @@ class FilterPane
     entries = m_filterByTypeMap.entrySet();
     for (Entry<String, Set<Filter>> entry : entries)
     {
-      if (entry.getValue().stream().filter(filter -> filter.accept(fileNode)).findFirst().isPresent())
+      if (entry.getValue().stream().anyMatch(filter -> filter.accept(fileNode)))
       {
         continue;
       }
@@ -218,7 +218,7 @@ class FilterPane
         m_filterActivationPane.getChildren().add(m_clearFilterButton);
       }
 
-      disabled = getFilterSet().stream().filter(filter -> filter.isDisabled()).findFirst().isPresent();
+      disabled = getFilterSet().stream().anyMatch(filter -> filter.isDisabled());
       m_activateFilterButton.setDisable(!disabled);
     }
     else
