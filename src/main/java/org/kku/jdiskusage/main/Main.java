@@ -68,9 +68,8 @@ public class Main
     stage.setScene(scene);
     stage.show();
 
-    getParameters().getRaw().stream().map(Path::of).filter(path -> {
-      return Files.exists(path) && Files.isDirectory(path);
-    }).map(PathList::of).findFirst().ifPresent(diskUsageView::scanDirectory);
+    getParameters().getRaw().stream().map(Path::of).filter(path -> Files.exists(path) && Files.isDirectory(path))
+        .map(PathList::of).findFirst().ifPresent(diskUsageView::scanDirectory);
   }
 
   static public Node getRootNode()
