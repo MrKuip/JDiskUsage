@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import org.kku.jdiskusage.ui.util.ConcurrentUtil;
 import org.kku.jdiskusage.ui.util.TableUtils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -124,7 +125,7 @@ public class MyTableView<T>
     originalPlaceHolder = getPlaceholder();
     setPlaceholder(new Label("Searching..."));
 
-    new Thread(() -> {
+    ConcurrentUtil.getInstance().getDefaultExecutor().submit(() -> {
       List<T> itemList;
 
       itemList = itemSupplier.get();
@@ -139,7 +140,7 @@ public class MyTableView<T>
           setPlaceholder(originalPlaceHolder);
         }
       });
-    }).start();
+    });
   }
 
   public <T> void async(Supplier<T> itemSupplier)

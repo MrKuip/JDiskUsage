@@ -31,10 +31,6 @@ public class ConcurrentUtil
     return getExecutor(DEFAULT_EXECUTOR);
   }
 
-  public void run(Runnable run)
-  {
-  }
-
   private MyExecutor getExecutor(String executorName)
   {
     return m_executorByNameMap.computeIfAbsent(executorName, (key) -> new MyExecutor());

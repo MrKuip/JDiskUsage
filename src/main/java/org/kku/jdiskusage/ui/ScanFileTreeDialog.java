@@ -10,6 +10,7 @@ import org.kku.jdiskusage.concurrent.FxTaskIF;
 import org.kku.jdiskusage.concurrent.ProgressData;
 import org.kku.jdiskusage.main.Main;
 import org.kku.jdiskusage.ui.common.Notifications;
+import org.kku.jdiskusage.ui.util.ConcurrentUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.DirectoryChooser;
@@ -151,7 +152,7 @@ public class ScanFileTreeDialog
     m_dialog.getDialogPane().getButtonTypes().addAll(new ButtonType(translate("Cancel"), ButtonData.CANCEL_CLOSE));
     m_dialog.setGraphic(IconUtil.createIconNode("file-search", IconSize.LARGE));
 
-    new Thread(scan).start();
+    ConcurrentUtil.getInstance().getDefaultExecutor().submit(scan);
 
     scanDialogResult = m_dialog.showAndWait();
     if (scanDialogResult.get() == ButtonType.CANCEL)
