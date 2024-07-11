@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import org.kku.fonticons.ui.FxIcon.IconSize;
+import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonProperty;
 import org.kku.jdiskusage.ui.util.ConcurrentUtil;
+import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.ui.util.TableUtils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -109,7 +112,6 @@ public class MyTableView<T>
     label.prefWidthProperty().bind(stack.prefWidthProperty());
 
     column.setGraphic(stack);
-
     if (nestedColumn != null)
     {
       nestedColumn.getColumns().add(column);
@@ -118,6 +120,23 @@ public class MyTableView<T>
     {
       getColumns().add(column);
     }
+
+    return column;
+  }
+
+  public MyTableColumn<T, ButtonProperty> addFilterColumn(MyTableColumn<T, Void> nestedColumn, String name)
+  {
+    ButtonProperty buttonProperty;
+    MyTableColumn<T, ButtonProperty> column;
+
+    buttonProperty = new ButtonProperty(() -> IconUtil.createIconNode("filter", IconSize.SMALLER));
+
+    column = addColumn(nestedColumn, translate(name));
+    column.setColumnCount(4);
+    column.setCellValueAlignment(Pos.CENTER);
+    column.setEditable(true);
+    column.setCellValueGetter((e) -> buttonProperty);
+
     return column;
   }
 
@@ -192,4 +211,5 @@ public class MyTableView<T>
       });
     });
   }
+
 }

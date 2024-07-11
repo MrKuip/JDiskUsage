@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonProperty;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
@@ -22,7 +21,6 @@ import org.kku.jdiskusage.ui.common.FileNodeIterator;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
 import org.kku.jdiskusage.ui.util.FxUtil;
-import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
@@ -143,13 +141,12 @@ class LinkCountPane
       MyTableColumn<Entry<String, FileAggregates>, Long> numberOfFilesCountColumn;
       MyTableColumn<Entry<String, FileAggregates>, Double> numberOfFilesPercentageColumn;
       MyTableColumn<Entry<String, FileAggregates>, Void> filterColumn;
-      MyTableColumn<Entry<String, FileAggregates>, ButtonProperty<Entry<String, FileAggregates>>> filterEqualColumn;
-      MyTableColumn<Entry<String, FileAggregates>, ButtonProperty<Entry<String, FileAggregates>>> filterGreaterThanColumn;
-      MyTableColumn<Entry<String, FileAggregates>, ButtonProperty<Entry<String, FileAggregates>>> filterLessThanColumn;
+      MyTableColumn<Entry<String, FileAggregates>, ButtonProperty> filterEqualColumn;
+      MyTableColumn<Entry<String, FileAggregates>, ButtonProperty> filterGreaterThanColumn;
+      MyTableColumn<Entry<String, FileAggregates>, ButtonProperty> filterLessThanColumn;
       Map<String, FileAggregates> fullMap;
-      ButtonProperty<Entry<String, FileAggregates>> filterItemEqualProperty;
-      ButtonProperty<Entry<String, FileAggregates>> filterItemGreaterThanProperty;
-      ButtonProperty<Entry<String, FileAggregates>> filterItemLessThanProperty;
+      ButtonProperty filterItemEqualProperty;
+      ButtonProperty filterItemLessThanProperty;
       long totalFileSize;
       long totalNumberOfFiles;
 
@@ -201,11 +198,7 @@ class LinkCountPane
 
       filterColumn = table.addColumn("Filter link count");
 
-      filterItemLessThanProperty = new ButtonProperty<>(() -> IconUtil.createIconNode("filter", IconSize.SMALLER));
-      filterLessThanColumn = table.addColumn(filterColumn, "<=");
-      filterLessThanColumn.setCellValueAlignment(Pos.CENTER);
-      filterLessThanColumn.setEditable(true);
-      filterLessThanColumn.setCellValueGetter((e) -> filterItemLessThanProperty);
+      filterLessThanColumn = table.addFilterColumn(filterColumn, "<=");
       filterLessThanColumn.setAction((event, entry) -> {
         Predicate<FileNodeIF> filterPredicate;
 
@@ -214,11 +207,7 @@ class LinkCountPane
             event.getClickCount() == 2);
       });
 
-      filterItemEqualProperty = new ButtonProperty<>(() -> IconUtil.createIconNode("filter", IconSize.SMALLER));
-      filterEqualColumn = table.addColumn(filterColumn, "is");
-      filterEqualColumn.setCellValueAlignment(Pos.CENTER);
-      filterEqualColumn.setEditable(true);
-      filterEqualColumn.setCellValueGetter((e) -> filterItemEqualProperty);
+      filterEqualColumn = table.addFilterColumn(filterColumn, "is");
       filterEqualColumn.setAction((event, entry) -> {
         Predicate<FileNodeIF> filterPredicate;
 
@@ -227,11 +216,7 @@ class LinkCountPane
             event.getClickCount() == 2);
       });
 
-      filterItemGreaterThanProperty = new ButtonProperty<>(() -> IconUtil.createIconNode("filter", IconSize.SMALLER));
-      filterGreaterThanColumn = table.addColumn(filterColumn, ">=");
-      filterGreaterThanColumn.setCellValueAlignment(Pos.CENTER);
-      filterGreaterThanColumn.setEditable(true);
-      filterGreaterThanColumn.setCellValueGetter((e) -> filterItemGreaterThanProperty);
+      filterGreaterThanColumn = table.addFilterColumn(filterColumn, ">=");
       filterGreaterThanColumn.setAction((event, entry) -> {
         Predicate<FileNodeIF> filterPredicate;
 

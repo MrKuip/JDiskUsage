@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonProperty;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
@@ -16,7 +15,6 @@ import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.FxUtil;
-import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
@@ -266,12 +264,9 @@ public class SizeDistributionPane
       MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, Long> sumOfFileSizesColumn;
       MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, Long> numberOfFilesColumn;
       MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, Void> filterColumn;
-      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, ButtonProperty<Entry<SizeDistributionBucket, SizeDistributionBucketData>>> filterEqualColumn;
-      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, ButtonProperty<Entry<SizeDistributionBucket, SizeDistributionBucketData>>> filterGreaterThanColumn;
-      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, ButtonProperty<Entry<SizeDistributionBucket, SizeDistributionBucketData>>> filterLessThanColumn;
-      ButtonProperty<Entry<SizeDistributionBucket, SizeDistributionBucketData>> filterItemEqualProperty;
-      ButtonProperty<Entry<SizeDistributionBucket, SizeDistributionBucketData>> filterItemGreaterThanProperty;
-      ButtonProperty<Entry<SizeDistributionBucket, SizeDistributionBucketData>> filterItemLessThanProperty;
+      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, ButtonProperty> filterEqualColumn;
+      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, ButtonProperty> filterGreaterThanColumn;
+      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, ButtonProperty> filterLessThanColumn;
 
       pane = new GridPane();
       table = new MyTableView<>("SizeDistribution");
@@ -296,11 +291,7 @@ public class SizeDistributionPane
 
       filterColumn = table.addColumn("Filter file size");
 
-      filterItemLessThanProperty = new ButtonProperty<>(() -> IconUtil.createIconNode("filter", IconSize.SMALLER));
-      filterLessThanColumn = table.addColumn(filterColumn, "<=");
-      filterLessThanColumn.setCellValueAlignment(Pos.CENTER);
-      filterLessThanColumn.setEditable(true);
-      filterLessThanColumn.setCellValueGetter((e) -> filterItemLessThanProperty);
+      filterLessThanColumn = table.addFilterColumn(filterColumn, "<=");
       filterLessThanColumn.setAction((event, entry) -> {
         Predicate<FileNodeIF> filterPredicate;
 
@@ -309,11 +300,7 @@ public class SizeDistributionPane
             event.getClickCount() == 2);
       });
 
-      filterItemEqualProperty = new ButtonProperty<>(() -> IconUtil.createIconNode("filter", IconSize.SMALLER));
-      filterEqualColumn = table.addColumn(filterColumn, "is");
-      filterEqualColumn.setCellValueAlignment(Pos.CENTER);
-      filterEqualColumn.setEditable(true);
-      filterEqualColumn.setCellValueGetter((e) -> filterItemEqualProperty);
+      filterEqualColumn = table.addFilterColumn(filterColumn, "==");
       filterEqualColumn.setAction((event, entry) -> {
         Predicate<FileNodeIF> filterPredicate;
 
@@ -322,11 +309,7 @@ public class SizeDistributionPane
             event.getClickCount() == 2);
       });
 
-      filterItemGreaterThanProperty = new ButtonProperty<>(() -> IconUtil.createIconNode("filter", IconSize.SMALLER));
-      filterGreaterThanColumn = table.addColumn(filterColumn, ">=");
-      filterGreaterThanColumn.setCellValueAlignment(Pos.CENTER);
-      filterGreaterThanColumn.setEditable(true);
-      filterGreaterThanColumn.setCellValueGetter((e) -> filterItemGreaterThanProperty);
+      filterGreaterThanColumn = table.addFilterColumn(filterColumn, ">=");
       filterGreaterThanColumn.setAction((event, entry) -> {
         Predicate<FileNodeIF> filterPredicate;
 

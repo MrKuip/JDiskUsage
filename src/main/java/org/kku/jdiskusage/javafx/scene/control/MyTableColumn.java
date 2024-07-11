@@ -150,7 +150,7 @@ public class MyTableColumn<T, R>
     });
   }
 
-  static public class ButtonProperty<T>
+  static public class ButtonProperty
   {
     private Supplier<Node> mi_graphic;
 
