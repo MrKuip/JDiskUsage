@@ -8,16 +8,21 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
+import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonProperty;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.DiskUsageView.FileAggregates;
 import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
+import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
 import org.kku.jdiskusage.ui.util.FxUtil;
+import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
@@ -38,12 +43,12 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 
-class TypesPane
+class LinkCountPane
   extends AbstractTabContentPane
 {
-  private TypesPaneData mi_data = new TypesPaneData();
+  private LinkCountPaneData mi_data = new LinkCountPaneData();
 
-  TypesPane(DiskUsageData diskUsageData)
+  LinkCountPane(DiskUsageData diskUsageData)
   {
     super(diskUsageData);
 
@@ -68,16 +73,8 @@ class TypesPane
       data = new PieChart.Data(name, entry.getValue().getSize(getCurrentDisplayMetric()));
       pieChart.getData().add(data);
 
-      if (!entry.getKey().equals(DiskUsageView.getOtherText()))
-      {
-        test = (fileNode) -> fileNode.getFileType().equals(entry.getKey());
-      }
-      else
-      {
-        test = (fileNode) -> !mi_data.getReducedMap().containsKey(fileNode.getFileType());
-      }
-
-      addFilterHandler(data.getNode(), "File type", entry.getKey(), test);
+      test = (fileNode) -> Integer.valueOf(entry.getKey()) == fileNode.getNumberOfLinks();
+      addFilterHandler(data.getNode(), "Link count", Objects.toString(entry.getKey()), test);
     });
 
     return pieChart;
@@ -101,7 +98,6 @@ class TypesPane
     xAxis.setSide(Side.TOP);
     yAxis = new CategoryAxis();
     barChart = FxUtil.createBarChart(xAxis, yAxis);
-    barChart.setTitle(translate("Number of files"));
     GridPane.setHgrow(barChart, Priority.ALWAYS);
     GridPane.setVgrow(barChart, Priority.ALWAYS);
 
@@ -114,19 +110,12 @@ class TypesPane
       Data<Number, String> data;
       Predicate<FileNodeIF> test;
 
-      data = new XYChart.Data<Number, String>(entry.getValue().getSize(getCurrentDisplayMetric()), entry.getKey());
+      data = new XYChart.Data<Number, String>(entry.getValue().getSize(getCurrentDisplayMetric()),
+          Objects.toString(entry.getKey()));
       series1.getData().add(data);
 
-      if (!entry.getKey().equals(DiskUsageView.getOtherText()))
-      {
-        test = (fileNode) -> fileNode.getFileType().equals(entry.getKey());
-      }
-      else
-      {
-        test = (fileNode) -> !mi_data.getReducedMap().containsKey(fileNode.getFileType());
-      }
-
-      addFilterHandler(data.getNode(), "File type", entry.getKey(), test);
+      test = (fileNode) -> Integer.valueOf(entry.getKey()) == fileNode.getNumberOfLinks();
+      addFilterHandler(data.getNode(), "Link count", Objects.toString(entry.getKey()), test);
     });
 
     barChart.setPrefHeight(series1.getData().size() * 20);
@@ -146,14 +135,21 @@ class TypesPane
     {
       ObservableList<Entry<String, FileAggregates>> list;
       MyTableView<Entry<String, FileAggregates>> table;
-      MyTableColumn<Entry<String, FileAggregates>, String> extensionColumn;
+      MyTableColumn<Entry<String, FileAggregates>, String> linkCountColumn;
       MyTableColumn<Entry<String, FileAggregates>, Long> fileSizeColumn;
       MyTableColumn<Entry<String, FileAggregates>, Long> fileSizeBytesColumn;
       MyTableColumn<Entry<String, FileAggregates>, Double> fileSizePercentageColumn;
       MyTableColumn<Entry<String, FileAggregates>, Long> numberOfFilesColumn;
       MyTableColumn<Entry<String, FileAggregates>, Long> numberOfFilesCountColumn;
       MyTableColumn<Entry<String, FileAggregates>, Double> numberOfFilesPercentageColumn;
+      MyTableColumn<Entry<String, FileAggregates>, ButtonProperty<Entry<String, FileAggregates>>> filterColumn;
+      MyTableColumn<Entry<String, FileAggregates>, ButtonProperty<Entry<String, FileAggregates>>> filterEqualColumn;
+      MyTableColumn<Entry<String, FileAggregates>, ButtonProperty<Entry<String, FileAggregates>>> filterGreaterThanColumn;
+      MyTableColumn<Entry<String, FileAggregates>, ButtonProperty<Entry<String, FileAggregates>>> filterLessThanColumn;
       Map<String, FileAggregates> fullMap;
+      ButtonProperty<Entry<String, FileAggregates>> filterItemEqualProperty;
+      ButtonProperty<Entry<String, FileAggregates>> filterItemGreaterThanProperty;
+      ButtonProperty<Entry<String, FileAggregates>> filterItemLessThanProperty;
       long totalFileSize;
       long totalNumberOfFiles;
 
@@ -167,13 +163,12 @@ class TypesPane
       }
 
       table = new MyTableView<>("File types in %d");
-      table.setEditable(false);
+      table.setEditable(true);
 
-      table.addRankColumn("Rank");
-
-      extensionColumn = table.addColumn("Extension");
-      extensionColumn.setColumnCount(10);
-      extensionColumn.setCellValueGetter(Entry::getKey);
+      linkCountColumn = table.addColumn("Link count");
+      linkCountColumn.setCellValueAlignment(Pos.BASELINE_RIGHT);
+      linkCountColumn.setColumnCount(10);
+      linkCountColumn.setCellValueGetter(Entry::getKey);
 
       fileSizeColumn = table.addColumn("File size");
 
@@ -204,6 +199,47 @@ class TypesPane
       numberOfFilesPercentageColumn
           .setCellValueGetter((e) -> (e.getValue().getFileCount() * 100.0) / totalNumberOfFiles);
 
+      filterColumn = table.addColumn("Filter link count");
+
+      filterItemLessThanProperty = new ButtonProperty<>(() -> IconUtil.createIconNode("filter", IconSize.SMALLER));
+      filterLessThanColumn = table.addColumn(filterColumn, "<=");
+      filterLessThanColumn.setCellValueAlignment(Pos.CENTER);
+      filterLessThanColumn.setEditable(true);
+      filterLessThanColumn.setCellValueGetter((e) -> filterItemLessThanProperty);
+      filterLessThanColumn.setAction((event, entry) -> {
+        Predicate<FileNodeIF> filterPredicate;
+
+        filterPredicate = (fileNode) -> fileNode.getNumberOfLinks() <= Integer.valueOf(entry.getKey());
+        getDiskUsageData().addFilter(new Filter("Link count", "<=", entry.getKey(), filterPredicate),
+            event.getClickCount() == 2);
+      });
+
+      filterItemEqualProperty = new ButtonProperty<>(() -> IconUtil.createIconNode("filter", IconSize.SMALLER));
+      filterEqualColumn = table.addColumn(filterColumn, "is");
+      filterEqualColumn.setCellValueAlignment(Pos.CENTER);
+      filterEqualColumn.setEditable(true);
+      filterEqualColumn.setCellValueGetter((e) -> filterItemEqualProperty);
+      filterEqualColumn.setAction((event, entry) -> {
+        Predicate<FileNodeIF> filterPredicate;
+
+        filterPredicate = (fileNode) -> fileNode.getNumberOfLinks() == Integer.valueOf(entry.getKey());
+        getDiskUsageData().addFilter(new Filter("Link count", entry.getKey(), filterPredicate),
+            event.getClickCount() == 2);
+      });
+
+      filterItemGreaterThanProperty = new ButtonProperty<>(() -> IconUtil.createIconNode("filter", IconSize.SMALLER));
+      filterGreaterThanColumn = table.addColumn(filterColumn, ">=");
+      filterGreaterThanColumn.setCellValueAlignment(Pos.CENTER);
+      filterGreaterThanColumn.setEditable(true);
+      filterGreaterThanColumn.setCellValueGetter((e) -> filterItemGreaterThanProperty);
+      filterGreaterThanColumn.setAction((event, entry) -> {
+        Predicate<FileNodeIF> filterPredicate;
+
+        filterPredicate = (fileNode) -> fileNode.getNumberOfLinks() > Integer.valueOf(entry.getKey());
+        getDiskUsageData().addFilter(new Filter("Link count", ">=", entry.getKey(), filterPredicate),
+            event.getClickCount() == 2);
+      });
+
       table.setItems(list);
 
       return table;
@@ -212,40 +248,42 @@ class TypesPane
     return translate(new Label("No data"));
   }
 
-  private class TypesPaneData
+  private class LinkCountPaneData
     extends PaneData
   {
-    private Map<String, FileAggregates> mi_fullMap;
+    private Map<String, FileAggregates> mi_map;
     private Map<String, FileAggregates> mi_reducedMap;
 
-    private TypesPaneData()
+    private LinkCountPaneData()
     {
     }
 
     private Map<String, FileAggregates> getFullMap()
     {
-      if (mi_fullMap == null)
+      if (mi_map == null)
       {
-        mi_fullMap = new HashMap<String, FileAggregates>();
+        mi_map = new HashMap<String, FileAggregates>();
         new FileNodeIterator(getCurrentTreeItem().getValue()).forEach(fn -> {
           if (fn.isFile())
           {
             String bucket;
             FileAggregates data;
 
-            bucket = fn.getFileType();
-            data = mi_fullMap.computeIfAbsent(bucket, (a) -> new FileAggregates(0l, 0l));
+            bucket = Objects.toString(fn.getNumberOfLinks());
+            if (bucket.equals("-1"))
+            {
+              System.out.println("file[linkcount=-1]=" + fn.getAbsolutePath());
+            }
+            data = mi_map.computeIfAbsent(bucket, (a) -> new FileAggregates(0l, 0l));
             data.mi_fileCount += 1;
             data.mi_fileSize += fn.getSize();
           }
           return true;
         });
-        mi_fullMap = mi_fullMap.entrySet().stream()
-            .sorted(
-                Comparator.comparing(e -> e.getValue().getSize(getCurrentDisplayMetric()), Comparator.reverseOrder()))
+        mi_map = mi_map.entrySet().stream().sorted(Comparator.comparing(e -> Integer.valueOf(e.getKey())))
             .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (x, y) -> y, LinkedHashMap::new));
       }
-      return mi_fullMap;
+      return mi_map;
     }
 
     private Map<String, FileAggregates> getReducedMap()
@@ -278,7 +316,7 @@ class TypesPane
     @Override
     public void reset()
     {
-      mi_fullMap = null;
+      mi_map = null;
       mi_reducedMap = null;
     }
   }

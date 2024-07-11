@@ -171,7 +171,7 @@ public class SizeDistributionPane
       data = new PieChart.Data(bucket.getText(), bucketData.getSize(getCurrentDisplayMetric()));
       pieChart.getData().add(data);
 
-      addFilter(data.getNode(), "Size", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
+      addFilterHandler(data.getNode(), "Size", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
     });
 
     return pieChart;
@@ -212,7 +212,7 @@ public class SizeDistributionPane
         value = mi_data.getMap().getOrDefault(bucket, dataDefault);
         data = new XYChart.Data<Number, String>(value.mi_numberOfFiles, bucket.getText());
         series1.getData().add(data);
-        addFilter(data.getNode(), "File size", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
+        addFilterHandler(data.getNode(), "File size", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
       });
 
       pane.add(barChart, 0, 0);
@@ -235,7 +235,7 @@ public class SizeDistributionPane
         value = mi_data.getMap().getOrDefault(bucket, dataDefault);
         data = new XYChart.Data<Number, String>(value.mi_sizeOfFiles, bucket.getText());
         series2.getData().add(data);
-        addFilter(data.getNode(), "File size", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
+        addFilterHandler(data.getNode(), "File size", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
       });
 
       pane.add(barChart, 0, 1);

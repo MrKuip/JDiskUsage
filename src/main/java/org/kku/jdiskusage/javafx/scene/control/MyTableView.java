@@ -72,7 +72,9 @@ public class MyTableView<T>
   public <R> MyTableColumn<T, R> addColumn(MyTableColumn nestedColumn, String name)
   {
     MyTableColumn<T, R> column;
+
     column = translate(new MyTableColumn<T, R>(name));
+    column.setEditable(false);
     if (nestedColumn != null)
     {
       nestedColumn.getColumns().add(column);

@@ -65,6 +65,7 @@ public class DiskUsageView
     private final TabPaneData mi_tabPaneData = new TabPaneData();
     private final SizePane mi_sizeTab = new SizePane(this);
     private final Top50Pane mi_top50Tab = new Top50Pane(this);
+    private final LinkCountPane mi_linkCountTab = new LinkCountPane(this);
     private final SizeDistributionPane mi_sizeDistributionTab = new SizeDistributionPane(this);
     private final LastModifiedDistributionPane mi_modifiedDistributionTab = new LastModifiedDistributionPane(this);
     private final TypesPane mi_typesTab = new TypesPane(this);
@@ -318,8 +319,9 @@ public class DiskUsageView
       SIZE("Size", "chart-pie", (md) -> md.mi_sizeTab),
       TOP50("Top 50", "trophy", (md) -> md.mi_top50Tab),
       DISTRIBUTION_SIZE("Size distribution", "chart-bell-curve", (md) -> md.mi_sizeDistributionTab),
-      DISTRIBUTION_MODIFIED("Last modified", "sort-calendar-ascending", (md) -> md.mi_modifiedDistributionTab),
+      DISTRIBUTION_MODIFIED("Last modified", "calendar-blank", (md) -> md.mi_modifiedDistributionTab),
       DISTRIBUTION_TYPES("Types", "chart-pie", (md) -> md.mi_typesTab),
+      LINK_COUNT("Link count", "counter", (md) -> md.mi_linkCountTab),
       SEARCH_TYPES("Search", "magnify", (md) -> md.mi_searchTab);
 
       private final String m_name;

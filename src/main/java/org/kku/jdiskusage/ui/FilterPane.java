@@ -84,16 +84,16 @@ class FilterPane
     m_filterTypePaneByTypeMap.clear();
 
     m_filterSet.forEach(filter -> {
-      if (m_filterByTypeMap.computeIfAbsent(filter.getFilterType(), (k) -> new HashSet<>()).add(filter))
+      if (m_filterByTypeMap.computeIfAbsent(filter.getFilterKey(), (k) -> new HashSet<>()).add(filter))
       {
         Pane filterTypePane;
         Node filterValueNode;
 
         filterValueNode = createFilterValueNode(filter);
 
-        filterTypePane = m_filterTypePaneByTypeMap.computeIfAbsent(filter.getFilterType(),
-            filterType -> createFilterTypePane(filter));
-        if (m_filterByTypeMap.get(filter.getFilterType()).size() > 1)
+        filterTypePane = m_filterTypePaneByTypeMap.computeIfAbsent(filter.getFilterKey(),
+            filterKey -> createFilterTypePane(filter));
+        if (m_filterByTypeMap.get(filter.getFilterKey()).size() > 1)
         {
           filterTypePane.getChildren().add(getFilterTypePaneText("or"));
         }
@@ -121,8 +121,8 @@ class FilterPane
     filterPane = new HBox();
     filterPane.setId("filterTypePane");
 
-    filterPane.getChildren()
-        .add(getFilterTypePaneText(translate(filter.getFilterType()) + " " + translate("is") + " "));
+    filterPane.getChildren().add(
+        getFilterTypePaneText(translate(filter.getFilterType()) + " " + translate(filter.getFilterOperator()) + " "));
 
     m_filterPane.getChildren().add(filterPane);
 

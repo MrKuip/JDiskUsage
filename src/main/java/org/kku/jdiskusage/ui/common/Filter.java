@@ -11,13 +11,20 @@ public class Filter
 {
   private final int mi_hashCode;
   private final String mi_filterType;
+  private final String mi_filterOperator;
   private final String mi_filterValue;
   private final Predicate<FileNodeIF> mi_fileNodePredicate;
   private BooleanProperty mi_filterDisabled = new SimpleBooleanProperty(true);
 
   public Filter(String filterName, String filterValue, Predicate<FileNodeIF> fileNodePredicate)
   {
+    this(filterName, "is", filterValue, fileNodePredicate);
+  }
+
+  public Filter(String filterName, String filterOperator, String filterValue, Predicate<FileNodeIF> fileNodePredicate)
+  {
     mi_filterType = filterName;
+    mi_filterOperator = filterOperator;
     mi_filterValue = filterValue;
     mi_fileNodePredicate = fileNodePredicate;
     mi_hashCode = (filterName + filterValue).hashCode();
@@ -44,9 +51,19 @@ public class Filter
     return mi_filterDisabled.get();
   }
 
+  public String getFilterKey()
+  {
+    return getFilterType() + "-" + getFilterOperator();
+  }
+
   public String getFilterType()
   {
     return mi_filterType;
+  }
+
+  public String getFilterOperator()
+  {
+    return mi_filterOperator;
   }
 
   public String getFilterValue()
@@ -77,6 +94,11 @@ public class Filter
 
     filter = (Filter) obj;
     if (!filter.getFilterType().equals(getFilterType()))
+    {
+      return false;
+    }
+
+    if (!filter.getFilterOperator().equals(getFilterOperator()))
     {
       return false;
     }

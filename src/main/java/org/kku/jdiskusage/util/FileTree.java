@@ -298,6 +298,7 @@ public class FileTree
         }
         catch (Exception e)
         {
+          e.printStackTrace();
         }
       }
 
@@ -497,9 +498,12 @@ public class FileTree
       {
         FileNode node;
 
-        node = new FileNode(file, attrs);
-        mi_parentNodeStack.peek().addChild(node);
-        mi_numberOfFiles++;
+        if (attrs.isRegularFile())
+        {
+          node = new FileNode(file, attrs);
+          mi_parentNodeStack.peek().addChild(node);
+          mi_numberOfFiles++;
+        }
 
         if (m_scanListener != null)
         {

@@ -5,25 +5,25 @@ import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.FileTree.FilterIF;
-import org.tbee.javafx.scene.layout.MigPane;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.layout.BorderPane;
 
 public class FileTreePane
 {
   private final DiskUsageData mi_diskUsageData;
   private FileTreeView mi_fileTreeView;
-  private MigPane mi_treePane;
+  private BorderPane mi_treePane;
   private BreadCrumbBar<FileNodeIF> mi_breadCrumbBar;
   TreeTableView<FileNodeIF> mi_treeTableView;
 
   public FileTreePane(DiskUsageData diskUsageData)
   {
     mi_diskUsageData = diskUsageData;
-    mi_treePane = new MigPane();
+    mi_treePane = new BorderPane();
   }
 
   public Node getNode()
@@ -49,7 +49,7 @@ public class FileTreePane
       mi_diskUsageData.getNavigation().navigateTo(e.getSelectedCrumb());
     });
 
-    mi_treePane.add(mi_treeTableView, "dock center");
+    mi_treePane.setCenter(mi_treeTableView);
 
     mi_treeTableView.getSelectionModel().selectedItemProperty()
         .addListener((o, oldValue, newValue) -> mi_diskUsageData.getSelectedTreeItemProperty().set(newValue));

@@ -161,7 +161,7 @@ abstract public class AbstractTabContentPane
     return m_node;
   }
 
-  protected void addFilter(Node node, String filterType, String filterValue, Predicate<FileNodeIF> fileNodePredicate)
+  protected void addFilterHandler(Node node, String filterType, String filterValue, Predicate<FileNodeIF> fileNodePredicate)
   {
     node.addEventHandler(MouseEvent.MOUSE_CLICKED, (event) -> {
       m_diskUsageData.addFilter(new Filter(filterType, filterValue, fileNodePredicate), event.getClickCount() == 2);
