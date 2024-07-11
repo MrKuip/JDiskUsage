@@ -2,7 +2,6 @@ package org.kku.jdiskusage.ui;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.kku.jdiskusage.javafx.scene.control.MyTreeTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTreeTableView;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
@@ -10,7 +9,6 @@ import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.FileTree.FilterIF;
 import org.kku.jdiskusage.util.OperatingSystemUtil;
-
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -45,13 +43,19 @@ public class FileTreeView
     treeTableColumn2 = mi_treeTableView.addColumn("File size");
     treeTableColumn2.setColumnCount(8);
     treeTableColumn2.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
-    treeTableColumn2.setCellValueAlignment(Pos.CENTER_RIGHT);
+    treeTableColumn2.setCellValueAlignment(Pos.BASELINE_RIGHT);
+    treeTableColumn2.setCellValueGetter((treeItem) -> treeItem.getValue().getSize());
+
+    treeTableColumn2 = mi_treeTableView.addColumn("Number of files");
+    treeTableColumn2.setColumnCount(8);
+    treeTableColumn2.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
+    treeTableColumn2.setCellValueAlignment(Pos.BASELINE_RIGHT);
     treeTableColumn2.setCellValueGetter((treeItem) -> treeItem.getValue().getSize());
 
     treeTableColumn3 = mi_treeTableView.addColumn("%");
     treeTableColumn3.setColumnCount(5);
     treeTableColumn3.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2f %%"));
-    treeTableColumn3.setCellValueAlignment(Pos.CENTER_RIGHT);
+    treeTableColumn3.setCellValueAlignment(Pos.BASELINE_RIGHT);
     treeTableColumn3.setCellValueGetter((treeItem) -> {
       if (treeItem.getParent() != null)
       {
@@ -65,9 +69,9 @@ public class FileTreeView
 
     if (OperatingSystemUtil.isLinux())
     {
-      treeTableColumn4 = mi_treeTableView.addColumn("Number\nof links\nto file");
+      treeTableColumn4 = mi_treeTableView.addColumn("Number of links to file");
       treeTableColumn4.setColumnCount(6);
-      treeTableColumn4.setCellValueAlignment(Pos.CENTER_RIGHT);
+      treeTableColumn4.setCellValueAlignment(Pos.BASELINE_RIGHT);
       treeTableColumn4.setCellValueGetter((treeItem) -> treeItem.getValue().getNumberOfLinks());
     }
 

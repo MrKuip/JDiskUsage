@@ -4,14 +4,19 @@ import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
+import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonProperty;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
+import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.FxUtil;
+import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
@@ -171,7 +176,7 @@ public class SizeDistributionPane
       data = new PieChart.Data(bucket.getText(), bucketData.getSize(getCurrentDisplayMetric()));
       pieChart.getData().add(data);
 
-      addFilterHandler(data.getNode(), "Size", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
+      addFilterHandler(data.getNode(), "Size", bucket.getText(), fileNode -> findBucket(fileNode) == bucket);
     });
 
     return pieChart;
@@ -212,7 +217,7 @@ public class SizeDistributionPane
         value = mi_data.getMap().getOrDefault(bucket, dataDefault);
         data = new XYChart.Data<Number, String>(value.mi_numberOfFiles, bucket.getText());
         series1.getData().add(data);
-        addFilterHandler(data.getNode(), "File size", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
+        addFilterHandler(data.getNode(), "File size", bucket.getText(), fileNode -> findBucket(fileNode) == bucket);
       });
 
       pane.add(barChart, 0, 0);
@@ -235,7 +240,7 @@ public class SizeDistributionPane
         value = mi_data.getMap().getOrDefault(bucket, dataDefault);
         data = new XYChart.Data<Number, String>(value.mi_sizeOfFiles, bucket.getText());
         series2.getData().add(data);
-        addFilterHandler(data.getNode(), "File size", bucket.getText(), fileNode -> bucket == findBucket(fileNode));
+        addFilterHandler(data.getNode(), "File size", bucket.getText(), fileNode -> findBucket(fileNode) == bucket);
       });
 
       pane.add(barChart, 0, 1);
@@ -260,6 +265,13 @@ public class SizeDistributionPane
       MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, String> timeIntervalColumn;
       MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, Long> sumOfFileSizesColumn;
       MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, Long> numberOfFilesColumn;
+      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, Void> filterColumn;
+      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, ButtonProperty<Entry<SizeDistributionBucket, SizeDistributionBucketData>>> filterEqualColumn;
+      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, ButtonProperty<Entry<SizeDistributionBucket, SizeDistributionBucketData>>> filterGreaterThanColumn;
+      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, ButtonProperty<Entry<SizeDistributionBucket, SizeDistributionBucketData>>> filterLessThanColumn;
+      ButtonProperty<Entry<SizeDistributionBucket, SizeDistributionBucketData>> filterItemEqualProperty;
+      ButtonProperty<Entry<SizeDistributionBucket, SizeDistributionBucketData>> filterItemGreaterThanProperty;
+      ButtonProperty<Entry<SizeDistributionBucket, SizeDistributionBucketData>> filterItemLessThanProperty;
 
       pane = new GridPane();
       table = new MyTableView<>("SizeDistribution");
@@ -268,19 +280,60 @@ public class SizeDistributionPane
       table.addRankColumn("Rank");
 
       timeIntervalColumn = table.addColumn("Size");
+      timeIntervalColumn.setCellValueAlignment(Pos.BASELINE_LEFT);
       timeIntervalColumn.setColumnCount(12);
       timeIntervalColumn.setCellValueGetter((o) -> o.getKey().getText());
 
       sumOfFileSizesColumn = table.addColumn("Sum of file sizes");
-      sumOfFileSizesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+      sumOfFileSizesColumn.setCellValueAlignment(Pos.BASELINE_RIGHT);
       sumOfFileSizesColumn.setColumnCount(8);
       sumOfFileSizesColumn.setCellValueGetter((o) -> o.getValue().mi_sizeOfFiles);
 
       numberOfFilesColumn = table.addColumn("Sum of number of files");
-      numberOfFilesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+      numberOfFilesColumn.setCellValueAlignment(Pos.BASELINE_RIGHT);
       numberOfFilesColumn.setColumnCount(8);
       numberOfFilesColumn.setCellValueGetter((o) -> o.getValue().mi_numberOfFiles);
 
+      filterColumn = table.addColumn("Filter file size");
+
+      filterItemLessThanProperty = new ButtonProperty<>(() -> IconUtil.createIconNode("filter", IconSize.SMALLER));
+      filterLessThanColumn = table.addColumn(filterColumn, "<=");
+      filterLessThanColumn.setCellValueAlignment(Pos.CENTER);
+      filterLessThanColumn.setEditable(true);
+      filterLessThanColumn.setCellValueGetter((e) -> filterItemLessThanProperty);
+      filterLessThanColumn.setAction((event, entry) -> {
+        Predicate<FileNodeIF> filterPredicate;
+
+        filterPredicate = (fileNode) -> findBucket(fileNode).ordinal() <= entry.getKey().ordinal();
+        getDiskUsageData().addFilter(new Filter("File size", "<=", entry.getKey().getText(), filterPredicate),
+            event.getClickCount() == 2);
+      });
+
+      filterItemEqualProperty = new ButtonProperty<>(() -> IconUtil.createIconNode("filter", IconSize.SMALLER));
+      filterEqualColumn = table.addColumn(filterColumn, "is");
+      filterEqualColumn.setCellValueAlignment(Pos.CENTER);
+      filterEqualColumn.setEditable(true);
+      filterEqualColumn.setCellValueGetter((e) -> filterItemEqualProperty);
+      filterEqualColumn.setAction((event, entry) -> {
+        Predicate<FileNodeIF> filterPredicate;
+
+        filterPredicate = (fileNode) -> findBucket(fileNode) == entry.getKey();
+        getDiskUsageData().addFilter(new Filter("Link count", entry.getKey().getText(), filterPredicate),
+            event.getClickCount() == 2);
+      });
+
+      filterItemGreaterThanProperty = new ButtonProperty<>(() -> IconUtil.createIconNode("filter", IconSize.SMALLER));
+      filterGreaterThanColumn = table.addColumn(filterColumn, ">=");
+      filterGreaterThanColumn.setCellValueAlignment(Pos.CENTER);
+      filterGreaterThanColumn.setEditable(true);
+      filterGreaterThanColumn.setCellValueGetter((e) -> filterItemGreaterThanProperty);
+      filterGreaterThanColumn.setAction((event, entry) -> {
+        Predicate<FileNodeIF> filterPredicate;
+
+        filterPredicate = (fileNode) -> findBucket(fileNode).ordinal() >= entry.getKey().ordinal();
+        getDiskUsageData().addFilter(new Filter("Link count", ">=", entry.getKey().getText(), filterPredicate),
+            event.getClickCount() == 2);
+      });
       table.setItems(mi_data.getList());
 
       pane.add(table, 0, 1);

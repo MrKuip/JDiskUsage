@@ -147,10 +147,10 @@ class TypesPane
       ObservableList<Entry<String, FileAggregates>> list;
       MyTableView<Entry<String, FileAggregates>> table;
       MyTableColumn<Entry<String, FileAggregates>, String> extensionColumn;
-      MyTableColumn<Entry<String, FileAggregates>, Long> fileSizeColumn;
+      MyTableColumn<Entry<String, FileAggregates>, Void> fileSizeColumn;
       MyTableColumn<Entry<String, FileAggregates>, Long> fileSizeBytesColumn;
       MyTableColumn<Entry<String, FileAggregates>, Double> fileSizePercentageColumn;
-      MyTableColumn<Entry<String, FileAggregates>, Long> numberOfFilesColumn;
+      MyTableColumn<Entry<String, FileAggregates>, Void> numberOfFilesColumn;
       MyTableColumn<Entry<String, FileAggregates>, Long> numberOfFilesCountColumn;
       MyTableColumn<Entry<String, FileAggregates>, Double> numberOfFilesPercentageColumn;
       Map<String, FileAggregates> fullMap;

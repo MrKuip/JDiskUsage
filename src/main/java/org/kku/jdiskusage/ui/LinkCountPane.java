@@ -73,7 +73,7 @@ class LinkCountPane
       data = new PieChart.Data(name, entry.getValue().getSize(getCurrentDisplayMetric()));
       pieChart.getData().add(data);
 
-      test = (fileNode) -> Integer.valueOf(entry.getKey()) == fileNode.getNumberOfLinks();
+      test = (fileNode) -> fileNode.getNumberOfLinks() == Integer.valueOf(entry.getKey());
       addFilterHandler(data.getNode(), "Link count", Objects.toString(entry.getKey()), test);
     });
 
@@ -114,7 +114,7 @@ class LinkCountPane
           Objects.toString(entry.getKey()));
       series1.getData().add(data);
 
-      test = (fileNode) -> Integer.valueOf(entry.getKey()) == fileNode.getNumberOfLinks();
+      test = (fileNode) -> fileNode.getNumberOfLinks() == Integer.valueOf(entry.getKey());
       addFilterHandler(data.getNode(), "Link count", Objects.toString(entry.getKey()), test);
     });
 
@@ -136,13 +136,13 @@ class LinkCountPane
       ObservableList<Entry<String, FileAggregates>> list;
       MyTableView<Entry<String, FileAggregates>> table;
       MyTableColumn<Entry<String, FileAggregates>, String> linkCountColumn;
-      MyTableColumn<Entry<String, FileAggregates>, Long> fileSizeColumn;
+      MyTableColumn<Entry<String, FileAggregates>, Void> fileSizeColumn;
       MyTableColumn<Entry<String, FileAggregates>, Long> fileSizeBytesColumn;
       MyTableColumn<Entry<String, FileAggregates>, Double> fileSizePercentageColumn;
-      MyTableColumn<Entry<String, FileAggregates>, Long> numberOfFilesColumn;
+      MyTableColumn<Entry<String, FileAggregates>, Void> numberOfFilesColumn;
       MyTableColumn<Entry<String, FileAggregates>, Long> numberOfFilesCountColumn;
       MyTableColumn<Entry<String, FileAggregates>, Double> numberOfFilesPercentageColumn;
-      MyTableColumn<Entry<String, FileAggregates>, ButtonProperty<Entry<String, FileAggregates>>> filterColumn;
+      MyTableColumn<Entry<String, FileAggregates>, Void> filterColumn;
       MyTableColumn<Entry<String, FileAggregates>, ButtonProperty<Entry<String, FileAggregates>>> filterEqualColumn;
       MyTableColumn<Entry<String, FileAggregates>, ButtonProperty<Entry<String, FileAggregates>>> filterGreaterThanColumn;
       MyTableColumn<Entry<String, FileAggregates>, ButtonProperty<Entry<String, FileAggregates>>> filterLessThanColumn;
@@ -175,13 +175,13 @@ class LinkCountPane
       fileSizeBytesColumn = table.addColumn(fileSizeColumn, "Bytes");
       fileSizeBytesColumn.setColumnCount(8);
       fileSizeBytesColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
-      fileSizeBytesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+      fileSizeBytesColumn.setCellValueAlignment(Pos.BASELINE_RIGHT);
       fileSizeBytesColumn.setCellValueGetter((e) -> e.getValue().getFileSize());
 
       fileSizePercentageColumn = table.addColumn(fileSizeColumn, "%");
       fileSizePercentageColumn.setColumnCount(5);
       fileSizePercentageColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2f%%"));
-      fileSizePercentageColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+      fileSizePercentageColumn.setCellValueAlignment(Pos.BASELINE_RIGHT);
       fileSizePercentageColumn.setCellValueGetter((e) -> (e.getValue().getFileSize() * 100.0) / totalFileSize);
 
       numberOfFilesColumn = table.addColumn("Number of Files");
@@ -189,13 +189,13 @@ class LinkCountPane
       numberOfFilesCountColumn = table.addColumn(numberOfFilesColumn, "Count");
       numberOfFilesCountColumn.setColumnCount(8);
       numberOfFilesCountColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
-      numberOfFilesCountColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+      numberOfFilesCountColumn.setCellValueAlignment(Pos.BASELINE_RIGHT);
       numberOfFilesCountColumn.setCellValueGetter((e) -> e.getValue().getFileCount());
 
       numberOfFilesPercentageColumn = table.addColumn(numberOfFilesColumn, "%");
       numberOfFilesPercentageColumn.setColumnCount(5);
       numberOfFilesPercentageColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2f%%"));
-      numberOfFilesPercentageColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+      numberOfFilesPercentageColumn.setCellValueAlignment(Pos.BASELINE_RIGHT);
       numberOfFilesPercentageColumn
           .setCellValueGetter((e) -> (e.getValue().getFileCount() * 100.0) / totalNumberOfFiles);
 
