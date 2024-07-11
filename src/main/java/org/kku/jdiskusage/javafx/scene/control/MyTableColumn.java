@@ -25,10 +25,8 @@ public class MyTableColumn<T, R>
   private Pos m_alignment;
   private BiConsumer<MouseEvent, T> m_action;
 
-  public MyTableColumn(String text)
+  public MyTableColumn()
   {
-    super(text);
-    setId(text);
     init();
   }
 

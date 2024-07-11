@@ -16,10 +16,8 @@ import javafx.util.Callback;
 public class MyTreeTableColumn<T, R>
   extends TreeTableColumn<T, R>
 {
-  public MyTreeTableColumn(String id, String text)
+  public MyTreeTableColumn()
   {
-    super(text);
-    setId(id);
   }
 
   public void setCellValueGetter(Function<TreeItem<T>, R> function)
