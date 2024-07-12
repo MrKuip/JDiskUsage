@@ -3,8 +3,6 @@ package org.kku.jdiskusage.ui;
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
@@ -19,6 +17,7 @@ import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
+import org.tbee.javafx.scene.layout.MigPane;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
@@ -29,9 +28,8 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TreeItem;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 
 public class SizeDistributionPane
   extends AbstractTabContentPane
@@ -164,13 +162,13 @@ public class SizeDistributionPane
     PieChart pieChart;
 
     pieChart = FxUtil.createPieChart();
-    mi_data.getMap().entrySet().forEach(entry -> {
+    mi_data.getMap().entrySet().forEach(e -> {
       SizeDistributionBucket bucket;
       SizeDistributionBucketData bucketData;
       PieChart.Data data;
 
-      bucket = entry.getKey();
-      bucketData = entry.getValue();
+      bucket = e.getKey();
+      bucketData = e.getValue();
       data = new PieChart.Data(bucket.getText(), bucketData.getSize(getCurrentDisplayMetric()));
       pieChart.getData().add(data);
 
@@ -187,7 +185,8 @@ public class SizeDistributionPane
     treeItem = getDiskUsageData().getSelectedTreeItem();
     if (!treeItem.getChildren().isEmpty())
     {
-      GridPane pane;
+      ScrollPane scrollPane;
+      MigPane pane;
       NumberAxis xAxis;
       CategoryAxis yAxis;
       BarChart<Number, String> barChart;
@@ -196,11 +195,13 @@ public class SizeDistributionPane
       SizeDistributionBucketData dataDefault;
 
       dataDefault = new SizeDistributionBucketData(0l, 0l);
-      pane = new GridPane();
+
+      pane = new MigPane("wrap 1", "[grow,fill]", "[][]");
 
       xAxis = new NumberAxis();
       yAxis = new CategoryAxis();
       barChart = FxUtil.createBarChart(xAxis, yAxis);
+      pane.add(barChart);
       barChart.setTitle(translate("Distribution of file sizes in") + " " + treeItem.getValue().getName());
       xAxis.setLabel(translate("Number of files"));
       yAxis.setLabel(translate("File sizes"));
@@ -218,13 +219,10 @@ public class SizeDistributionPane
         addFilterHandler(data.getNode(), "File size", bucket.getText(), fileNode -> findBucket(fileNode) == bucket);
       });
 
-      pane.add(barChart, 0, 0);
-      GridPane.setHgrow(barChart, Priority.ALWAYS);
-      GridPane.setVgrow(barChart, Priority.ALWAYS);
-
       xAxis = new NumberAxis();
       yAxis = new CategoryAxis();
       barChart = FxUtil.createBarChart(xAxis, yAxis);
+      pane.add(barChart);
       xAxis.setLabel(translate("Total size of files (in Gb)"));
       yAxis.setLabel(translate("File sizes"));
 
@@ -241,11 +239,11 @@ public class SizeDistributionPane
         addFilterHandler(data.getNode(), "File size", bucket.getText(), fileNode -> findBucket(fileNode) == bucket);
       });
 
-      pane.add(barChart, 0, 1);
-      GridPane.setHgrow(barChart, Priority.ALWAYS);
-      GridPane.setVgrow(barChart, Priority.ALWAYS);
+      scrollPane = new ScrollPane();
+      scrollPane.setFitToWidth(true);
+      scrollPane.setContent(pane);
 
-      return pane;
+      return scrollPane;
     }
 
     return new Label("No data");
@@ -258,17 +256,15 @@ public class SizeDistributionPane
     treeItem = getDiskUsageData().getSelectedTreeItem();
     if (treeItem != null && !treeItem.getChildren().isEmpty())
     {
-      GridPane pane;
-      MyTableView<Entry<SizeDistributionBucket, SizeDistributionBucketData>> table;
-      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, String> timeIntervalColumn;
-      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, Long> sumOfFileSizesColumn;
-      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, Long> numberOfFilesColumn;
-      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, Void> filterColumn;
-      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, ButtonProperty> filterEqualColumn;
-      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, ButtonProperty> filterGreaterThanColumn;
-      MyTableColumn<Entry<SizeDistributionBucket, SizeDistributionBucketData>, ButtonProperty> filterLessThanColumn;
+      MyTableView<SizeDistributionEntry> table;
+      MyTableColumn<SizeDistributionEntry, String> timeIntervalColumn;
+      MyTableColumn<SizeDistributionEntry, Long> sumOfFileSizesColumn;
+      MyTableColumn<SizeDistributionEntry, Long> numberOfFilesColumn;
+      MyTableColumn<SizeDistributionEntry, Void> filterColumn;
+      MyTableColumn<SizeDistributionEntry, ButtonProperty> filterEqualColumn;
+      MyTableColumn<SizeDistributionEntry, ButtonProperty> filterGreaterThanColumn;
+      MyTableColumn<SizeDistributionEntry, ButtonProperty> filterLessThanColumn;
 
-      pane = new GridPane();
       table = new MyTableView<>("SizeDistribution");
       table.setEditable(false);
 
@@ -277,73 +273,64 @@ public class SizeDistributionPane
       timeIntervalColumn = table.addColumn("Size");
       timeIntervalColumn.setCellValueAlignment(Pos.BASELINE_LEFT);
       timeIntervalColumn.setColumnCount(12);
-      timeIntervalColumn.setCellValueGetter((o) -> o.getKey().getText());
+      timeIntervalColumn.setCellValueGetter((o) -> o.bucket().getText());
 
       sumOfFileSizesColumn = table.addColumn("Sum of file sizes");
       sumOfFileSizesColumn.setCellValueAlignment(Pos.BASELINE_RIGHT);
       sumOfFileSizesColumn.setColumnCount(8);
-      sumOfFileSizesColumn.setCellValueGetter((o) -> o.getValue().mi_sizeOfFiles);
+      sumOfFileSizesColumn.setCellValueGetter((o) -> o.data().mi_sizeOfFiles);
 
       numberOfFilesColumn = table.addColumn("Sum of number of files");
       numberOfFilesColumn.setCellValueAlignment(Pos.BASELINE_RIGHT);
       numberOfFilesColumn.setColumnCount(8);
-      numberOfFilesColumn.setCellValueGetter((o) -> o.getValue().mi_numberOfFiles);
+      numberOfFilesColumn.setCellValueGetter((o) -> o.data().mi_numberOfFiles);
 
       filterColumn = table.addColumn("Filter file size");
 
       filterLessThanColumn = table.addFilterColumn(filterColumn, "<=");
-      filterLessThanColumn.setAction((event, entry) -> {
-        Predicate<FileNodeIF> filterPredicate;
-
-        filterPredicate = (fileNode) -> findBucket(fileNode).ordinal() <= entry.getKey().ordinal();
-        getDiskUsageData().addFilter(new Filter("File size", "<=", entry.getKey().getText(), filterPredicate),
-            event.getClickCount() == 2);
+      filterLessThanColumn.setAction((event, e) -> {
+        getDiskUsageData().addFilter(new Filter("File size", "<=", e.bucket().getText(),
+            (fileNode) -> findBucket(fileNode).ordinal() <= e.bucket().ordinal()), event.getClickCount() == 2);
       });
 
       filterEqualColumn = table.addFilterColumn(filterColumn, "==");
-      filterEqualColumn.setAction((event, entry) -> {
-        Predicate<FileNodeIF> filterPredicate;
-
-        filterPredicate = (fileNode) -> findBucket(fileNode) == entry.getKey();
-        getDiskUsageData().addFilter(new Filter("Link count", entry.getKey().getText(), filterPredicate),
+      filterEqualColumn.setAction((event, e) -> {
+        getDiskUsageData().addFilter(
+            new Filter("File size", e.bucket().getText(), (fileNode) -> findBucket(fileNode) == e.bucket()),
             event.getClickCount() == 2);
       });
 
       filterGreaterThanColumn = table.addFilterColumn(filterColumn, ">=");
-      filterGreaterThanColumn.setAction((event, entry) -> {
-        Predicate<FileNodeIF> filterPredicate;
-
-        filterPredicate = (fileNode) -> findBucket(fileNode).ordinal() >= entry.getKey().ordinal();
-        getDiskUsageData().addFilter(new Filter("Link count", ">=", entry.getKey().getText(), filterPredicate),
-            event.getClickCount() == 2);
+      filterGreaterThanColumn.setAction((event, e) -> {
+        getDiskUsageData().addFilter(new Filter("File size", ">=", e.bucket().getText(),
+            (fileNode) -> findBucket(fileNode).ordinal() >= e.bucket().ordinal()), event.getClickCount() == 2);
       });
       table.setItems(mi_data.getList());
 
-      pane.add(table, 0, 1);
-      GridPane.setHgrow(table, Priority.ALWAYS);
-      GridPane.setVgrow(table, Priority.ALWAYS);
-
-      return pane;
+      return table;
     }
 
     return new Label("No data");
   }
 
+  record SizeDistributionEntry(SizeDistributionBucket bucket, SizeDistributionBucketData data) {};
+
   private class SizeDistributionPaneData
     extends PaneData
   {
     private Map<SizeDistributionBucket, SizeDistributionBucketData> mi_map;
-    private ObservableList<Entry<SizeDistributionBucket, SizeDistributionBucketData>> mi_list;
+    private ObservableList<SizeDistributionEntry> mi_list;
 
     private SizeDistributionPaneData()
     {
     }
 
-    public ObservableList<Entry<SizeDistributionBucket, SizeDistributionBucketData>> getList()
+    public ObservableList<SizeDistributionEntry> getList()
     {
       if (mi_list == null)
       {
-        mi_list = getMap().entrySet().stream().collect(Collectors.toCollection(FXCollections::observableArrayList));
+        mi_list = getMap().entrySet().stream().map(e -> new SizeDistributionEntry(e.getKey(), e.getValue()))
+            .collect(Collectors.toCollection(FXCollections::observableArrayList));
       }
 
       return mi_list;

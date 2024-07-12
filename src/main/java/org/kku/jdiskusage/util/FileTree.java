@@ -95,6 +95,8 @@ public class FileTree
 
     public long getSize();
 
+    public long getNumberOfFiles();
+
     default public int getNumberOfLinks()
     {
       return 0;
@@ -170,6 +172,7 @@ public class FileTree
   {
     private List<FileNodeIF> mi_childList;
     private long mi_fileSize = -1;
+    private long mi_numberOfFiles = -1;
 
     private DirNode(boolean root, Path path)
     {
@@ -219,6 +222,17 @@ public class FileTree
       }
 
       return mi_fileSize;
+    }
+
+    @Override
+    public long getNumberOfFiles()
+    {
+      if (mi_numberOfFiles == -1)
+      {
+        mi_numberOfFiles = getChildList().stream().map(FileNodeIF::getNumberOfFiles).reduce(0l, Long::sum);
+      }
+
+      return mi_numberOfFiles;
     }
 
     @Override
@@ -363,6 +377,12 @@ public class FileTree
     public long getSize()
     {
       return mi_size;
+    }
+
+    @Override
+    public long getNumberOfFiles()
+    {
+      return 1;
     }
 
     @Override

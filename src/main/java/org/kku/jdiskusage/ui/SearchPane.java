@@ -40,8 +40,6 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.TreeItem;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 
 public class SearchPane
@@ -135,12 +133,10 @@ public class SearchPane
     treeItem = getDiskUsageData().getSelectedTreeItem();
     if (treeItem != null && !treeItem.getChildren().isEmpty())
     {
-      GridPane pane;
       MyTableView<FileNodeIF> table;
       MyTableColumn<FileNodeIF, StyledText> nameColumn;
       MyTableColumn<FileNodeIF, Long> fileSizeColumn;
 
-      pane = new GridPane();
       table = new MyTableView<>("Search");
       table.setEditable(false);
 
@@ -163,11 +159,7 @@ public class SearchPane
       new FxTask<>((progressData) -> mi_data.getList(progressData), (itemList) -> table.setItems(itemList),
           SearchProgressData::new).execute();
 
-      pane.add(table, 0, 1);
-      GridPane.setHgrow(table, Priority.ALWAYS);
-      GridPane.setVgrow(table, Priority.ALWAYS);
-
-      return pane;
+      return table;
     }
 
     return new Label("No data");

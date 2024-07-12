@@ -4,20 +4,24 @@ import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
+import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonProperty;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
+import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.util.CommonUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
+import org.tbee.javafx.scene.layout.MigPane;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
@@ -28,9 +32,8 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TreeItem;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 
 class LastModifiedDistributionPane
   extends AbstractTabContentPane
@@ -139,7 +142,7 @@ class LastModifiedDistributionPane
       pieChart.getData().add(data);
 
       addFilterHandler(data.getNode(), "Modification date", bucket.getText(),
-          fileNode -> bucket == findBucket(fileNode));
+          fileNode -> findBucket(fileNode) == bucket);
     });
 
     return pieChart;
@@ -152,7 +155,8 @@ class LastModifiedDistributionPane
     treeItem = getDiskUsageData().getSelectedTreeItem();
     if (treeItem != null && !treeItem.getChildren().isEmpty())
     {
-      GridPane pane;
+      ScrollPane scrollPane;
+      MigPane pane;
       NumberAxis xAxis;
       CategoryAxis yAxis;
       BarChart<Number, String> barChart;
@@ -162,11 +166,12 @@ class LastModifiedDistributionPane
 
       dataDefault = new LastModifiedDistributionBucketData(0l, 0l);
 
-      pane = new GridPane();
+      pane = new MigPane("wrap 1", "[grow,fill]", "[][]");
 
       xAxis = new NumberAxis();
       yAxis = new CategoryAxis();
       barChart = FxUtil.createBarChart(xAxis, yAxis);
+      pane.add(barChart);
       barChart.setTitle(translate("Distribution of last modified dates in") + " " + treeItem.getValue().getName());
       xAxis.setLabel(translate("Number of files"));
       yAxis.setLabel(translate("Last modified date"));
@@ -182,16 +187,13 @@ class LastModifiedDistributionPane
         data = new XYChart.Data<Number, String>(value.mi_numberOfFiles, bucket.getText());
         series1.getData().add(data);
         addFilterHandler(data.getNode(), "Modification date", bucket.getText(),
-            fileNode -> bucket == findBucket(fileNode));
+            fileNode -> findBucket(fileNode) == bucket);
       });
-
-      pane.add(barChart, 0, 0);
-      GridPane.setHgrow(barChart, Priority.ALWAYS);
-      GridPane.setVgrow(barChart, Priority.ALWAYS);
 
       xAxis = new NumberAxis();
       yAxis = new CategoryAxis();
       barChart = FxUtil.createBarChart(xAxis, yAxis);
+      pane.add(barChart);
       xAxis.setLabel(translate("Total size of files (in Gb)"));
       yAxis.setLabel(translate("Last modified date"));
 
@@ -206,14 +208,14 @@ class LastModifiedDistributionPane
         data = new XYChart.Data<Number, String>(value.mi_sizeOfFiles, bucket.getText());
         series2.getData().add(data);
         addFilterHandler(data.getNode(), "Modification date", bucket.getText(),
-            fileNode -> bucket == findBucket(fileNode));
+            fileNode -> findBucket(fileNode) == bucket);
       });
 
-      pane.add(barChart, 0, 1);
-      GridPane.setHgrow(barChart, Priority.ALWAYS);
-      GridPane.setVgrow(barChart, Priority.ALWAYS);
+      scrollPane = new ScrollPane();
+      scrollPane.setFitToWidth(true);
+      scrollPane.setContent(pane);
 
-      return pane;
+      return scrollPane;
     }
 
     return new Label("No data");
@@ -226,13 +228,15 @@ class LastModifiedDistributionPane
     treeItem = getDiskUsageData().getSelectedTreeItem();
     if (treeItem != null && !treeItem.getChildren().isEmpty())
     {
-      GridPane pane;
       MyTableView<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>> table;
       MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, String> timeIntervalColumn;
       MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, Long> sumOfFileSizesColumn;
       MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, Long> numberOfFilesColumn;
+      MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, Void> filterColumn;
+      MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, ButtonProperty> filterEqualColumn;
+      MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, ButtonProperty> filterGreaterThanColumn;
+      MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, ButtonProperty> filterLessThanColumn;
 
-      pane = new GridPane();
       table = new MyTableView<>("LastModifiedDistribution");
       table.setEditable(false);
 
@@ -252,13 +256,37 @@ class LastModifiedDistributionPane
       numberOfFilesColumn.setColumnCount(8);
       numberOfFilesColumn.setCellValueGetter((o) -> o.getValue().mi_numberOfFiles);
 
+      filterColumn = table.addColumn("Filter file size");
+
+      filterLessThanColumn = table.addFilterColumn(filterColumn, "<=");
+      filterLessThanColumn.setAction((event, entry) -> {
+        Predicate<FileNodeIF> filterPredicate;
+
+        filterPredicate = (fileNode) -> findBucket(fileNode).ordinal() <= entry.getKey().ordinal();
+        getDiskUsageData().addFilter(new Filter("Modification date", "<=", entry.getKey().getText(), filterPredicate),
+            event.getClickCount() == 2);
+      });
+
+      filterEqualColumn = table.addFilterColumn(filterColumn, "==");
+      filterEqualColumn.setAction((event, entry) -> {
+        Predicate<FileNodeIF> filterPredicate;
+
+        filterPredicate = (fileNode) -> findBucket(fileNode) == entry.getKey();
+        getDiskUsageData().addFilter(new Filter("Modification date", entry.getKey().getText(), filterPredicate),
+            event.getClickCount() == 2);
+      });
+
+      filterGreaterThanColumn = table.addFilterColumn(filterColumn, ">=");
+      filterGreaterThanColumn.setAction((event, entry) -> {
+        Predicate<FileNodeIF> filterPredicate;
+
+        filterPredicate = (fileNode) -> findBucket(fileNode).ordinal() >= entry.getKey().ordinal();
+        getDiskUsageData().addFilter(new Filter("Modification date", ">=", entry.getKey().getText(), filterPredicate),
+            event.getClickCount() == 2);
+      });
       table.setItems(mi_data.getList());
 
-      pane.add(table, 0, 1);
-      GridPane.setHgrow(table, Priority.ALWAYS);
-      GridPane.setVgrow(table, Priority.ALWAYS);
-
-      return pane;
+      return table;
     }
 
     return new Label("No data");

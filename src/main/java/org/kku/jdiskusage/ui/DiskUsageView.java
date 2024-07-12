@@ -554,6 +554,8 @@ public class DiskUsageView
     }
   }
 
+  record FileAggregatesEntry(String bucket, FileAggregates aggregates) {};
+
   public static class FileAggregates
   {
     public long mi_fileSize;

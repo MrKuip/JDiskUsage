@@ -50,7 +50,7 @@ public class FileTreeView
     treeTableColumn2.setColumnCount(8);
     treeTableColumn2.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
     treeTableColumn2.setCellValueAlignment(Pos.BASELINE_RIGHT);
-    treeTableColumn2.setCellValueGetter((treeItem) -> treeItem.getValue().getSize());
+    treeTableColumn2.setCellValueGetter((treeItem) -> treeItem.getValue().getNumberOfFiles());
 
     treeTableColumn3 = mi_treeTableView.addColumn("%");
     treeTableColumn3.setColumnCount(5);
