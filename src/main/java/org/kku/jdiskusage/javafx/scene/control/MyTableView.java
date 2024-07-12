@@ -52,6 +52,7 @@ public class MyTableView<T>
     StackPane stack;
 
     column = translate(new MyTableColumn<T, R>());
+    column.setCellValueAlignment(Pos.BASELINE_LEFT);
     column.setEditable(false);
     column.setId(name);
 

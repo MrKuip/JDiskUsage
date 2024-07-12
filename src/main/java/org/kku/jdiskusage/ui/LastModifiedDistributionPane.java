@@ -243,16 +243,17 @@ class LastModifiedDistributionPane
       table.addRankColumn("Rank");
 
       timeIntervalColumn = table.addColumn("Time interval");
+      timeIntervalColumn.setCellValueAlignment(Pos.BASELINE_RIGHT);
       timeIntervalColumn.setColumnCount(12);
       timeIntervalColumn.setCellValueGetter((o) -> o.getKey().getText());
 
       sumOfFileSizesColumn = table.addColumn("Sum of file sizes");
-      sumOfFileSizesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+      sumOfFileSizesColumn.setCellValueAlignment(Pos.BASELINE_RIGHT);
       sumOfFileSizesColumn.setColumnCount(8);
       sumOfFileSizesColumn.setCellValueGetter((o) -> o.getValue().mi_sizeOfFiles);
 
       numberOfFilesColumn = table.addColumn("Sum of number of files");
-      numberOfFilesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+      numberOfFilesColumn.setCellValueAlignment(Pos.BASELINE_RIGHT);
       numberOfFilesColumn.setColumnCount(8);
       numberOfFilesColumn.setCellValueGetter((o) -> o.getValue().mi_numberOfFiles);
 
@@ -267,23 +268,25 @@ class LastModifiedDistributionPane
             event.getClickCount() == 2);
       });
 
+      /*
       filterEqualColumn = table.addFilterColumn(filterColumn, "==");
       filterEqualColumn.setAction((event, entry) -> {
         Predicate<FileNodeIF> filterPredicate;
-
+      
         filterPredicate = (fileNode) -> findBucket(fileNode) == entry.getKey();
         getDiskUsageData().addFilter(new Filter("Modification date", entry.getKey().getText(), filterPredicate),
             event.getClickCount() == 2);
       });
-
+      
       filterGreaterThanColumn = table.addFilterColumn(filterColumn, ">=");
       filterGreaterThanColumn.setAction((event, entry) -> {
         Predicate<FileNodeIF> filterPredicate;
-
+      
         filterPredicate = (fileNode) -> findBucket(fileNode).ordinal() >= entry.getKey().ordinal();
         getDiskUsageData().addFilter(new Filter("Modification date", ">=", entry.getKey().getText(), filterPredicate),
             event.getClickCount() == 2);
       });
+      */
       table.setItems(mi_data.getList());
 
       return table;

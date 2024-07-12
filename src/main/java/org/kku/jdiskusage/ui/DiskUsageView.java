@@ -558,8 +558,8 @@ public class DiskUsageView
 
   public static class FileAggregates
   {
-    public long mi_fileSize;
-    public long mi_fileCount;
+    private long mi_fileSize;
+    private long mi_fileCount;
 
     public FileAggregates(long accumulatedSize, long fileCount)
     {
@@ -608,6 +608,12 @@ public class DiskUsageView
     {
       return "FileAggregates(" + getValueDescription(DisplayMetric.FILE_COUNT) + ", "
           + getValueDescription(DisplayMetric.FILE_SIZE) + ")";
+    }
+
+    public void add(int i, long size)
+    {
+      mi_fileCount += 1;
+      mi_fileSize += size;
     }
   }
 

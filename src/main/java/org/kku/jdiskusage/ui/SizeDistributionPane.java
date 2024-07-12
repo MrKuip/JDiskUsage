@@ -271,7 +271,7 @@ public class SizeDistributionPane
       table.addRankColumn("Rank");
 
       timeIntervalColumn = table.addColumn("Size");
-      timeIntervalColumn.setCellValueAlignment(Pos.BASELINE_LEFT);
+      timeIntervalColumn.setCellValueAlignment(Pos.BASELINE_RIGHT);
       timeIntervalColumn.setColumnCount(12);
       timeIntervalColumn.setCellValueGetter((o) -> o.bucket().getText());
 

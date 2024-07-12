@@ -237,8 +237,7 @@ class LinkCountPane
 
             bucket = Objects.toString(fn.getNumberOfLinks());
             data = map.computeIfAbsent(bucket, (a) -> new FileAggregates(0l, 0l));
-            data.mi_fileCount += 1;
-            data.mi_fileSize += fn.getSize();
+            data.add(1, fn.getSize());
           }
           return true;
         });
