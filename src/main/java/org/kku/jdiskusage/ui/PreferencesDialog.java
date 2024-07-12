@@ -2,6 +2,7 @@ package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -127,9 +128,13 @@ public class PreferencesDialog
       try
       {
         props = new Properties();
-        props.load(getClass().getResourceAsStream("/language.properties"));
-        list = props.entrySet().stream().map(entry -> new Language((String) entry.getKey(), (String) entry.getValue()))
-            .collect(Collectors.toCollection(ArrayList::new));
+        list = new ArrayList<>();
+        try (InputStream stream = getClass().getResourceAsStream("/language.properties"))
+        {
+          props.load(stream);
+          props.entrySet().stream().map(entry -> new Language((String) entry.getKey(), (String) entry.getValue()))
+              .collect(Collectors.toCollection(() -> list));
+        }
         // Always add the default language at index 0
         list.add(0, new Language("English", ""));
 
