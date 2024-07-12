@@ -15,13 +15,7 @@ import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.Skin;
-import javafx.scene.control.TableColumnBase;
 import javafx.scene.control.TableView;
-import javafx.scene.control.skin.NestedTableColumnHeader;
-import javafx.scene.control.skin.TableColumnHeader;
-import javafx.scene.control.skin.TableHeaderRow;
-import javafx.scene.control.skin.TableViewSkin;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.TextAlignment;
 
@@ -37,46 +31,6 @@ public class MyTableView<T>
 
     getSelectionModel().setCellSelectionEnabled(true);
     TableUtils.installCopyPasteHandler(this);
-  }
-
-  /**
-   * Adjusting the column header to enable wrapping if it's text doesn't fit.
-   */
-  @Override
-  protected Skin<?> createDefaultSkin()
-  {
-    return new TableViewSkin<>(this)
-    {
-      @Override
-      protected TableHeaderRow createTableHeaderRow()
-      {
-        return new TableHeaderRow(this)
-        {
-          @Override
-          protected NestedTableColumnHeader createRootHeader()
-          {
-            return new NestedTableColumnHeader(null)
-            {
-              private TableColumnHeader tableColumnHeader;
-
-              @Override
-              protected TableColumnHeader createTableColumnHeader(@SuppressWarnings("rawtypes") TableColumnBase col)
-              {
-                tableColumnHeader = super.createTableColumnHeader(col);
-                tableColumnHeader.getChildrenUnmodifiable().forEach(node -> {
-                  if (node instanceof Label label && label.getText().equals(col.getText()))
-                  {
-                    label.setWrapText(true);
-                    label.setAlignment(Pos.CENTER);
-                  }
-                });
-                return tableColumnHeader;
-              }
-            };
-          }
-        };
-      }
-    };
   }
 
   /**
@@ -108,10 +62,11 @@ public class MyTableView<T>
 
     stack = new StackPane();
     stack.getChildren().add(label);
-    stack.prefWidthProperty().bind(column.widthProperty().subtract(5));
+    stack.prefWidthProperty().bind(column.widthProperty());
     label.prefWidthProperty().bind(stack.prefWidthProperty());
 
     column.setGraphic(stack);
+
     if (nestedColumn != null)
     {
       nestedColumn.getColumns().add(column);
@@ -132,7 +87,7 @@ public class MyTableView<T>
     buttonProperty = new ButtonProperty(() -> IconUtil.createIconNode("filter", IconSize.SMALLER));
 
     column = addColumn(nestedColumn, translate(name));
-    column.setColumnCount(4);
+    column.setColumnCount(2);
     column.setCellValueAlignment(Pos.CENTER);
     column.setEditable(true);
     column.setCellValueGetter((e) -> buttonProperty);
