@@ -12,6 +12,7 @@ module org.kku.jdiskusage
   requires com.miglayout.javafx;
   requires org.commonmark;
   requires javafx.web;
+  requires jdk.xml.dom;
 
   exports org.kku.jdiskusage.main;
 }

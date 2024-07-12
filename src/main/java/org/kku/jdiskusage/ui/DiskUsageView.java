@@ -125,7 +125,6 @@ public class DiskUsageView
   {
     VBox toolBars;
     SplitPane splitPane;
-    AppSetting<Double> splitPaneProperty;
 
     m_data.mi_fullScreen = new FullScreen(stage);
 

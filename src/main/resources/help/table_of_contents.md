@@ -4,6 +4,6 @@
 
 ## User's guide
 
-[Link](file:/help/license.md)  
-[Faq](file://help/faq.md)  
+[License GNU AGPL v3.0](file:///help/license.md)  
+[Faq](file:///help/faq.md)  
 [Google](http://google.com/)
