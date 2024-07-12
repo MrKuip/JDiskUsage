@@ -83,11 +83,8 @@ public class MyTableColumn<T, R>
           button.setText("");
           button.setOnAction(null);
 
-          if (value != null && value instanceof StyledText)
+          if (value != null && value instanceof StyledText styledText)
           {
-            StyledText styledText;
-
-            styledText = (StyledText) value;
             if (styledText.isPlainText())
             {
               text = styledText.getPlainText();
@@ -100,17 +97,17 @@ public class MyTableColumn<T, R>
               setPrefHeight(1);
             }
           }
-          else if (value != null && value instanceof ButtonCell)
+          else if (value != null && value instanceof ButtonCell buttonCell)
           {
-            button.setGraphic(((ButtonCell) value).getGraphic());
+            button.setGraphic(buttonCell.getGraphic());
             button.setOnMouseClicked((ae) -> m_action.accept(ae, getTableRow().getItem()));
             graphic = button;
             text = null;
           }
-          else if (value != null && value instanceof Node)
+          else if (value != null && value instanceof Node node)
           {
             text = "";
-            graphic = (Node) value;
+            graphic = node;
           }
           else
           {

@@ -85,14 +85,11 @@ public class Filter
   @Override
   public boolean equals(Object obj)
   {
-    Filter filter;
-
-    if (obj == null || !(obj instanceof Filter))
+    if (obj == null || !(obj instanceof Filter filter))
     {
       return false;
     }
 
-    filter = (Filter) obj;
     if (!filter.getFilterType().equals(getFilterType()))
     {
       return false;

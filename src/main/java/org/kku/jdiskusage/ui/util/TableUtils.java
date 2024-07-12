@@ -43,10 +43,10 @@ public class TableUtils
     {
       if (copyKeyCodeCompination.match(keyEvent))
       {
-        if (keyEvent.getSource() instanceof TableView)
+        if (keyEvent.getSource() instanceof TableView<?> tableView)
         {
           // copy to clipboard
-          copySelectionToClipboard((TableView<?>) keyEvent.getSource());
+          copySelectionToClipboard(tableView);
 
           // event is handled, consume it
           keyEvent.consume();

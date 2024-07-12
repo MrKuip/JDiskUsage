@@ -162,7 +162,6 @@ public class HelpPane
         for (int i = 0; i < nodeList.getLength(); i++)
         {
           ((EventTarget) nodeList.item(i)).addEventListener(EVENT_TYPE_CLICK, event -> {
-
             if (event.getCurrentTarget() instanceof HTMLAnchorElement anchorElement)
             {
               event.preventDefault();

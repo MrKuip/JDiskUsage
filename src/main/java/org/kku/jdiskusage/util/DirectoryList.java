@@ -69,16 +69,12 @@ public class DirectoryList
     @Override
     public boolean equals(Object obj)
     {
-      Directory o;
-
-      if (!(obj instanceof Directory))
+      if (!(obj instanceof Directory directory))
       {
         return false;
       }
 
-      o = (Directory) obj;
-
-      if (!Objects.equals(o.getName(), getName()) || !Objects.equals(o.getPath(), getPath()))
+      if (!Objects.equals(directory.getName(), getName()) || !Objects.equals(directory.getPath(), getPath()))
       {
         return false;
       }

@@ -102,8 +102,8 @@ public class PathList
     commonPrefixIndex2 = commonPrefixIndex;
 
     description.append(" -> ");
-    description.append(pathNameList.stream().map(pn -> "'" + pn.substring(commonPrefixIndex2) + "'")
-        .collect(Collectors.joining(" ")));
+    description.append(
+        pathNameList.stream().map(pn -> "'" + pn.substring(commonPrefixIndex2) + "'").collect(Collectors.joining(" ")));
 
     return description.toString();
   }
@@ -117,12 +117,12 @@ public class PathList
   @Override
   public boolean equals(Object o)
   {
-    if (!(o instanceof PathList))
+    if (!(o instanceof PathList pathList))
     {
       return false;
     }
 
-    if (((PathList) o).toString().equals(toString()))
+    if (pathList.toString().equals(toString()))
     {
       return true;
     }
