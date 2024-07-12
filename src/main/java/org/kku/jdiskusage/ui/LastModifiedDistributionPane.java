@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
-import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonProperty;
+import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonCell;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
@@ -233,9 +233,9 @@ class LastModifiedDistributionPane
       MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, Long> sumOfFileSizesColumn;
       MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, Long> numberOfFilesColumn;
       MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, Void> filterColumn;
-      MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, ButtonProperty> filterEqualColumn;
-      MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, ButtonProperty> filterGreaterThanColumn;
-      MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, ButtonProperty> filterLessThanColumn;
+      MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, ButtonCell> filterEqualColumn;
+      MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, ButtonCell> filterGreaterThanColumn;
+      MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, ButtonCell> filterLessThanColumn;
 
       table = new MyTableView<>("LastModifiedDistribution");
       table.setEditable(false);

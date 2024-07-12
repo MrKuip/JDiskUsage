@@ -41,17 +41,19 @@ public class MyTreeTableColumn<T, R>
 
   public void setColumnCount(int columnCount)
   {
-    AppSetting<Double> prefSizeProperty;
-
-    prefSizeProperty = AppProperties.PREF_SIZE.forSubject(getTreeTableView().getId() + "_" + getId());
-
-    setPrefWidth(prefSizeProperty.get(FxUtil.getColumnCountWidth(columnCount)));
-    widthProperty().addListener(prefSizeProperty.getChangeListener());
+    setPrefWidth(getPrefSizeProperty().get(FxUtil.getColumnCountWidth(columnCount)));
+    widthProperty().addListener(getPrefSizeProperty().getChangeListener());
   }
 
   public void setCellValueAlignment(Pos pos)
   {
     setStyle("-fx-alignment: " + pos + ";");
+  }
+
+  private AppSetting<Double> getPrefSizeProperty()
+  {
+    assert getTreeTableView().getId() != null;
+    return AppProperties.PREF_SIZE.forSubject(getTreeTableView().getId() + "_" + getId());
   }
 
   static class MyTreeTableCell<T, R>

@@ -11,6 +11,8 @@ import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.FileTreePane;
 import org.kku.jdiskusage.ui.util.IconUtil;
+import org.kku.jdiskusage.util.AppProperties;
+import org.kku.jdiskusage.util.AppSettings.AppSetting;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
@@ -35,7 +37,7 @@ abstract public class AbstractTabContentPane
   private FileTreePane m_currentTreePaneData;
   private TreeItem<FileNodeIF> m_currentTreeItem;
 
-  private record PaneType(String description, String iconName, Supplier<Node> node) {};
+  private record PaneType(String id, String description, String iconName, Supplier<Node> node) {};
 
   public AbstractTabContentPane(DiskUsageData diskUsageData)
   {
@@ -65,6 +67,9 @@ abstract public class AbstractTabContentPane
   {
     if (m_paneTypeByIdMap.size() > 1)
     {
+      m_currentPaneType = m_paneTypeByIdMap
+          .get(getSelectedIdProperty().get(m_paneTypeByIdMap.entrySet().iterator().next().getKey()));
+
       m_paneTypeByIdMap.values().stream().map(paneType -> {
         ToggleButton button;
 
@@ -108,7 +113,7 @@ abstract public class AbstractTabContentPane
     PaneType paneType;
 
     paneType = m_paneTypeByIdMap.computeIfAbsent(paneTypeId,
-        (panelTypeId) -> new PaneType(description, iconName, node));
+        (panelTypeId) -> new PaneType(paneTypeId, description, iconName, node));
     if (m_currentPaneType == null || current)
     {
       m_currentPaneType = paneType;
@@ -117,10 +122,17 @@ abstract public class AbstractTabContentPane
     return paneType;
   }
 
-  private void setCurrentPaneType(PaneType paneType)
+  public void setCurrentPaneType(PaneType paneType)
   {
     m_currentPaneType = paneType;
     initCurrentNode();
+
+    getSelectedIdProperty().set(paneType.id());
+  }
+
+  private AppSetting<String> getSelectedIdProperty()
+  {
+    return AppProperties.SELECTED_ID.forSubject(this);
   }
 
   private void initCurrentNode()
@@ -161,7 +173,8 @@ abstract public class AbstractTabContentPane
     return m_node;
   }
 
-  protected void addFilterHandler(Node node, String filterType, String filterValue, Predicate<FileNodeIF> fileNodePredicate)
+  protected void addFilterHandler(Node node, String filterType, String filterValue,
+      Predicate<FileNodeIF> fileNodePredicate)
   {
     node.addEventHandler(MouseEvent.MOUSE_CLICKED, (event) -> {
       m_diskUsageData.addFilter(new Filter(filterType, filterValue, fileNodePredicate), event.getClickCount() == 2);

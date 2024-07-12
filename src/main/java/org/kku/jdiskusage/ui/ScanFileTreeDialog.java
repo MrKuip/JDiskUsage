@@ -13,6 +13,7 @@ import org.kku.jdiskusage.ui.common.Notifications;
 import org.kku.jdiskusage.ui.util.ConcurrentUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties;
+import org.kku.jdiskusage.util.AppSettings.AppSetting;
 import org.kku.jdiskusage.util.DirectoryChooser;
 import org.kku.jdiskusage.util.FileTree;
 import org.kku.jdiskusage.util.FileTree.DirNode;
@@ -49,7 +50,7 @@ public class ScanFileTreeDialog
     PathList dirPathList;
     Path initialDirectory;
 
-    initialDirectory = AppProperties.INITIAL_DIRECTORY.forSubject(this).get();
+    initialDirectory = getInitialDirectoryProperty().get();
     directoryChooser = new DirectoryChooser();
     if (initialDirectory != null)
     {
@@ -184,7 +185,7 @@ public class ScanFileTreeDialog
       }
 
       //getProps().set(AppProperties.INITIAL_DIRECTORY, mi_rootDirectory);
-      AppProperties.INITIAL_DIRECTORY.forSubject(ScanFileTreeDialog.this).set(mi_rootDirectory);
+      getInitialDirectoryProperty().set(mi_rootDirectory);
     }
 
     public Path getRootDirectory()
@@ -270,7 +271,7 @@ public class ScanFileTreeDialog
       }
 
       //getProps().set(AppProperties.INITIAL_DIRECTORY, mi_rootDirectory);
-      AppProperties.INITIAL_DIRECTORY.forSubject(ScanFileTreeDialog.this).set(mi_rootDirectory);
+      getInitialDirectoryProperty().set(mi_rootDirectory);
     }
 
     public Path getRootDirectory()
@@ -378,7 +379,7 @@ public class ScanFileTreeDialog
       }
 
       //getProps().set(AppProperties.INITIAL_DIRECTORY, mi_rootDirectory);
-      AppProperties.INITIAL_DIRECTORY.forSubject(ScanFileTreeDialog.this).set(mi_rootDirectory);
+      getInitialDirectoryProperty().set(mi_rootDirectory);
 
       setRunNow(this::scan);
     }
@@ -415,5 +416,10 @@ public class ScanFileTreeDialog
     {
       return new ProgressData();
     }
+  }
+
+  private AppSetting<Path> getInitialDirectoryProperty()
+  {
+    return AppProperties.INITIAL_DIRECTORY.forSubject(this);
   }
 }

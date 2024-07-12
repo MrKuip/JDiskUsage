@@ -28,10 +28,6 @@ public class Main
     DiskUsageView diskUsageView;
     Scene scene;
     Rectangle2D defaultScreenBounds;
-    AppSetting<Double> xProperty;
-    AppSetting<Double> yProperty;
-    AppSetting<Double> widthProperty;
-    AppSetting<Double> heightProperty;
 
     m_rootStage = stage;
 
@@ -45,24 +41,15 @@ public class Main
 
     defaultScreenBounds = getDefaultScreenBounds();
 
-    xProperty = AppProperties.X.forSubject(Main.this);
-    yProperty = AppProperties.Y.forSubject(Main.this);
-    widthProperty = AppProperties.WIDTH.forSubject(Main.this);
-    heightProperty = AppProperties.HEIGHT.forSubject(Main.this);
+    stage.setX(getXProperty().get(defaultScreenBounds.getMinX()));
+    stage.setY(getYProperty().get(defaultScreenBounds.getMinY()));
+    stage.setWidth(getWidthProperty().get(defaultScreenBounds.getWidth()));
+    stage.setHeight(getHeightProperty().get(defaultScreenBounds.getHeight()));
 
-    stage.setX(xProperty.get(defaultScreenBounds.getMinX()));
-    stage.setY(AppProperties.Y.forSubject(Main.this).get(defaultScreenBounds.getMinY()));
-    stage.setWidth(AppProperties.WIDTH.forSubject(Main.this).get(defaultScreenBounds.getWidth()));
-    stage.setHeight(AppProperties.HEIGHT.forSubject(Main.this).get(defaultScreenBounds.getHeight()));
-
-    stage.xProperty().addListener(xProperty.getChangeListener());
-    stage.yProperty().addListener(yProperty.getChangeListener());
-    stage.widthProperty().addListener(widthProperty.getChangeListener());
-    stage.heightProperty().addListener(heightProperty.getChangeListener());
-
-    //stage.xProperty().addListener((a, b, c) -> { System.out.println("changed 1!"); });
-    //stage.xProperty().addListener((a, b, c) -> { System.out.println("changed 3!"); });
-    //stage.xProperty().asObject().addListener((a, b, c) -> { System.out.println("changed 2!"); });
+    stage.xProperty().addListener(getXProperty().getChangeListener());
+    stage.yProperty().addListener(getYProperty().getChangeListener());
+    stage.widthProperty().addListener(getWidthProperty().getChangeListener());
+    stage.heightProperty().addListener(getHeightProperty().getChangeListener());
 
     stage.setTitle("JDiskUsage");
     stage.setScene(scene);
@@ -96,5 +83,25 @@ public class Main
   public static void main(String[] args)
   {
     launch(args);
+  }
+
+  private AppSetting<Double> getWidthProperty()
+  {
+    return AppProperties.WIDTH.forSubject(this);
+  }
+
+  private AppSetting<Double> getHeightProperty()
+  {
+    return AppProperties.HEIGHT.forSubject(this);
+  }
+
+  private AppSetting<Double> getXProperty()
+  {
+    return AppProperties.X.forSubject(this);
+  }
+
+  private AppSetting<Double> getYProperty()
+  {
+    return AppProperties.Y.forSubject(this);
   }
 }

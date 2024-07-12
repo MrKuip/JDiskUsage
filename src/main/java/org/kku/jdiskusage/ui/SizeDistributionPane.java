@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
-import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonProperty;
+import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonCell;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
@@ -261,9 +261,9 @@ public class SizeDistributionPane
       MyTableColumn<SizeDistributionEntry, Long> sumOfFileSizesColumn;
       MyTableColumn<SizeDistributionEntry, Long> numberOfFilesColumn;
       MyTableColumn<SizeDistributionEntry, Void> filterColumn;
-      MyTableColumn<SizeDistributionEntry, ButtonProperty> filterEqualColumn;
-      MyTableColumn<SizeDistributionEntry, ButtonProperty> filterGreaterThanColumn;
-      MyTableColumn<SizeDistributionEntry, ButtonProperty> filterLessThanColumn;
+      MyTableColumn<SizeDistributionEntry, ButtonCell> filterEqualColumn;
+      MyTableColumn<SizeDistributionEntry, ButtonCell> filterGreaterThanColumn;
+      MyTableColumn<SizeDistributionEntry, ButtonCell> filterLessThanColumn;
 
       table = new MyTableView<>("SizeDistribution");
       table.setEditable(false);

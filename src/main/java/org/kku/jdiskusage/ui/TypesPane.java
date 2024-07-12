@@ -159,7 +159,7 @@ class TypesPane
         totalNumberOfFiles = list.stream().map(e -> e.aggregates().getFileCount()).reduce(0l, (a, b) -> a + b);
       }
 
-      table = new MyTableView<>("File types in %d");
+      table = new MyTableView<>("Types");
       table.setEditable(false);
 
       table.addRankColumn("Rank");

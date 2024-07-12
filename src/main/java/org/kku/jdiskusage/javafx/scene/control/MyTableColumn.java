@@ -33,12 +33,8 @@ public class MyTableColumn<T, R>
   @SuppressWarnings("unchecked")
   public void setColumnCount(int columnCount)
   {
-    AppSetting<Double> prefSizeProperty;
-
-    prefSizeProperty = AppProperties.PREF_SIZE.forSubject(getTableView().getId() + "_" + getId());
-
-    setPrefWidth(prefSizeProperty.get(FxUtil.getColumnCountWidth(columnCount)));
-    widthProperty().addListener(prefSizeProperty.getChangeListener());
+    setPrefWidth(getPrefSizeProperty().get(FxUtil.getColumnCountWidth(columnCount)));
+    widthProperty().addListener(getPrefSizeProperty().getChangeListener());
   }
 
   public void setCellValueAlignment(Pos alignment)
@@ -104,9 +100,9 @@ public class MyTableColumn<T, R>
               setPrefHeight(1);
             }
           }
-          else if (value != null && value instanceof ButtonProperty)
+          else if (value != null && value instanceof ButtonCell)
           {
-            button.setGraphic(((ButtonProperty) value).getGraphic());
+            button.setGraphic(((ButtonCell) value).getGraphic());
             button.setOnMouseClicked((ae) -> m_action.accept(ae, getTableRow().getItem()));
             graphic = button;
             text = null;
@@ -150,11 +146,19 @@ public class MyTableColumn<T, R>
     });
   }
 
-  static public class ButtonProperty
+  private AppSetting<Double> getPrefSizeProperty()
+  {
+    assert getTableView().getId() != null;
+    System.out.println("tableView.id=" + getTableView().getId());
+    System.out.println("tableColumn.id=" + getId());
+    return AppProperties.PREF_SIZE.forSubject(getTableView().getId() + "_" + getId());
+  }
+
+  static public class ButtonCell
   {
     private Supplier<Node> mi_graphic;
 
-    public ButtonProperty(Supplier<Node> graphic)
+    public ButtonCell(Supplier<Node> graphic)
     {
       mi_graphic = graphic;
     }

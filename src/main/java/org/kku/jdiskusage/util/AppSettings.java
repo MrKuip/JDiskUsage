@@ -52,7 +52,10 @@ public abstract class AppSettings
 
     public AppSetting<T> forSubject(Object subject, T defaultValue)
     {
-      return new AppSetting<>(this, subject.getClass().getSimpleName(), defaultValue);
+      Class<?> subjectClass;
+
+      subjectClass = subject instanceof Class ? (Class<?>) subject : subject.getClass();
+      return new AppSetting<>(this, subjectClass.getSimpleName(), defaultValue);
     }
 
     public AppSetting<T> forSubject(String subject)

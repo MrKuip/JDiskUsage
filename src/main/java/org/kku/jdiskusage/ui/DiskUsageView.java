@@ -133,14 +133,12 @@ public class DiskUsageView
 
     m_data.getTabPaneData().init();
 
-    splitPaneProperty = AppProperties.SPLIT_PANE_POSITION.forSubject(DiskUsageView.this);
-
     splitPane.getItems().addAll(m_data.getTreePaneData().getNode(), m_data.getTabPaneData().getNode());
-    splitPane.getDividers().get(0).positionProperty().addListener(splitPaneProperty.getChangeListener());
+    splitPane.getDividers().get(0).positionProperty().addListener(getSplitPaneProperty().getChangeListener());
     SplitPane.setResizableWithParent(m_data.getTreePaneData().getNode(), false);
     SplitPane.setResizableWithParent(m_data.getTabPaneData().getNode(), false);
 
-    splitPane.getDividers().get(0).setPosition(splitPaneProperty.get(0.40));
+    splitPane.getDividers().get(0).setPosition(getSplitPaneProperty().get(0.40));
 
     m_content.add(toolBars, "dock north");
     m_content.add(splitPane, "dock center");
@@ -407,7 +405,7 @@ public class DiskUsageView
         selectedIdProperty.set(((TabData) newTab.getUserData()).name());
       });
 
-      // Select the tab that was in a previous version the last tab selected
+      // Select the tab that was in a previously selected (in a previous run)
       selectedTabDataName = selectedIdProperty.get(TabPaneData.TabData.values()[0].name());
       mi_tabPane.getTabs().stream().filter(tab -> ((TabData) tab.getUserData()).name().equals(selectedTabDataName))
           .findFirst().ifPresent(tab -> {
@@ -483,8 +481,7 @@ public class DiskUsageView
       AppSetting<PathList> recentScansProperty;
       List<PathList> list;
 
-      recentScansProperty = AppProperties.RECENT_SCANS.forSubject(this);
-
+      recentScansProperty = getRecentScansProperty();
       list = recentScansProperty.getList();
       list.add(0, pathList);
       list = list.stream().distinct().toList();
@@ -506,8 +503,7 @@ public class DiskUsageView
 
     private List<MenuItem> getItems()
     {
-      return AppProperties.RECENT_SCANS.forSubject(this).getList().stream().map(this::createMenuItem)
-          .collect(Collectors.toList());
+      return getRecentScansProperty().getList().stream().map(this::createMenuItem).collect(Collectors.toList());
     }
 
     private MenuItem createMenuItem(PathList pathList)
@@ -521,6 +517,11 @@ public class DiskUsageView
       });
 
       return menuItem;
+    }
+
+    private AppSetting<PathList> getRecentScansProperty()
+    {
+      return AppProperties.RECENT_SCANS.forSubject(this);
     }
   }
 
@@ -625,5 +626,10 @@ public class DiskUsageView
   public static String getNoneText()
   {
     return translate("<None>");
+  }
+
+  private AppSetting<Double> getSplitPaneProperty()
+  {
+    return AppProperties.SPLIT_PANE_POSITION.forSubject(this);
   }
 }

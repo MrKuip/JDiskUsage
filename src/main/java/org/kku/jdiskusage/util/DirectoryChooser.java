@@ -18,6 +18,7 @@ import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.common.FxDialog;
+import org.kku.jdiskusage.util.AppSettings.AppSetting;
 import org.kku.jdiskusage.util.DirectoryList.Directory;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.application.Platform;
@@ -522,12 +523,17 @@ public class DirectoryChooser
 
     private void setFavoriteDirectoryList(DirectoryList pathList)
     {
-      AppProperties.FAVORITE_DIRECTORIES.forSubject(this.getClass()).set(pathList);
+      getFavoriteDirectoriesProperty().set(pathList);
     }
 
     private DirectoryList getFavoriteDirectoryList()
     {
-      return AppProperties.FAVORITE_DIRECTORIES.forSubject(this.getClass()).get(DirectoryList.empty());
+      return getFavoriteDirectoriesProperty().get(DirectoryList.empty());
+    }
+
+    private AppSetting<DirectoryList> getFavoriteDirectoriesProperty()
+    {
+      return AppProperties.FAVORITE_DIRECTORIES.forSubject(this);
     }
   }
 

@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
-import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonProperty;
+import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonCell;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.DiskUsageView.FileAggregates;
@@ -133,9 +133,9 @@ class LinkCountPane
       MyTableColumn<FileAggregatesEntry, Long> numberOfFilesCountColumn;
       MyTableColumn<FileAggregatesEntry, Double> numberOfFilesPercentageColumn;
       MyTableColumn<FileAggregatesEntry, Void> filterColumn;
-      MyTableColumn<FileAggregatesEntry, ButtonProperty> filterEqualColumn;
-      MyTableColumn<FileAggregatesEntry, ButtonProperty> filterGreaterThanColumn;
-      MyTableColumn<FileAggregatesEntry, ButtonProperty> filterLessThanColumn;
+      MyTableColumn<FileAggregatesEntry, ButtonCell> filterEqualColumn;
+      MyTableColumn<FileAggregatesEntry, ButtonCell> filterGreaterThanColumn;
+      MyTableColumn<FileAggregatesEntry, ButtonCell> filterLessThanColumn;
       long totalFileSize;
       long totalNumberOfFiles;
 
@@ -147,7 +147,7 @@ class LinkCountPane
         totalNumberOfFiles = list.stream().map(e -> e.aggregates().getFileCount()).reduce(0l, (a, b) -> a + b);
       }
 
-      table = new MyTableView<>("File types in %d");
+      table = new MyTableView<>("Link count");
       table.setEditable(true);
 
       linkCountColumn = table.addColumn("Link count");

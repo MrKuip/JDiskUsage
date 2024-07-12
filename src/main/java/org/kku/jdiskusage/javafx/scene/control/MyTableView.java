@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import org.kku.fonticons.ui.FxIcon.IconSize;
-import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonProperty;
+import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonCell;
 import org.kku.jdiskusage.ui.util.ConcurrentUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.ui.util.TableUtils;
@@ -80,12 +80,12 @@ public class MyTableView<T>
     return column;
   }
 
-  public MyTableColumn<T, ButtonProperty> addFilterColumn(MyTableColumn<T, Void> nestedColumn, String name)
+  public MyTableColumn<T, ButtonCell> addFilterColumn(MyTableColumn<T, Void> nestedColumn, String name)
   {
-    ButtonProperty buttonProperty;
-    MyTableColumn<T, ButtonProperty> column;
+    ButtonCell buttonProperty;
+    MyTableColumn<T, ButtonCell> column;
 
-    buttonProperty = new ButtonProperty(() -> IconUtil.createIconNode("filter", IconSize.SMALLER));
+    buttonProperty = new ButtonCell(() -> IconUtil.createIconNode("filter", IconSize.SMALLER));
 
     column = addColumn(nestedColumn, translate(name));
     column.setColumnCount(2);

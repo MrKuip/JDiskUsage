@@ -1,9 +1,9 @@
 package org.kku.jdiskusage.main;
 
-import org.tbee.javafx.scene.layout.MigPane;
+import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
+import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
 public class TestFx
@@ -13,20 +13,14 @@ public class TestFx
   public void start(Stage stage)
   {
     Scene scene;
-    MigPane pane;
-    Button button1;
-    Button button2;
+    MyTableView<String> tableView;
+    MyTableColumn<String, Void> filterColumn;
 
-    button1 = new Button("Button 1");
-    button1.setStyle("-fx-font-size: 10");
-    button2 = new Button("Button 1");
-    button2.setStyle("-fx-font-size: 20");
+    tableView = new MyTableView<>("id1");
+    filterColumn = tableView.addColumn("Filter");
+    tableView.addColumn(filterColumn, "Filter1");
 
-    pane = new MigPane("debug", "", "top");
-    pane.add(button1);
-    pane.add(button2);
-
-    scene = new Scene(pane);
+    scene = new Scene(tableView);
     stage.setScene(scene);
     stage.show();
   }
