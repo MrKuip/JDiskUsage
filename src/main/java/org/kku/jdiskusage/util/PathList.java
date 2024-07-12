@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class PathList
@@ -122,12 +123,7 @@ public class PathList
       return false;
     }
 
-    if (pathList.toString().equals(toString()))
-    {
-      return true;
-    }
-
-    return super.equals(o);
+    return Objects.equals(pathList.toString(), toString());
   }
 
   @Override

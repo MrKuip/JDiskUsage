@@ -1,5 +1,6 @@
 package org.kku.jdiskusage.ui.common;
 
+import java.util.Objects;
 import java.util.function.Predicate;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.FileTree.FilterIF;
@@ -27,7 +28,7 @@ public class Filter
     mi_filterOperator = filterOperator;
     mi_filterValue = filterValue;
     mi_fileNodePredicate = fileNodePredicate;
-    mi_hashCode = (filterName + filterValue).hashCode();
+    mi_hashCode = Objects.hash(mi_filterType, mi_filterOperator, mi_filterValue);
   }
 
   @Override
@@ -90,16 +91,16 @@ public class Filter
       return false;
     }
 
-    if (!filter.getFilterType().equals(getFilterType()))
+    if (!Objects.equals(filter.getFilterType(), getFilterType()))
     {
       return false;
     }
 
-    if (!filter.getFilterOperator().equals(getFilterOperator()))
+    if (!Objects.equals(filter.getFilterOperator(), getFilterOperator()))
     {
       return false;
     }
 
-    return filter.getFilterValue().equals(getFilterValue());
+    return Objects.equals(filter.getFilterValue(), getFilterValue());
   }
 }

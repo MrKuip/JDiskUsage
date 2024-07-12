@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.controlsfx.control.BreadCrumbBar;
@@ -504,14 +505,14 @@ public class DirectoryChooser
     private void removeFavorite(Directory directory)
     {
       setFavoriteDirectoryList(new DirectoryList(
-          getFavoriteDirectoryList().getDirectoryList().stream().filter(d -> !d.equals(directory)).toList()));
+          getFavoriteDirectoryList().getDirectoryList().stream().filter(d -> !Objects.equals(d, directory)).toList()));
       m_sidePane.reInit();
     }
 
     private void renameFavorite(Directory directory)
     {
       setFavoriteDirectoryList(new DirectoryList(getFavoriteDirectoryList().getDirectoryList().stream().map(d -> {
-        return d.getPath().equals(directory.getPath()) ? directory : d;
+        return Objects.equals(d.getPath(), directory.getPath()) ? directory : d;
       }).toList()));
       m_sidePane.reInit();
     }

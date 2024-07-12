@@ -67,9 +67,9 @@ class TypesPane
       data = new PieChart.Data(name, e.aggregates().getSize(getCurrentDisplayMetric()));
       pieChart.getData().add(data);
 
-      if (!e.bucket().equals(DiskUsageView.getOtherText()))
+      if (!Objects.equals(e.bucket(), DiskUsageView.getOtherText()))
       {
-        test = (fileNode) -> fileNode.getFileType().equals(e.bucket());
+        test = (fileNode) -> Objects.equals(fileNode.getFileType(), e.bucket());
       }
       else
       {
@@ -110,9 +110,9 @@ class TypesPane
       data = new XYChart.Data<Number, String>(e.aggregates().getSize(getCurrentDisplayMetric()), e.bucket());
       series1.getData().add(data);
 
-      if (!e.bucket().equals(DiskUsageView.getOtherText()))
+      if (!Objects.equals(e.bucket(), DiskUsageView.getOtherText()))
       {
-        test = (fileNode) -> fileNode.getFileType().equals(e.bucket());
+        test = (fileNode) -> Objects.equals(fileNode.getFileType(), e.bucket());
       }
       else
       {

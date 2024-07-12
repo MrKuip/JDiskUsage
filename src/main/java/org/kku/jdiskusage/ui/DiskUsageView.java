@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -408,8 +409,9 @@ public class DiskUsageView
 
       // Select the tab that was in a previously selected (in a previous run)
       selectedTabDataName = selectedIdProperty.get(TabPaneData.TabData.values()[0].name());
-      mi_tabPane.getTabs().stream().filter(tab -> ((TabData) tab.getUserData()).name().equals(selectedTabDataName))
-          .findFirst().ifPresent(tab -> {
+      mi_tabPane.getTabs().stream()
+          .filter(tab -> Objects.equals(((TabData) tab.getUserData()).name(), selectedTabDataName)).findFirst()
+          .ifPresent(tab -> {
             mi_tabPane.getSelectionModel().select(tab);
           });
     }
@@ -433,7 +435,7 @@ public class DiskUsageView
     {
       Optional<Entry<TabData, Tab>> tabEntry;
 
-      tabEntry = mi_tabByTabId.entrySet().stream().filter(entry -> tab.equals(entry.getValue())).findFirst();
+      tabEntry = mi_tabByTabId.entrySet().stream().filter(entry -> Objects.equals(tab, entry.getValue())).findFirst();
       if (tabEntry.isPresent() && item != null)
       {
         TabData tabData;
