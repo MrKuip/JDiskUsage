@@ -10,6 +10,8 @@ module org.kku.jdiskusage
   requires java.prefs;
   requires com.miglayout.swing;
   requires com.miglayout.javafx;
+  requires org.commonmark;
+  requires javafx.web;
 
   exports org.kku.jdiskusage.main;
 }

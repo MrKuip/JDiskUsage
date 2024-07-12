@@ -22,7 +22,7 @@ repositories {
 
 javafx {
     version = "22.0.1"
-    modules = [ 'javafx.controls' ]
+    modules = [ 'javafx.controls', 'javafx.web']
 }
 
 dependencies {
@@ -30,6 +30,7 @@ dependencies {
   implementation files('lib/fontIcons-1.0.jar')
   implementation 'com.miglayout:miglayout-javafx:11.4'
   implementation 'com.miglayout:miglayout-swing:11.4'
+  implementation 'org.commonmark:commonmark:0.18.2'
 
   testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
   testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

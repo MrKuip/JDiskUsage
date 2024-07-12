@@ -70,6 +70,7 @@ public class DiskUsageView
     private final LastModifiedDistributionPane mi_modifiedDistributionTab = new LastModifiedDistributionPane(this);
     private final TypesPane mi_typesTab = new TypesPane(this);
     private final SearchPane mi_searchTab = new SearchPane(this);
+    private final HelpPane mi_helpTab = new HelpPane(this);
     private final RecentFilesMenu mi_recentFiles = new RecentFilesMenu();
     private final PreferencesMenu mi_preferences = new PreferencesMenu();
     private final FilterPane mi_filterPane = new FilterPane(this);
@@ -320,7 +321,8 @@ public class DiskUsageView
       DISTRIBUTION_MODIFIED("Last modified", "calendar-blank", (md) -> md.mi_modifiedDistributionTab),
       DISTRIBUTION_TYPES("Types", "chart-pie", (md) -> md.mi_typesTab),
       LINK_COUNT("Link count", "counter", (md) -> md.mi_linkCountTab),
-      SEARCH_TYPES("Search", "magnify", (md) -> md.mi_searchTab);
+      SEARCH_TYPES("Search", "magnify", (md) -> md.mi_searchTab),
+      HELP("Help", "help", (md) -> md.mi_helpTab);
 
       private final String m_name;
       private final String m_iconName;
