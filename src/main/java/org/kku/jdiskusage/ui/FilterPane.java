@@ -41,11 +41,9 @@ class FilterPane
   {
     m_diskUsageData = diskUsageData;
 
-    m_contentPane = new MigPane("ins 0", "[][grow][]", "[]");
+    m_contentPane = new MigPane("ins 0", "[][grow][]", "[grow]");
 
     m_filterPane.setId("filterPane");
-    m_filterPane.setVgap(5);
-    m_filterPane.setHgap(5);
 
     m_contentPane.add(IconUtil.createIconNode("filter", IconSize.SMALL), "aligny baseline");
     m_contentPane.add(m_filterPane, "grow");
