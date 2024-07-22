@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
+import org.kku.jdiskusage.javafx.scene.control.DraggableTabPane;
 import org.kku.jdiskusage.ui.ScanFileTreeDialog.ScanResult;
 import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
 import org.kku.jdiskusage.ui.common.Filter;
@@ -255,7 +256,6 @@ public class DiskUsageView
 
     filterPaneNode = createFilterPane().getNode();
     filterPaneNode.setId("filterButton");
-    //HBox.setHgrow(filterPaneNode, Priority.ALWAYS);
 
     toolBar = new MigPane("", "[pref][pref][pref]40[pref][pref]20[pref]20[pref]20[grow,fill]", "[pref:pref:pref, top]");
     toolBar.add(backButton);
@@ -265,7 +265,7 @@ public class DiskUsageView
     toolBar.add(refreshButton);
     toolBar.add(showDisplayMetricButton);
     toolBar.add(sortButton);
-    toolBar.add(filterPaneNode);
+    toolBar.add(filterPaneNode, "grow");
 
     return toolBar;
   }
@@ -385,7 +385,7 @@ public class DiskUsageView
 
     private TabPaneData()
     {
-      mi_tabPane = new TabPane();
+      mi_tabPane = new DraggableTabPane();
       mi_borderPane = new BorderPane();
       mi_borderPane.setCenter(mi_tabPane);
     }
@@ -416,9 +416,9 @@ public class DiskUsageView
           });
     }
 
-    public BorderPane getNode()
+    public Node getNode()
     {
-      return mi_borderPane;
+      return mi_tabPane;
     }
 
     public Tab createTab(TabData tabData)
