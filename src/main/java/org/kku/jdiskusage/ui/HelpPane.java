@@ -9,7 +9,7 @@ import java.net.URISyntaxException;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
+import org.kku.jdiskusage.ui.common.AbstractContentPane;
 import org.kku.jdiskusage.ui.util.ConcurrentUtil;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppSettings.AppSetting;
@@ -27,7 +27,7 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
 public class HelpPane
-  extends AbstractTabContentPane
+  extends AbstractContentPane
 {
   public static final String EVENT_TYPE_CLICK = "click";
   public static final String FILE_PREFIX = "file://";

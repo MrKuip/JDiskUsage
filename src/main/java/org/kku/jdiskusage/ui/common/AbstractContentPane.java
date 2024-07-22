@@ -19,13 +19,14 @@ import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 
-abstract public class AbstractTabContentPane
+abstract public class AbstractContentPane
 {
   private DiskUsageData m_diskUsageData;
   private PaneData m_paneData;
@@ -39,9 +40,57 @@ abstract public class AbstractTabContentPane
 
   private record PaneType(String id, String description, String iconName, Supplier<Node> node) {};
 
-  public AbstractTabContentPane(DiskUsageData diskUsageData)
+  public AbstractContentPane(DiskUsageData diskUsageData)
   {
     m_diskUsageData = diskUsageData;
+
+    m_diskUsageData.getSelectedTreeItemProperty().addListener((o, oldValue, newValue) -> refresh());
+    AppPreferences.displayMetricPreference.addListener((o, oldValue, newValue) -> refresh());
+  }
+
+  public void refresh()
+  {
+    boolean init;
+
+    init = isShowing(m_nodeByPaneTypeMap.get(m_currentPaneType));
+
+    System.out.print(getClass().getSimpleName() + "." + m_currentPaneType.description + " " + init);
+    reset();
+
+    if (init)
+    {
+      initNode(m_diskUsageData.getTreePaneData());
+      initCurrentNode();
+      System.out.print("INIT_CURRENT_NODE:" + getClass().getSimpleName() + "." + m_currentPaneType.description + " ");
+    }
+  }
+
+  private static boolean isShowing(Node node)
+  {
+    if (node == null)
+    {
+      return false;
+    }
+
+    //System.out.println("====is visible :" + node);
+    do
+    {
+      if (!node.isVisible())
+      {
+        return false;
+      }
+
+      if (node instanceof TabPane tabPane)
+      {
+        //System.out.println("selectedItem: " + tabPane.getSelectionModel().getSelectedItem());
+        //System.out.println("selectedContent: " + tabPane.getSelectionModel().getSelectedItem().getContent());
+      }
+
+      //System.out.println("node=" + node);
+    }
+    while ((node = node.getParent()) != null);
+
+    return true;
   }
 
   public void reset()
@@ -140,7 +189,7 @@ abstract public class AbstractTabContentPane
     if (m_currentPaneType != null)
     {
       m_node.setCenter(m_nodeByPaneTypeMap.computeIfAbsent(m_currentPaneType, type -> {
-
+        System.out.println("Creating new node: " + type.toString());
         return type.node().get();
       }));
     }
@@ -185,8 +234,8 @@ abstract public class AbstractTabContentPane
   {
     public PaneData()
     {
-      m_diskUsageData.getSelectedTreeItemProperty().addListener((o, oldValue, newValue) -> reset());
-      AppPreferences.displayMetricPreference.addListener((o, oldValue, newValue) -> reset());
+      //m_diskUsageData.getSelectedTreeItemProperty().addListener((o, oldValue, newValue) -> reset());
+      //AppPreferences.displayMetricPreference.addListener((o, oldValue, newValue) -> reset());
 
       m_paneData = this;
     }

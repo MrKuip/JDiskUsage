@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
+import org.kku.jdiskusage.ui.common.AbstractContentPane;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.OperatingSystemUtil;
@@ -28,7 +28,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
 
 class Top50Pane
-  extends AbstractTabContentPane
+  extends AbstractContentPane
 {
   private final Top50PaneData mi_data = new Top50PaneData();
 

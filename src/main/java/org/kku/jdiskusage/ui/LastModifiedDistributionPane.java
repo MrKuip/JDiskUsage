@@ -12,7 +12,7 @@ import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonCell;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
+import org.kku.jdiskusage.ui.common.AbstractContentPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.FxUtil;
@@ -36,7 +36,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TreeItem;
 
 class LastModifiedDistributionPane
-  extends AbstractTabContentPane
+  extends AbstractContentPane
 {
   private LastModifiedDistributionPaneData mi_data = new LastModifiedDistributionPaneData();
 

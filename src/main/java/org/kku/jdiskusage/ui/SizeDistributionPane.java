@@ -9,7 +9,7 @@ import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonCell;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
+import org.kku.jdiskusage.ui.common.AbstractContentPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.FxUtil;
@@ -32,7 +32,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TreeItem;
 
 public class SizeDistributionPane
-  extends AbstractTabContentPane
+  extends AbstractContentPane
 {
   private SizeDistributionPaneData mi_data = new SizeDistributionPaneData();
 
@@ -346,6 +346,8 @@ public class SizeDistributionPane
           Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {
             mi_map.put(bucket, new SizeDistributionBucketData(0l, 0l));
           });
+
+          System.out.println("current tree item: " + getCurrentTreeItem());
 
           new FileNodeIterator(getCurrentTreeItem().getValue()).forEach(fn -> {
             if (fn.isFile())

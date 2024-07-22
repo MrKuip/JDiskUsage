@@ -13,7 +13,7 @@ import org.kku.jdiskusage.concurrent.ProgressData;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
+import org.kku.jdiskusage.ui.common.AbstractContentPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
@@ -43,7 +43,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.paint.Color;
 
 public class SearchPane
-  extends AbstractTabContentPane
+  extends AbstractContentPane
 {
   private SearchPaneData mi_data = new SearchPaneData();
 

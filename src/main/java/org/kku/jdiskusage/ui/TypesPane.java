@@ -15,7 +15,7 @@ import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.DiskUsageView.FileAggregates;
 import org.kku.jdiskusage.ui.DiskUsageView.FileAggregatesEntry;
-import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
+import org.kku.jdiskusage.ui.common.AbstractContentPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
 import org.kku.jdiskusage.ui.util.FxUtil;
@@ -38,7 +38,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TreeItem;
 
 class TypesPane
-  extends AbstractTabContentPane
+  extends AbstractContentPane
 {
   private TypesPaneData mi_data = new TypesPaneData();
 

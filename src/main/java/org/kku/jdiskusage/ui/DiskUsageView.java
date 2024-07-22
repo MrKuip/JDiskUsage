@@ -16,7 +16,7 @@ import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.DraggableTabPane;
 import org.kku.jdiskusage.ui.ScanFileTreeDialog.ScanResult;
-import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
+import org.kku.jdiskusage.ui.common.AbstractContentPane;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.common.FullScreen;
 import org.kku.jdiskusage.ui.common.Navigation;
@@ -326,10 +326,10 @@ public class DiskUsageView
 
       private final String m_name;
       private final String m_iconName;
-      private final Function<DiskUsageData, ? extends AbstractTabContentPane> m_tabPaneSupplier;
+      private final Function<DiskUsageData, ? extends AbstractContentPane> m_tabPaneSupplier;
 
       private TabData(String name, String iconName,
-          Function<DiskUsageData, ? extends AbstractTabContentPane> tabPaneGetter)
+          Function<DiskUsageData, ? extends AbstractContentPane> tabPaneGetter)
       {
         m_name = name;
         m_iconName = iconName;

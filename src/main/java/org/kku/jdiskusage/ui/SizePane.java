@@ -2,7 +2,7 @@ package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.common.AbstractTabContentPane;
+import org.kku.jdiskusage.ui.common.AbstractContentPane;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
@@ -14,7 +14,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.input.MouseEvent;
 
 class SizePane
-  extends AbstractTabContentPane
+  extends AbstractContentPane
 {
   SizePane(DiskUsageData diskUsageData)
   {
