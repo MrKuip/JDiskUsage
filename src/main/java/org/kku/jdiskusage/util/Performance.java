@@ -26,7 +26,7 @@ public class Performance
 
     public void ready()
     {
-      System.out.println(mi_text + " took " + mi_stopWatch.getElapsedTime() + " msec.");
+      Log.performance.info("%s took %d msec", mi_text, mi_stopWatch.getElapsedTime());
     }
 
     @Override
