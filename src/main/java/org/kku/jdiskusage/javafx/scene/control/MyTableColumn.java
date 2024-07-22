@@ -146,8 +146,6 @@ public class MyTableColumn<T, R>
   private AppSetting<Double> getPrefSizeProperty()
   {
     assert getTableView().getId() != null;
-    System.out.println("tableView.id=" + getTableView().getId());
-    System.out.println("tableColumn.id=" + getId());
     return AppProperties.PREF_SIZE.forSubject(getTableView().getId() + "_" + getId());
   }
 
