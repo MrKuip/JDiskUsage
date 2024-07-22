@@ -416,9 +416,9 @@ public class DiskUsageView
           });
     }
 
-    public Node getNode()
+    public BorderPane getNode()
     {
-      return mi_tabPane;
+      return mi_borderPane;
     }
 
     public Tab createTab(TabData tabData)
