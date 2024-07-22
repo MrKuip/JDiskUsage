@@ -1,7 +1,6 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
 import java.util.stream.Collectors;
-import org.kku.fonticons.ui.FxIcon.IconColorModifier;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties;
@@ -19,6 +18,7 @@ import javafx.scene.input.DataFormat;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.scene.robot.Robot;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -45,8 +45,7 @@ public class DraggableTabPane
           {
             MigPane pane = new MigPane("", "0[]0[]0");
             pane.getChildren().addAll(
-                IconUtil.createFxIcon("drag", IconSize.SMALL).fillColor(IconColorModifier.BRIGHTER).getIconLabel(),
-                tab.getGraphic());
+                IconUtil.createFxIcon("drag", IconSize.SMALL).fillColor(Color.GREY).getIconLabel(), tab.getGraphic());
             tab.setGraphic(pane);
 
             tab.getProperties().put(TAB_SEQUENCE_NUMBER, ++NEXT_TAB_SEQUENCE_NUMBER);
