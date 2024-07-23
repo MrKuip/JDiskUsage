@@ -1,6 +1,8 @@
 package org.kku.jdiskusage.util;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -16,24 +18,19 @@ import java.util.logging.Logger;
 
 public class Log
 {
-  static public MyLogger performance = createLogger("performance", "performance", 100000, 10);
-  static public MyLogger log = createLogger("log", "log", 100000, 10);
-
-  {
-    performance.setLevel(Level.INFO);
-    log.setLevel(Level.INFO);
-  }
+  static public MyLogger log = createLogger("log", "log", 100000, 10, Level.FINE);
 
   private Log()
   {
   }
 
-  static private MyLogger createLogger(String name, String fileName, long fileSize, int count)
+  static private MyLogger createLogger(String name, String fileName, long fileSize, int count, Level level)
   {
     Logger logger;
     Handler handler;
 
     logger = Logger.getLogger(name);
+    logger.setLevel(level);
     logger.setUseParentHandlers(false);
     handler = new MyConsoleHandler();
     handler.setFormatter(getFormatter());
@@ -41,7 +38,7 @@ public class Log
 
     // HACK: The FileHandler doesn't create parent directories of the pattern.
     //       It will throw a NoSuchFileException with a message that is the name of the path.
-    //       
+    //       Then create the directories and try again.
     for (int i = 0; i < 2; i++)
     {
       try
@@ -84,9 +81,26 @@ public class Log
     return new Formatter()
     {
       @Override
-      public String format(LogRecord record)
+      public String format(LogRecord logRecord)
       {
-        return String.format("%1$tF %1$tT %2$s%n", Date.from(record.getInstant()), record.getMessage());
+        String msg;
+
+        msg = String.format("%1$tF %1$tT %2$s%n", Date.from(logRecord.getInstant()), logRecord.getMessage());
+        if (logRecord.getThrown() != null)
+        {
+          try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw))
+          {
+            logRecord.getThrown().printStackTrace(pw);
+            msg += sw.toString();
+          }
+          catch (IOException e)
+          {
+            // This will never happen
+            e.printStackTrace();
+          }
+        }
+
+        return msg;
       }
     };
   }
@@ -100,29 +114,42 @@ public class Log
       mi_logger = logger;
     }
 
-    private void setLevel(Level level)
+    public void setLevel(Level level)
     {
       mi_logger.setLevel(level);
     }
 
     public void info(String msg)
     {
-      mi_logger.info(msg);
+      mi_logger.log(Level.INFO, msg);
     }
 
     public void info(String format, Object... args)
     {
-      mi_logger.info(String.format(format, args));
+      log(Level.INFO, null, format, args);
     }
 
     public void debug(String msg)
     {
-      mi_logger.fine(msg);
+      mi_logger.log(Level.FINE, msg);
     }
 
     public void debug(String format, Object... args)
     {
-      mi_logger.fine(String.format(format, args));
+      log(Level.FINE, null, format, args);
+    }
+
+    public void error(Throwable throwable, String format, Object... args)
+    {
+      log(Level.SEVERE, throwable, String.format(format, args));
+    }
+
+    private void log(Level level, Throwable throwable, String format, Object... args)
+    {
+      if (mi_logger.isLoggable(level))
+      {
+        mi_logger.log(Level.SEVERE, String.format(format, args), throwable);
+      }
     }
   }
 

@@ -6,7 +6,7 @@ public class Performance
   {
   }
 
-  public static PerformancePoint start(String format, Object... args)
+  public static PerformancePoint measure(String format, Object... args)
   {
     return new PerformancePoint(String.format(format, args));
   }
@@ -26,7 +26,7 @@ public class Performance
 
     public void ready()
     {
-      Log.performance.info("%s took %d msec", mi_text, mi_stopWatch.getElapsedTime());
+      Log.log.info("%s took %d msec", mi_text, mi_stopWatch.getElapsedTime());
     }
 
     @Override

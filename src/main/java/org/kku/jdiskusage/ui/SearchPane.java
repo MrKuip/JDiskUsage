@@ -39,7 +39,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.TreeItem;
 import javafx.scene.paint.Color;
 
 public class SearchPane
@@ -128,41 +127,33 @@ public class SearchPane
 
   Node getTableNode()
   {
-    TreeItem<FileNodeIF> treeItem;
+    MyTableView<FileNodeIF> table;
+    MyTableColumn<FileNodeIF, StyledText> nameColumn;
+    MyTableColumn<FileNodeIF, Long> fileSizeColumn;
 
-    treeItem = getDiskUsageData().getSelectedTreeItem();
-    if (treeItem != null && !treeItem.getChildren().isEmpty())
-    {
-      MyTableView<FileNodeIF> table;
-      MyTableColumn<FileNodeIF, StyledText> nameColumn;
-      MyTableColumn<FileNodeIF, Long> fileSizeColumn;
+    table = new MyTableView<>("Search");
+    table.setEditable(false);
 
-      table = new MyTableView<>("Search");
-      table.setEditable(false);
+    table.addRankColumn("Rank");
 
-      table.addRankColumn("Rank");
+    nameColumn = table.addColumn("Name");
+    nameColumn.setColumnCount(300);
+    nameColumn.setCellValueGetter((fn) -> {
+      return mi_data.getAbsolutePathWithSearchHighlighted(fn);
+    });
 
-      nameColumn = table.addColumn("Name");
-      nameColumn.setColumnCount(300);
-      nameColumn.setCellValueGetter((fn) -> {
-        return mi_data.getAbsolutePathWithSearchHighlighted(fn);
-      });
+    fileSizeColumn = table.addColumn("File size");
+    fileSizeColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+    fileSizeColumn.setColumnCount(8);
+    fileSizeColumn.setCellValueGetter((fn) -> fn.getSize());
 
-      fileSizeColumn = table.addColumn("File size");
-      fileSizeColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-      fileSizeColumn.setColumnCount(8);
-      fileSizeColumn.setCellValueGetter((fn) -> fn.getSize());
+    table.getPlaceholder();
+    table.setPlaceholder(new Label("Searching..."));
 
-      table.getPlaceholder();
-      table.setPlaceholder(new Label("Searching..."));
+    new FxTask<>((progressData) -> mi_data.getList(progressData), (itemList) -> table.setItems(itemList),
+        SearchProgressData::new).execute();
 
-      new FxTask<>((progressData) -> mi_data.getList(progressData), (itemList) -> table.setItems(itemList),
-          SearchProgressData::new).execute();
-
-      return table;
-    }
-
-    return new Label("No data");
+    return table;
   }
 
   private static class SearchProgressData
@@ -196,7 +187,7 @@ public class SearchPane
         List<FileNodeIF> list;
 
         searchText = mi_data.mi_searchTextProperty.get();
-        try (PerformancePoint pp = Performance.start("Collecting data for search '%s'", searchText))
+        try (PerformancePoint pp = Performance.measure("Collecting data for search '%s'", searchText))
         {
           Pattern pattern;
           Matcher matcher;
@@ -228,7 +219,7 @@ public class SearchPane
 
             searchText2 = searchText;
 
-            fnIterator = new FileNodeIterator(getCurrentTreeItem().getValue());
+            fnIterator = new FileNodeIterator(getCurrentFileNode());
             fnIterator.setStoppedOnMaxCountProperty(mi_progress.mi_stoppedOnMaxCountProperty);
             fnIterator.setStoppedOnTimeoutProperty(mi_progress.mi_stoppedOnTimeoutProperty);
             fnIterator.enableProgress(mi_progress.mi_progressProperty);

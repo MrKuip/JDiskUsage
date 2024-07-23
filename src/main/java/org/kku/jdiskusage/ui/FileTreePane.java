@@ -7,7 +7,6 @@ import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.FileTree.FilterIF;
 import javafx.application.Platform;
 import javafx.scene.Node;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.BorderPane;
@@ -40,10 +39,7 @@ public class FileTreePane
   {
     mi_fileTreeView = new FileTreeView(dirNode);
     mi_treeTableView = mi_fileTreeView.createComponent();
-    mi_treeTableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-      mi_diskUsageData.getTabPaneData().itemSelected();
-    });
-    mi_breadCrumbBar.selectedCrumbProperty().bind(mi_treeTableView.getSelectionModel().selectedItemProperty());
+    mi_breadCrumbBar.selectedCrumbProperty().bind(mi_diskUsageData.selectedTreeItemProperty());
     mi_breadCrumbBar.setAutoNavigationEnabled(false);
     mi_breadCrumbBar.setOnCrumbAction((e) -> {
       mi_diskUsageData.getNavigation().navigateTo(e.getSelectedCrumb());
@@ -51,8 +47,7 @@ public class FileTreePane
 
     mi_treePane.setCenter(mi_treeTableView);
 
-    mi_treeTableView.getSelectionModel().selectedItemProperty()
-        .addListener((o, oldValue, newValue) -> mi_diskUsageData.getSelectedTreeItemProperty().set(newValue));
+    mi_diskUsageData.selectedTreeItemProperty().bind(mi_treeTableView.getSelectionModel().selectedItemProperty());
   }
 
   public void navigateTo(TreeItem<FileNodeIF> treeItem)
@@ -64,11 +59,11 @@ public class FileTreePane
 
     if (mi_treeTableView != null)
     {
-      Tab selectedTab;
+      TreeItem<FileNodeIF> parentTreeItem;
 
       // Make sure the path to select is expanded, because selection alone doesn't
       // expand the tree
-      TreeItem<FileNodeIF> parentTreeItem = treeItem;
+      parentTreeItem = treeItem;
       while ((parentTreeItem = parentTreeItem.getParent()) != null)
       {
         parentTreeItem.setExpanded(true);
@@ -79,9 +74,9 @@ public class FileTreePane
       // Scroll to the selected item to make sure it is visible for the user
       // mi_treeTableView.scrollTo(mi_treeTableView.getSelectionModel().getSelectedIndex());
 
-      mi_diskUsageData.getTabPaneData().mi_contentByTabId.clear();
-      selectedTab = mi_diskUsageData.getTabPaneData().mi_tabPane.getSelectionModel().getSelectedItem();
-      mi_diskUsageData.getTabPaneData().fillContent(selectedTab, mi_diskUsageData.getSelectedTreeItem());
+      //mi_diskUsageData.getTabPaneData().mi_contentByTabId.clear();
+      //selectedTab = mi_diskUsageData.getTabPaneData().mi_tabPane.getSelectionModel().getSelectedItem();
+      //mi_diskUsageData.getTabPaneData().fillContent(selectedTab, mi_diskUsageData.getSelectedTreeItem());
 
       Platform.runLater(() -> mi_treeTableView.requestFocus());
     }

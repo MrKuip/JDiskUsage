@@ -25,6 +25,7 @@ import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppSettings.AppSetting;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
+import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.PathList;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
@@ -43,7 +44,6 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
@@ -61,7 +61,8 @@ public class DiskUsageView
   public class DiskUsageData
   {
     private FullScreen mi_fullScreen;
-    private final ObjectProperty<TreeItem<FileNodeIF>> mi_selectedItemProperty = new SimpleObjectProperty<>();
+    private final ObjectProperty<TreeItem<FileNodeIF>> mi_selectedTreeItemProperty = new SimpleObjectProperty<>();
+    private final ObjectProperty<Tab> mi_selectedTabProperty = new SimpleObjectProperty<>();
     private final Navigation mi_navigation = new Navigation(this);
     private final FileTreePane mi_treePaneData = new FileTreePane(this);
     private final TabPaneData mi_tabPaneData = new TabPaneData();
@@ -88,18 +89,19 @@ public class DiskUsageView
       mi_tabPaneData.refresh();
     }
 
-    public ObjectProperty<TreeItem<FileNodeIF>> getSelectedTreeItemProperty()
+    public ObjectProperty<Tab> selectedTabProperty()
     {
-      return mi_selectedItemProperty;
+      return mi_selectedTabProperty;
+    }
+
+    public ObjectProperty<TreeItem<FileNodeIF>> selectedTreeItemProperty()
+    {
+      return mi_selectedTreeItemProperty;
     }
 
     public TreeItem<FileNodeIF> getSelectedTreeItem()
     {
-      if (getTreePaneData() == null || getTreePaneData().mi_treeTableView == null)
-      {
-        return null;
-      }
-      return getTreePaneData().mi_treeTableView.getSelectionModel().getSelectedItem();
+      return selectedTreeItemProperty().get();
     }
 
     public void addFilter(Filter filter, boolean activateFilterImmediately)
@@ -346,40 +348,28 @@ public class DiskUsageView
         return m_iconName;
       }
 
-      public Tab createTab()
+      public Tab initTab(Tab tab)
       {
-        Tab tab;
-
-        tab = translate(new Tab(getName()));
         tab.setUserData(this);
-        tab.setClosable(false);
-        if (getIconName() != null)
-        {
-          Node icon;
-
-          icon = IconUtil.createIconNode(getIconName(), IconSize.SMALL);
-          icon.prefHeight(300);
-          tab.setGraphic(icon);
-        }
-
         return tab;
       }
 
       Node fillContent(DiskUsageData mainData)
       {
-        Node node;
-
-        try (PerformancePoint pp = Performance.start("Filling content for %s", getName()))
+        try (PerformancePoint pp = Performance.measure("Filling content for %s", getName()))
         {
-          node = m_tabPaneSupplier.apply(mainData).initNode(mainData.getTreePaneData());
-        }
+          AbstractContentPane contentPane;
 
-        return node;
+          contentPane = m_tabPaneSupplier.apply(mainData);
+          contentPane.refresh();
+
+          return contentPane.getNode();
+        }
       }
     }
 
     private final BorderPane mi_borderPane;
-    final TabPane mi_tabPane;
+    final DraggableTabPane mi_tabPane;
     private Map<TabData, Tab> mi_tabByTabId = new HashMap<>();
     Map<TabData, Node> mi_contentByTabId = new HashMap<>();
 
@@ -399,9 +389,13 @@ public class DiskUsageView
 
       selectedIdProperty = AppProperties.SELECTED_ID.forSubject(DiskUsageView.this);
 
-      mi_tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
+      m_data.mi_selectedTabProperty.bind(mi_tabPane.getSelectionModel().selectedItemProperty());
+
+      m_data.selectedTabProperty().addListener((observable, oldTab, newTab) -> {
+        Log.log.debug("fill tab content: %s", newTab.getText());
+
         // Fill the new selected tab with data.
-        fillContent(newTab, m_data.getSelectedTreeItem());
+        fillContent(newTab);
 
         // Remember the last selected tab
         selectedIdProperty.set(((TabData) newTab.getUserData()).name());
@@ -412,6 +406,7 @@ public class DiskUsageView
       mi_tabPane.getTabs().stream()
           .filter(tab -> Objects.equals(((TabData) tab.getUserData()).name(), selectedTabDataName)).findFirst()
           .ifPresent(tab -> {
+            Log.log.debug("select tab: %s", tab.getText());
             mi_tabPane.getSelectionModel().select(tab);
           });
     }
@@ -424,19 +419,16 @@ public class DiskUsageView
     public Tab createTab(TabData tabData)
     {
       return mi_tabByTabId.computeIfAbsent(tabData, td -> {
-        Tab tab;
-        tab = td.createTab();
-        mi_tabPane.getTabs().add(tab);
-        return tab;
+        return td.initTab(mi_tabPane.createTab(td.getIconName(), td.getName()));
       });
     }
 
-    public void fillContent(Tab tab, TreeItem<FileNodeIF> item)
+    public void fillContent(Tab tab)
     {
       Optional<Entry<TabData, Tab>> tabEntry;
 
       tabEntry = mi_tabByTabId.entrySet().stream().filter(entry -> Objects.equals(tab, entry.getValue())).findFirst();
-      if (tabEntry.isPresent() && item != null)
+      if (tabEntry.isPresent())
       {
         TabData tabData;
 
@@ -454,12 +446,6 @@ public class DiskUsageView
       mi_contentByTabId.clear();
       Stream.of(TabData.values()).forEach(tabData -> tabData.m_tabPaneSupplier.apply(m_data).reset());
       m_data.getTreePaneData().navigateTo(m_data.getSelectedTreeItem());
-    }
-
-    public void itemSelected()
-    {
-      mi_contentByTabId.clear();
-      m_data.getNavigation().navigateTo(m_data.getSelectedTreeItem());
     }
   }
 

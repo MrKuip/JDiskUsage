@@ -78,3 +78,9 @@
     -fx-alignment: top-left;
 }
 
+.tab-pane > .tab-header-area > .headers-region > .draggable-tab {
+    -fx-padding: 4 10 4 0;
+}
+
+
+

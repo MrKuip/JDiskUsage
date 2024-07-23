@@ -33,9 +33,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
-import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TreeItem;
 
 class TypesPane
   extends AbstractContentPane
@@ -134,75 +132,64 @@ class TypesPane
 
   Node getTableNode()
   {
-    TreeItem<FileNodeIF> treeItem;
+    ObservableList<FileAggregatesEntry> list;
+    MyTableView<FileAggregatesEntry> table;
+    MyTableColumn<FileAggregatesEntry, String> extensionColumn;
+    MyTableColumn<FileAggregatesEntry, Void> fileSizeColumn;
+    MyTableColumn<FileAggregatesEntry, Long> fileSizeBytesColumn;
+    MyTableColumn<FileAggregatesEntry, Double> fileSizePercentageColumn;
+    MyTableColumn<FileAggregatesEntry, Void> numberOfFilesColumn;
+    MyTableColumn<FileAggregatesEntry, Long> numberOfFilesCountColumn;
+    MyTableColumn<FileAggregatesEntry, Double> numberOfFilesPercentageColumn;
+    long totalFileSize;
+    long totalNumberOfFiles;
 
-    treeItem = getDiskUsageData().getSelectedTreeItem();
-    if (!treeItem.getChildren().isEmpty())
-    {
-      ObservableList<FileAggregatesEntry> list;
-      MyTableView<FileAggregatesEntry> table;
-      MyTableColumn<FileAggregatesEntry, String> extensionColumn;
-      MyTableColumn<FileAggregatesEntry, Void> fileSizeColumn;
-      MyTableColumn<FileAggregatesEntry, Long> fileSizeBytesColumn;
-      MyTableColumn<FileAggregatesEntry, Double> fileSizePercentageColumn;
-      MyTableColumn<FileAggregatesEntry, Void> numberOfFilesColumn;
-      MyTableColumn<FileAggregatesEntry, Long> numberOfFilesCountColumn;
-      MyTableColumn<FileAggregatesEntry, Double> numberOfFilesPercentageColumn;
-      long totalFileSize;
-      long totalNumberOfFiles;
+    list = mi_data.getList().stream().collect(Collectors.toCollection(FXCollections::observableArrayList));
 
-      try (PerformancePoint pp = Performance.start("Collecting data for types table"))
-      {
-        list = mi_data.getList().stream().collect(Collectors.toCollection(FXCollections::observableArrayList));
+    totalFileSize = list.stream().map(e -> e.aggregates().getFileSize()).reduce(0l, (a, b) -> a + b);
+    totalNumberOfFiles = list.stream().map(e -> e.aggregates().getFileCount()).reduce(0l, (a, b) -> a + b);
 
-        totalFileSize = list.stream().map(e -> e.aggregates().getFileSize()).reduce(0l, (a, b) -> a + b);
-        totalNumberOfFiles = list.stream().map(e -> e.aggregates().getFileCount()).reduce(0l, (a, b) -> a + b);
-      }
+    table = new MyTableView<>("Types");
+    table.setEditable(false);
 
-      table = new MyTableView<>("Types");
-      table.setEditable(false);
+    table.addRankColumn("Rank");
 
-      table.addRankColumn("Rank");
+    extensionColumn = table.addColumn("Extension");
+    extensionColumn.setColumnCount(10);
+    extensionColumn.setCellValueGetter(FileAggregatesEntry::bucket);
 
-      extensionColumn = table.addColumn("Extension");
-      extensionColumn.setColumnCount(10);
-      extensionColumn.setCellValueGetter(FileAggregatesEntry::bucket);
+    fileSizeColumn = table.addColumn("File size");
 
-      fileSizeColumn = table.addColumn("File size");
+    fileSizeBytesColumn = table.addColumn(fileSizeColumn, "Bytes");
+    fileSizeBytesColumn.setColumnCount(8);
+    fileSizeBytesColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
+    fileSizeBytesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+    fileSizeBytesColumn.setCellValueGetter((e) -> e.aggregates().getFileSize());
 
-      fileSizeBytesColumn = table.addColumn(fileSizeColumn, "Bytes");
-      fileSizeBytesColumn.setColumnCount(8);
-      fileSizeBytesColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
-      fileSizeBytesColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-      fileSizeBytesColumn.setCellValueGetter((e) -> e.aggregates().getFileSize());
+    fileSizePercentageColumn = table.addColumn(fileSizeColumn, "%");
+    fileSizePercentageColumn.setColumnCount(5);
+    fileSizePercentageColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2f%%"));
+    fileSizePercentageColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+    fileSizePercentageColumn.setCellValueGetter((e) -> (e.aggregates().getFileSize() * 100.0) / totalFileSize);
 
-      fileSizePercentageColumn = table.addColumn(fileSizeColumn, "%");
-      fileSizePercentageColumn.setColumnCount(5);
-      fileSizePercentageColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2f%%"));
-      fileSizePercentageColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-      fileSizePercentageColumn.setCellValueGetter((e) -> (e.aggregates().getFileSize() * 100.0) / totalFileSize);
+    numberOfFilesColumn = table.addColumn("Number of Files");
 
-      numberOfFilesColumn = table.addColumn("Number of Files");
+    numberOfFilesCountColumn = table.addColumn(numberOfFilesColumn, "Count");
+    numberOfFilesCountColumn.setColumnCount(8);
+    numberOfFilesCountColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
+    numberOfFilesCountColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+    numberOfFilesCountColumn.setCellValueGetter((e) -> e.aggregates().getFileCount());
 
-      numberOfFilesCountColumn = table.addColumn(numberOfFilesColumn, "Count");
-      numberOfFilesCountColumn.setColumnCount(8);
-      numberOfFilesCountColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
-      numberOfFilesCountColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-      numberOfFilesCountColumn.setCellValueGetter((e) -> e.aggregates().getFileCount());
+    numberOfFilesPercentageColumn = table.addColumn(numberOfFilesColumn, "%");
+    numberOfFilesPercentageColumn.setColumnCount(5);
+    numberOfFilesPercentageColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2f%%"));
+    numberOfFilesPercentageColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+    numberOfFilesPercentageColumn
+        .setCellValueGetter((e) -> (e.aggregates().getFileCount() * 100.0) / totalNumberOfFiles);
 
-      numberOfFilesPercentageColumn = table.addColumn(numberOfFilesColumn, "%");
-      numberOfFilesPercentageColumn.setColumnCount(5);
-      numberOfFilesPercentageColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2f%%"));
-      numberOfFilesPercentageColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-      numberOfFilesPercentageColumn
-          .setCellValueGetter((e) -> (e.aggregates().getFileCount() * 100.0) / totalNumberOfFiles);
+    table.setItems(list);
 
-      table.setItems(list);
-
-      return table;
-    }
-
-    return translate(new Label("No data"));
+    return table;
   }
 
   private class TypesPaneData
@@ -219,26 +206,35 @@ class TypesPane
     {
       if (mi_list == null)
       {
-        Map<String, FileAggregates> map;
+        try (PerformancePoint pp = Performance.measure("Collecting data for types"))
+        {
+          Map<String, FileAggregates> map;
+          FileNodeIF currentFileNode;
 
-        map = new HashMap<String, FileAggregates>();
-        new FileNodeIterator(getCurrentTreeItem().getValue()).forEach(fn -> {
-          if (fn.isFile())
+          map = new HashMap<String, FileAggregates>();
+          currentFileNode = getCurrentFileNode();
+
+          if (currentFileNode != null)
           {
-            String bucket;
-            FileAggregates data;
+            new FileNodeIterator(currentFileNode).forEach(fn -> {
+              if (fn.isFile())
+              {
+                String bucket;
+                FileAggregates data;
 
-            bucket = fn.getFileType();
-            data = map.computeIfAbsent(bucket, (a) -> new FileAggregates(0l, 0l));
-            data.add(1, fn.getSize());
+                bucket = fn.getFileType();
+                data = map.computeIfAbsent(bucket, (a) -> new FileAggregates(0l, 0l));
+                data.add(1, fn.getSize());
+              }
+              return true;
+            });
           }
-          return true;
-        });
 
-        mi_list = map.entrySet().stream()
-            .sorted(
-                Comparator.comparing(e -> e.getValue().getSize(getCurrentDisplayMetric()), Comparator.reverseOrder()))
-            .map(e -> new FileAggregatesEntry(e.getKey(), e.getValue())).toList();
+          mi_list = map.entrySet().stream()
+              .sorted(
+                  Comparator.comparing(e -> e.getValue().getSize(getCurrentDisplayMetric()), Comparator.reverseOrder()))
+              .map(e -> new FileAggregatesEntry(e.getKey(), e.getValue())).toList();
+        }
       }
       return mi_list;
     }

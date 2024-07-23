@@ -1,12 +1,12 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
+import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.stream.Collectors;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppSettings.AppSetting;
 import org.tbee.javafx.scene.layout.MigPane;
-import javafx.collections.ListChangeListener;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -36,23 +36,34 @@ public class DraggableTabPane
   public DraggableTabPane()
   {
     setOnDragDetected();
+  }
 
-    getTabs().addListener((ListChangeListener<Tab>) change -> {
-      if (change.next())
-      {
-        change.getAddedSubList().forEach(tab -> {
-          if (tab.getProperties().get(TAB_SEQUENCE_NUMBER) == null)
-          {
-            MigPane pane = new MigPane("", "0[]0[]0");
-            pane.getChildren().addAll(
-                IconUtil.createFxIcon("drag", IconSize.SMALL).fillColor(Color.GREY).getIconLabel(), tab.getGraphic());
-            tab.setGraphic(pane);
+  public Tab createTab(String iconName, String name)
+  {
+    Tab tab;
+    MigPane iconPane;
 
-            tab.getProperties().put(TAB_SEQUENCE_NUMBER, ++NEXT_TAB_SEQUENCE_NUMBER);
-          }
-        });
-      }
-    });
+    tab = translate(new Tab(name));
+    tab.getStyleClass().add("draggable-tab");
+    tab.setUserData(this);
+    tab.getProperties().put(TAB_SEQUENCE_NUMBER, ++NEXT_TAB_SEQUENCE_NUMBER);
+    tab.setClosable(false);
+
+    iconPane = new MigPane("", "0[]0[]0");
+    iconPane.getChildren().add(IconUtil.createFxIcon("drag", IconSize.SMALL).fillColor(Color.GREY).getIconLabel());
+    if (iconName != null)
+    {
+      Node icon;
+
+      icon = IconUtil.createIconNode(iconName, IconSize.SMALL);
+      icon.prefHeight(300);
+      iconPane.getChildren().add(icon);
+    }
+    tab.setGraphic(iconPane);
+
+    getTabs().add(tab);
+
+    return tab;
   }
 
   //source events handlers
@@ -105,8 +116,8 @@ public class DraggableTabPane
       dialogHeight = draggedNode.getLayoutBounds().getHeight();
 
       subjectId = "DraggedTab:" + draggedTab.getText();
-      widthProperty = AppProperties.WIDTH.forSubject("DraggedTab:" + draggedTab.getText());
-      heightProperty = AppProperties.HEIGHT.forSubject("DraggedTab:" + draggedTab.getText());
+      widthProperty = AppProperties.WIDTH.forSubject(subjectId);
+      heightProperty = AppProperties.HEIGHT.forSubject(subjectId);
 
       draggedDialog = new Stage();
       draggedDialog.setTitle(draggedTab.getText());
@@ -156,4 +167,5 @@ public class DraggableTabPane
 
     return (Integer) tabSequenceNumber;
   }
+
 }

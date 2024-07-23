@@ -1,14 +1,11 @@
 package org.kku.jdiskusage.ui;
 
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
@@ -19,13 +16,10 @@ import org.kku.jdiskusage.util.OperatingSystemUtil;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.StreamUtil;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.TreeItem;
 
 class Top50Pane
   extends AbstractContentPane
@@ -71,57 +65,49 @@ class Top50Pane
 
   Node getTableNode(FileNodeComparator fc)
   {
-    TreeItem<FileNodeIF> treeItem;
+    MyTableView<FileNodeIF> table;
+    MyTableColumn<FileNodeIF, String> nameColumn;
+    MyTableColumn<FileNodeIF, Long> fileSizeColumn;
+    MyTableColumn<FileNodeIF, Date> lastModifiedColumn;
+    MyTableColumn<FileNodeIF, Integer> numberOfLinksColumn;
+    MyTableColumn<FileNodeIF, String> pathColumn;
 
-    treeItem = getDiskUsageData().getSelectedTreeItem();
-    if (!treeItem.getChildren().isEmpty())
+    table = new MyTableView<>("Top50");
+    table.setEditable(false);
+
+    table.addRankColumn("Rank");
+
+    nameColumn = table.addColumn("Name");
+    nameColumn.setColumnCount(20);
+    nameColumn.setCellValueGetter(FileNodeIF::getName);
+
+    fileSizeColumn = table.addColumn("File size");
+    fileSizeColumn.setColumnCount(8);
+    fileSizeColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
+    fileSizeColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+    fileSizeColumn.setCellValueGetter(FileNodeIF::getSize);
+
+    lastModifiedColumn = table.addColumn("Last modified");
+    lastModifiedColumn.setColumnCount(15);
+    lastModifiedColumn.setCellValueGetter(fn -> new Date(fn.getLastModifiedTime()));
+    lastModifiedColumn.setCellValueFormatter(FormatterFactory.createSimpleDateFormatter("dd/MM/yyyy HH:mm:ss"));
+    lastModifiedColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+
+    if (OperatingSystemUtil.isLinux())
     {
-      MyTableView<FileNodeIF> table;
-      MyTableColumn<FileNodeIF, String> nameColumn;
-      MyTableColumn<FileNodeIF, Long> fileSizeColumn;
-      MyTableColumn<FileNodeIF, Date> lastModifiedColumn;
-      MyTableColumn<FileNodeIF, Integer> numberOfLinksColumn;
-      MyTableColumn<FileNodeIF, String> pathColumn;
-
-      table = new MyTableView<>("Top50");
-      table.setEditable(false);
-
-      table.addRankColumn("Rank");
-
-      nameColumn = table.addColumn("Name");
-      nameColumn.setColumnCount(20);
-      nameColumn.setCellValueGetter(FileNodeIF::getName);
-
-      fileSizeColumn = table.addColumn("File size");
-      fileSizeColumn.setColumnCount(8);
-      fileSizeColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
-      fileSizeColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-      fileSizeColumn.setCellValueGetter(FileNodeIF::getSize);
-
-      lastModifiedColumn = table.addColumn("Last modified");
-      lastModifiedColumn.setColumnCount(15);
-      lastModifiedColumn.setCellValueGetter(fn -> new Date(fn.getLastModifiedTime()));
-      lastModifiedColumn.setCellValueFormatter(FormatterFactory.createSimpleDateFormatter("dd/MM/yyyy HH:mm:ss"));
-      lastModifiedColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-
-      if (OperatingSystemUtil.isLinux())
-      {
-        numberOfLinksColumn = table.addColumn("Number\nof links\nto file");
-        numberOfLinksColumn.setColumnCount(8);
-        numberOfLinksColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
-        numberOfLinksColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-        numberOfLinksColumn.setCellValueGetter(FileNodeIF::getNumberOfLinks);
-      }
-
-      pathColumn = table.addColumn("Path");
-      pathColumn.setCellValueGetter(FileNodeIF::getAbsolutePath);
-
-      table.setItems(mi_data.getList(fc));
-
-      return table;
+      numberOfLinksColumn = table.addColumn("Number\nof links\nto file");
+      numberOfLinksColumn.setColumnCount(8);
+      numberOfLinksColumn.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
+      numberOfLinksColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+      numberOfLinksColumn.setCellValueGetter(FileNodeIF::getNumberOfLinks);
     }
 
-    return translate(new Label("No data"));
+    pathColumn = table.addColumn("Path");
+    pathColumn.setCellValueGetter(FileNodeIF::getAbsolutePath);
+
+    table.setItems(mi_data.getList(fc));
+
+    return table;
   }
 
   class Top50PaneData
@@ -132,11 +118,11 @@ class Top50Pane
     public ObservableList<FileNodeIF> getList(FileNodeComparator fc)
     {
       return mi_map.computeIfAbsent(fc, (key) -> {
-        try (PerformancePoint pp = Performance.start("Collecting data for top 50 table"))
+        try (PerformancePoint pp = Performance.measure("Collecting data for top 50 tab"))
         {
           List<FileNodeIF> fnList;
 
-          fnList = getCurrentTreeItem().getValue().streamNode().filter(FileNodeIF::isFile)
+          fnList = getCurrentFileNode().streamNode().filter(FileNodeIF::isFile)
               .collect(StreamUtil.createTopCollector(fc.getComparator(), 50));
 
           return FXCollections.observableArrayList(fnList);

@@ -1,6 +1,5 @@
 package org.kku.jdiskusage.ui;
 
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractContentPane;
 import org.kku.jdiskusage.ui.util.FxUtil;
@@ -29,54 +28,47 @@ class SizePane
 
   Node getPieChartNode()
   {
-    TreeItem<FileNodeIF> treeItem;
+    PieChart chart;
+    double sum;
+    double totalSize;
+    double minimumDataSize;
 
-    treeItem = getDiskUsageData().getSelectedTreeItem();
-    if (!treeItem.getChildren().isEmpty())
-    {
-      PieChart chart;
-      double sum;
-      double totalSize;
-      double minimumDataSize;
+    totalSize = getCurrentFileNode().getSize();
+    minimumDataSize = totalSize * 0.02;
 
-      totalSize = treeItem.getValue().getSize();
-      minimumDataSize = totalSize * 0.02;
-
-      record MyData(PieChart.Data pieChartData, TreeItem<FileNodeIF> treeItem) {
-      }
-
-      chart = FxUtil.createPieChart();
-      treeItem.getChildren().stream().filter(item -> {
-        return item.getValue().getSize() > minimumDataSize;
-      }).limit(10).map(item -> {
-        PieChart.Data data;
-
-        data = new PieChart.Data(item.getValue().getName(), item.getValue().getSize());
-        data.nameProperty().bind(Bindings.concat(data.getName(), "\n",
-            AppPreferences.sizeSystemPreference.get().getFileSize(data.getPieValue())));
-
-        return new MyData(data, item);
-      }).forEach(tuple -> {
-        chart.getData().add(tuple.pieChartData);
-        tuple.pieChartData.getNode().setUserData(tuple.treeItem);
-        tuple.pieChartData.getNode().addEventHandler(MouseEvent.MOUSE_CLICKED, (me) -> {
-          if (tuple.treeItem.getValue().isDirectory())
-          {
-            getDiskUsageData().getNavigation().navigateTo(tuple.treeItem);
-          }
-        });
-      });
-
-      if (chart.getData().size() != treeItem.getChildren().size())
-      {
-        sum = chart.getData().stream().map(data -> data.getPieValue()).reduce(0.0d, Double::sum);
-        chart.getData().add(new PieChart.Data(DiskUsageView.getOtherText(), treeItem.getValue().getSize() - sum));
-      }
-
-      return chart;
+    record MyData(PieChart.Data pieChartData, TreeItem<FileNodeIF> treeItem) {
     }
 
-    return translate(new Label("No data"));
+    chart = FxUtil.createPieChart();
+    getCurrentTreeItem().getChildren().stream().filter(item -> {
+      return item.getValue().getSize() > minimumDataSize;
+    }).limit(10).map(item -> {
+      PieChart.Data data;
+
+      data = new PieChart.Data(item.getValue().getName(), item.getValue().getSize());
+      data.nameProperty().bind(Bindings.concat(data.getName(), "\n",
+          AppPreferences.sizeSystemPreference.get().getFileSize(data.getPieValue())));
+
+      return new MyData(data, item);
+    }).forEach(tuple -> {
+      chart.getData().add(tuple.pieChartData);
+      tuple.pieChartData.getNode().setUserData(tuple.treeItem);
+      tuple.pieChartData.getNode().addEventHandler(MouseEvent.MOUSE_CLICKED, (me) -> {
+        if (tuple.treeItem.getValue().isDirectory())
+        {
+          getDiskUsageData().getNavigation().navigateTo(tuple.treeItem);
+        }
+      });
+    });
+
+    if (chart.getData().size() != getCurrentTreeItem().getChildren().size())
+    {
+      sum = chart.getData().stream().map(data -> data.getPieValue()).reduce(0.0d, Double::sum);
+      chart.getData()
+          .add(new PieChart.Data(DiskUsageView.getOtherText(), getCurrentTreeItem().getValue().getSize() - sum));
+    }
+
+    return chart;
   }
 
   Node getBarChartNode()

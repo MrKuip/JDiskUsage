@@ -5,10 +5,12 @@ import java.nio.file.Path;
 import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppSettings.AppSetting;
+import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.PathList;
 import org.kku.jdiskusage.util.Translator;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -30,6 +32,10 @@ public class Main
     Rectangle2D defaultScreenBounds;
 
     m_rootStage = stage;
+
+    Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+      Log.log.error(throwable, "%s %s", thread, throwable.getMessage());
+    });
 
     Translator.getInstance().changeLocale(AppPreferences.localePreference.get());
 
@@ -53,6 +59,7 @@ public class Main
 
     stage.setTitle("JDiskUsage");
     stage.setScene(scene);
+    stage.setOnCloseRequest((cr) -> { Platform.exit(); System.exit(1); });
     stage.show();
 
     getParameters().getRaw().stream().map(Path::of).filter(path -> Files.exists(path) && Files.isDirectory(path))

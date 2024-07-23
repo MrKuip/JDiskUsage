@@ -9,17 +9,16 @@ import java.util.function.Supplier;
 import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.FileTreePane;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppSettings.AppSetting;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
+import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
@@ -35,7 +34,6 @@ abstract public class AbstractContentPane
   private final SegmentedButton m_segmentedButton = new SegmentedButton();
   private PaneType m_currentPaneType;
   private Map<PaneType, Node> m_nodeByPaneTypeMap = new HashMap<>();
-  private FileTreePane m_currentTreePaneData;
   private TreeItem<FileNodeIF> m_currentTreeItem;
 
   private record PaneType(String id, String description, String iconName, Supplier<Node> node) {};
@@ -44,47 +42,65 @@ abstract public class AbstractContentPane
   {
     m_diskUsageData = diskUsageData;
 
-    m_diskUsageData.getSelectedTreeItemProperty().addListener((o, oldValue, newValue) -> refresh());
+    m_diskUsageData.selectedTreeItemProperty().addListener((o, oldValue, newValue) -> refresh(newValue));
     AppPreferences.displayMetricPreference.addListener((o, oldValue, newValue) -> refresh());
+    Log.log.debug("Create content pane %s", getClass().getSimpleName());
+  }
+
+  public Node getNode()
+  {
+    return m_node;
+  }
+
+  public void refresh(TreeItem<FileNodeIF> selectedTreeItem)
+  {
+    refresh(selectedTreeItem, needInit(m_nodeByPaneTypeMap.get(m_currentPaneType)));
   }
 
   public void refresh()
   {
-    boolean init;
+    refresh(m_diskUsageData.getSelectedTreeItem(), true);
+  }
 
-    init = isShowing(m_nodeByPaneTypeMap.get(m_currentPaneType));
+  public void refresh(TreeItem<FileNodeIF> selectedTreeItem, boolean init)
+  {
+    m_currentTreeItem = selectedTreeItem;
 
-    System.out.print(getClass().getSimpleName() + "." + m_currentPaneType.description + " " + init);
+    init = init || needInit(m_node);
+
     reset();
 
+    Log.log.info("refresh[showing=%b, %s-%s] filenode=%s", init, getClass().getSimpleName(),
+        m_currentPaneType.description(), m_currentTreeItem == null ? "<no selection>" : m_currentTreeItem.getValue());
     if (init)
     {
-      initNode(m_diskUsageData.getTreePaneData());
+      //initNode(m_diskUsageData.getTreePaneData());
       initCurrentNode();
-      System.out.print("INIT_CURRENT_NODE:" + getClass().getSimpleName() + "." + m_currentPaneType.description + " ");
     }
   }
 
-  private static boolean isShowing(Node node)
+  private boolean needInit(Node node)
   {
     if (node == null)
     {
       return false;
     }
 
-    //System.out.println("====is visible :" + node);
+    if (m_currentTreeItem == null)
+    {
+      // Display label with 'no data'
+      return true;
+    }
+
+    Log.log.debug("====is visible ? : %s", node);
     do
     {
       if (!node.isVisible())
       {
+        Log.log.debug("not visible : %s", node);
         return false;
       }
-
-      if (node instanceof TabPane tabPane)
-      {
-        //System.out.println("selectedItem: " + tabPane.getSelectionModel().getSelectedItem());
-        //System.out.println("selectedContent: " + tabPane.getSelectionModel().getSelectedItem().getContent());
-      }
+      Log.log.debug("visible     : %s", node);
 
       //System.out.println("node=" + node);
     }
@@ -184,12 +200,16 @@ abstract public class AbstractContentPane
     return AppProperties.SELECTED_ID.forSubject(this);
   }
 
-  private void initCurrentNode()
+  private Node initCurrentNode()
   {
     if (m_currentPaneType != null)
     {
       m_node.setCenter(m_nodeByPaneTypeMap.computeIfAbsent(m_currentPaneType, type -> {
-        System.out.println("Creating new node: " + type.toString());
+        if (getDiskUsageData().getSelectedTreeItem() == null)
+        {
+          return translate(new Label("No data"));
+        }
+
         return type.node().get();
       }));
     }
@@ -197,6 +217,8 @@ abstract public class AbstractContentPane
     {
       m_node.setCenter(new Label(""));
     }
+
+    return m_node;
   }
 
   protected TreeItem<FileNodeIF> getCurrentTreeItem()
@@ -204,22 +226,14 @@ abstract public class AbstractContentPane
     return m_currentTreeItem;
   }
 
+  protected FileNodeIF getCurrentFileNode()
+  {
+    return getCurrentTreeItem().getValue();
+  }
+
   protected DisplayMetric getCurrentDisplayMetric()
   {
     return AppPreferences.displayMetricPreference.get();
-  }
-
-  public Node initNode(FileTreePane treePaneData)
-  {
-    if (m_currentTreePaneData != treePaneData || getCurrentTreeItem() != m_diskUsageData.getSelectedTreeItem())
-    {
-      m_currentTreePaneData = treePaneData;
-      m_currentTreeItem = m_diskUsageData.getSelectedTreeItem();
-      m_nodeByPaneTypeMap.clear();
-    }
-
-    initCurrentNode();
-    return m_node;
   }
 
   protected void addFilterHandler(Node node, String filterType, String filterValue,
