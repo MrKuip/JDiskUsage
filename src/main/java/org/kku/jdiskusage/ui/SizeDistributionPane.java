@@ -113,7 +113,7 @@ public class SizeDistributionPane
     }
   }
 
-  private class SizeDistributionBucketData
+  static private class SizeDistributionBucketData
   {
     public long mi_numberOfFiles;
     public long mi_sizeOfFiles;

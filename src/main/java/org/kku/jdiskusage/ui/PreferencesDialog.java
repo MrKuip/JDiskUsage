@@ -108,7 +108,7 @@ public class PreferencesDialog
     return tab;
   }
 
-  private class LanguagePreferences
+  static private class LanguagePreferences
   {
 
     private Language getCurrentLanguage()
@@ -148,13 +148,13 @@ public class PreferencesDialog
       }
     }
 
-    private class Language
+    static private class Language
     {
       private final String mi_name;
       private final String mi_language;
       private final Locale mi_locale;
 
-      public Language(String name, String language)
+      private Language(String name, String language)
       {
         mi_name = name;
         mi_language = language;

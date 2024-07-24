@@ -223,8 +223,8 @@ public class SearchPane
             fnIterator.setStoppedOnMaxCountProperty(mi_progress.mi_stoppedOnMaxCountProperty);
             fnIterator.setStoppedOnTimeoutProperty(mi_progress.mi_stoppedOnTimeoutProperty);
             fnIterator.enableProgress(mi_progress.mi_progressProperty);
-            fnIterator.setMaxCount(Integer.valueOf(mi_data.mi_maxCountProperty.get()));
-            fnIterator.setTimeoutInSeconds(Integer.valueOf(mi_data.mi_maxTimeProperty.get()));
+            fnIterator.setMaxCount(Integer.parseInt(mi_data.mi_maxCountProperty.get()));
+            fnIterator.setTimeoutInSeconds(Integer.parseInt(mi_data.mi_maxTimeProperty.get()));
             fnIterator.forEach(fn -> {
               String searchedString;
 

@@ -101,9 +101,11 @@ public class TableUtils
       {
         text = "";
       }
-
-      value = observableValue.getValue();
-      text = (value == null) ? "" : value.toString();
+      else
+      {
+        value = observableValue.getValue();
+        text = (value == null) ? "" : value.toString();
+      }
 
       clipboardString.append(text);
 

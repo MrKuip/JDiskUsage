@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Stack;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -128,7 +129,12 @@ public class FileTree
       implements FileNodeIF
   {
     private final String m_pathName;
-    private DirNode mi_parentNode;
+    private DirNode m_parentNode;
+
+    protected AbstractFileNode(Path path)
+    {
+      this(path.toString());
+    }
 
     protected AbstractFileNode(String pathName)
     {
@@ -144,13 +150,13 @@ public class FileTree
     @Override
     public DirNode getParent()
     {
-      return mi_parentNode;
+      return m_parentNode;
     }
 
     @Override
     public void setParent(DirNode parentNode)
     {
-      mi_parentNode = parentNode;
+      m_parentNode = parentNode;
     }
 
     @Override
@@ -158,6 +164,33 @@ public class FileTree
     {
       return (getParent() != null && getParent().getParent() != null ? (getParent().getAbsolutePath() + File.separator)
           : "") + getName();
+    }
+
+    @Override
+    public int hashCode()
+    {
+      return m_pathName.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+      if (!(obj instanceof AbstractFileNode afn))
+      {
+        return false;
+      }
+
+      if (!Objects.equals(m_pathName, afn.m_pathName))
+      {
+        return false;
+      }
+
+      if (!Objects.equals(m_parentNode, afn.m_parentNode))
+      {
+        return false;
+      }
+
+      return true;
     }
 
     @Override
@@ -181,16 +214,11 @@ public class FileTree
 
     private DirNode(boolean root, Path path, int size)
     {
-      super(root ? path.toString() : path.getFileName().toString());
+      super(root ? path : path.getFileName());
       if (size > 0)
       {
         initList(size);
       }
-    }
-
-    private DirNode(Path path)
-    {
-      this(false, path, -1);
     }
 
     public DirNode(DirNode node)
@@ -297,7 +325,7 @@ public class FileTree
 
     private FileNode(Path path, BasicFileAttributes basicAttributes)
     {
-      super(path.getFileName().toString());
+      super(path.getFileName());
 
       mi_fileType = determineFileType(getName());
 
@@ -333,17 +361,17 @@ public class FileTree
       index = name.lastIndexOf('/');
       if (index != -1)
       {
-        name.substring(index + 1);
+        name = name.substring(index + 1);
       }
 
       index = name.lastIndexOf('\\');
       if (index != -1)
       {
-        name.substring(index + 1);
+        name = name.substring(index + 1);
       }
 
       index = name.lastIndexOf(".");
-      if (index > 0 && index != -1)
+      if (index != -1)
       {
         name = name.substring(index + 1);
         if (name.length() < 10 && typePattern.matcher(name).matches())
@@ -641,7 +669,7 @@ public class FileTree
       sw.start();
       DirNode dirNode = ft.scan();
       System.out.println("scan took " + sw.getElapsedTime() + " msec.");
-      //new Print().print(dirNode);
+      new Print().print(dirNode);
 
       System.out.println("ready");
     }

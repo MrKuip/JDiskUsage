@@ -425,7 +425,7 @@ public class DirectoryChooser
     }
   }
 
-  private class MyPath
+  static private class MyPath
   {
     private final Path mi_path;
     private final String mi_name;

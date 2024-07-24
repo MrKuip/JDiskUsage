@@ -528,7 +528,7 @@ public class DiskUsageView
     }
   }
 
-  private class PreferencesMenu
+  static private class PreferencesMenu
   {
     public MenuItem createMenuItem()
     {

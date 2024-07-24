@@ -44,9 +44,6 @@ class AppPropertiesTest
 
     stringProperty.set("Hallo2");
     assertEquals(property.get("Test2"), "Hallo2");
-
-    type = properties.createAppSettingType("Test", Converters.getStringConverter());
-    property = type.forSubject("Test");
   }
 
   @Test

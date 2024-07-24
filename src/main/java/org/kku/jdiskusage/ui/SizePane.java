@@ -56,7 +56,7 @@ class SizePane
       tuple.pieChartData.getNode().addEventHandler(MouseEvent.MOUSE_CLICKED, (me) -> {
         if (tuple.treeItem.getValue().isDirectory())
         {
-          getDiskUsageData().getNavigation().navigateTo(tuple.treeItem);
+          getDiskUsageData().getTreePaneData().navigateTo(tuple.treeItem);
         }
       });
     });

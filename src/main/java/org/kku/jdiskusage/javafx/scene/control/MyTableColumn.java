@@ -118,7 +118,7 @@ public class MyTableColumn<T, R>
             }
             else
             {
-              if (value != null && mi_formatter != null)
+              if (mi_formatter != null)
               {
                 text = mi_formatter.format(value);
               }

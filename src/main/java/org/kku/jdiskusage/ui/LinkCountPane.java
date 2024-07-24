@@ -66,7 +66,7 @@ class LinkCountPane
       data = new PieChart.Data(name, e.aggregates().getSize(getCurrentDisplayMetric()));
       pieChart.getData().add(data);
 
-      test = (fileNode) -> fileNode.getNumberOfLinks() == Integer.valueOf(e.bucket());
+      test = (fileNode) -> fileNode.getNumberOfLinks() == Integer.parseInt(e.bucket());
       addFilterHandler(data.getNode(), "Link count", Objects.toString(e.bucket()), test);
     });
 
@@ -100,7 +100,7 @@ class LinkCountPane
           Objects.toString(e.bucket()));
       series1.getData().add(data);
 
-      test = (fileNode) -> fileNode.getNumberOfLinks() == Integer.valueOf(e.bucket());
+      test = (fileNode) -> fileNode.getNumberOfLinks() == Integer.parseInt(e.bucket());
       addFilterHandler(data.getNode(), "Link count", Objects.toString(e.bucket()), test);
     });
 
@@ -178,19 +178,19 @@ class LinkCountPane
     filterLessThanColumn = table.addFilterColumn(filterColumn, "<=");
     filterLessThanColumn.setAction((event, e) -> {
       getDiskUsageData().addFilter(new Filter("Link count", "<=", e.bucket(),
-          (fileNode) -> fileNode.getNumberOfLinks() <= Integer.valueOf(e.bucket())), event.getClickCount() == 2);
+          (fileNode) -> fileNode.getNumberOfLinks() <= Integer.parseInt(e.bucket())), event.getClickCount() == 2);
     });
 
     filterEqualColumn = table.addFilterColumn(filterColumn, "is");
     filterEqualColumn.setAction((event, e) -> {
       getDiskUsageData().addFilter(new Filter("Link count", e.bucket(),
-          (fileNode) -> fileNode.getNumberOfLinks() == Integer.valueOf(e.bucket())), event.getClickCount() == 2);
+          (fileNode) -> fileNode.getNumberOfLinks() == Integer.parseInt(e.bucket())), event.getClickCount() == 2);
     });
 
     filterGreaterThanColumn = table.addFilterColumn(filterColumn, ">=");
     filterGreaterThanColumn.setAction((event, e) -> {
       getDiskUsageData().addFilter(new Filter("Link count", ">=", e.bucket(),
-          fileNode -> fileNode.getNumberOfLinks() > Integer.valueOf(e.bucket())), event.getClickCount() == 2);
+          fileNode -> fileNode.getNumberOfLinks() > Integer.parseInt(e.bucket())), event.getClickCount() == 2);
     });
 
     table.setItems(list);

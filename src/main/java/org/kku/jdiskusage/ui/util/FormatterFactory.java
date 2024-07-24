@@ -2,7 +2,6 @@ package org.kku.jdiskusage.ui.util;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import org.kku.jdiskusage.util.preferences.AppPreferences;
 
 public class FormatterFactory
 {
@@ -35,7 +34,7 @@ public class FormatterFactory
     @Override
     public String format(Long fileSize)
     {
-      String size = AppPreferences.sizeSystemPreference.get().getFileSize(fileSize);
+      //String size = AppPreferences.sizeSystemPreference.get().getFileSize(fileSize);
       return "";
     }
   }

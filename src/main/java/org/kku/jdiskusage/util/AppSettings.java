@@ -2,6 +2,8 @@ package org.kku.jdiskusage.util;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -235,9 +237,9 @@ public abstract class AppSettings
     {
       m_settings = new Properties();
 
-      try
+      try (InputStream is = Files.newInputStream(getSettingPath()))
       {
-        m_settings.load(Files.newInputStream(getSettingPath()));
+        m_settings.load(is);
       }
       catch (FileNotFoundException e)
       {
@@ -258,9 +260,9 @@ public abstract class AppSettings
 
   public void storeProperties()
   {
-    try
+    try (OutputStream os = Files.newOutputStream(getSettingPath()))
     {
-      m_settings.store(Files.newOutputStream(getSettingPath()), "store to properties file");
+      m_settings.store(os, "store to properties file");
     }
     catch (IOException e)
     {

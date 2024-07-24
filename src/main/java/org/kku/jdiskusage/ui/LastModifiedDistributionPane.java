@@ -336,7 +336,7 @@ class LastModifiedDistributionPane
     }
   }
 
-  private class LastModifiedDistributionBucketData
+  static private class LastModifiedDistributionBucketData
   {
     public long mi_numberOfFiles;
     public long mi_sizeOfFiles;

@@ -166,12 +166,10 @@ class FilterPane
     entries = m_filterByTypeMap.entrySet();
     for (Entry<String, Set<Filter>> entry : entries)
     {
-      if (entry.getValue().stream().anyMatch(filter -> filter.accept(fileNode)))
+      if (!(entry.getValue().stream().anyMatch(filter -> filter.accept(fileNode))))
       {
-        continue;
+        return false;
       }
-
-      return false;
     }
 
     return true;

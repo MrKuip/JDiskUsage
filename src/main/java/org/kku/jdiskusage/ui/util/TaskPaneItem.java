@@ -30,7 +30,6 @@ public class TaskPaneItem<T>
   public TaskPaneItem()
   {
     addUI();
-
   }
 
   public TaskPaneItem(Worker<T> worker)

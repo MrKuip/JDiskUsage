@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
@@ -131,7 +132,7 @@ public class HelpPane
     {
       String html;
 
-      try (Reader reader = new InputStreamReader(HelpPane.class.getResourceAsStream(link)))
+      try (Reader reader = new InputStreamReader(HelpPane.class.getResourceAsStream(link), StandardCharsets.UTF_8))
       {
         html = mi_renderer.render(mi_parser.parseReader(reader));
       }
