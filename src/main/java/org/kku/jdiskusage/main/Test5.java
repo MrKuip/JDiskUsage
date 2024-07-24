@@ -99,7 +99,7 @@ public class Test5
     }
   }
 
-  class MyData2
+  static class MyData2
   {
     private long numberOfFiles;
     private long sizeOfFiles;
@@ -173,7 +173,7 @@ public class Test5
     }
   }
 
-  class MaxCollector<T>
+  static class MaxCollector<T>
   {
     private final int mi_limit;
     private final Comparator<? super T> mi_comparator;
@@ -216,7 +216,7 @@ public class Test5
     }
   }
 
-  class TopCollector<T>
+  static class TopCollector<T>
       implements Collector<T, List<T>, List<T>>
   {
     private final int mi_limit;

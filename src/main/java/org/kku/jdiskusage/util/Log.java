@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 
 public class Log
 {
-  static public MyLogger log = createLogger("log", "log", 100000, 10, Level.FINE);
+  static public final MyLogger log = createLogger("log", "log", 100000, 10, Level.FINE);
 
   private Log()
   {
@@ -35,7 +35,15 @@ public class Log
     handler = new MyConsoleHandler();
     handler.setFormatter(getFormatter());
     logger.addHandler(handler);
+    handler = createFileHandler(fileName, fileSize, count, true);
+    handler.setFormatter(getFormatter());
+    logger.addHandler(handler);
 
+    return new MyLogger(logger);
+  }
+
+  static private Handler createFileHandler(String fileName, long limit, int count, boolean append)
+  {
     // HACK: The FileHandler doesn't create parent directories of the pattern.
     //       It will throw a NoSuchFileException with a message that is the name of the path.
     //       Then create the directories and try again.
@@ -43,23 +51,25 @@ public class Log
     {
       try
       {
-        handler = new FileHandler("%t/jdiskusage/" + fileName + "%g.log", fileSize, count, true);
-        handler.setFormatter(getFormatter());
-        logger.addHandler(handler);
-        break;
+        return new FileHandler("%t/jdiskusage/" + fileName + "%g.log", limit, count, append);
       }
       catch (NoSuchFileException e)
       {
         if (i == 0)
         {
-          Path path = Paths.get(e.getMessage());
-          try
+          Path path;
+
+          path = Paths.get(e.getMessage());
+          if (path != null)
           {
-            Files.createDirectories(path.getParent());
-          }
-          catch (IOException e1)
-          {
-            e1.printStackTrace();
+            try
+            {
+              Files.createDirectories(path.getParent());
+            }
+            catch (IOException e1)
+            {
+              e1.printStackTrace();
+            }
           }
         }
         else
@@ -73,7 +83,7 @@ public class Log
       }
     }
 
-    return new MyLogger(logger);
+    return null;
   }
 
   static private Formatter getFormatter()

@@ -10,32 +10,46 @@ import javafx.scene.control.TreeItem;
 
 public class Navigation
 {
-  private final DiskUsageData mi_diskUsageData;
-  private List<NavigationItem> mi_navigationItemList = new ArrayList<NavigationItem>();
-  private NavigationItem mi_currentNavigationItem;
-  private BooleanProperty mi_homeNavigationDisabled = new SimpleBooleanProperty(true);
-  private BooleanProperty mi_forwardNavigationDisabled = new SimpleBooleanProperty(true);
-  private BooleanProperty mi_backNavigationDisabled = new SimpleBooleanProperty(true);
-  private NavigationItem mi_navigatingTo;
+  private final DiskUsageData m_diskUsageData;
+  private List<NavigationItem> m_navigationItemList = new ArrayList<NavigationItem>();
+  private NavigationItem m_currentNavigationItem;
+  private BooleanProperty m_homeNavigationDisabled = new SimpleBooleanProperty(true);
+  private BooleanProperty m_forwardNavigationDisabled = new SimpleBooleanProperty(true);
+  private BooleanProperty m_backNavigationDisabled = new SimpleBooleanProperty(true);
+  private NavigationItem m_navigatingTo;
 
   public Navigation(DiskUsageData diskUsageData)
   {
-    mi_diskUsageData = diskUsageData;
+    m_diskUsageData = diskUsageData;
+
+    m_diskUsageData.selectedTreeItemProperty().addListener((o, oldValue, newValue) -> addNavigationItem(newValue));
   }
 
-  public void navigateTo(TreeItem<FileNodeIF> treeItem)
+  private void addNavigationItem(TreeItem<FileNodeIF> treeItem)
   {
     NavigationItem item;
+    int currentIndex;
 
-    if (mi_navigatingTo != null)
+    if (treeItem == null)
     {
       return;
     }
 
-    item = new NavigationItem(treeItem);
-    mi_navigationItemList.add(item);
+    if (m_currentNavigationItem != null)
+    {
+      // This is a navigation caused by home/forward/back
+      if (treeItem.equals(m_currentNavigationItem.mii_treeItem))
+      {
+        return;
+      }
 
-    item.navigateTo();
+      //currentIndex = m_navigationItemList.indexOf(m_currentNavigationItem);
+      //m_navigationItemList = m_navigationItemList.subList(0, currentIndex + 1);
+    }
+
+    item = new NavigationItem(treeItem);
+    m_navigationItemList.add(item);
+    item.evaluateWidgets();
   }
 
   public void home()
@@ -45,43 +59,43 @@ public class Navigation
 
   public void forward()
   {
-    navigateTo(mi_navigationItemList.indexOf(mi_currentNavigationItem) + 1);
+    navigateTo(m_navigationItemList.indexOf(m_currentNavigationItem) + 1);
   }
 
   public void back()
   {
-    navigateTo(mi_navigationItemList.indexOf(mi_currentNavigationItem) - 1);
+    navigateTo(m_navigationItemList.indexOf(m_currentNavigationItem) - 1);
   }
 
   private void navigateTo(int toIndex)
   {
-    if (mi_navigatingTo == null && toIndex >= 0 && toIndex < mi_navigationItemList.size())
+    if (m_navigatingTo == null && toIndex >= 0 && toIndex < m_navigationItemList.size())
     {
-      mi_navigatingTo = mi_navigationItemList.get(toIndex);
+      m_navigatingTo = m_navigationItemList.get(toIndex);
       try
       {
-        mi_navigatingTo.navigateTo();
+        m_navigatingTo.navigateTo();
       }
       finally
       {
-        mi_navigatingTo = null;
+        m_navigatingTo = null;
       }
     }
   }
 
   public BooleanProperty homeNavigationDisabledProperty()
   {
-    return mi_homeNavigationDisabled;
+    return m_homeNavigationDisabled;
   }
 
   public BooleanProperty backNavigationDisabledProperty()
   {
-    return mi_backNavigationDisabled;
+    return m_backNavigationDisabled;
   }
 
   public BooleanProperty forwardNavigationDisabledProperty()
   {
-    return mi_forwardNavigationDisabled;
+    return m_forwardNavigationDisabled;
   }
 
   private class NavigationItem
@@ -93,18 +107,45 @@ public class Navigation
       mii_treeItem = treeItem;
     }
 
-    public void navigateTo()
+    public void evaluateWidgets()
     {
       int currentIndex;
 
-      currentIndex = mi_navigationItemList.indexOf(this);
+      currentIndex = m_navigationItemList.indexOf(this);
 
-      mi_currentNavigationItem = this;
-      mi_homeNavigationDisabled.set(mi_navigationItemList.isEmpty());
-      mi_forwardNavigationDisabled.set(currentIndex < 0 || currentIndex >= (mi_navigationItemList.size() - 1));
-      mi_backNavigationDisabled.set(currentIndex <= 0);
+      m_currentNavigationItem = this;
+      m_homeNavigationDisabled.set(m_navigationItemList.isEmpty());
+      m_forwardNavigationDisabled.set(currentIndex < 0 || currentIndex >= (m_navigationItemList.size() - 1));
+      m_backNavigationDisabled.set(currentIndex <= 0);
+    }
 
-      mi_diskUsageData.getTreePaneData().navigateTo(mii_treeItem);
+    public void navigateTo()
+    {
+      evaluateWidgets();
+      m_diskUsageData.getTreePaneData().navigateTo(mii_treeItem);
+    }
+
+    @Override
+    public int hashCode()
+    {
+      return mii_treeItem.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+      if (!(o instanceof NavigationItem navigationItem))
+      {
+        return false;
+      }
+
+      return navigationItem.mii_treeItem == mii_treeItem;
+    }
+
+    @Override
+    public String toString()
+    {
+      return "Navigation: " + mii_treeItem.getValue().getName();
     }
   }
 }

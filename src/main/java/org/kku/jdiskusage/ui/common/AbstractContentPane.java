@@ -4,8 +4,10 @@ import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
@@ -93,20 +95,8 @@ abstract public class AbstractContentPane
     }
 
     Log.log.debug("====is visible ? : %s", node);
-    do
-    {
-      if (!node.isVisible())
-      {
-        Log.log.debug("not visible : %s", node);
-        return false;
-      }
-      Log.log.debug("visible     : %s", node);
-
-      //System.out.println("node=" + node);
-    }
-    while ((node = node.getParent()) != null);
-
-    return true;
+    return Stream.iterate(node, Objects::nonNull, Node::getParent).filter(Predicate.not(Node::isVisible)).findFirst()
+        .isPresent();
   }
 
   public void reset()
@@ -248,9 +238,6 @@ abstract public class AbstractContentPane
   {
     public PaneData()
     {
-      //m_diskUsageData.getSelectedTreeItemProperty().addListener((o, oldValue, newValue) -> reset());
-      //AppPreferences.displayMetricPreference.addListener((o, oldValue, newValue) -> reset());
-
       m_paneData = this;
     }
 
