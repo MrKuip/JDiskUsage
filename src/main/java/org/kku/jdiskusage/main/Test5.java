@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.kku.jdiskusage.ui.DiskUsageView;
-import org.kku.jdiskusage.ui.SizeDistributionPane.SizeDistributionBucket;
+import org.kku.jdiskusage.ui.SizeDistributionFormPane.SizeDistributionBucket;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
 import org.kku.jdiskusage.util.FileTree;
 import org.kku.jdiskusage.util.FileTree.DirNode;

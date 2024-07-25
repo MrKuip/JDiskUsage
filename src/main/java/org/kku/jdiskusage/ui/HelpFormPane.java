@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.common.AbstractContentPane;
+import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.util.ConcurrentUtil;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppSettings.AppSetting;
@@ -27,15 +27,15 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
-public class HelpPane
-  extends AbstractContentPane
+public class HelpFormPane
+  extends AbstractFormPane
 {
   public static final String EVENT_TYPE_CLICK = "click";
   public static final String FILE_PREFIX = "file://";
 
   private WebBrowser m_contentWebBrowser;
 
-  public HelpPane(DiskUsageData diskUsageData)
+  public HelpFormPane(DiskUsageData diskUsageData)
   {
     super(diskUsageData);
 
@@ -132,7 +132,7 @@ public class HelpPane
     {
       String html;
 
-      try (Reader reader = new InputStreamReader(HelpPane.class.getResourceAsStream(link), StandardCharsets.UTF_8))
+      try (Reader reader = new InputStreamReader(HelpFormPane.class.getResourceAsStream(link), StandardCharsets.UTF_8))
       {
         html = mi_renderer.render(mi_parser.parseReader(reader));
       }

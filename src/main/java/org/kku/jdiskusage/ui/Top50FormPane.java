@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.common.AbstractContentPane;
+import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.OperatingSystemUtil;
@@ -21,8 +21,8 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 
-class Top50Pane
-  extends AbstractContentPane
+class Top50FormPane
+  extends AbstractFormPane
 {
   private final Top50PaneData mi_data = new Top50PaneData();
 
@@ -52,7 +52,7 @@ class Top50Pane
     }
   }
 
-  Top50Pane(DiskUsageData diskUsageData)
+  Top50FormPane(DiskUsageData diskUsageData)
   {
     super(diskUsageData);
 

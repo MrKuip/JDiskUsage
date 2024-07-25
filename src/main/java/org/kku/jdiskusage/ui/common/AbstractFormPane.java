@@ -27,7 +27,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 
-abstract public class AbstractContentPane
+abstract public class AbstractFormPane
 {
   private DiskUsageData m_diskUsageData;
   private PaneData m_paneData;
@@ -40,13 +40,23 @@ abstract public class AbstractContentPane
 
   private record PaneType(String id, String description, String iconName, Supplier<Node> node) {};
 
-  public AbstractContentPane(DiskUsageData diskUsageData)
+  public AbstractFormPane(DiskUsageData diskUsageData)
   {
     m_diskUsageData = diskUsageData;
 
     m_diskUsageData.selectedTreeItemProperty().addListener((o, oldValue, newValue) -> refresh(newValue));
     AppPreferences.displayMetricPreference.addListener((o, oldValue, newValue) -> refresh());
     Log.log.debug("Create content pane %s", getClass().getSimpleName());
+  }
+
+  public void refreshView()
+  {
+
+  }
+
+  public void refreshModel()
+  {
+
   }
 
   public Node getNode()
@@ -56,7 +66,7 @@ abstract public class AbstractContentPane
 
   public void refresh(TreeItem<FileNodeIF> selectedTreeItem)
   {
-    refresh(selectedTreeItem, needInit(m_nodeByPaneTypeMap.get(m_currentPaneType)));
+    refresh(selectedTreeItem, m_nodeByPaneTypeMap.get(m_currentPaneType) != null);
   }
 
   public void refresh()

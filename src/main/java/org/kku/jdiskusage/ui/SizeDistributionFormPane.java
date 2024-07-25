@@ -9,7 +9,7 @@ import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonCell;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.common.AbstractContentPane;
+import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.FxUtil;
@@ -29,8 +29,8 @@ import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.ScrollPane;
 
-public class SizeDistributionPane
-  extends AbstractContentPane
+public class SizeDistributionFormPane
+  extends AbstractFormPane
 {
   private SizeDistributionPaneData mi_data = new SizeDistributionPaneData();
 
@@ -81,7 +81,7 @@ public class SizeDistributionPane
     static public SizeDistributionBucket findBucket(long value)
     {
       int length;
-      SizeDistributionPane.SizeDistributionBucket[] buckets;
+      SizeDistributionFormPane.SizeDistributionBucket[] buckets;
 
       buckets = SizeDistributionBucket.values();
       length = buckets.length;
@@ -139,7 +139,7 @@ public class SizeDistributionPane
     }
   }
 
-  SizeDistributionPane(DiskUsageData diskUsageData)
+  SizeDistributionFormPane(DiskUsageData diskUsageData)
   {
     super(diskUsageData);
 
@@ -332,7 +332,7 @@ public class SizeDistributionPane
           new FileNodeIterator(getCurrentFileNode()).forEach(fn -> {
             if (fn.isFile())
             {
-              SizeDistributionPane.SizeDistributionBucket bucket;
+              SizeDistributionFormPane.SizeDistributionBucket bucket;
               SizeDistributionBucketData data;
 
               bucket = SizeDistributionBucket.findBucket(fn.getSize());

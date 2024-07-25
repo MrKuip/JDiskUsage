@@ -16,7 +16,7 @@ import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.DraggableTabPane;
 import org.kku.jdiskusage.ui.ScanFileTreeDialog.ScanResult;
-import org.kku.jdiskusage.ui.common.AbstractContentPane;
+import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.common.FullScreen;
 import org.kku.jdiskusage.ui.common.Navigation;
@@ -66,14 +66,14 @@ public class DiskUsageView
     private final Navigation mi_navigation = new Navigation(this);
     private final FileTreePane mi_treePaneData = new FileTreePane(this);
     private final TabPaneData mi_tabPaneData = new TabPaneData();
-    private final SizePane mi_sizeTab = new SizePane(this);
-    private final Top50Pane mi_top50Tab = new Top50Pane(this);
-    private final LinkCountPane mi_linkCountTab = new LinkCountPane(this);
-    private final SizeDistributionPane mi_sizeDistributionTab = new SizeDistributionPane(this);
-    private final LastModifiedDistributionPane mi_modifiedDistributionTab = new LastModifiedDistributionPane(this);
-    private final TypesPane mi_typesTab = new TypesPane(this);
-    private final SearchPane mi_searchTab = new SearchPane(this);
-    private final HelpPane mi_helpTab = new HelpPane(this);
+    private final SizeFormPane mi_sizeTab = new SizeFormPane(this);
+    private final Top50FormPane mi_top50Tab = new Top50FormPane(this);
+    private final LinkCountFormPane mi_linkCountTab = new LinkCountFormPane(this);
+    private final SizeDistributionFormPane mi_sizeDistributionTab = new SizeDistributionFormPane(this);
+    private final LastModifiedDistributionFormPane mi_modifiedDistributionTab = new LastModifiedDistributionFormPane(this);
+    private final TypesFormPane mi_typesTab = new TypesFormPane(this);
+    private final SearchFormPane mi_searchTab = new SearchFormPane(this);
+    private final HelpFormPane mi_helpTab = new HelpFormPane(this);
     private final RecentFilesMenu mi_recentFiles = new RecentFilesMenu();
     private final PreferencesMenu mi_preferences = new PreferencesMenu();
     private final FilterPane mi_filterPane = new FilterPane(this);
@@ -328,10 +328,10 @@ public class DiskUsageView
 
       private final String m_name;
       private final String m_iconName;
-      private final Function<DiskUsageData, ? extends AbstractContentPane> m_tabPaneSupplier;
+      private final Function<DiskUsageData, ? extends AbstractFormPane> m_tabPaneSupplier;
 
       private TabData(String name, String iconName,
-          Function<DiskUsageData, ? extends AbstractContentPane> tabPaneGetter)
+          Function<DiskUsageData, ? extends AbstractFormPane> tabPaneGetter)
       {
         m_name = name;
         m_iconName = iconName;
@@ -358,7 +358,7 @@ public class DiskUsageView
       {
         try (PerformancePoint pp = Performance.measure("Filling content for %s", getName()))
         {
-          AbstractContentPane contentPane;
+          AbstractFormPane contentPane;
 
           contentPane = m_tabPaneSupplier.apply(mainData);
           contentPane.refresh();
