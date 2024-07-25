@@ -15,7 +15,6 @@ import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.FileTree.FilterIF;
 import org.kku.jdiskusage.util.OperatingSystemUtil;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
@@ -72,52 +71,8 @@ public class FileTreePane
 
     if (mi_treeTableView != null)
     {
-      TreeItem<FileNodeIF> parentTreeItem;
 
-      // Make sure the path to select is expanded, because selection alone doesn't
-      // expand the tree
-      parentTreeItem = treeItem;
-      while ((parentTreeItem = parentTreeItem.getParent()) != null)
-      {
-        parentTreeItem.setExpanded(true);
-      }
-      expandTo(treeItem);
-
-      treeItem.setExpanded(true);
-
-      mi_treeTableView.getSelectionModel().select(treeItem);
-
-      Platform.runLater(() -> mi_treeTableView.requestFocus());
-    }
-  }
-
-  private void expandTo(TreeItem<FileNodeIF> treeItem)
-  {
-    if (treeItem instanceof FileTreeView.FileTreeItem fileTreeItem)
-    {
-      AtomicReference<TreeItem<FileNodeIF>> currentTreeNode = new AtomicReference<>();
-      AtomicReference<Boolean> walkTreeFailed = new AtomicReference<>();
-
-      walkTreeFailed.set(false);
-
-      currentTreeNode.set(mi_treeTableView.getRoot());
-      mi_treeTableView.getRoot().setExpanded(true);
-      fileTreeItem.getPathFromRootList().forEach(fileNode -> {
-        if (!walkTreeFailed.get())
-        {
-          Optional<TreeItem<FileNodeIF>> childTreeItem;
-
-          childTreeItem = currentTreeNode.get().getChildren().stream()
-              .filter(ti -> Objects.equals(ti.getValue().getName(), fileNode.getName())).findFirst();
-          childTreeItem.ifPresentOrElse(ti -> {
-            ti.setExpanded(true);
-            currentTreeNode.set(ti);
-          }, () -> walkTreeFailed.set(true));
-        }
-      });
-
-      mi_treeTableView.requestFocus();
-      mi_treeTableView.getSelectionModel().select(currentTreeNode.get());
+      mi_fileTreeView.selectItem(treeItem);
     }
   }
 
@@ -193,15 +148,9 @@ public class FileTreePane
 
     public void setFilter(FilterIF filter)
     {
-      MyTreeTableView<FileNodeIF>.SelectedItem selectedPathList;
-
       mi_filter = filter;
 
-      selectedPathList = mi_treeTableView.getSelectedItem();
-
       mi_treeTableView.setRoot(new FileTreeItem(m_dirNode.filter(filter)));
-
-      mi_treeTableView.initSelectedItem(selectedPathList);
     }
 
     private void selectFirstItem()
@@ -211,10 +160,40 @@ public class FileTreePane
 
     private void selectItem(TreeItem<FileNodeIF> treeItem)
     {
-      Platform.runLater(() -> {
-        mi_treeTableView.getSelectionModel().select(treeItem);
-        mi_treeTableView.getSelectionModel().getSelectedItem().setExpanded(true);
-      });
+      mi_treeTableView.getSelectionModel().select(treeItem);
+      expandTo(treeItem);
+      mi_treeTableView.scrollTo(mi_treeTableView.getSelectionModel().getSelectedIndex());
+      mi_treeTableView.requestFocus();
+    }
+
+    private void expandTo(TreeItem<FileNodeIF> treeItem)
+    {
+      if (treeItem instanceof FileTreeView.FileTreeItem fileTreeItem)
+      {
+        AtomicReference<TreeItem<FileNodeIF>> currentTreeNode = new AtomicReference<>();
+        AtomicReference<Boolean> walkTreeFailed = new AtomicReference<>();
+
+        walkTreeFailed.set(false);
+
+        currentTreeNode.set(mi_treeTableView.getRoot());
+        mi_treeTableView.getRoot().setExpanded(true);
+        fileTreeItem.getPathFromRootList().forEach(fileNode -> {
+          if (!walkTreeFailed.get())
+          {
+            Optional<TreeItem<FileNodeIF>> childTreeItem;
+
+            childTreeItem = currentTreeNode.get().getChildren().stream()
+                .filter(ti -> Objects.equals(ti.getValue().getName(), fileNode.getName())).findFirst();
+            childTreeItem.ifPresentOrElse(ti -> {
+              ti.setExpanded(true);
+              currentTreeNode.set(ti);
+            }, () -> walkTreeFailed.set(true));
+          }
+        });
+
+        mi_treeTableView.requestFocus();
+        mi_treeTableView.getSelectionModel().select(currentTreeNode.get());
+      }
     }
 
     private class FileTreeItem

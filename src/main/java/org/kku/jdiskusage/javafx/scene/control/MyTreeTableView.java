@@ -1,9 +1,6 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
@@ -49,40 +46,5 @@ public class MyTreeTableView<S>
   public TreeItem<S> getSelectedTreeItem()
   {
     return getSelectionModel().getSelectedItem();
-  }
-
-  public SelectedItem getSelectedItem()
-  {
-    return new SelectedItem();
-  }
-
-  public void initSelectedItem(SelectedItem selectedPath)
-  {
-  }
-
-  public class SelectedItem
-  {
-    private List<TreeItem<S>> mi_selectedTreeItemPathList;
-
-    private SelectedItem()
-    {
-      init();
-    }
-
-    private void init()
-    {
-      TreeItem<S> treeItem;
-
-      mi_selectedTreeItemPathList = new ArrayList<>();
-
-      treeItem = getSelectedTreeItem();
-      while (treeItem != null)
-      {
-        mi_selectedTreeItemPathList.add(treeItem);
-        treeItem = treeItem.getParent();
-      }
-
-      Collections.reverse(mi_selectedTreeItemPathList);
-    }
   }
 }
