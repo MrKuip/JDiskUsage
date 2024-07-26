@@ -36,11 +36,11 @@ public class ConcurrentUtil
     return m_executorByNameMap.computeIfAbsent(executorName, (key) -> new MyExecutor());
   }
 
-  public class MyExecutor
+  static public class MyExecutor
   {
     private final ThreadPoolExecutor mi_executor;
 
-    public MyExecutor()
+    private MyExecutor()
     {
       mi_executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
           createThreadFactory());

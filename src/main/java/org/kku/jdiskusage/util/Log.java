@@ -166,6 +166,7 @@ public class Log
   static public class MyConsoleHandler
     extends ConsoleHandler
   {
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW")
     public MyConsoleHandler()
     {
       setOutputStream(System.out);

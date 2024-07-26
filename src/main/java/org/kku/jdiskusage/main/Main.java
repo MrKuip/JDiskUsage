@@ -7,6 +7,7 @@ import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppSettings.AppSetting;
 import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.PathList;
+import org.kku.jdiskusage.util.SuppressFBWarnings;
 import org.kku.jdiskusage.util.Translator;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import javafx.application.Application;
@@ -24,6 +25,7 @@ public class Main
   static private Pane m_rootNode;
   static private Stage m_rootStage;
 
+  @SuppressFBWarnings(value = "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
   @Override
   public void start(Stage stage)
   {
@@ -66,11 +68,13 @@ public class Main
         .map(PathList::of).findFirst().ifPresent(diskUsageView::scanDirectory);
   }
 
+  @SuppressFBWarnings(value = "MS_EXPOSE_REP")
   static public Node getRootNode()
   {
     return m_rootNode;
   }
 
+  @SuppressFBWarnings(value = "MS_EXPOSE_REP")
   static public Stage getRootStage()
   {
     return m_rootStage;

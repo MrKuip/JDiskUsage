@@ -47,6 +47,7 @@ public class FileTree
     }
   }
 
+  @SuppressFBWarnings(value = "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
   private static String UNIX_ATTRIBUTE_IDS;
 
   {

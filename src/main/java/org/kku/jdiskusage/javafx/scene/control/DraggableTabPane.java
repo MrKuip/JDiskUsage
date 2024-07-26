@@ -6,6 +6,7 @@ import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppSettings.AppSetting;
+import org.kku.jdiskusage.util.SuppressFBWarnings;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
@@ -26,6 +27,7 @@ import javafx.stage.StageStyle;
 public class DraggableTabPane
   extends TabPane
 {
+  @SuppressFBWarnings(value = "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
   private static int NEXT_TAB_SEQUENCE_NUMBER = 0;
   private static String TAB_SEQUENCE_NUMBER = "TAB_SEQUENCE_NUMBER";
   private static DataFormat DATA_FORMAT = new DataFormat("draggable/tab");
