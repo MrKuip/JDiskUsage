@@ -19,6 +19,7 @@ import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.OperatingSystemUtil;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
@@ -63,34 +64,45 @@ public class FileTreePane
 
     mi_treePane.setCenter(mi_treeTableView);
 
-    mi_treeTableView.getSelectionModel().selectedItemProperty().addListener((o, oldTreeItem, newTreeItem) -> {
-      if (AppPreferences.autoExpandTreeNode.get())
-      {
-        if (newTreeItem != null)
-        {
-          Log.log.debug("auto expand:" + newTreeItem);
-          Platform.runLater(() -> newTreeItem.setExpanded(true));
-        }
-      }
+    mi_diskUsageData.selectedTreeItemProperty().bind(mi_treeTableView.getSelectionModel().selectedItemProperty());
+    mi_diskUsageData.selectedTreeItemProperty().addListener(this::evaluateExpand);
+  }
 
-      if (AppPreferences.autoCollapseTreeNode.get())
+  private final void evaluateExpand(ObservableValue<? extends TreeItem<FileNodeIF>> observable,
+      TreeItem<FileNodeIF> oldTreeItem, TreeItem<FileNodeIF> newTreeItem)
+  {
+    if (AppPreferences.autoExpandTreeNode.get())
+    {
+      if (newTreeItem != null)
       {
-        if (oldTreeItem != null)
-        {
-          // Do not collapse if the old node is a parent node of the new node
-          if (!Stream.iterate(newTreeItem, Objects::nonNull, TreeItem::getParent).filter(ti -> oldTreeItem == ti)
-              .findFirst().isPresent())
+        Platform.runLater(() -> {
+          if (!newTreeItem.isExpanded())
           {
-            Platform.runLater(() -> {
+            Log.log.debug("auto expand:" + newTreeItem);
+            newTreeItem.setExpanded(true);
+          }
+        });
+      }
+    }
+
+    if (AppPreferences.autoCollapseTreeNode.get())
+    {
+      if (oldTreeItem != null)
+      {
+        // Do not collapse if the old node is a parent node of the new node
+        if (!Stream.iterate(newTreeItem, Objects::nonNull, TreeItem::getParent).filter(ti -> oldTreeItem == ti)
+            .findFirst().isPresent())
+        {
+          Platform.runLater(() -> {
+            if (oldTreeItem.isExpanded())
+            {
               Log.log.debug("auto collapse:" + oldTreeItem);
               oldTreeItem.setExpanded(false);
-            });
-          }
+            }
+          });
         }
       }
-
-    });
-    mi_diskUsageData.selectedTreeItemProperty().bind(mi_treeTableView.getSelectionModel().selectedItemProperty());
+    }
   }
 
   public void navigateTo(TreeItem<FileNodeIF> treeItem)
