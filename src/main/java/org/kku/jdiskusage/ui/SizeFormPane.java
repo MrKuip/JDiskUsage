@@ -6,6 +6,7 @@ import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import javafx.beans.binding.Bindings;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Label;
@@ -68,7 +69,20 @@ class SizeFormPane
           .add(new PieChart.Data(DiskUsageView.getOtherText(), getCurrentTreeItem().getValue().getSize() - sum));
     }
 
+    applyCustomColorSequence(chart.getData(), "aqua", "bisque", "chocolate", "coral", "crimson", "red", "yellow",
+        "blue", "purple", "green");
+
     return chart;
+  }
+
+  private void applyCustomColorSequence(ObservableList<PieChart.Data> pieChartData, String... pieColors)
+  {
+    int i = 0;
+    for (PieChart.Data data : pieChartData)
+    {
+      data.getNode().setStyle("-fx-pie-color: " + pieColors[i % pieColors.length] + ";");
+      i++;
+    }
   }
 
   Node getBarChartNode()
