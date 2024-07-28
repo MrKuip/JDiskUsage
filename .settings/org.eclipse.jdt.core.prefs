@@ -1,5 +1,5 @@
 #
-#Fri Jul 05 10:27:15 CEST 2024
+#Sun Jul 28 11:35:10 CEST 2024
 org.eclipse.jdt.core.formatter.insert_space_after_ellipsis=insert
 org.eclipse.jdt.core.formatter.insert_space_after_comma_in_enum_declarations=insert
 org.eclipse.jdt.core.formatter.insert_space_before_comma_in_allocation_expression=do not insert
