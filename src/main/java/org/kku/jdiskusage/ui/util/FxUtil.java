@@ -4,12 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
+import javafx.scene.chart.PieChart.Data;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Region;
 
@@ -41,14 +43,28 @@ public class FxUtil
     pieChart.setLegendVisible(false);
     pieChart.setStartAngle(90.0);
 
+    pieChart.getData().addListener(new ListChangeListener<PieChart.Data>()
+    {
+      @Override
+      public void onChanged(Change<? extends Data> c)
+      {
+        if (c.next())
+        {
+          IntStream.range(c.getFrom(), c.getTo()).forEach(index -> {
+            System.out.println("index=" + index);
+            pieChart.getData().get(index).getNode().setStyle("-fx-pie-color: " + PieChartColors.getColor(index) + ";");
+          });
+        }
+      }
+    });
+
     return pieChart;
   }
 
   public class PieChartColors
   {
-    private static final String[] COMBINED_COLORS =
+    private static final String[] chartColorPalette =
     {
-        // Default JavaFX colors
         "#f9d900", // Default gold
         "#a9e200", // Default lime green
         "#22bad9", // Default sky blue
@@ -57,30 +73,24 @@ public class FxUtil
         "#860061", // Default purple
         "#c62b00", // Default rust
         "#ff5700", // Default orange
-
-        // Custom colors
-        "#FFD700", // Custom golden yellow
-        "#98FB98", // Custom pale green
-        "#00CED1", // Custom dark turquoise
-        "#4169E1", // Custom royal blue
-        "#483D8B", // Custom dark slate blue
-        "#9932CC", // Custom dark orchid
-        "#FF4500", // Custom orange red
-        "#FF8C00" // Custom dark orange
+        "#e6007e", // Default magenta
+        "#008080", // Default teal
+        "#808000", // Default olive
+        "#000080", // Default navy
+        "#800000", // Default maroon
+        "#00FF00", // Default lime
+        "#00FFFF", // Default aqua
+        "#FF7F50", // Default coral
+        "#FA8072", // Default salmon
+        "#EE82EE", // Default violet
+        "#A0522D", // Default sienna
+        "#6A5ACD" // Default slate blue
     };
 
-    private PieChartColors()
+    public static String getColor(int index)
     {
+      return chartColorPalette[index % chartColorPalette.length];
     }
-
-    private void initColors()
-    {
-      PieChart chart;
-
-      chart = createPieChart();
-      IntStream.range(0, 20).forEach(number -> chart.getData().add(new PieChart.Data(String.valueOf(number), number)));
-    }
-
   }
 
   public static Region createHorizontalSpacer(int size)
