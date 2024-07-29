@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.controlsfx.control.BreadCrumbBar;
 import org.kku.jdiskusage.javafx.scene.control.MyTreeTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTreeTableView;
@@ -14,7 +15,11 @@ import org.kku.jdiskusage.ui.util.FormatterFactory;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.FileTree.FilterIF;
+import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.OperatingSystemUtil;
+import org.kku.jdiskusage.util.preferences.AppPreferences;
+import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
@@ -60,6 +65,44 @@ public class FileTreePane
     mi_treePane.setCenter(mi_treeTableView);
 
     mi_diskUsageData.selectedTreeItemProperty().bind(mi_treeTableView.getSelectionModel().selectedItemProperty());
+    mi_diskUsageData.selectedTreeItemProperty().addListener(this::evaluateExpand);
+  }
+
+  private final void evaluateExpand(ObservableValue<? extends TreeItem<FileNodeIF>> observable,
+      TreeItem<FileNodeIF> oldTreeItem, TreeItem<FileNodeIF> newTreeItem)
+  {
+    if (AppPreferences.autoExpandTreeNode.get())
+    {
+      if (newTreeItem != null)
+      {
+        Platform.runLater(() -> {
+          if (!newTreeItem.isExpanded())
+          {
+            Log.log.debug("auto expand:" + newTreeItem);
+            newTreeItem.setExpanded(true);
+          }
+        });
+      }
+    }
+
+    if (AppPreferences.autoCollapseTreeNode.get())
+    {
+      if (oldTreeItem != null)
+      {
+        // Do not collapse if the old node is a parent node of the new node
+        if (!Stream.iterate(newTreeItem, Objects::nonNull, TreeItem::getParent).filter(ti -> oldTreeItem == ti)
+            .findFirst().isPresent())
+        {
+          Platform.runLater(() -> {
+            if (oldTreeItem.isExpanded())
+            {
+              Log.log.debug("auto collapse:" + oldTreeItem);
+              oldTreeItem.setExpanded(false);
+            }
+          });
+        }
+      }
+    }
   }
 
   public void navigateTo(TreeItem<FileNodeIF> treeItem)

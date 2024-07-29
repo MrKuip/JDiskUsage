@@ -21,12 +21,18 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.stage.Modality;
 
 public class PreferencesDialog
 {
+  static private final int MIN_NUMBER_OF_CHART_ELEMENTS = 5;
+  static private final int MAX_NUMBER_OF_CHART_ELEMENTS = 20;
+  static private final int MIN_PERCENTAGE_CHART_ELEMENT = 1;
+  static private final int MAX_PERCENTAGE_CHART_ELEMENT = 10;
+
   private Dialog<ButtonType> m_dialog;
   private LanguagePreferences m_languagePreferences = new LanguagePreferences();
 
@@ -102,8 +108,37 @@ public class PreferencesDialog
   private Tab getChartingTab()
   {
     Tab tab;
+    MigPane pane;
+    Spinner<Integer> maxNumberOfElements;
+    Spinner<Integer> minPercentageElement;
+
+    maxNumberOfElements = new Spinner<>(MIN_NUMBER_OF_CHART_ELEMENTS, MAX_NUMBER_OF_CHART_ELEMENTS,
+        AppPreferences.maxNumberOfChartElements.get());
+    maxNumberOfElements.setPrefWidth(80.0);
+    maxNumberOfElements.valueProperty()
+        .addListener((o, oldValue, newValue) -> AppPreferences.maxNumberOfChartElements.set(newValue));
+
+    minPercentageElement = new Spinner<>(MIN_PERCENTAGE_CHART_ELEMENT, MAX_PERCENTAGE_CHART_ELEMENT,
+        AppPreferences.minPercentageChartElement.get());
+    minPercentageElement.setPrefWidth(80.0);
+    minPercentageElement.valueProperty()
+        .addListener((o, oldValue, newValue) -> AppPreferences.minPercentageChartElement.set(newValue));
+
+    pane = new MigPane("");
+
+    pane.add(translate(new Label("Chart shows at most")), "");
+    pane.add(maxNumberOfElements, "");
+    pane.add(
+        new Label(
+            translate("elements") + " (" + MIN_NUMBER_OF_CHART_ELEMENTS + " - " + MAX_NUMBER_OF_CHART_ELEMENTS + ")"),
+        "wrap");
+
+    pane.add(translate(new Label("Show elements larger than")), "");
+    pane.add(minPercentageElement, "");
+    pane.add(new Label("%" + " (" + MIN_PERCENTAGE_CHART_ELEMENT + " - " + MAX_PERCENTAGE_CHART_ELEMENT + ")"), "wrap");
 
     tab = translate(new Tab("Charting"));
+    tab.setContent(pane);
 
     return tab;
   }

@@ -34,15 +34,18 @@ class SizeFormPane
     double minimumDataSize;
 
     totalSize = getCurrentFileNode().getSize();
-    minimumDataSize = totalSize * 0.02;
+    minimumDataSize = totalSize * (AppPreferences.minPercentageChartElement.get() / 100.0);
 
     record MyData(PieChart.Data pieChartData, TreeItem<FileNodeIF> treeItem) {
     }
 
+    System.out.println("minPerc:" + AppPreferences.minPercentageChartElement.get());
+    System.out.println("maxNumb:" + AppPreferences.maxNumberOfChartElements.get());
+
     chart = FxUtil.createPieChart();
     getCurrentTreeItem().getChildren().stream().filter(item -> {
       return item.getValue().getSize() > minimumDataSize;
-    }).limit(10).map(item -> {
+    }).limit(AppPreferences.maxNumberOfChartElements.get()).map(item -> {
       PieChart.Data data;
 
       data = new PieChart.Data(item.getValue().getName(), item.getValue().getSize());
