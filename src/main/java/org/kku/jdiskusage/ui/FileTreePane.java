@@ -263,7 +263,6 @@ public class FileTreePane
       private void initPathFromRootList()
       {
         getPathFromRootList();
-        System.out.println("root path[" + getValue() + "]=" + getPathFromRootList());
       }
 
       public List<FileNodeIF> getPathFromRootList()

@@ -3,6 +3,7 @@ package org.kku.jdiskusage.main;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.kku.jdiskusage.ui.DiskUsageView;
+import org.kku.jdiskusage.ui.util.ChartStyleSheet;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppSettings.AppSetting;
 import org.kku.jdiskusage.util.Log;
@@ -46,6 +47,7 @@ public class Main
 
     scene = new Scene(m_rootNode);
     scene.getStylesheets().add("jdiskusage.css");
+    scene.getStylesheets().add(new ChartStyleSheet().getStyleSheet());
 
     defaultScreenBounds = getDefaultScreenBounds();
 

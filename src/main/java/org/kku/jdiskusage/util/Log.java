@@ -19,28 +19,51 @@ import java.util.logging.Logger;
 public class Log
 {
   static public final MyLogger log = createLogger("log", "log", 100000, 10, Level.FINE);
+  static public final MyLogger javafx = createLogger("javafx", Level.INFO);
 
   private Log()
   {
   }
 
-  static private MyLogger createLogger(String name, String fileName, long fileSize, int count, Level level)
+  static private MyLogger createLogger(String name, Level level)
   {
     Logger logger;
-    Handler handler;
 
     logger = Logger.getLogger(name);
     logger.setLevel(level);
     logger.setUseParentHandlers(false);
-    handler = new MyConsoleHandler();
-    handler.setFormatter(getFormatter());
-    logger.addHandler(handler);
-    handler = createFileHandler(fileName, fileSize, count, true);
-    handler.setFormatter(getFormatter());
-    logger.addHandler(handler);
+    logger.addHandler(new MyConsoleHandler());
 
     return new MyLogger(logger);
   }
+
+  static private MyLogger createLogger(String name, String fileName, long fileSize, int count, Level level)
+  {
+    MyLogger logger;
+
+    logger = createLogger(name, level);
+    logger.addHandler(createFileHandler(fileName, fileSize, count, true));
+
+    return logger;
+  }
+
+  /**
+   * Create a file handler that will roll over when it's limit is reached.<br>
+   * 
+   * The log files are placed in the directory 'temp'/jdiskusage.<br>
+   * The intermediate directories are created if they do not exist.<br>
+   * 
+   * @param limit  the maximum number of bytes to write to any one file
+   * @param count  the number of files to use
+   * @param append  specifies append mode
+   * @throws  IOException if there are IO problems opening the files.
+   * @throws  SecurityException  if a security manager exists and if
+   *             the caller does not have {@code LoggingPermission("control")}.
+   * @throws  IllegalArgumentException if {@code limit < 0}, or {@code count < 1}.
+   * @throws  IllegalArgumentException if pattern is an empty string
+   * 
+   * @see FileHandler#FileHandler(String, long, int, boolean)
+   */
 
   static private Handler createFileHandler(String fileName, long limit, int count, boolean append)
   {
@@ -51,7 +74,12 @@ public class Log
     {
       try
       {
-        return new FileHandler("%t/jdiskusage/" + fileName + "%g.log", limit, count, append);
+        FileHandler handler;
+
+        handler = new FileHandler("%t/jdiskusage/" + fileName + "%g.log", limit, count, append);
+        handler.setFormatter(createDefaultFormatter());
+
+        return handler;
       }
       catch (NoSuchFileException e)
       {
@@ -86,7 +114,10 @@ public class Log
     return null;
   }
 
-  static private Formatter getFormatter()
+  /**
+   * Create a formatter that outputs 1 line.
+   */
+  static private Formatter createDefaultFormatter()
   {
     return new Formatter()
     {
@@ -115,6 +146,9 @@ public class Log
     };
   }
 
+  /**
+   * Wrapper around Logger that adds varargs
+   */
   static public class MyLogger
   {
     private final Logger mi_logger;
@@ -127,6 +161,11 @@ public class Log
     public void setLevel(Level level)
     {
       mi_logger.setLevel(level);
+    }
+
+    public void addHandler(Handler handler)
+    {
+      mi_logger.addHandler(handler);
     }
 
     public void info(String msg)
@@ -163,6 +202,9 @@ public class Log
     }
   }
 
+  /**
+   *  Handler that prints all log records to standard out with our default formatter.
+   */
   static public class MyConsoleHandler
     extends ConsoleHandler
   {
@@ -170,6 +212,8 @@ public class Log
     public MyConsoleHandler()
     {
       setOutputStream(System.out);
+      setLevel(Level.ALL);
+      setFormatter(createDefaultFormatter());
     }
   }
 }

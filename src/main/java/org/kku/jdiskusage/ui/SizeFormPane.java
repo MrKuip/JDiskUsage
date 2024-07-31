@@ -39,9 +39,6 @@ class SizeFormPane
     record MyData(PieChart.Data pieChartData, TreeItem<FileNodeIF> treeItem) {
     }
 
-    System.out.println("minPerc:" + AppPreferences.minPercentageChartElement.get());
-    System.out.println("maxNumb:" + AppPreferences.maxNumberOfChartElements.get());
-
     chart = FxUtil.createPieChart();
     getCurrentTreeItem().getChildren().stream().filter(item -> {
       return item.getValue().getSize() > minimumDataSize;

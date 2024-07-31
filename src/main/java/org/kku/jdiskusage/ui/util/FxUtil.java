@@ -2,22 +2,19 @@ package org.kku.jdiskusage.ui.util;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.IntStream;
 import javafx.beans.value.ChangeListener;
-import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
-import javafx.scene.chart.PieChart.Data;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Region;
 
 public class FxUtil
 {
-  private static Map<Integer, Double> m_columnWidthByColumnCountMap = new HashMap<>();
+  private final static Map<Integer, Double> m_columnWidthByColumnCountMap = new HashMap<>();
 
   private FxUtil()
   {
@@ -25,72 +22,27 @@ public class FxUtil
 
   public static BarChart<Number, String> createBarChart(NumberAxis xAxis, CategoryAxis yAxis)
   {
-    BarChart<Number, String> barChart;
+    BarChart<Number, String> chart;
 
-    barChart = new BarChart<>(xAxis, yAxis);
-    barChart.setLegendVisible(false);
-    barChart.setBarGap(1.0);
-    barChart.setCategoryGap(4.0);
+    chart = new BarChart<>(xAxis, yAxis);
+    chart.getStyleClass().add("barchart");
+    chart.setLegendVisible(false);
+    chart.setBarGap(1.0);
+    chart.setCategoryGap(4.0);
 
-    return barChart;
+    return chart;
   }
 
   public static PieChart createPieChart()
   {
-    PieChart pieChart;
+    PieChart chart;
 
-    pieChart = new PieChart();
-    pieChart.setLegendVisible(false);
-    pieChart.setStartAngle(90.0);
+    chart = new PieChart();
+    chart.getStyleClass().add("piechart");
+    chart.setLegendVisible(false);
+    chart.setStartAngle(90.0);
 
-    pieChart.getData().addListener(new ListChangeListener<PieChart.Data>()
-    {
-      @Override
-      public void onChanged(Change<? extends Data> c)
-      {
-        if (c.next())
-        {
-          IntStream.range(c.getFrom(), c.getTo()).forEach(index -> {
-            System.out.println("index=" + index);
-            pieChart.getData().get(index).getNode().setStyle("-fx-pie-color: " + PieChartColors.getColor(index) + ";");
-          });
-        }
-      }
-    });
-
-    return pieChart;
-  }
-
-  public class PieChartColors
-  {
-    private static final String[] chartColorPalette =
-    {
-        "#f9d900", // Default gold
-        "#a9e200", // Default lime green
-        "#22bad9", // Default sky blue
-        "#0181e2", // Default azure
-        "#2f357f", // Default indigo
-        "#860061", // Default purple
-        "#c62b00", // Default rust
-        "#ff5700", // Default orange
-        "#e6007e", // Default magenta
-        "#008080", // Default teal
-        "#808000", // Default olive
-        "#000080", // Default navy
-        "#800000", // Default maroon
-        "#00FF00", // Default lime
-        "#00FFFF", // Default aqua
-        "#FF7F50", // Default coral
-        "#FA8072", // Default salmon
-        "#EE82EE", // Default violet
-        "#A0522D", // Default sienna
-        "#6A5ACD" // Default slate blue
-    };
-
-    public static String getColor(int index)
-    {
-      return chartColorPalette[index % chartColorPalette.length];
-    }
+    return chart;
   }
 
   public static Region createHorizontalSpacer(int size)
