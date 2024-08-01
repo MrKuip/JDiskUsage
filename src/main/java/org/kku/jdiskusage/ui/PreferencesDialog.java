@@ -28,11 +28,6 @@ import javafx.stage.Modality;
 
 public class PreferencesDialog
 {
-  static private final int MIN_NUMBER_OF_CHART_ELEMENTS = 5;
-  static private final int MAX_NUMBER_OF_CHART_ELEMENTS = 20;
-  static private final int MIN_PERCENTAGE_CHART_ELEMENT = 1;
-  static private final int MAX_PERCENTAGE_CHART_ELEMENT = 10;
-
   private Dialog<ButtonType> m_dialog;
   private LanguagePreferences m_languagePreferences = new LanguagePreferences();
 
@@ -125,7 +120,7 @@ public class PreferencesDialog
     minPercentageElementField.valueProperty()
         .addListener((o, oldValue, newValue) -> AppPreferences.minPercentageChartElement.set(newValue));
 
-    pane = new MigPane("debug, grow");
+    pane = new MigPane("debug, fill");
 
     pane.add(translate(new Label("Chart shows at most")), "");
     pane.add(maxNumberOfElementsField, "");

@@ -19,7 +19,7 @@ public class AppPreferences
   public final static AppSetting<Boolean> autoExpandTreeNode;
   public final static AppSetting<Boolean> autoCollapseTreeNode;
   public final static AppSetting<Integer> maxNumberOfChartElements;
-  public final static AppSetting<Integer> minPercentageChartElement;
+  public final static AppSetting<Double> minPercentageChartElement;
 
   static
   {
@@ -45,7 +45,7 @@ public class AppPreferences
     maxNumberOfChartElements = m_instance
         .createAppSettingType("Max number of elements", Converters.getIntegerConverter()).forSubject(m_instance, 11);
     minPercentageChartElement = m_instance
-        .createAppSettingType("Min percentage element", Converters.getIntegerConverter()).forSubject(m_instance, 5);
+        .createAppSettingType("Min percentage element", Converters.getDoubleConverter()).forSubject(m_instance, 5.0);
   }
 
   protected AppPreferences()
