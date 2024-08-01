@@ -16,12 +16,12 @@ import org.kku.jdiskusage.util.Translator;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.stage.Modality;
@@ -109,33 +109,36 @@ public class PreferencesDialog
   {
     Tab tab;
     MigPane pane;
-    Spinner<Integer> maxNumberOfElements;
-    Spinner<Integer> minPercentageElement;
+    NumericTextField<Integer> maxNumberOfElementsField;
+    NumericTextField<Double> minPercentageElementField;
+    Button restoreButton;
 
-    maxNumberOfElements = new Spinner<>(MIN_NUMBER_OF_CHART_ELEMENTS, MAX_NUMBER_OF_CHART_ELEMENTS,
-        AppPreferences.maxNumberOfChartElements.get());
-    maxNumberOfElements.setPrefWidth(80.0);
-    maxNumberOfElements.valueProperty()
+    maxNumberOfElementsField = NumericTextField.integerField();
+    maxNumberOfElementsField.setValue(AppPreferences.maxNumberOfChartElements.get());
+    maxNumberOfElementsField.setPrefWidth(80.0);
+    maxNumberOfElementsField.valueProperty()
         .addListener((o, oldValue, newValue) -> AppPreferences.maxNumberOfChartElements.set(newValue));
 
-    minPercentageElement = new Spinner<>(MIN_PERCENTAGE_CHART_ELEMENT, MAX_PERCENTAGE_CHART_ELEMENT,
-        AppPreferences.minPercentageChartElement.get());
-    minPercentageElement.setPrefWidth(80.0);
-    minPercentageElement.valueProperty()
+    minPercentageElementField = NumericTextField.doubleField();
+    minPercentageElementField.setValue(AppPreferences.minPercentageChartElement.get());
+    minPercentageElementField.setPrefWidth(80.0);
+    minPercentageElementField.valueProperty()
         .addListener((o, oldValue, newValue) -> AppPreferences.minPercentageChartElement.set(newValue));
 
-    pane = new MigPane("");
+    pane = new MigPane("debug, grow");
 
     pane.add(translate(new Label("Chart shows at most")), "");
-    pane.add(maxNumberOfElements, "");
-    pane.add(
-        new Label(
-            translate("elements") + " (" + MIN_NUMBER_OF_CHART_ELEMENTS + " - " + MAX_NUMBER_OF_CHART_ELEMENTS + ")"),
-        "wrap");
+    pane.add(maxNumberOfElementsField, "");
+    pane.add(new Label(translate("elements")), "wrap");
 
     pane.add(translate(new Label("Show elements larger than")), "");
-    pane.add(minPercentageElement, "");
-    pane.add(new Label("%" + " (" + MIN_PERCENTAGE_CHART_ELEMENT + " - " + MAX_PERCENTAGE_CHART_ELEMENT + ")"), "wrap");
+    pane.add(minPercentageElementField, "");
+    pane.add(new Label("%"), "wrap");
+
+    restoreButton = new Button("Restore");
+    MigPane toolbar = new MigPane("", "push[]", "[]");
+    toolbar.add(restoreButton);
+    pane.add(toolbar, "dock south");
 
     tab = translate(new Tab("Charting"));
     tab.setContent(pane);
