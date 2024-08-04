@@ -7,8 +7,6 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import org.kku.jdiskusage.util.Converters.Converter;
 import javafx.beans.value.ChangeListener;
@@ -26,25 +24,18 @@ public abstract class AppSettings
 
   protected <T> AppSettingType<T> createAppSettingType(String name, Converter<T> converter)
   {
-    return new AppSettingType<>(name, converter, -1);
-  }
-
-  protected <T> AppSettingType<T> createAppSettingType(String name, Converter<T> converter, int listSize)
-  {
-    return new AppSettingType<>(name, converter, listSize);
+    return new AppSettingType<>(name, converter);
   }
 
   public class AppSettingType<T>
   {
     private final String mi_name;
     private final Converter<T> mi_converter;
-    private final int mi_listSize;
 
-    private AppSettingType(String name, Converter<T> converter, int listSize)
+    private AppSettingType(String name, Converter<T> converter)
     {
       mi_name = name;
       mi_converter = converter;
-      mi_listSize = listSize;
     }
 
     public AppSetting<T> forSubject(Object subject)
@@ -79,11 +70,6 @@ public abstract class AppSettings
     {
       return mi_converter;
     }
-
-    public int getListSize()
-    {
-      return mi_listSize;
-    }
   }
 
   public class AppSetting<T>
@@ -103,48 +89,6 @@ public abstract class AppSettings
     public String getName()
     {
       return mi_type.getName();
-    }
-
-    public List<T> getList()
-    {
-      List<T> list;
-
-      list = new ArrayList<>();
-      for (int index = 0; index < mi_type.getListSize(); index++)
-      {
-        T value;
-
-        value = getProperty(getSettingNameList(index), null);
-        if (value != null)
-        {
-          list.add(value);
-        }
-      }
-
-      return list;
-    }
-
-    public void setList(List<T> list)
-    {
-      for (int index = 0; index < mi_type.getListSize(); index++)
-      {
-        T value;
-
-        value = index < list.size() ? list.get(index) : null;
-        if (value != null)
-        {
-          setProperty(getSettingNameList(index), value);
-        }
-        else
-        {
-          remove(getSettingNameList(index));
-        }
-      }
-    }
-
-    private String getSettingNameList(int index)
-    {
-      return getSettingName() + "_" + index;
     }
 
     public T get()

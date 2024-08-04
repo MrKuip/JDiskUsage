@@ -2,12 +2,7 @@ package org.kku.jdiskusage.util;
 
 import java.nio.file.Path;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.kku.jdiskusage.util.DirectoryList.Directory;
 
 public class Converters
 {
@@ -49,23 +44,6 @@ public class Converters
   public static <E extends Enum<E>> Converter<E> getEnumConverter(Class<E> enumClass)
   {
     return new Converter<E>((s) -> Enum.valueOf(enumClass, s), (e) -> e.name());
-  }
-
-  public static Converter<PathList> getPathListConverter()
-  {
-    return new Converter<PathList>(
-        (s) -> new PathList(Stream.of(s.split(",")).filter(Predicate.not(StringUtils::isEmpty))
-            .map(fileName -> Path.of(fileName)).toList()),
-        (pl) -> pl.getPathList().stream().map(Path::toString).collect(Collectors.joining(",")));
-  }
-
-  public static Converter<DirectoryList> getDirectoryListConverter()
-  {
-    return new Converter<DirectoryList>(
-        (s) -> new DirectoryList(Stream.of(s.split(",")).filter(Predicate.not(StringUtils::isEmpty))
-            .map(text -> Directory.parseText(text.split(":::"))).filter(Objects::nonNull).toList()),
-        (pl) -> pl.getDirectoryList().stream().map(d -> d.getName() + ":::" + d.getPath().toString())
-            .collect(Collectors.joining(",")));
   }
 
   static class Converter<T>

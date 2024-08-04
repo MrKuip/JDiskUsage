@@ -95,7 +95,14 @@ public class Main
 
   public static void main(String[] args)
   {
-    launch(args);
+    try
+    {
+      launch(args);
+    }
+    catch (Throwable ex)
+    {
+      ex.printStackTrace();
+    }
   }
 
   private AppSetting<Double> getWidthProperty()

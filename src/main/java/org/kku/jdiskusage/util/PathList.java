@@ -7,7 +7,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.kku.jdiskusage.util.Converters.Converter;
 
 public class PathList
 {
@@ -124,6 +127,14 @@ public class PathList
     }
 
     return Objects.equals(pathList.toString(), toString());
+  }
+
+  public static Converter<PathList> getConverter()
+  {
+    return new Converter<PathList>(
+        (s) -> new PathList(Stream.of(s.split(",")).filter(Predicate.not(StringUtils::isEmpty))
+            .map(fileName -> Path.of(fileName)).toList()),
+        (pl) -> pl.getPathList().stream().map(Path::toString).collect(Collectors.joining(",")));
   }
 
   @Override

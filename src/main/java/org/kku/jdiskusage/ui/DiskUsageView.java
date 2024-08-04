@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.DraggableTabPane;
+import org.kku.jdiskusage.main.Main;
 import org.kku.jdiskusage.ui.ScanFileTreeDialog.ScanResult;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.Filter;
@@ -29,11 +30,13 @@ import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.PathList;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
+import org.kku.jdiskusage.util.RecentScanList;
 import org.kku.jdiskusage.util.Translator;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.kku.jdiskusage.util.preferences.Sort;
 import org.tbee.javafx.scene.layout.MigPane;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
@@ -70,7 +73,8 @@ public class DiskUsageView
     private final Top50FormPane mi_top50Tab = new Top50FormPane(this);
     private final LinkCountFormPane mi_linkCountTab = new LinkCountFormPane(this);
     private final SizeDistributionFormPane mi_sizeDistributionTab = new SizeDistributionFormPane(this);
-    private final LastModifiedDistributionFormPane mi_modifiedDistributionTab = new LastModifiedDistributionFormPane(this);
+    private final LastModifiedDistributionFormPane mi_modifiedDistributionTab = new LastModifiedDistributionFormPane(
+        this);
     private final TypesFormPane mi_typesTab = new TypesFormPane(this);
     private final SearchFormPane mi_searchTab = new SearchFormPane(this);
     private final HelpFormPane mi_helpTab = new HelpFormPane(this);
@@ -169,7 +173,7 @@ public class DiskUsageView
     menu = translate(new Menu("File"));
     menu.getItems().addAll(createScanFileTreeMenuItem(), createRecentFilesMenu(), createPreferencesMenuItem(),
         createExitMenuItem());
-    menuBar.getMenus().add(menu);
+    menuBar.getMenus().addAll(menu);
 
     return menuBar;
   }
@@ -279,7 +283,8 @@ public class DiskUsageView
     menuItem = translate(new MenuItem("Scan directory"));
     menuItem.setGraphic(IconUtil.createIconNode("file-search", IconSize.SMALLER));
     menuItem.setOnAction(e -> {
-      scanDirectory(new ScanFileTreeDialog().chooseDirectory(m_data.mi_fullScreen.getCurrentStage()));
+      Platform.runLater(
+          () -> scanDirectory(new ScanFileTreeDialog().chooseDirectory(m_data.mi_fullScreen.getCurrentStage())));
     });
 
     return menuItem;
@@ -330,8 +335,7 @@ public class DiskUsageView
       private final String m_iconName;
       private final Function<DiskUsageData, ? extends AbstractFormPane> m_tabPaneSupplier;
 
-      private TabData(String name, String iconName,
-          Function<DiskUsageData, ? extends AbstractFormPane> tabPaneGetter)
+      private TabData(String name, String iconName, Function<DiskUsageData, ? extends AbstractFormPane> tabPaneGetter)
       {
         m_name = name;
         m_iconName = iconName;
@@ -467,14 +471,13 @@ public class DiskUsageView
 
     public void addPath(PathList pathList)
     {
-      AppSetting<PathList> recentScansProperty;
-      List<PathList> list;
+      AppSetting<RecentScanList> recentScansProperty;
+      RecentScanList recentScanList;
 
       recentScansProperty = getRecentScansProperty();
-      list = recentScansProperty.getList();
-      list.add(0, pathList);
-      list = list.stream().distinct().toList();
-      recentScansProperty.setList(list);
+      recentScanList = recentScansProperty.get();
+      recentScanList = recentScanList.add(0, pathList);
+      recentScansProperty.set(recentScanList);
 
       update();
     }
@@ -483,6 +486,7 @@ public class DiskUsageView
     {
       menu.getItems().clear();
       menu.getItems().addAll(getItems());
+      Platform.runLater(() -> Main.getRootStage().requestFocus());
     }
 
     private void update()
@@ -492,7 +496,8 @@ public class DiskUsageView
 
     private List<MenuItem> getItems()
     {
-      return getRecentScansProperty().getList().stream().map(this::createMenuItem).collect(Collectors.toList());
+      return getRecentScansProperty().get().getRecentScanList().stream().map(this::createMenuItem)
+          .collect(Collectors.toList());
     }
 
     private MenuItem createMenuItem(PathList pathList)
@@ -508,9 +513,9 @@ public class DiskUsageView
       return menuItem;
     }
 
-    private AppSetting<PathList> getRecentScansProperty()
+    private AppSetting<RecentScanList> getRecentScansProperty()
     {
-      return AppProperties.RECENT_SCANS.forSubject(this);
+      return AppProperties.RECENT_SCANS.forSubject(this, RecentScanList.empty());
     }
   }
 

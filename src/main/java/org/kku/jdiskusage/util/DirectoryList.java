@@ -4,6 +4,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.kku.jdiskusage.util.Converters.Converter;
 
 public class DirectoryList
 {
@@ -12,6 +16,15 @@ public class DirectoryList
   DirectoryList(List<Directory> directoryList)
   {
     mi_directoryList = directoryList == null ? new ArrayList<>() : directoryList;
+  }
+
+  public static Converter<DirectoryList> getConverter()
+  {
+    return new Converter<DirectoryList>(
+        (s) -> new DirectoryList(Stream.of(s.split(",")).filter(Predicate.not(StringUtils::isEmpty))
+            .map(text -> Directory.parseText(text.split("###"))).filter(Objects::nonNull).toList()),
+        (pl) -> pl.getDirectoryList().stream().map(d -> d.getName() + "###" + d.getPath().toString())
+            .collect(Collectors.joining(",")));
   }
 
   public static DirectoryList empty()

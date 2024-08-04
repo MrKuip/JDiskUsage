@@ -10,7 +10,9 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.main.Main;
+import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.ui.util.TranslateUtil;
 import org.kku.jdiskusage.util.Translator;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
@@ -113,6 +115,7 @@ public class PreferencesDialog
     maxNumberOfElementsField.setPrefWidth(80.0);
     maxNumberOfElementsField.valueProperty()
         .addListener((o, oldValue, newValue) -> AppPreferences.maxNumberOfChartElements.set(newValue));
+    //maxNumberOfElementsField.valueProperty().bind(AppPreferences.maxNumberOfChartElements.property());
 
     minPercentageElementField = NumericTextField.doubleField();
     minPercentageElementField.setValue(AppPreferences.minPercentageChartElement.get());
@@ -120,7 +123,7 @@ public class PreferencesDialog
     minPercentageElementField.valueProperty()
         .addListener((o, oldValue, newValue) -> AppPreferences.minPercentageChartElement.set(newValue));
 
-    pane = new MigPane("debug, fill");
+    pane = new MigPane("", "[][][][]", "[][]push[]");
 
     pane.add(translate(new Label("Chart shows at most")), "");
     pane.add(maxNumberOfElementsField, "");
@@ -130,10 +133,12 @@ public class PreferencesDialog
     pane.add(minPercentageElementField, "");
     pane.add(new Label("%"), "wrap");
 
-    restoreButton = new Button("Restore");
-    MigPane toolbar = new MigPane("", "push[]", "[]");
-    toolbar.add(restoreButton);
-    pane.add(toolbar, "dock south");
+    restoreButton = translate(new Button("Restore", IconUtil.createIconNode("restore", IconSize.SMALLER)));
+    restoreButton.setOnAction((ae) -> {
+      //AppPreferences.maxNumberOfChartElements.reset();
+      //AppPreferences.minPercentageChartElement.reset();
+    });
+    pane.add(restoreButton);
 
     tab = translate(new Tab("Charting"));
     tab.setContent(pane);

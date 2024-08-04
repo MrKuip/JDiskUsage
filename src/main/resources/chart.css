@@ -1,0 +1,223 @@
+
+.piechart .data0 {
+  -fx-pie-color: -fx-chart-color-0;
+}
+	
+.piechart .data1 {
+  -fx-pie-color: -fx-chart-color-1; 
+}
+	
+.piechart .data2 {
+  -fx-pie-color: -fx-chart-color-2; 
+}
+	
+.piechart .data3 {
+  -fx-pie-color: -fx-chart-color-3; 
+}
+	
+.piechart .data4 {
+  -fx-pie-color: -fx-chart-color-4; 
+}
+	
+.piechart .data5 {
+  -fx-pie-color: -fx-chart-color-5; 
+}
+	
+.piechart .data6 {
+  -fx-pie-color: -fx-chart-color-6; 
+}
+	
+.piechart .data7 {
+-fx-pie-color: -fx-chart-color-7; 
+}
+	
+.piechart .data8 {
+-fx-pie-color: -fx-chart-color-8; 
+}
+	
+.piechart .data9 {
+  -fx-pie-color: -fx-chart-color-9; 
+}
+	
+.piechart .data10 {
+  -fx-pie-color: -fx-chart-color-10; 
+}
+	
+.piechart .data11 {
+  -fx-pie-color: -fx-chart-color-11; 
+}
+	
+.piechart .data12 {
+  -fx-pie-color: -fx-chart-color-12; 
+}
+	
+.piechart .data13 {
+  -fx-pie-color: -fx-chart-color-13; 
+}
+	
+.piechart .data14 {
+  -fx-pie-color: -fx-chart-color-14; 
+}
+	
+.piechart .data15 {
+  -fx-pie-color: -fx-chart-color-15; 
+}
+	
+.piechart .data16 {
+  -fx-pie-color: -fx-chart-color-16; 
+}
+	
+.piechart .data17 {
+  -fx-pie-color: -fx-chart-color-17; 
+}
+	
+.piechart .data18 {
+  -fx-pie-color: -fx-chart-color-18; 
+}
+	
+.piechart .data19 {
+  -fx-pie-color: -fx-chart-color-19;
+}
+
+.linechart .series0 {
+  -fx-stroke: -fx-chart-color-0;
+  -fx-background-color: -fx-chart-color-0, white;
+}
+
+.linechart .series1 {
+  -fx-stroke: -fx-chart-color-1;
+  -fx-background-color: -fx-chart-color-1, white;
+}
+.linechart .series2 {
+  -fx-stroke: -fx-chart-color-2;
+  -fx-background-color: -fx-chart-color-2, white;
+}
+.linechart .series3 {
+  -fx-stroke: -fx-chart-color-3;
+  -fx-background-color: -fx-chart-color-3, white;
+}
+.linechart .series4 {
+  -fx-stroke: -fx-chart-color-4;
+  -fx-background-color: -fx-chart-color-4, white;
+}
+.linechart .series5 {
+  -fx-stroke: -fx-chart-color-5;
+  -fx-background-color: -fx-chart-color-5, white;
+}
+.linechart .series6 {
+  -fx-stroke: -fx-chart-color-6;
+  -fx-background-color: -fx-chart-color-6, white;
+}
+.linechart .series7 {
+  -fx-stroke: -fx-chart-color-7;
+  -fx-background-color: -fx-chart-color-7, white;
+}
+.linechart .series8 {
+  -fx-stroke: -fx-chart-color-8;
+  -fx-background-color: -fx-chart-color-8, white;
+}
+.linechart .series9 {
+  -fx-stroke: -fx-chart-color-9;
+  -fx-background-color: -fx-chart-color-9, white;
+}
+.linechart .series10 {
+  -fx-stroke: -fx-chart-color-10;
+  -fx-background-color: -fx-chart-color-10, white;
+}
+.linechart .series11 {
+  -fx-stroke: -fx-chart-color-11;
+  -fx-background-color: -fx-chart-color-11, white;
+}
+.linechart .series12 {
+  -fx-stroke: -fx-chart-color-12;
+  -fx-background-color: -fx-chart-color-12, white;
+}
+.linechart .series13 {
+  -fx-stroke: -fx-chart-color-13;
+  -fx-background-color: -fx-chart-color-13, white;
+}
+.linechart .series14 {
+  -fx-stroke: -fx-chart-color-14;
+  -fx-background-color: -fx-chart-color-14, white;
+}
+.linechart .series15 {
+  -fx-stroke: -fx-chart-color-15;
+  -fx-background-color: -fx-chart-color-15, white;
+}
+.linechart .series16 {
+  -fx-stroke: -fx-chart-color-16;
+  -fx-background-color: -fx-chart-color-16, white;
+}
+.linechart .series17 {
+  -fx-stroke: -fx-chart-color-17;
+  -fx-background-color: -fx-chart-color-17, white;
+}
+.linechart .series18 {
+  -fx-stroke: -fx-chart-color-18;
+  -fx-background-color: -fx-chart-color-18, white;
+}
+.linechart .series19 {
+  -fx-stroke: -fx-chart-color-19;
+  -fx-background-color: -fx-chart-color-19, white;
+}
+
+.barchart .series0 {
+  -fx-bar-fill: -fx-chart-color-0;
+}
+.barchart .series1 {
+  -fx-bar-fill: -fx-chart-color-1;
+}
+.barchart .series2 {
+  -fx-bar-fill: -fx-chart-color-2;
+}
+.barchart .series3 {
+  -fx-bar-fill: -fx-chart-color-3;
+}
+.barchart .series4 {
+  -fx-bar-fill: -fx-chart-color-4;
+}
+.barchart .series5 {
+  -fx-bar-fill: -fx-chart-color-5;
+}
+.barchart .series6 {
+  -fx-bar-fill: -fx-chart-color-6;
+}
+.barchart .series7 {
+  -fx-bar-fill: -fx-chart-color-7;
+}
+.barchart .series8 {
+  -fx-bar-fill: -fx-chart-color-8;
+}
+.barchart .series9 {
+  -fx-bar-fill: -fx-chart-color-9;
+}
+.barchart .series10 {
+  -fx-bar-fill: -fx-chart-color-10;
+}
+.barchart .series11 {
+  -fx-bar-fill: -fx-chart-color-11;
+}
+.barchart .series12 {
+  -fx-bar-fill: -fx-chart-color-12;
+}
+.barchart .series13 {
+  -fx-bar-fill: -fx-chart-color-13;
+}
+.barchart .series14 {
+  -fx-bar-fill: -fx-chart-color-14;
+}
+.barchart .series15 {
+  -fx-bar-fill: -fx-chart-color-15;
+}
+.barchart .series16 {
+  -fx-bar-fill: -fx-chart-color-16;
+}
+.barchart .series17 {
+  -fx-bar-fill: -fx-chart-color-17;
+}
+.barchart .series18 {
+  -fx-bar-fill: -fx-chart-color-18;
+}
+.barchart .series19 {
+  -fx-bar-fill: -fx-chart-color-19;
+}
