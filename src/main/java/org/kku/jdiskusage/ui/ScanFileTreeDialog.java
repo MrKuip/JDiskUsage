@@ -11,6 +11,7 @@ import org.kku.jdiskusage.ui.util.ConcurrentUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppSettings.AppSetting;
+import org.kku.jdiskusage.util.CommonUtil;
 import org.kku.jdiskusage.util.DirectoryChooser;
 import org.kku.jdiskusage.util.FileTree;
 import org.kku.jdiskusage.util.FileTree.DirNode;
@@ -235,8 +236,6 @@ public class ScanFileTreeDialog
                 numberOfFiles, translate("files"), translate("in"), (int) ((currentTimeMillis - mi_startTime) / 1000),
                 translate("seconds"));
 
-            m_dialog.close();
-
             Notifications.showMessage("Scan ready", text);
           }
         });
@@ -244,6 +243,12 @@ public class ScanFileTreeDialog
         return mi_cancel;
       });
       mi_result = tree.scan();
+
+      // Give the dialog a minimal time (200 ms) to show itself. Otherwise (on Linux) the application looses its
+      //   focus and the only way to get it back is to click outside the app and then click inside the app.
+      //   When there is no focus the menu's on the menubar will not show. 
+      CommonUtil.sleep(200 - (System.currentTimeMillis() - mi_startTime));
+      Platform.runLater(() -> m_dialog.close());
     }
   }
 

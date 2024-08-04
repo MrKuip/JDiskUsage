@@ -126,6 +126,11 @@ public abstract class AppSettings
       setProperty(getSettingName(), value);
     }
 
+    public void reset()
+    {
+      set(null);
+    }
+
     private void setProperty(String propertyName, T value)
     {
       String stringValue;

@@ -135,8 +135,8 @@ public class PreferencesDialog
 
     restoreButton = translate(new Button("Restore", IconUtil.createIconNode("restore", IconSize.SMALLER)));
     restoreButton.setOnAction((ae) -> {
-      //AppPreferences.maxNumberOfChartElements.reset();
-      //AppPreferences.minPercentageChartElement.reset();
+      AppPreferences.maxNumberOfChartElements.reset();
+      AppPreferences.minPercentageChartElement.reset();
     });
     pane.add(restoreButton);
 

@@ -21,16 +21,19 @@ public class CommonUtil
     return calendar.getTime().toInstant().toEpochMilli();
   }
 
-  public static void sleep(int milliSeconds)
+  public static void sleep(long milliSeconds)
   {
-    try
+    if (milliSeconds > 0)
     {
-      Thread.sleep(milliSeconds);
-    }
-    catch (InterruptedException e)
-    {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      try
+      {
+        Thread.sleep(milliSeconds);
+      }
+      catch (InterruptedException e)
+      {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     }
   }
 }

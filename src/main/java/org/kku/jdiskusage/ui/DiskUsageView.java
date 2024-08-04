@@ -15,13 +15,13 @@ import java.util.stream.Stream;
 import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.DraggableTabPane;
-import org.kku.jdiskusage.main.Main;
 import org.kku.jdiskusage.ui.ScanFileTreeDialog.ScanResult;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.common.FullScreen;
 import org.kku.jdiskusage.ui.common.Navigation;
 import org.kku.jdiskusage.ui.common.Notifications;
+import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.AppSettings.AppSetting;
@@ -36,7 +36,6 @@ import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.kku.jdiskusage.util.preferences.Sort;
 import org.tbee.javafx.scene.layout.MigPane;
-import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
@@ -283,8 +282,7 @@ public class DiskUsageView
     menuItem = translate(new MenuItem("Scan directory"));
     menuItem.setGraphic(IconUtil.createIconNode("file-search", IconSize.SMALLER));
     menuItem.setOnAction(e -> {
-      Platform.runLater(
-          () -> scanDirectory(new ScanFileTreeDialog().chooseDirectory(m_data.mi_fullScreen.getCurrentStage())));
+      scanDirectory(new ScanFileTreeDialog().chooseDirectory(m_data.mi_fullScreen.getCurrentStage()));
     });
 
     return menuItem;
@@ -486,7 +484,6 @@ public class DiskUsageView
     {
       menu.getItems().clear();
       menu.getItems().addAll(getItems());
-      Platform.runLater(() -> Main.getRootStage().requestFocus());
     }
 
     private void update()
