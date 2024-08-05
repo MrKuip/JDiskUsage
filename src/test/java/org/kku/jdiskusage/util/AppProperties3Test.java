@@ -1,7 +1,6 @@
 package org.kku.jdiskusage.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
 import org.kku.jdiskusage.util.AppSettings.AppSetting;
 import org.kku.jdiskusage.util.AppSettings.AppSettingType;
@@ -22,7 +21,7 @@ class AppProperties3Test
     TestProperties properties;
 
     properties = new TestProperties();
-    properties.reset();
+    properties.getStore().clear();
 
     type = properties.createAppSettingType("Test", Converters.getStringConverter());
     property = type.forSubject("Test", "Test2");
@@ -55,14 +54,6 @@ class AppProperties3Test
     public static TestProperties getInstance()
     {
       return mi_instance;
-    }
-
-    public void reset() throws Exception
-    {
-      if (Files.exists(getSettingPath()))
-      {
-        Files.delete(getSettingPath());
-      }
     }
   }
 }

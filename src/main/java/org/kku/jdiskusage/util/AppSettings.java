@@ -8,18 +8,27 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import org.kku.jdiskusage.util.Converters.Converter;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.scene.control.CheckBox;
 
 public abstract class AppSettings
 {
-  private String m_settingFileName;
-  private Properties m_settings;
+  private final PropertyStore m_propertyStore;
 
-  protected AppSettings(String settingFileName)
+  protected AppSettings(String propertyFileName)
   {
-    m_settingFileName = settingFileName;
+    m_propertyStore = new PropertyStore(propertyFileName);
+  }
+
+  protected PropertyStore getStore()
+  {
+    return m_propertyStore;
   }
 
   protected <T> AppSettingType<T> createAppSettingType(String name, Converter<T> converter)
@@ -77,18 +86,34 @@ public abstract class AppSettings
     private final AppSettingType<T> mi_type;
     private final String mi_subject;
     private final T mi_defaultValue;
-    private final WeakReferenceList<ChangeListener<T>> mi_changeListenerList = new WeakReferenceList<>();
+    private final ObjectProperty<T> mi_property;
 
     public AppSetting(AppSettingType<T> type, String subject, T defaultValue)
     {
       mi_type = type;
       mi_subject = subject;
       mi_defaultValue = defaultValue;
+      mi_property = new SimpleObjectProperty<>(null, mi_type.getName());
+
+      initProperty();
+    }
+
+    private void initProperty()
+    {
+      mi_property.set(mi_type.mi_converter.fromString(m_propertyStore.getPropertyValue(getPropertyName())));
+      mi_property.addListener((c) -> {
+        m_propertyStore.putProperty(getPropertyName(), mi_type.mi_converter.toString(mi_property.getValue()));
+      });
     }
 
     public String getName()
     {
       return mi_type.getName();
+    }
+
+    private String getPropertyName()
+    {
+      return (mi_subject + "_" + getName()).toUpperCase().replace(' ', '_').replace('-', '_');
     }
 
     public T get()
@@ -99,70 +124,53 @@ public abstract class AppSettings
 
     public T get(T defaultValue)
     {
-      return getProperty(getSettingName(), defaultValue);
-    }
+      T value;
 
-    public T getProperty(String propertyName)
-    {
-      assert mi_defaultValue != null;
-      return getProperty(propertyName, mi_defaultValue);
-    }
-
-    public T getProperty(String propertyName, T defaultValue)
-    {
-      String stringValue;
-
-      stringValue = (String) getProperties().get(propertyName);
-      if (stringValue != null)
+      assert defaultValue != null;
+      value = property().get();
+      if (value == null)
       {
-        return mi_type.getConverter().fromString(stringValue);
+        value = defaultValue;
       }
 
-      return defaultValue;
-    }
-
-    public void set(T value)
-    {
-      setProperty(getSettingName(), value);
+      return value;
     }
 
     public void reset()
     {
-      set(null);
+      property().set(null);
     }
 
-    private void setProperty(String propertyName, T value)
+    public void set(T value)
     {
-      String stringValue;
-
-      mi_changeListenerList.getElements().forEach(cl -> cl.changed(null, null, value));
-
-      stringValue = mi_type.getConverter().toString(value);
-      getProperties().put(propertyName, stringValue);
-      storeProperties();
-    }
-
-    private void remove(String propertyName)
-    {
-      getProperties().remove(propertyName);
-      storeProperties();
+      property().set(value);
     }
 
     public void addListener(ChangeListener<T> listener)
     {
-      mi_changeListenerList.add(listener);
+      property().addListener(listener);
     }
 
-    /**
-     * Get a changelistener that will set the value of this property
-     * 
-     * WATCH OUT: This changelistener cannot be parameterized because for instance a
-     * double property expects a Changelistener<? extends Number> and NOT
-     * ChangeListener<Double>. This won't even compile! The FX team decided on this
-     * because of lots of additional code. Now we are left with the baked pears!
-     * 
-     * @return
-     */
+    public ObjectProperty<T> property()
+    {
+      if (mi_property == null)
+      {
+        return mi_property;
+      }
+
+      return mi_property;
+    }
+
+    /*
+    * Get a changelistener that will set the value of this property
+    * 
+    * WATCH OUT: This changelistener cannot be parameterized because for instance a
+    * double property expects a Changelistener<? extends Number> and NOT
+    * ChangeListener<Double>. This won't even compile! The FX team decided on this
+    * because of lots of additional code. Now we are left with the baked pears!
+    * 
+    * @return
+    */
     @SuppressWarnings(
     {
         "unchecked", "rawtypes"
@@ -173,30 +181,89 @@ public abstract class AppSettings
         set((T) newValue);
       };
     }
-
-    private String getSettingName()
-    {
-      return (mi_subject + "_" + getName()).toUpperCase().replace(' ', '_').replace('-', '_');
-    }
   }
 
-  private Properties getProperties()
+  static class PropertyStore
   {
-    if (m_settings == null)
-    {
-      m_settings = new Properties();
+    private final String mi_fileName;
+    private Properties mi_properties;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> mi_scheduledFuture;
 
-      try (InputStream is = Files.newInputStream(getSettingPath()))
+    public PropertyStore(String fileName)
+    {
+      mi_fileName = fileName;
+    }
+
+    public void putProperty(String propertyName, String stringValue)
+    {
+      Log.log.debug("Mark properties[%s] dirty to %s because property %s changed from %s to %s", getFilePath(),
+          propertyName, getProperties().get(propertyName), stringValue);
+      getProperties().put(propertyName, stringValue);
+      markDirty();
+    }
+
+    public void removeProperty(String propertyName)
+    {
+      Log.log.debug("Mark properties[%s] dirty because property %s is removed", getFilePath(), propertyName);
+      getProperties().remove(propertyName);
+      markDirty();
+    }
+
+    private String getPropertyValue(String propertyKey)
+    {
+      return (String) getProperties().get(propertyKey);
+    }
+
+    private Properties getProperties()
+    {
+      load();
+      return mi_properties;
+    }
+
+    private Properties load()
+    {
+      if (mi_properties == null)
       {
-        m_settings.load(is);
+        mi_properties = new Properties();
+
+        Log.log.debug("Load properties from %s", getFilePath());
+        try (InputStream is = Files.newInputStream(getFilePath()))
+        {
+          mi_properties.load(is);
+        }
+        catch (FileNotFoundException e)
+        {
+          // This can happen! First time the application is started.
+        }
+        catch (NoSuchFileException e)
+        {
+          // This can happen! First time the application is started.
+        }
+        catch (IOException e)
+        {
+          e.printStackTrace();
+        }
       }
-      catch (FileNotFoundException e)
+
+      return mi_properties;
+    }
+
+    private void markDirty()
+    {
+      if (mi_scheduledFuture != null)
       {
-        // This can happen! First time the application is started.
+        mi_scheduledFuture.cancel(false);
       }
-      catch (NoSuchFileException e)
+      mi_scheduledFuture = scheduler.schedule(this::save, 1, TimeUnit.SECONDS);
+    }
+
+    private void save()
+    {
+      Log.log.debug("Save properties to %s", getFilePath());
+      try (OutputStream os = Files.newOutputStream(getFilePath()))
       {
-        // This can happen! First time the application is started.
+        getProperties().store(os, "store to properties file");
       }
       catch (IOException e)
       {
@@ -204,27 +271,15 @@ public abstract class AppSettings
       }
     }
 
-    return m_settings;
-  }
-
-  public void storeProperties()
-  {
-    try (OutputStream os = Files.newOutputStream(getSettingPath()))
+    public Path getFilePath()
     {
-      m_settings.store(os, "store to properties file");
+      return Path.of(System.getProperty("user.home"), mi_fileName);
     }
-    catch (IOException e)
+
+    void clear() throws IOException
     {
-      e.printStackTrace();
+      Files.delete(getFilePath());
+      mi_properties = null;
     }
-  }
-
-  protected Path getSettingPath()
-  {
-    return Path.of(System.getProperty("user.home"), m_settingFileName);
-  }
-
-  public static void bind(AppSetting<Boolean> autocollapsetreenode2, CheckBox autoExpandCheckBox)
-  {
   }
 }
