@@ -1,11 +1,11 @@
 package org.kku.jdiskusage.util.preferences;
 
 import java.util.Locale;
-import org.kku.jdiskusage.util.AppSettings;
+import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.Converters;
 
 public class AppPreferences
-  extends AppSettings
+  extends AppProperties
 {
   private final static AppPreferences m_instance = new AppPreferences();
 

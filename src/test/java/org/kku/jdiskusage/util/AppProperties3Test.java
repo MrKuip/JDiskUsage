@@ -2,8 +2,8 @@ package org.kku.jdiskusage.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
-import org.kku.jdiskusage.util.AppSettings.AppSetting;
-import org.kku.jdiskusage.util.AppSettings.AppSettingType;
+import org.kku.jdiskusage.util.AppProperties.AppSetting;
+import org.kku.jdiskusage.util.AppProperties.AppSettingType;
 import javafx.beans.property.SimpleStringProperty;
 
 class AppProperties3Test
@@ -42,7 +42,7 @@ class AppProperties3Test
   }
 
   public static class TestProperties
-    extends AppSettings
+    extends AppProperties
   {
     private final static TestProperties mi_instance = new TestProperties();
 

@@ -3,7 +3,7 @@ package org.kku.jdiskusage.util;
 import java.nio.file.Path;
 
 public class AppSettings2
-  extends AppSettings
+  extends AppProperties
 {
   private final static AppSettings2 m_instance = new AppSettings2();
 

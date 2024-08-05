@@ -4,7 +4,7 @@ import java.util.function.Function;
 import org.kku.jdiskusage.ui.util.FormatterIF;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.util.AppSettings2;
-import org.kku.jdiskusage.util.AppSettings.AppSetting;
+import org.kku.jdiskusage.util.AppProperties.AppSetting;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;

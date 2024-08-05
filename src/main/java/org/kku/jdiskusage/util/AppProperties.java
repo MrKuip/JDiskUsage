@@ -17,11 +17,11 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 
-public abstract class AppSettings
+public abstract class AppProperties
 {
   private final PropertyStore m_propertyStore;
 
-  protected AppSettings(String propertyFileName)
+  protected AppProperties(String propertyFileName)
   {
     m_propertyStore = new PropertyStore(propertyFileName);
   }

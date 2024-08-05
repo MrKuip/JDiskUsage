@@ -13,7 +13,7 @@ import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.util.ConcurrentUtil;
 import org.kku.jdiskusage.util.AppSettings2;
-import org.kku.jdiskusage.util.AppSettings.AppSetting;
+import org.kku.jdiskusage.util.AppProperties.AppSetting;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.events.EventTarget;

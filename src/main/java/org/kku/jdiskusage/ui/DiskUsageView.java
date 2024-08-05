@@ -23,7 +23,7 @@ import org.kku.jdiskusage.ui.common.Navigation;
 import org.kku.jdiskusage.ui.common.Notifications;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppSettings2;
-import org.kku.jdiskusage.util.AppSettings.AppSetting;
+import org.kku.jdiskusage.util.AppProperties.AppSetting;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.PathList;

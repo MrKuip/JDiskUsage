@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppSettings2;
-import org.kku.jdiskusage.util.AppSettings.AppSetting;
+import org.kku.jdiskusage.util.AppProperties.AppSetting;
 import org.kku.jdiskusage.util.SuppressFBWarnings;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.geometry.Point2D;
