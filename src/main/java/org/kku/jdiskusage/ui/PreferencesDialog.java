@@ -100,9 +100,10 @@ public class PreferencesDialog
       AppPreferences.maxNumberInTopRanking.reset();
     });
 
-    pane = new MigPane("debug");
-    pane.add(translate(autoExpandCheckBox), "newline, spanx 2");
-    pane.add(translate(autoCollapseCheckBox), "newline, spanx 2");
+    pane = new MigPane();
+
+    pane.add(translate(autoExpandCheckBox), "spanx 2, newline");
+    pane.add(translate(autoCollapseCheckBox), "spanx 2, newline");
     pane.add(TranslateUtil.translate(new Label("Language")), "newline");
     pane.add(languageComboBox);
     pane.add(TranslateUtil.translate(new Label("Max number in top Ranking")), "newline");
@@ -131,22 +132,21 @@ public class PreferencesDialog
     minPercentageElementField.setPrefWidth(80.0);
     minPercentageElementField.valueProperty().bindBidirectional(AppPreferences.minPercentageChartElement.property());
 
-    pane = new MigPane("", "[][][][]", "[][]push[]");
-
-    pane.add(translate(new Label("Chart shows at most")), "");
-    pane.add(maxNumberOfElementsField, "");
-    pane.add(new Label(translate("elements")), "wrap");
-
-    pane.add(translate(new Label("Show elements larger than")), "");
-    pane.add(minPercentageElementField, "");
-    pane.add(new Label("%"), "wrap");
-
     restoreButton = translate(new Button("Reset all to default", IconUtil.createIconNode("restore")));
     restoreButton.setOnAction((ae) -> {
       AppPreferences.maxNumberOfChartElements.reset();
       AppPreferences.minPercentageChartElement.reset();
     });
-    pane.add(restoreButton);
+
+    pane = new MigPane();
+
+    pane.add(translate(new Label("Chart shows at most")), "newline");
+    pane.add(maxNumberOfElementsField, "");
+    pane.add(new Label(translate("elements")), "");
+    pane.add(translate(new Label("Show elements larger than")), "newline");
+    pane.add(minPercentageElementField, "");
+    pane.add(new Label("%"), "");
+    pane.add(restoreButton, "newline push, spanx 3");
 
     tab = translate(new Tab("Charting"));
     tab.setContent(pane);
