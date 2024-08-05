@@ -22,8 +22,8 @@ import org.kku.jdiskusage.ui.common.FullScreen;
 import org.kku.jdiskusage.ui.common.Navigation;
 import org.kku.jdiskusage.ui.common.Notifications;
 import org.kku.jdiskusage.ui.util.IconUtil;
-import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.AppProperties.AppProperty;
+import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.PathList;
@@ -324,7 +324,7 @@ public class DiskUsageView
       DISTRIBUTION_SIZE("Size distribution", "chart-bell-curve", (md) -> md.mi_sizeDistributionTab),
       DISTRIBUTION_MODIFIED("Last modified", "calendar-blank", (md) -> md.mi_modifiedDistributionTab),
       DISTRIBUTION_TYPES("Types", "chart-pie", (md) -> md.mi_typesTab),
-      LINK_COUNT("Link count", "counter", (md) -> md.mi_linkCountTab),
+      LINK_COUNT("Link count", "file-link", (md) -> md.mi_linkCountTab),
       SEARCH_TYPES("Search", "magnify", (md) -> md.mi_searchTab),
       HELP("Help", "help", (md) -> md.mi_helpTab);
 
@@ -409,6 +409,7 @@ public class DiskUsageView
           .ifPresent(tab -> {
             Log.log.debug("select tab: %s", tab.getText());
             mi_tabPane.getSelectionModel().select(tab);
+            fillContent(tab);
           });
     }
 

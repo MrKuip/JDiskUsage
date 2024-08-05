@@ -12,8 +12,8 @@ import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.util.IconUtil;
-import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.AppProperties.AppProperty;
+import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
@@ -104,7 +104,6 @@ abstract public class AbstractFormPane
       return true;
     }
 
-    Log.log.debug("====is visible ? : %s", node);
     return Stream.iterate(node, Objects::nonNull, Node::getParent).filter(Predicate.not(Node::isVisible)).findFirst()
         .isPresent();
   }
