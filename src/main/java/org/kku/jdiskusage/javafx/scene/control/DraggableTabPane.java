@@ -4,7 +4,7 @@ import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.stream.Collectors;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.util.IconUtil;
-import org.kku.jdiskusage.util.AppSettings2;
+import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.AppProperties.AppSetting;
 import org.kku.jdiskusage.util.SuppressFBWarnings;
 import org.tbee.javafx.scene.layout.MigPane;
@@ -118,8 +118,8 @@ public class DraggableTabPane
       dialogHeight = draggedNode.getLayoutBounds().getHeight();
 
       subjectId = "DraggedTab:" + draggedTab.getText();
-      widthProperty = AppSettings2.WIDTH.forSubject(subjectId);
-      heightProperty = AppSettings2.HEIGHT.forSubject(subjectId);
+      widthProperty = AppSettings.WIDTH.forSubject(subjectId);
+      heightProperty = AppSettings.HEIGHT.forSubject(subjectId);
 
       draggedDialog = new Stage();
       draggedDialog.setTitle(draggedTab.getText());

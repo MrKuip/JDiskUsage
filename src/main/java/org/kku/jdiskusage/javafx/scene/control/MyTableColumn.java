@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import org.kku.jdiskusage.ui.util.FormatterIF;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.StyledText;
-import org.kku.jdiskusage.util.AppSettings2;
+import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.AppProperties.AppSetting;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
@@ -146,7 +146,7 @@ public class MyTableColumn<T, R>
   private AppSetting<Double> getPrefSizeProperty()
   {
     assert getTableView().getId() != null;
-    return AppSettings2.PREF_SIZE.forSubject(getTableView().getId() + "_" + getId());
+    return AppSettings.PREF_SIZE.forSubject(getTableView().getId() + "_" + getId());
   }
 
   static public class ButtonCell

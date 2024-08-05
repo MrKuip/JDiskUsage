@@ -3,7 +3,7 @@ package org.kku.jdiskusage.javafx.scene.control;
 import java.util.function.Function;
 import org.kku.jdiskusage.ui.util.FormatterIF;
 import org.kku.jdiskusage.ui.util.FxUtil;
-import org.kku.jdiskusage.util.AppSettings2;
+import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.AppProperties.AppSetting;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
@@ -53,7 +53,7 @@ public class MyTreeTableColumn<T, R>
   private AppSetting<Double> getPrefSizeProperty()
   {
     assert getTreeTableView().getId() != null;
-    return AppSettings2.PREF_SIZE.forSubject(getTreeTableView().getId() + "_" + getId());
+    return AppSettings.PREF_SIZE.forSubject(getTreeTableView().getId() + "_" + getId());
   }
 
   static class MyTreeTableCell<T, R>

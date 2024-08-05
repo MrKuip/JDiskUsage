@@ -534,7 +534,7 @@ public class DirectoryChooser
 
     private AppSetting<DirectoryList> getFavoriteDirectoriesProperty()
     {
-      return AppSettings2.FAVORITE_DIRECTORIES.forSubject(this);
+      return AppSettings.FAVORITE_DIRECTORIES.forSubject(this);
     }
   }
 

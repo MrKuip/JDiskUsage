@@ -12,7 +12,7 @@ import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.util.IconUtil;
-import org.kku.jdiskusage.util.AppSettings2;
+import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.AppProperties.AppSetting;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Log;
@@ -197,7 +197,7 @@ abstract public class AbstractFormPane
 
   private AppSetting<String> getSelectedIdProperty()
   {
-    return AppSettings2.SELECTED_ID.forSubject(this);
+    return AppSettings.SELECTED_ID.forSubject(this);
   }
 
   private Node initCurrentNode()

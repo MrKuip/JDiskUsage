@@ -12,7 +12,7 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.util.ConcurrentUtil;
-import org.kku.jdiskusage.util.AppSettings2;
+import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.AppProperties.AppSetting;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -91,7 +91,7 @@ public class HelpFormPane
 
   private AppSetting<Double> getSplitPaneProperty()
   {
-    return AppSettings2.SPLIT_PANE_POSITION.forSubject(this);
+    return AppSettings.SPLIT_PANE_POSITION.forSubject(this);
   }
 
   private static class WebBrowser

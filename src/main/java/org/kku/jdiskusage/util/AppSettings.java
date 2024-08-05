@@ -2,10 +2,10 @@ package org.kku.jdiskusage.util;
 
 import java.nio.file.Path;
 
-public class AppSettings2
+public class AppSettings
   extends AppProperties
 {
-  private final static AppSettings2 m_instance = new AppSettings2();
+  private final static AppSettings m_instance = new AppSettings();
 
   public final static AppSettingType<Path> INITIAL_DIRECTORY;
   public final static AppSettingType<RecentScanList> RECENT_SCANS;
@@ -32,12 +32,12 @@ public class AppSettings2
     SELECTED_ID = m_instance.createAppSettingType("SELECTED_ID", Converters.getStringConverter());
   }
 
-  private AppSettings2()
+  private AppSettings()
   {
     super("JDiskUsage.properties");
   }
 
-  public static AppSettings2 getInstance()
+  public static AppSettings getInstance()
   {
     return m_instance;
   }
