@@ -100,7 +100,15 @@ public abstract class AppProperties
 
     private void initProperty()
     {
-      mi_property.set(mi_type.mi_converter.fromString(m_propertyStore.getPropertyValue(getPropertyName())));
+      T value;
+
+      value = mi_type.mi_converter.fromString(m_propertyStore.getPropertyValue(getPropertyName()));
+      if (value == null)
+      {
+        value = mi_defaultValue;
+      }
+
+      mi_property.set(value);
       mi_property.addListener((c) -> {
         m_propertyStore.putProperty(getPropertyName(), mi_type.mi_converter.toString(mi_property.getValue()));
       });
@@ -118,8 +126,7 @@ public abstract class AppProperties
 
     public T get()
     {
-      assert mi_defaultValue != null;
-      return get(mi_defaultValue);
+      return property().get();
     }
 
     public T get(T defaultValue)
@@ -138,7 +145,7 @@ public abstract class AppProperties
 
     public void reset()
     {
-      property().set(null);
+      property().set(mi_defaultValue);
     }
 
     public void set(T value)

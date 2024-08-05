@@ -16,15 +16,16 @@ import org.kku.jdiskusage.util.OperatingSystemUtil;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.StreamUtil;
+import org.kku.jdiskusage.util.preferences.AppPreferences;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 
-class Top50FormPane
+class TopRankingFormPane
   extends AbstractFormPane
 {
-  private final Top50PaneData mi_data = new Top50PaneData();
+  private final TopRankingPaneData mi_data = new TopRankingPaneData();
 
   private enum FileNodeComparator
   {
@@ -52,7 +53,7 @@ class Top50FormPane
     }
   }
 
-  Top50FormPane(DiskUsageData diskUsageData)
+  TopRankingFormPane(DiskUsageData diskUsageData)
   {
     super(diskUsageData);
 
@@ -110,7 +111,7 @@ class Top50FormPane
     return table;
   }
 
-  class Top50PaneData
+  class TopRankingPaneData
     extends PaneData
   {
     private Map<FileNodeComparator, ObservableList<FileNodeIF>> mi_map = new HashMap<>();
@@ -123,7 +124,7 @@ class Top50FormPane
           List<FileNodeIF> fnList;
 
           fnList = getCurrentFileNode().streamNode().filter(FileNodeIF::isFile)
-              .collect(StreamUtil.createTopCollector(fc.getComparator(), 50));
+              .collect(StreamUtil.createTopCollector(fc.getComparator(), AppPreferences.maxNumberInTopRanking.get()));
 
           return FXCollections.observableArrayList(fnList);
         }

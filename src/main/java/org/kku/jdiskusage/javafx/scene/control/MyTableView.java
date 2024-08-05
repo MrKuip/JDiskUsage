@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
-import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonCell;
 import org.kku.jdiskusage.ui.util.ConcurrentUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
@@ -85,7 +84,7 @@ public class MyTableView<T>
     ButtonCell buttonProperty;
     MyTableColumn<T, ButtonCell> column;
 
-    buttonProperty = new ButtonCell(() -> IconUtil.createIconNode("filter", IconSize.SMALLER));
+    buttonProperty = new ButtonCell(() -> IconUtil.createIconNode("filter"));
 
     column = addColumn(nestedColumn, translate(name));
     column.setColumnCount(2);

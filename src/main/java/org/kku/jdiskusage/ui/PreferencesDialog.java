@@ -10,7 +10,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
-import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.main.Main;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.ui.util.TranslateUtil;
@@ -69,15 +68,14 @@ public class PreferencesDialog
     CheckBox autoExpandCheckBox;
     CheckBox autoCollapseCheckBox;
     ComboBox<LanguagePreferences.Language> languageComboBox;
+    NumericTextField<Integer> maxNumberInTopRankingField;
+    Button restoreButton;
 
     autoExpandCheckBox = new CheckBox("Auto expand selected tree node");
-    autoExpandCheckBox.setSelected(AppPreferences.autoExpandTreeNode.get());
-    autoExpandCheckBox.setOnAction((ae) -> AppPreferences.autoExpandTreeNode.set(autoExpandCheckBox.isSelected()));
+    autoExpandCheckBox.selectedProperty().bindBidirectional(AppPreferences.autoExpandTreeNode.property());
 
     autoCollapseCheckBox = new CheckBox("Auto collapse deselected tree nodes");
-    autoCollapseCheckBox.setSelected(AppPreferences.autoCollapseTreeNode.get());
-    autoCollapseCheckBox
-        .setOnAction((ae) -> AppPreferences.autoCollapseTreeNode.set(autoCollapseCheckBox.isSelected()));
+    autoCollapseCheckBox.selectedProperty().bindBidirectional(AppPreferences.autoCollapseTreeNode.property());
 
     languageComboBox = new ComboBox<>();
     languageComboBox.getItems().addAll(m_languagePreferences.getLanguageList());
@@ -90,11 +88,26 @@ public class PreferencesDialog
       AppPreferences.localePreference.set(locale);
     });
 
-    pane = new MigPane();
+    maxNumberInTopRankingField = NumericTextField.integerField();
+    maxNumberInTopRankingField.setPrefWidth(80.0);
+    maxNumberInTopRankingField.valueProperty().bindBidirectional(AppPreferences.maxNumberInTopRanking.property());
+
+    restoreButton = translate(new Button("Reset all to default", IconUtil.createIconNode("restore")));
+    restoreButton.setOnAction((ae) -> {
+      AppPreferences.autoExpandTreeNode.reset();
+      AppPreferences.autoCollapseTreeNode.reset();
+      AppPreferences.localePreference.reset();
+      AppPreferences.maxNumberInTopRanking.reset();
+    });
+
+    pane = new MigPane("debug");
     pane.add(translate(autoExpandCheckBox), "newline, spanx 2");
     pane.add(translate(autoCollapseCheckBox), "newline, spanx 2");
     pane.add(TranslateUtil.translate(new Label("Language")), "newline");
     pane.add(languageComboBox);
+    pane.add(TranslateUtil.translate(new Label("Max number in top Ranking")), "newline");
+    pane.add(maxNumberInTopRankingField);
+    pane.add(restoreButton, "newline push");
 
     tab = translate(new Tab("General"));
     tab.setContent(pane);
@@ -111,17 +124,12 @@ public class PreferencesDialog
     Button restoreButton;
 
     maxNumberOfElementsField = NumericTextField.integerField();
-    maxNumberOfElementsField.setValue(AppPreferences.maxNumberOfChartElements.get());
     maxNumberOfElementsField.setPrefWidth(80.0);
-    maxNumberOfElementsField.valueProperty()
-        .addListener((o, oldValue, newValue) -> AppPreferences.maxNumberOfChartElements.set(newValue));
-    //maxNumberOfElementsField.valueProperty().bind(AppPreferences.maxNumberOfChartElements.property());
+    maxNumberOfElementsField.valueProperty().bindBidirectional(AppPreferences.maxNumberOfChartElements.property());
 
     minPercentageElementField = NumericTextField.doubleField();
-    minPercentageElementField.setValue(AppPreferences.minPercentageChartElement.get());
     minPercentageElementField.setPrefWidth(80.0);
-    minPercentageElementField.valueProperty()
-        .addListener((o, oldValue, newValue) -> AppPreferences.minPercentageChartElement.set(newValue));
+    minPercentageElementField.valueProperty().bindBidirectional(AppPreferences.minPercentageChartElement.property());
 
     pane = new MigPane("", "[][][][]", "[][]push[]");
 
@@ -133,7 +141,7 @@ public class PreferencesDialog
     pane.add(minPercentageElementField, "");
     pane.add(new Label("%"), "wrap");
 
-    restoreButton = translate(new Button("Restore", IconUtil.createIconNode("restore", IconSize.SMALLER)));
+    restoreButton = translate(new Button("Reset all to default", IconUtil.createIconNode("restore")));
     restoreButton.setOnAction((ae) -> {
       AppPreferences.maxNumberOfChartElements.reset();
       AppPreferences.minPercentageChartElement.reset();

@@ -9,7 +9,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.controlsfx.control.SegmentedButton;
-import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties.AppProperty;
@@ -140,7 +139,7 @@ abstract public class AbstractFormPane
         button = new ToggleButton();
         if (paneType.iconName() != null)
         {
-          button.setGraphic(IconUtil.createIconNode(paneType.iconName(), IconSize.SMALLER));
+          button.setGraphic(IconUtil.createIconNode(paneType.iconName()));
           button.setTooltip(new Tooltip(translate(paneType.description())));
         }
         else

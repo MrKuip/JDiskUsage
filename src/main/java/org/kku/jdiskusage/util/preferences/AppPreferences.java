@@ -20,18 +20,20 @@ public class AppPreferences
   public final static AppProperty<Boolean> autoCollapseTreeNode;
   public final static AppProperty<Integer> maxNumberOfChartElements;
   public final static AppProperty<Double> minPercentageChartElement;
+  public final static AppProperty<Integer> maxNumberInTopRanking;
 
   static
   {
-    sizeSystemPreference = m_instance.createAppPropertyType("Size system", Converters.getEnumConverter(SizeSystem.class))
+    sizeSystemPreference = m_instance
+        .createAppPropertyType("Size system", Converters.getEnumConverter(SizeSystem.class))
         .forSubject(m_instance, SizeSystem.BINARY);
     displayMetricPreference = m_instance
         .createAppPropertyType("Display metric", Converters.getEnumConverter(DisplayMetric.class))
         .forSubject(m_instance, DisplayMetric.FILE_SIZE);
     sortPreference = m_instance.createAppPropertyType("Sort", Converters.getEnumConverter(Sort.class))
         .forSubject(m_instance, Sort.NUMERIC);
-    localePreference = m_instance.createAppPropertyType("Locale", Converters.getLocaleConverter()).forSubject(m_instance,
-        new Locale("nl"));
+    localePreference = m_instance.createAppPropertyType("Locale", Converters.getLocaleConverter())
+        .forSubject(m_instance, new Locale("nl"));
     searchMaxCountPreference = m_instance.createAppPropertyType("Max count", Converters.getIntegerConverter())
         .forSubject(m_instance, 100);
     searchMaxTimePreference = m_instance.createAppPropertyType("Max time", Converters.getIntegerConverter())
@@ -46,6 +48,9 @@ public class AppPreferences
         .createAppPropertyType("Max number of elements", Converters.getIntegerConverter()).forSubject(m_instance, 11);
     minPercentageChartElement = m_instance
         .createAppPropertyType("Min percentage element", Converters.getDoubleConverter()).forSubject(m_instance, 5.0);
+    maxNumberInTopRanking = m_instance
+        .createAppPropertyType("Max number in top ranking", Converters.getIntegerConverter())
+        .forSubject(m_instance, 50);
   }
 
   protected AppPreferences()

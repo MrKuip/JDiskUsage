@@ -4,7 +4,6 @@ import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -30,7 +29,6 @@ import org.kku.jdiskusage.util.PathList;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.RecentScanList;
-import org.kku.jdiskusage.util.Translator;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.kku.jdiskusage.util.preferences.Sort;
@@ -68,7 +66,7 @@ public class DiskUsageView
     private final FileTreePane mi_treePaneData = new FileTreePane(this);
     private final TabPaneData mi_tabPaneData = new TabPaneData();
     private final SizeFormPane mi_sizeTab = new SizeFormPane(this);
-    private final Top50FormPane mi_top50Tab = new Top50FormPane(this);
+    private final TopRankingFormPane mi_topRankingTab = new TopRankingFormPane(this);
     private final LinkCountFormPane mi_linkCountTab = new LinkCountFormPane(this);
     private final SizeDistributionFormPane mi_sizeDistributionTab = new SizeDistributionFormPane(this);
     private final LastModifiedDistributionFormPane mi_modifiedDistributionTab = new LastModifiedDistributionFormPane(
@@ -238,21 +236,19 @@ public class DiskUsageView
 
     sortGroup = new ToggleGroup();
 
-    sortNumericButton = new ToggleButton("", IconUtil.createIconNode("sort-numeric-ascending", IconSize.SMALL));
-    sortNumericButton.setToggleGroup(sortGroup);
-    sortNumericButton.setOnAction((e) -> {
-      AppPreferences.sortPreference.set(Sort.NUMERIC);
-      Translator.getInstance().changeLocale(new Locale("nl"));
-      Notifications.showMessage("Language change", "Language changed to netherlands");
-    });
-
     sortAlphabeticallyButton = new ToggleButton("",
         IconUtil.createIconNode("sort-alphabetical-ascending", IconSize.SMALL));
     sortAlphabeticallyButton.setToggleGroup(sortGroup);
+    sortAlphabeticallyButton.setSelected(Sort.ALPHABETICALLY == AppPreferences.sortPreference.get());
     sortAlphabeticallyButton.setOnAction((e) -> {
       AppPreferences.sortPreference.set(Sort.ALPHABETICALLY);
-      Translator.getInstance().changeLocale(Locale.CANADA);
-      Notifications.showMessage("Language change", "Language changed to canada");
+    });
+
+    sortNumericButton = new ToggleButton("", IconUtil.createIconNode("sort-numeric-ascending", IconSize.SMALL));
+    sortNumericButton.setToggleGroup(sortGroup);
+    sortNumericButton.setSelected(Sort.NUMERIC == AppPreferences.sortPreference.get());
+    sortNumericButton.setOnAction((e) -> {
+      AppPreferences.sortPreference.set(Sort.NUMERIC);
     });
 
     sortButton = new SegmentedButton();
@@ -279,7 +275,7 @@ public class DiskUsageView
     MenuItem menuItem;
 
     menuItem = translate(new MenuItem("Scan directory"));
-    menuItem.setGraphic(IconUtil.createIconNode("file-search", IconSize.SMALLER));
+    menuItem.setGraphic(IconUtil.createIconNode("file-search"));
     menuItem.setOnAction(e -> {
       scanDirectory(new ScanFileTreeDialog().chooseDirectory(m_data.mi_fullScreen.getCurrentStage()));
     });
@@ -302,7 +298,7 @@ public class DiskUsageView
     MenuItem menuItem;
 
     menuItem = translate(new MenuItem("Exit"));
-    menuItem.setGraphic(IconUtil.createIconNode("exit-to-app", IconSize.SMALLER));
+    menuItem.setGraphic(IconUtil.createIconNode("exit-to-app"));
     menuItem.setOnAction(e -> {
       System.exit(0);
     });
@@ -320,7 +316,7 @@ public class DiskUsageView
     private enum TabData
     {
       SIZE("Size", "chart-pie", (md) -> md.mi_sizeTab),
-      TOP50("Top 50", "trophy", (md) -> md.mi_top50Tab),
+      TOP_RANKING("Ranking", "trophy", (md) -> md.mi_topRankingTab),
       DISTRIBUTION_SIZE("Size distribution", "chart-bell-curve", (md) -> md.mi_sizeDistributionTab),
       DISTRIBUTION_MODIFIED("Last modified", "calendar-blank", (md) -> md.mi_modifiedDistributionTab),
       DISTRIBUTION_TYPES("Types", "chart-pie", (md) -> md.mi_typesTab),
@@ -460,7 +456,7 @@ public class DiskUsageView
       Menu menu;
 
       menu = translate(new Menu("Recent scans"));
-      menu.setGraphic(IconUtil.createIconNode("history", IconSize.SMALLER));
+      menu.setGraphic(IconUtil.createIconNode("history"));
       update(menu);
       m_listenerList.add(menu);
 
@@ -502,7 +498,7 @@ public class DiskUsageView
       MenuItem menuItem;
 
       menuItem = translate(new MenuItem(pathList.toString()));
-      menuItem.setGraphic(IconUtil.createIconNode("folder-outline", IconSize.SMALLER));
+      menuItem.setGraphic(IconUtil.createIconNode("folder-outline"));
       menuItem.setOnAction(e -> {
         scanDirectory(pathList);
       });
@@ -537,7 +533,7 @@ public class DiskUsageView
       MenuItem menuItem;
 
       menuItem = translate(new MenuItem("Preferences"));
-      menuItem.setGraphic(IconUtil.createIconNode("cog", IconSize.SMALLER));
+      menuItem.setGraphic(IconUtil.createIconNode("cog"));
       menuItem.setOnAction(e -> {
         new PreferencesDialog().show();
       });

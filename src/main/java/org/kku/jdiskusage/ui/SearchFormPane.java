@@ -27,6 +27,7 @@ import org.tbee.javafx.scene.layout.MigPane;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.StringProperty;
@@ -64,14 +65,14 @@ public class SearchFormPane
     Button cancelButton;
     TextField searchTextField;
     Label maxCountLabel;
-    TextField maxCountTextField;
+    NumericTextField<Integer> maxCountTextField;
     Label maxTimeLabel;
-    TextField maxTimeTextField;
+    NumericTextField<Integer> maxTimeTextField;
     ProgressBar progressBar;
 
-    searchLabel = new Label(null, IconUtil.createIconNode("magnify", IconSize.SMALLER));
+    searchLabel = new Label(null, IconUtil.createIconNode("magnify"));
 
-    regexButton = new ToggleButton(null, IconUtil.createIconNode("regex", IconSize.SMALLER));
+    regexButton = new ToggleButton(null, IconUtil.createIconNode("regex"));
     mi_data.mi_regexSelectedProperty = regexButton.selectedProperty();
 
     searchTextField = new TextField();
@@ -79,30 +80,24 @@ public class SearchFormPane
     searchTextField.setOnAction((ae) -> getDiskUsageData().refresh());
     mi_data.mi_searchTextProperty = searchTextField.textProperty();
 
-    maxCountTextField = new TextField();
+    maxCountTextField = NumericTextField.integerField();
     maxCountTextField.setPrefColumnCount(5);
     maxCountLabel = new Label(translate("Max items"));
     maxCountLabel.setLabelFor(maxCountTextField);
-    maxCountTextField.setText(AppPreferences.searchMaxCountPreference.get().toString());
-    maxCountTextField
-        .setOnAction((ae) -> AppPreferences.searchMaxCountPreference.set(Integer.valueOf(maxCountTextField.getText())));
-    mi_data.mi_maxCountProperty = maxCountTextField.textProperty();
+    maxCountTextField.valueProperty().bindBidirectional(AppPreferences.searchMaxCountPreference.property());
+    mi_data.mi_maxCountProperty = maxCountTextField.valueProperty();
     mi_data.mi_progress.mi_stoppedOnMaxCountProperty.addListener(FxUtil.showWarning(maxCountTextField));
 
-    maxTimeTextField = new TextField();
+    maxTimeTextField = NumericTextField.integerField();
     maxTimeTextField.setPrefColumnCount(5);
     maxTimeLabel = new Label(translate("Max time (seconds)"));
     maxTimeLabel.setLabelFor(maxTimeTextField);
-    maxTimeTextField.setText(AppPreferences.searchMaxTimePreference.get().toString());
-    maxTimeTextField
-        .setOnAction((ae) -> AppPreferences.searchMaxTimePreference.set(Integer.valueOf(maxTimeTextField.getText())));
-    mi_data.mi_maxTimeProperty = maxTimeTextField.textProperty();
+    maxTimeTextField.valueProperty().bindBidirectional(AppPreferences.searchMaxTimePreference.property());
+    mi_data.mi_maxTimeProperty = maxTimeTextField.valueProperty();
     mi_data.mi_progress.mi_stoppedOnTimeoutProperty.addListener(FxUtil.showWarning(maxTimeTextField));
 
     cancelButton = new Button(null,
         IconUtil.createFxIcon("cancel", IconSize.SMALLER).fillColor(Color.RED).getIconLabel());
-
-    //HBox.setHgrow(searchTextField, Priority.ALWAYS);
 
     toolBar = new MigPane("", "[pref][pref][grow,fill][pref][pref][pref][pref]", "[pref]1[pref]0");
     toolBar.add(cancelButton);
@@ -167,8 +162,8 @@ public class SearchFormPane
   private class SearchPaneData
     extends PaneData
   {
-    public StringProperty mi_maxCountProperty;
-    public StringProperty mi_maxTimeProperty;
+    public ObjectProperty<Integer> mi_maxCountProperty;
+    public ObjectProperty<Integer> mi_maxTimeProperty;
     public BooleanProperty mi_regexSelectedProperty;
     public StringProperty mi_searchTextProperty;
     private SearchProgressData mi_progress = new SearchProgressData();
@@ -223,8 +218,8 @@ public class SearchFormPane
             fnIterator.setStoppedOnMaxCountProperty(mi_progress.mi_stoppedOnMaxCountProperty);
             fnIterator.setStoppedOnTimeoutProperty(mi_progress.mi_stoppedOnTimeoutProperty);
             fnIterator.enableProgress(mi_progress.mi_progressProperty);
-            fnIterator.setMaxCount(Integer.parseInt(mi_data.mi_maxCountProperty.get()));
-            fnIterator.setTimeoutInSeconds(Integer.parseInt(mi_data.mi_maxTimeProperty.get()));
+            fnIterator.setMaxCount(mi_data.mi_maxCountProperty.get());
+            fnIterator.setTimeoutInSeconds(mi_data.mi_maxTimeProperty.get());
             fnIterator.forEach(fn -> {
               String searchedString;
 
