@@ -7,7 +7,7 @@ import org.kku.jdiskusage.ui.util.FormatterIF;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.StyledText;
 import org.kku.jdiskusage.util.AppSettings;
-import org.kku.jdiskusage.util.AppProperties.AppSetting;
+import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
@@ -143,7 +143,7 @@ public class MyTableColumn<T, R>
     });
   }
 
-  private AppSetting<Double> getPrefSizeProperty()
+  private AppProperty<Double> getPrefSizeProperty()
   {
     assert getTableView().getId() != null;
     return AppSettings.PREF_SIZE.forSubject(getTableView().getId() + "_" + getId());

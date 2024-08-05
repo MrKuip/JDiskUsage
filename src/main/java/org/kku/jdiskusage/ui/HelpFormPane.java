@@ -13,7 +13,7 @@ import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.util.ConcurrentUtil;
 import org.kku.jdiskusage.util.AppSettings;
-import org.kku.jdiskusage.util.AppProperties.AppSetting;
+import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.events.EventTarget;
@@ -89,7 +89,7 @@ public class HelpFormPane
     return m_contentWebBrowser;
   }
 
-  private AppSetting<Double> getSplitPaneProperty()
+  private AppProperty<Double> getSplitPaneProperty()
   {
     return AppSettings.SPLIT_PANE_POSITION.forSubject(this);
   }

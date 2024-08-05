@@ -4,7 +4,7 @@ import java.util.function.Function;
 import org.kku.jdiskusage.ui.util.FormatterIF;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.util.AppSettings;
-import org.kku.jdiskusage.util.AppProperties.AppSetting;
+import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
@@ -50,7 +50,7 @@ public class MyTreeTableColumn<T, R>
     setStyle("-fx-alignment: " + pos + ";");
   }
 
-  private AppSetting<Double> getPrefSizeProperty()
+  private AppProperty<Double> getPrefSizeProperty()
   {
     assert getTreeTableView().getId() != null;
     return AppSettings.PREF_SIZE.forSubject(getTreeTableView().getId() + "_" + getId());

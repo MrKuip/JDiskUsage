@@ -13,7 +13,7 @@ import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppSettings;
-import org.kku.jdiskusage.util.AppProperties.AppSetting;
+import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
@@ -195,7 +195,7 @@ abstract public class AbstractFormPane
     getSelectedIdProperty().set(paneType.id());
   }
 
-  private AppSetting<String> getSelectedIdProperty()
+  private AppProperty<String> getSelectedIdProperty()
   {
     return AppSettings.SELECTED_ID.forSubject(this);
   }

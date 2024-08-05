@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.ui.util.ChartStyleSheet;
 import org.kku.jdiskusage.util.AppSettings;
-import org.kku.jdiskusage.util.AppProperties.AppSetting;
+import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.PathList;
 import org.kku.jdiskusage.util.SuppressFBWarnings;
@@ -105,22 +105,22 @@ public class Main
     }
   }
 
-  private AppSetting<Double> getWidthProperty()
+  private AppProperty<Double> getWidthProperty()
   {
     return AppSettings.WIDTH.forSubject(this);
   }
 
-  private AppSetting<Double> getHeightProperty()
+  private AppProperty<Double> getHeightProperty()
   {
     return AppSettings.HEIGHT.forSubject(this);
   }
 
-  private AppSetting<Double> getXProperty()
+  private AppProperty<Double> getXProperty()
   {
     return AppSettings.X.forSubject(this);
   }
 
-  private AppSetting<Double> getYProperty()
+  private AppProperty<Double> getYProperty()
   {
     return AppSettings.Y.forSubject(this);
   }

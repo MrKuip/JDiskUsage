@@ -23,7 +23,7 @@ import org.kku.jdiskusage.ui.common.Navigation;
 import org.kku.jdiskusage.ui.common.Notifications;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppSettings;
-import org.kku.jdiskusage.util.AppProperties.AppSetting;
+import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.PathList;
@@ -384,7 +384,7 @@ public class DiskUsageView
     public void init()
     {
       String selectedTabDataName;
-      AppSetting<String> selectedIdProperty;
+      AppProperty<String> selectedIdProperty;
 
       Stream.of(TabPaneData.TabData.values()).forEach(this::createTab);
 
@@ -468,7 +468,7 @@ public class DiskUsageView
 
     public void addPath(PathList pathList)
     {
-      AppSetting<RecentScanList> recentScansProperty;
+      AppProperty<RecentScanList> recentScansProperty;
       RecentScanList recentScanList;
 
       recentScansProperty = getRecentScansProperty();
@@ -509,7 +509,7 @@ public class DiskUsageView
       return menuItem;
     }
 
-    private AppSetting<RecentScanList> getRecentScansProperty()
+    private AppProperty<RecentScanList> getRecentScansProperty()
     {
       return AppSettings.RECENT_SCANS.forSubject(this, RecentScanList.empty());
     }
@@ -618,7 +618,7 @@ public class DiskUsageView
     return translate("<None>");
   }
 
-  private AppSetting<Double> getSplitPaneProperty()
+  private AppProperty<Double> getSplitPaneProperty()
   {
     return AppSettings.SPLIT_PANE_POSITION.forSubject(this);
   }

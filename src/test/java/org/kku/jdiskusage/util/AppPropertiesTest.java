@@ -4,16 +4,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
-import org.kku.jdiskusage.util.AppProperties2.AppProperty;
-import org.kku.jdiskusage.util.AppProperties2.AppPropertyType;
+import org.kku.jdiskusage.util.AppProperties.AppProperty;
+import org.kku.jdiskusage.util.AppProperties.AppPropertyType;
 import javafx.beans.property.SimpleStringProperty;
 
-public class AppProperties2Test
+public class AppPropertiesTest
 {
-  public AppProperties2Test()
+  public AppPropertiesTest()
   {
   }
 
@@ -37,7 +36,7 @@ public class AppProperties2Test
     defaultValue = "defaultValue";
     subject = "TestSubject";
 
-    type = properties.createType(propertyKey, Converters.getStringConverter());
+    type = properties.createAppPropertyType(propertyKey, Converters.getStringConverter());
     property = type.forSubject(subject, propertyValue);
 
     assertEquals(property.get(), propertyValue);
@@ -59,42 +58,6 @@ public class AppProperties2Test
     assertTrue(checkFileContent(properties, subject + "_" + propertyKey + "=" + propertyValue));
   }
 
-  @Test
-  void testList() throws Exception
-  {
-    AppPropertyType<List<String>> type;
-    AppProperty<List<String>> property;
-    SimpleStringProperty stringProperty;
-    TestProperties properties;
-    String subject;
-    String propertyKey;
-    String propertyValue;
-    String defaultValue;
-    List<String> list;
-    /*
-    
-    properties = new TestProperties();
-    properties.getStore().clear();
-    
-    propertyKey = "Test";
-    propertyValue = "Test2";
-    defaultValue = "defaultValue";
-    subject = "TestSubject";
-    
-    type = properties.createListType(propertyKey, Converters.getStringConverter(), 20);
-    property = type.forSubject("subject");
-    
-    list = property.get();
-    property.set(list);
-    */
-
-  }
-
-  @Test
-  void testArray() throws Exception
-  {
-  }
-
   private boolean checkFileContent(TestProperties properties, String regex) throws IOException
   {
     Pattern pattern;
@@ -106,13 +69,15 @@ public class AppProperties2Test
   }
 
   public static class TestProperties
-    extends AppProperties2
+    extends AppProperties
   {
     private final static TestProperties mi_instance = new TestProperties();
 
     private TestProperties()
     {
       super("JDiskUsageTest.properties");
+
+      getStore().setSyncImmediately(true);
     }
 
     public static TestProperties getInstance()

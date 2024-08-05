@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppSettings;
-import org.kku.jdiskusage.util.AppProperties.AppSetting;
+import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.SuppressFBWarnings;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.geometry.Point2D;
@@ -104,8 +104,8 @@ public class DraggableTabPane
       Double dialogWidth;
       Double dialogHeight;
       String subjectId;
-      AppSetting<Double> widthProperty;
-      AppSetting<Double> heightProperty;
+      AppProperty<Double> widthProperty;
+      AppProperty<Double> heightProperty;
 
       mousePosition = new Robot().getMousePosition();
 

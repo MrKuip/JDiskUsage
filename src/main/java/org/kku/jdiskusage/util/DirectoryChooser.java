@@ -19,7 +19,7 @@ import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.common.FxDialog;
-import org.kku.jdiskusage.util.AppProperties.AppSetting;
+import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.DirectoryList.Directory;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.application.Platform;
@@ -532,7 +532,7 @@ public class DirectoryChooser
       return getFavoriteDirectoriesProperty().get(DirectoryList.empty());
     }
 
-    private AppSetting<DirectoryList> getFavoriteDirectoriesProperty()
+    private AppProperty<DirectoryList> getFavoriteDirectoriesProperty()
     {
       return AppSettings.FAVORITE_DIRECTORIES.forSubject(this);
     }

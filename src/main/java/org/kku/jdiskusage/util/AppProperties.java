@@ -31,43 +31,43 @@ public abstract class AppProperties
     return m_propertyStore;
   }
 
-  protected <T> AppSettingType<T> createAppSettingType(String name, Converter<T> converter)
+  protected <T> AppPropertyType<T> createAppPropertyType(String name, Converter<T> converter)
   {
-    return new AppSettingType<>(name, converter);
+    return new AppPropertyType<>(name, converter);
   }
 
-  public class AppSettingType<T>
+  public class AppPropertyType<T>
   {
     private final String mi_name;
     private final Converter<T> mi_converter;
 
-    private AppSettingType(String name, Converter<T> converter)
+    private AppPropertyType(String name, Converter<T> converter)
     {
       mi_name = name;
       mi_converter = converter;
     }
 
-    public AppSetting<T> forSubject(Object subject)
+    public AppProperty<T> forSubject(Object subject)
     {
       return forSubject(subject, null);
     }
 
-    public AppSetting<T> forSubject(Object subject, T defaultValue)
+    public AppProperty<T> forSubject(Object subject, T defaultValue)
     {
       Class<?> subjectClass;
 
       subjectClass = subject instanceof Class ? (Class<?>) subject : subject.getClass();
-      return new AppSetting<>(this, subjectClass.getSimpleName(), defaultValue);
+      return new AppProperty<>(this, subjectClass.getSimpleName(), defaultValue);
     }
 
-    public AppSetting<T> forSubject(String subject)
+    public AppProperty<T> forSubject(String subject)
     {
       return forSubject(subject, null);
     }
 
-    public AppSetting<T> forSubject(String subject, T defaultValue)
+    public AppProperty<T> forSubject(String subject, T defaultValue)
     {
-      return new AppSetting<>(this, subject, defaultValue);
+      return new AppProperty<>(this, subject, defaultValue);
     }
 
     public String getName()
@@ -81,14 +81,14 @@ public abstract class AppProperties
     }
   }
 
-  public class AppSetting<T>
+  public class AppProperty<T>
   {
-    private final AppSettingType<T> mi_type;
+    private final AppPropertyType<T> mi_type;
     private final String mi_subject;
     private final T mi_defaultValue;
     private final ObjectProperty<T> mi_property;
 
-    public AppSetting(AppSettingType<T> type, String subject, T defaultValue)
+    public AppProperty(AppPropertyType<T> type, String subject, T defaultValue)
     {
       mi_type = type;
       mi_subject = subject;
@@ -189,16 +189,22 @@ public abstract class AppProperties
     private Properties mi_properties;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> mi_scheduledFuture;
+    private boolean mi_sync;
 
     public PropertyStore(String fileName)
     {
       mi_fileName = fileName;
     }
 
+    public void setSyncImmediately(boolean sync)
+    {
+      mi_sync = sync;
+    }
+
     public void putProperty(String propertyName, String stringValue)
     {
-      Log.log.debug("Mark properties[%s] dirty to %s because property %s changed from %s to %s", getFilePath(),
-          propertyName, getProperties().get(propertyName), stringValue);
+      Log.log.debug("Mark properties[%s] dirty because property %s changed from %s to %s", getFilePath(), propertyName,
+          getProperties().get(propertyName), stringValue);
       getProperties().put(propertyName, stringValue);
       markDirty();
     }
@@ -227,7 +233,7 @@ public abstract class AppProperties
       {
         mi_properties = new Properties();
 
-        Log.log.debug("Load properties from %s", getFilePath());
+        Log.log.debug("Load properties[%s]", getFilePath());
         try (InputStream is = Files.newInputStream(getFilePath()))
         {
           mi_properties.load(is);
@@ -251,16 +257,23 @@ public abstract class AppProperties
 
     private void markDirty()
     {
-      if (mi_scheduledFuture != null)
+      if (mi_sync)
       {
-        mi_scheduledFuture.cancel(false);
+        save();
       }
-      mi_scheduledFuture = scheduler.schedule(this::save, 1, TimeUnit.SECONDS);
+      else
+      {
+        if (mi_scheduledFuture != null)
+        {
+          mi_scheduledFuture.cancel(false);
+        }
+        mi_scheduledFuture = scheduler.schedule(this::save, 1, TimeUnit.SECONDS);
+      }
     }
 
-    private void save()
+    private synchronized void save()
     {
-      Log.log.debug("Save properties to %s", getFilePath());
+      Log.log.debug("Save properties[%s]", getFilePath());
       try (OutputStream os = Files.newOutputStream(getFilePath()))
       {
         getProperties().store(os, "store to properties file");
@@ -278,8 +291,9 @@ public abstract class AppProperties
 
     void clear() throws IOException
     {
-      Files.delete(getFilePath());
+      Files.deleteIfExists(getFilePath());
       mi_properties = null;
     }
+
   }
 }

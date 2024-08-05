@@ -10,7 +10,7 @@ import org.kku.jdiskusage.ui.common.Notifications;
 import org.kku.jdiskusage.ui.util.ConcurrentUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppSettings;
-import org.kku.jdiskusage.util.AppProperties.AppSetting;
+import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.CommonUtil;
 import org.kku.jdiskusage.util.DirectoryChooser;
 import org.kku.jdiskusage.util.FileTree;
@@ -252,7 +252,7 @@ public class ScanFileTreeDialog
     }
   }
 
-  private AppSetting<Path> getInitialDirectoryProperty()
+  private AppProperty<Path> getInitialDirectoryProperty()
   {
     return AppSettings.INITIAL_DIRECTORY.forSubject(this);
   }
