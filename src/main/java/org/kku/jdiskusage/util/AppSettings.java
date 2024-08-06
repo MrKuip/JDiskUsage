@@ -36,9 +36,4 @@ public class AppSettings
   {
     super("JDiskUsage.settings");
   }
-
-  public static AppSettings getInstance()
-  {
-    return m_instance;
-  }
 }

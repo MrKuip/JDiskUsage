@@ -4,8 +4,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.ui.util.ChartStyleSheet;
-import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.AppProperties.AppProperty;
+import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.PathList;
 import org.kku.jdiskusage.util.SuppressFBWarnings;
@@ -40,7 +40,7 @@ public class Main
       Log.log.error(throwable, "%s %s", thread, throwable.getMessage());
     });
 
-    Translator.getInstance().changeLocale(AppPreferences.localePreference.get());
+    Translator.getInstance().changeLanguage(AppPreferences.languagePreference.get());
 
     diskUsageView = new DiskUsageView(stage);
     m_rootNode = diskUsageView.getContent();

@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Locale;
 import org.junit.jupiter.api.Test;
+import org.kku.jdiskusage.util.LanguageList.Language;
 import org.kku.jdiskusage.util.preferences.SizeSystem;
 
 class ConvertersTest
@@ -121,16 +121,16 @@ class ConvertersTest
   }
 
   @Test
-  void testLocaleConverter()
+  void testLanguageConverter()
   {
-    Locale value;
+    Language value;
     String stringValue;
 
-    value = new Locale("nl");
-    stringValue = "nl";
+    value = LanguageList.getInstance().getDefault();
+    stringValue = value.getName();
 
-    assertEquals(value, Converters.getLocaleConverter().fromString(stringValue));
-    assertEquals(stringValue, Converters.getLocaleConverter().toString(value));
+    assertEquals(value, Converters.getLanguageConverter().fromString(stringValue));
+    assertEquals(stringValue, Converters.getLanguageConverter().toString(value));
   }
 
   @Test

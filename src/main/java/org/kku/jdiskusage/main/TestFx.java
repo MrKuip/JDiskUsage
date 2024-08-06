@@ -1,11 +1,9 @@
 package org.kku.jdiskusage.main;
 
-import org.kku.jdiskusage.ui.NumericTextField;
-import org.tbee.javafx.scene.layout.MigPane;
+import java.util.Locale;
+import org.kku.jdiskusage.util.LanguageList.Language;
 import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.stage.Stage;
 
 public class TestFx
@@ -14,40 +12,45 @@ public class TestFx
   @Override
   public void start(Stage stage)
   {
-    Scene scene;
-    NumericTextField<Double> textField1;
-    NumericTextField<Double> textField2;
-    NumericTextField<Integer> textField3;
-    MigPane pane;
+    SimpleObjectProperty<Locale> localeProperty;
+    SimpleObjectProperty<Language> languageProperty;
 
-    pane = new MigPane("wrap 2");
+    localeProperty = new SimpleObjectProperty<Locale>();
+    languageProperty = new SimpleObjectProperty<Language>();
 
-    pane.add(new Label("doubleField(#)"));
-    textField1 = NumericTextField.doubleField("#");
-    textField1.setOnAction(ae -> System.out.println("value=" + textField1.getValue()));
-    pane.add(textField1);
+    bindBidirectionel(localeProperty, languageProperty, new Convert<>()
+    {
+      @Override
+      public Language from(Locale fromValue)
+      {
+        return null;
+      }
 
-    pane.add(new Label("doubleField(#0.000)"));
-    textField2 = NumericTextField.doubleField("#0.000");
-    textField2.setOnAction(ae -> {
-      System.out.println("value=" + textField2.getValue());
+      @Override
+      public Locale to(Language toValue)
+      {
+        // TODO Auto-generated method stub
+        return null;
+      }
     });
-    pane.add(textField2);
+  }
 
-    pane.add(new Label("integerField()"));
-    textField3 = NumericTextField.integerField();
-    textField3.setOnAction(ae -> {
-      System.out.println("value=" + textField3.getValue());
+  private void bindBidirectionel(SimpleObjectProperty<Locale> localeProperty,
+      SimpleObjectProperty<Language> languageProperty, Convert<Locale, Language> converter)
+  {
+    localeProperty.addListener((o, oldValue, newValue) -> {
+      languageProperty.set(converter.from(newValue));
     });
-    pane.add(textField3);
+    languageProperty.addListener((o, oldValue, newValue) -> {
+      localeProperty.set(converter.to(newValue));
+    });
+  }
 
-    pane.add(new TextField("123"));
-    pane.add(new TextField("456"));
-    pane.add(new TextField("789"));
+  private interface Convert<From, To>
+  {
+    public To from(From fromValue);
 
-    scene = new Scene(pane);
-    stage.setScene(scene);
-    stage.show();
+    public From to(To toValue);
   }
 
   public static void main(String[] args)

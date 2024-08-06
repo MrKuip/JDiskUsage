@@ -73,6 +73,7 @@ public class SearchFormPane
     searchLabel = new Label(null, IconUtil.createIconNode("magnify"));
 
     regexButton = new ToggleButton(null, IconUtil.createIconNode("regex"));
+    regexButton.selectedProperty().bindBidirectional(AppPreferences.searchRegexPreference.property());
     mi_data.mi_regexSelectedProperty = regexButton.selectedProperty();
 
     searchTextField = new TextField();

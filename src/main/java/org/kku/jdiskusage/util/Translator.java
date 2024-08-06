@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import org.kku.jdiskusage.util.LanguageList.Language;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -26,9 +27,9 @@ public class Translator
     return m_instance;
   }
 
-  public void changeLocale(Locale newLocale)
+  public void changeLanguage(Language language)
   {
-    Locale.setDefault(newLocale);
+    Locale.setDefault(language.getLocale());
     reload();
   }
 

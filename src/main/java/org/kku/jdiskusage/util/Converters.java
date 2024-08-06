@@ -1,8 +1,8 @@
 package org.kku.jdiskusage.util;
 
 import java.nio.file.Path;
-import java.util.Locale;
 import java.util.function.Function;
+import org.kku.jdiskusage.util.LanguageList.Language;
 
 public class Converters
 {
@@ -31,9 +31,9 @@ public class Converters
     return new Converter<Boolean>(Boolean::valueOf, (value) -> value.toString());
   }
 
-  public static Converter<Locale> getLocaleConverter()
+  public static Converter<Language> getLanguageConverter()
   {
-    return new Converter<Locale>(Locale::forLanguageTag, Locale::toLanguageTag);
+    return new Converter<Language>((s) -> LanguageList.getInstance().getLanguage(s), (e) -> e.getName());
   }
 
   public static Converter<Path> getPathConverter()

@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +34,8 @@ import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.kku.jdiskusage.util.preferences.Sort;
 import org.tbee.javafx.scene.layout.MigPane;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
@@ -316,7 +319,8 @@ public class DiskUsageView
     private enum TabData
     {
       SIZE("Size", "chart-pie", (md) -> md.mi_sizeTab),
-      TOP_RANKING("Ranking", "trophy", (md) -> md.mi_topRankingTab),
+      TOP_RANKING(Bindings.concat(translatedTextProperty("Top"), " ", AppPreferences.maxNumberInTopRanking.property()),
+          "trophy", (md) -> md.mi_topRankingTab),
       DISTRIBUTION_SIZE("Size distribution", "chart-bell-curve", (md) -> md.mi_sizeDistributionTab),
       DISTRIBUTION_MODIFIED("Last modified", "calendar-blank", (md) -> md.mi_modifiedDistributionTab),
       DISTRIBUTION_TYPES("Types", "chart-pie", (md) -> md.mi_typesTab),
@@ -324,11 +328,17 @@ public class DiskUsageView
       SEARCH_TYPES("Search", "magnify", (md) -> md.mi_searchTab),
       HELP("Help", "help", (md) -> md.mi_helpTab);
 
-      private final String m_name;
+      private final StringExpression m_name;
       private final String m_iconName;
       private final Function<DiskUsageData, ? extends AbstractFormPane> m_tabPaneSupplier;
 
       private TabData(String name, String iconName, Function<DiskUsageData, ? extends AbstractFormPane> tabPaneGetter)
+      {
+        this(Bindings.concat(translatedTextProperty(name)), iconName, tabPaneGetter);
+      }
+
+      private TabData(StringExpression name, String iconName,
+          Function<DiskUsageData, ? extends AbstractFormPane> tabPaneGetter)
       {
         m_name = name;
         m_iconName = iconName;
@@ -336,6 +346,11 @@ public class DiskUsageView
       }
 
       public String getName()
+      {
+        return m_name.get();
+      }
+
+      public StringExpression getNameExpression()
       {
         return m_name;
       }
@@ -417,7 +432,7 @@ public class DiskUsageView
     public Tab createTab(TabData tabData)
     {
       return mi_tabByTabId.computeIfAbsent(tabData, td -> {
-        return td.initTab(mi_tabPane.createTab(td.getIconName(), td.getName()));
+        return td.initTab(mi_tabPane.createTab(td.getIconName(), td.getNameExpression()));
       });
     }
 

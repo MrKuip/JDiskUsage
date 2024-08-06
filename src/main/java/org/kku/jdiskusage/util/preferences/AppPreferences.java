@@ -1,8 +1,9 @@
 package org.kku.jdiskusage.util.preferences;
 
-import java.util.Locale;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.Converters;
+import org.kku.jdiskusage.util.LanguageList;
+import org.kku.jdiskusage.util.LanguageList.Language;
 
 public class AppPreferences
   extends AppProperties
@@ -12,7 +13,7 @@ public class AppPreferences
   public final static AppProperty<SizeSystem> sizeSystemPreference;
   public final static AppProperty<DisplayMetric> displayMetricPreference;
   public final static AppProperty<Sort> sortPreference;
-  public final static AppProperty<Locale> localePreference;
+  public final static AppProperty<Language> languagePreference;
   public final static AppProperty<Integer> searchMaxCountPreference;
   public final static AppProperty<Integer> searchMaxTimePreference;
   public final static AppProperty<Boolean> searchRegexPreference;
@@ -32,8 +33,8 @@ public class AppPreferences
         .forSubject(m_instance, DisplayMetric.FILE_SIZE);
     sortPreference = m_instance.createAppPropertyType("Sort", Converters.getEnumConverter(Sort.class))
         .forSubject(m_instance, Sort.NUMERIC);
-    localePreference = m_instance.createAppPropertyType("Locale", Converters.getLocaleConverter())
-        .forSubject(m_instance, new Locale("nl"));
+    languagePreference = m_instance.createAppPropertyType("Language", Converters.getLanguageConverter())
+        .forSubject(m_instance, LanguageList.getInstance().getDefault());
     searchMaxCountPreference = m_instance.createAppPropertyType("Max count", Converters.getIntegerConverter())
         .forSubject(m_instance, 100);
     searchMaxTimePreference = m_instance.createAppPropertyType("Max time", Converters.getIntegerConverter())

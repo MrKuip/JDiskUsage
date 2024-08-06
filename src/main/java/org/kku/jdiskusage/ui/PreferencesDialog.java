@@ -1,19 +1,12 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.stream.Collectors;
 import org.kku.jdiskusage.main.Main;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.ui.util.TranslateUtil;
-import org.kku.jdiskusage.util.Translator;
+import org.kku.jdiskusage.util.AppProperties.AppProperty;
+import org.kku.jdiskusage.util.LanguageList;
+import org.kku.jdiskusage.util.LanguageList.Language;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.scene.Node;
@@ -30,7 +23,6 @@ import javafx.stage.Modality;
 public class PreferencesDialog
 {
   private Dialog<ButtonType> m_dialog;
-  private LanguagePreferences m_languagePreferences = new LanguagePreferences();
 
   public PreferencesDialog()
   {
@@ -67,9 +59,9 @@ public class PreferencesDialog
     MigPane pane;
     CheckBox autoExpandCheckBox;
     CheckBox autoCollapseCheckBox;
-    ComboBox<LanguagePreferences.Language> languageComboBox;
+    ComboBox<Language> languageComboBox;
     NumericTextField<Integer> maxNumberInTopRankingField;
-    Button restoreButton;
+    Button resetAllButton;
 
     autoExpandCheckBox = new CheckBox("Auto expand selected tree node");
     autoExpandCheckBox.selectedProperty().bindBidirectional(AppPreferences.autoExpandTreeNode.property());
@@ -78,42 +70,49 @@ public class PreferencesDialog
     autoCollapseCheckBox.selectedProperty().bindBidirectional(AppPreferences.autoCollapseTreeNode.property());
 
     languageComboBox = new ComboBox<>();
-    languageComboBox.getItems().addAll(m_languagePreferences.getLanguageList());
-    languageComboBox.getSelectionModel().select(m_languagePreferences.getCurrentLanguage());
-    languageComboBox.setOnAction((ae) -> {
-      Locale locale;
-
-      locale = languageComboBox.getSelectionModel().getSelectedItem().getLocale();
-      Translator.getInstance().changeLocale(locale);
-      AppPreferences.localePreference.set(locale);
-    });
+    languageComboBox.getItems().addAll(LanguageList.getInstance().getList());
+    languageComboBox.valueProperty().bindBidirectional(AppPreferences.languagePreference.property());
 
     maxNumberInTopRankingField = NumericTextField.integerField();
     maxNumberInTopRankingField.setPrefWidth(80.0);
     maxNumberInTopRankingField.valueProperty().bindBidirectional(AppPreferences.maxNumberInTopRanking.property());
 
-    restoreButton = translate(new Button("Reset all to default", IconUtil.createIconNode("restore")));
-    restoreButton.setOnAction((ae) -> {
+    resetAllButton = translate(new Button("Reset all to default", IconUtil.createIconNode("restore")));
+    resetAllButton.setOnAction((ae) -> {
       AppPreferences.autoExpandTreeNode.reset();
       AppPreferences.autoCollapseTreeNode.reset();
-      AppPreferences.localePreference.reset();
+      AppPreferences.languagePreference.reset();
       AppPreferences.maxNumberInTopRanking.reset();
     });
 
-    pane = new MigPane();
+    pane = new MigPane("wrap 3, debug", "[][]push[]", "[][][][]push[]");
 
-    pane.add(translate(autoExpandCheckBox), "spanx 2, newline");
-    pane.add(translate(autoCollapseCheckBox), "spanx 2, newline");
-    pane.add(TranslateUtil.translate(new Label("Language")), "newline");
+    pane.add(translate(autoExpandCheckBox), "spanx 2");
+    pane.add(resetPreference(AppPreferences.autoExpandTreeNode));
+    pane.add(translate(autoCollapseCheckBox), "spanx 2");
+    pane.add(resetPreference(AppPreferences.autoCollapseTreeNode));
+    pane.add(TranslateUtil.translate(new Label("Language")));
     pane.add(languageComboBox);
-    pane.add(TranslateUtil.translate(new Label("Max number in top Ranking")), "newline");
+    pane.add(resetPreference(AppPreferences.languagePreference));
+    pane.add(TranslateUtil.translate(new Label("Max number in top Ranking")));
     pane.add(maxNumberInTopRankingField);
-    pane.add(restoreButton, "newline push");
+    pane.add(resetPreference(AppPreferences.maxNumberInTopRanking));
+    pane.add(resetAllButton, "spanx");
 
     tab = translate(new Tab("General"));
     tab.setContent(pane);
 
     return tab;
+  }
+
+  private Node resetPreference(AppProperty<?> property)
+  {
+    Button button;
+
+    button = translate(new Button("", IconUtil.createIconNode("restore")));
+    button.setOnAction((ae) -> property.reset());
+
+    return button;
   }
 
   private Tab getChartingTab()
@@ -152,76 +151,5 @@ public class PreferencesDialog
     tab.setContent(pane);
 
     return tab;
-  }
-
-  static private class LanguagePreferences
-  {
-
-    private Language getCurrentLanguage()
-    {
-      Locale locale;
-
-      locale = Locale.getDefault();
-
-      return getLanguageList().stream().filter(l -> Objects.equals(l.getLanguage(), locale.getLanguage())).findFirst()
-          .orElse(getLanguageList().get(0));
-    }
-
-    private List<Language> getLanguageList()
-    {
-      Properties props;
-      List<Language> list;
-
-      try
-      {
-        props = new Properties();
-        list = new ArrayList<>();
-        try (InputStream stream = getClass().getResourceAsStream("/language.properties"))
-        {
-          props.load(stream);
-          props.entrySet().stream().map(entry -> new Language((String) entry.getKey(), (String) entry.getValue()))
-              .collect(Collectors.toCollection(() -> list));
-        }
-        // Always add the default language at index 0
-        list.add(0, new Language("English", ""));
-
-        return list;
-      }
-      catch (IOException e)
-      {
-        e.printStackTrace();
-        return Collections.emptyList();
-      }
-    }
-
-    static private class Language
-    {
-      private final String mi_name;
-      private final String mi_language;
-      private final Locale mi_locale;
-
-      private Language(String name, String language)
-      {
-        mi_name = name;
-        mi_language = language;
-        mi_locale = new Locale(language);
-      }
-
-      public String getLanguage()
-      {
-        return mi_language;
-      }
-
-      public Locale getLocale()
-      {
-        return mi_locale;
-      }
-
-      @Override
-      public String toString()
-      {
-        return mi_name;
-      }
-    }
   }
 }

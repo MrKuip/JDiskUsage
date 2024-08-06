@@ -1,13 +1,13 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.stream.Collectors;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.util.IconUtil;
-import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.AppProperties.AppProperty;
+import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.SuppressFBWarnings;
 import org.tbee.javafx.scene.layout.MigPane;
+import javafx.beans.binding.StringExpression;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -40,12 +40,13 @@ public class DraggableTabPane
     setOnDragDetected();
   }
 
-  public Tab createTab(String iconName, String name)
+  public Tab createTab(String iconName, StringExpression nameExpression)
   {
     Tab tab;
     MigPane iconPane;
 
-    tab = translate(new Tab(name));
+    tab = new Tab();
+    tab.textProperty().bind(nameExpression);
     tab.getStyleClass().add("draggable-tab");
     tab.setUserData(this);
     tab.getProperties().put(TAB_SEQUENCE_NUMBER, ++NEXT_TAB_SEQUENCE_NUMBER);

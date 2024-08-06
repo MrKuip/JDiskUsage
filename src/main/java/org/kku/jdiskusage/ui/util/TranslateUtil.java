@@ -51,6 +51,16 @@ public class TranslateUtil
 
   public static void bind(StringProperty textProperty)
   {
-    textProperty.bind(Translator.translatedTextProperty(textProperty.get()));
+    textProperty.bind(translatedTextProperty(textProperty));
+  }
+
+  public static StringProperty translatedTextProperty(StringProperty textProperty)
+  {
+    return translatedTextProperty(textProperty.get());
+  }
+
+  public static StringProperty translatedTextProperty(String text)
+  {
+    return Translator.translatedTextProperty(text);
   }
 }
