@@ -3,14 +3,12 @@ package org.kku.jdiskusage.ui;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
-import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.util.StringConverter;
-import javafx.util.converter.NumberStringConverter;
 
 public class NumericTextField<T extends Number>
   extends TextField
@@ -173,42 +171,4 @@ public class NumericTextField<T extends Number>
       return Integer.valueOf(s);
     }
   }
-
-  class NumberStringFilteredConverter
-    extends NumberStringConverter
-  {
-    // Note, if needed you can add in appropriate constructors 
-    // here to set locale, pattern matching or an explicit
-    // type of NumberFormat.
-    // 
-    // For more information on format control, see 
-    //    the NumberStringConverter constructors
-    //    DecimalFormat class 
-    //    NumberFormat static methods for examples.
-    // This solution can instead extend other NumberStringConverters if needed
-    //    e.g. CurrencyStringConverter or PercentageStringConverter.
-
-    public UnaryOperator<TextFormatter.Change> getFilter()
-    {
-      return change -> {
-        String newText = change.getControlNewText();
-        if (newText.isEmpty())
-        {
-          return change;
-        }
-
-        ParsePosition parsePosition = new ParsePosition(0);
-        Object object = getNumberFormat().parse(newText, parsePosition);
-        if (object == null || parsePosition.getIndex() < newText.length())
-        {
-          return null;
-        }
-        else
-        {
-          return change;
-        }
-      };
-    }
-  }
-
 }
