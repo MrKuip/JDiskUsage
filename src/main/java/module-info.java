@@ -18,4 +18,5 @@ module org.kku.jdiskusage
   exports org.kku.jdiskusage.main;
 
   opens org.kku.jdiskusage.conf to com.fasterxml.jackson.databind;
+  opens org.kku.conf to com.fasterxml.jackson.databind;
 }

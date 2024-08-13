@@ -2,6 +2,7 @@ package org.kku.jdiskusage.ui.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -9,8 +10,13 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
+import javafx.util.Callback;
 
 public class FxUtil
 {
@@ -110,4 +116,39 @@ public class FxUtil
       }
     };
   }
+
+  public static <T> Callback<ListView<T>, ListCell<T>> getCellFactoryWithImage(Function<T, String> nameFunction,
+      Function<T, Image> imageFunction)
+  {
+    return param -> getListCellWithImage(nameFunction, imageFunction);
+  }
+
+  public static <T> ListCell<T> getListCellWithImage(Function<T, String> nameFunction, Function<T, Image> imageFunction)
+  {
+    return new ListCell<>()
+    {
+      private final ImageView imageView = new ImageView();
+
+      @Override
+      protected void updateItem(T language, boolean empty)
+      {
+        super.updateItem(language, empty);
+
+        if (empty || language == null)
+        {
+          setGraphic(null);
+          setText(null);
+        }
+        else
+        {
+          imageView.setImage(imageFunction.apply(language));
+          imageView.setFitHeight(16);
+          imageView.setFitWidth(24);
+          setGraphic(imageView);
+          setText(nameFunction.apply(language));
+        }
+      }
+    };
+  }
+
 }
