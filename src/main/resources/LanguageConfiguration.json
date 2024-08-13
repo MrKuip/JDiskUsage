@@ -2,10 +2,12 @@
   "languageList" : [ {
     "name" : "English",
     "language" : "en",
+    "flag" : "GB-UKM",
     "default" : true
   }, {
     "name" : "Nederlands",
     "language" : "nl",
+    "flag" : "NL",
     "default" : false
   } ]
 }

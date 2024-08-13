@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import java.util.function.Function;
 import org.kku.jdiskusage.conf.Language;
 import org.kku.jdiskusage.conf.LanguageConfiguration;
 import org.kku.jdiskusage.main.Main;
@@ -16,9 +17,14 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Modality;
+import javafx.util.Callback;
 
 public class PreferencesDialog
 {
@@ -71,6 +77,8 @@ public class PreferencesDialog
 
     languageComboBox = new ComboBox<>();
     languageComboBox.getItems().addAll(LanguageConfiguration.getInstance().getList());
+    languageComboBox.setCellFactory(getCellFactoryWithImage(Language::getName, Language::getFlagImage));
+    languageComboBox.setButtonCell(getListCellWithImage(Language::getName, Language::getFlagImage));
     languageComboBox.valueProperty().bindBidirectional(AppPreferences.languagePreference.property());
 
     maxNumberInTopRankingField = NumericTextField.integerField();
@@ -103,6 +111,40 @@ public class PreferencesDialog
     tab.setContent(pane);
 
     return tab;
+  }
+
+  private <T> Callback<ListView<T>, ListCell<T>> getCellFactoryWithImage(Function<T, String> nameFunction,
+      Function<T, Image> imageFunction)
+  {
+    return param -> getListCellWithImage(nameFunction, imageFunction);
+  }
+
+  private <T> ListCell<T> getListCellWithImage(Function<T, String> nameFunction, Function<T, Image> imageFunction)
+  {
+    return new ListCell<>()
+    {
+      private final ImageView imageView = new ImageView();
+
+      @Override
+      protected void updateItem(T language, boolean empty)
+      {
+        super.updateItem(language, empty);
+
+        if (empty || language == null)
+        {
+          setGraphic(null);
+          setText(null);
+        }
+        else
+        {
+          imageView.setImage(imageFunction.apply(language));
+          imageView.setFitHeight(16);
+          imageView.setFitWidth(24);
+          setGraphic(imageView);
+          setText(nameFunction.apply(language));
+        }
+      }
+    };
   }
 
   private Tab getChartingTab()

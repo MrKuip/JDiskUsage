@@ -1,12 +1,19 @@
 package org.kku.jdiskusage.conf;
 
+import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import org.kku.conf.ConfigurationItem;
+import org.kku.jdiskusage.util.Log;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import javafx.scene.image.Image;
 
 public class Language
   extends ConfigurationItem
 {
+  @JsonIgnore
+  private static Map<String, Image> iconByNameMap = new HashMap<>();
   private String mi_name;
   private String mi_language;
   private String mi_flag;
@@ -46,6 +53,24 @@ public class Language
   public String getFlag()
   {
     return mi_flag;
+  }
+
+  public Image getFlagImage()
+  {
+    return iconByNameMap.computeIfAbsent(getFlag(), flag -> {
+      String flagName;
+
+      flagName = "/flags/" + flag + ".png";
+      try (InputStream is = Language.class.getResourceAsStream(flagName))
+      {
+        return new Image(is);
+      }
+      catch (Exception e)
+      {
+        Log.log.error(e, "Cannot load image " + flagName);
+        throw new RuntimeException(e);
+      }
+    });
   }
 
   public void setDefault(boolean isDefault)
