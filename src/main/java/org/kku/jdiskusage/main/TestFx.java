@@ -1,9 +1,9 @@
 package org.kku.jdiskusage.main;
 
-import java.util.Locale;
-import org.kku.jdiskusage.util.LanguageList.Language;
+import org.tbee.javafx.scene.layout.MigPane;
 import javafx.application.Application;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
 public class TestFx
@@ -12,45 +12,32 @@ public class TestFx
   @Override
   public void start(Stage stage)
   {
-    SimpleObjectProperty<Locale> localeProperty;
-    SimpleObjectProperty<Language> languageProperty;
+    Scene scene;
 
-    localeProperty = new SimpleObjectProperty<Locale>();
-    languageProperty = new SimpleObjectProperty<Language>();
-
-    bindBidirectionel(localeProperty, languageProperty, new Convert<>()
-    {
-      @Override
-      public Language from(Locale fromValue)
-      {
-        return null;
-      }
-
-      @Override
-      public Locale to(Language toValue)
-      {
-        // TODO Auto-generated method stub
-        return null;
-      }
-    });
+    scene = new Scene(getNode());
+    stage.setTitle("JDiskUsage");
+    stage.setScene(scene);
+    stage.setHeight(200);
+    stage.setWidth(600);
+    stage.show();
   }
 
-  private void bindBidirectionel(SimpleObjectProperty<Locale> localeProperty,
-      SimpleObjectProperty<Language> languageProperty, Convert<Locale, Language> converter)
+  private MigPane getNode()
   {
-    localeProperty.addListener((o, oldValue, newValue) -> {
-      languageProperty.set(converter.from(newValue));
-    });
-    languageProperty.addListener((o, oldValue, newValue) -> {
-      localeProperty.set(converter.to(newValue));
-    });
-  }
+    MigPane pane;
 
-  private interface Convert<From, To>
-  {
-    public To from(From fromValue);
+    pane = new MigPane("wrap 4, debug", "[][][]push[align right]", "[][]push[]");
 
-    public From to(To toValue);
+    pane.add(new Button("123"));
+    pane.add(new Button("123"));
+    pane.add(new Button("123"));
+    pane.add(new Button("123"));
+    pane.add(new Button("123"));
+    pane.add(new Button("123"));
+    pane.add(new Button("123"));
+    pane.add(new Button("123"));
+
+    return pane;
   }
 
   public static void main(String[] args)

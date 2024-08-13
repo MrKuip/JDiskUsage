@@ -13,6 +13,9 @@ module org.kku.jdiskusage
   requires org.commonmark;
   requires javafx.web;
   requires jdk.xml.dom;
+  requires com.fasterxml.jackson.databind;
 
   exports org.kku.jdiskusage.main;
+
+  opens org.kku.jdiskusage.conf to com.fasterxml.jackson.databind;
 }

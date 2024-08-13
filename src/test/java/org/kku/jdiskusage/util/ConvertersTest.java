@@ -5,7 +5,8 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
-import org.kku.jdiskusage.util.LanguageList.Language;
+import org.kku.jdiskusage.conf.Language;
+import org.kku.jdiskusage.conf.LanguageConfiguration;
 import org.kku.jdiskusage.util.preferences.SizeSystem;
 
 class ConvertersTest
@@ -126,7 +127,7 @@ class ConvertersTest
     Language value;
     String stringValue;
 
-    value = LanguageList.getInstance().getDefault();
+    value = LanguageConfiguration.getInstance().getDefault();
     stringValue = value.getName();
 
     assertEquals(value, Converters.getLanguageConverter().fromString(stringValue));

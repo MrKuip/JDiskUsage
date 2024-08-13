@@ -107,6 +107,7 @@ public class DraggableTabPane
       String subjectId;
       AppProperty<Double> widthProperty;
       AppProperty<Double> heightProperty;
+      TabPane tabPane;
 
       mousePosition = new Robot().getMousePosition();
 
@@ -151,7 +152,7 @@ public class DraggableTabPane
       draggedDialog.show();
 
       // Remove tab from tabPane
-      TabPane tabPane = draggedTab.getTabPane();
+      tabPane = draggedTab.getTabPane();
       tabPane.getTabs().remove(draggedTab);
 
       de.consume();

@@ -1,12 +1,12 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import org.kku.jdiskusage.conf.Language;
+import org.kku.jdiskusage.conf.LanguageConfiguration;
 import org.kku.jdiskusage.main.Main;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.ui.util.TranslateUtil;
 import org.kku.jdiskusage.util.AppProperties.AppProperty;
-import org.kku.jdiskusage.util.LanguageList;
-import org.kku.jdiskusage.util.LanguageList.Language;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.scene.Node;
@@ -38,7 +38,7 @@ public class PreferencesDialog
     m_dialog.setTitle("Preferences");
     TranslateUtil.bind(m_dialog.titleProperty());
     m_dialog.getDialogPane().getScene().getWindow().setOnCloseRequest((e) -> m_dialog.close());
-    m_dialog.getDialogPane().setPrefSize(600, 200);
+    m_dialog.getDialogPane().setPrefSize(600, 400);
     m_dialog.getDialogPane().setMinSize(600, 400);
     m_dialog.showAndWait();
   }
@@ -70,7 +70,7 @@ public class PreferencesDialog
     autoCollapseCheckBox.selectedProperty().bindBidirectional(AppPreferences.autoCollapseTreeNode.property());
 
     languageComboBox = new ComboBox<>();
-    languageComboBox.getItems().addAll(LanguageList.getInstance().getList());
+    languageComboBox.getItems().addAll(LanguageConfiguration.getInstance().getList());
     languageComboBox.valueProperty().bindBidirectional(AppPreferences.languagePreference.property());
 
     maxNumberInTopRankingField = NumericTextField.integerField();
@@ -85,7 +85,7 @@ public class PreferencesDialog
       AppPreferences.maxNumberInTopRanking.reset();
     });
 
-    pane = new MigPane("wrap 3, debug", "[][]push[]", "[][][][]push[]");
+    pane = new MigPane("wrap 3", "[][]push[align right]", "[][][][]push[]");
 
     pane.add(translate(autoExpandCheckBox), "spanx 2");
     pane.add(resetPreference(AppPreferences.autoExpandTreeNode));
@@ -97,22 +97,12 @@ public class PreferencesDialog
     pane.add(TranslateUtil.translate(new Label("Max number in top Ranking")));
     pane.add(maxNumberInTopRankingField);
     pane.add(resetPreference(AppPreferences.maxNumberInTopRanking));
-    pane.add(resetAllButton, "spanx");
+    pane.add(resetAllButton, "spanx, align right");
 
     tab = translate(new Tab("General"));
     tab.setContent(pane);
 
     return tab;
-  }
-
-  private Node resetPreference(AppProperty<?> property)
-  {
-    Button button;
-
-    button = translate(new Button("", IconUtil.createIconNode("restore")));
-    button.setOnAction((ae) -> property.reset());
-
-    return button;
   }
 
   private Tab getChartingTab()
@@ -137,19 +127,31 @@ public class PreferencesDialog
       AppPreferences.minPercentageChartElement.reset();
     });
 
-    pane = new MigPane();
+    pane = new MigPane("wrap 4", "[][][]push[align right]", "[][]push[]");
 
-    pane.add(translate(new Label("Chart shows at most")), "newline");
+    pane.add(translate(new Label("Chart shows at most")));
     pane.add(maxNumberOfElementsField, "");
     pane.add(new Label(translate("elements")), "");
-    pane.add(translate(new Label("Show elements larger than")), "newline");
+    pane.add(resetPreference(AppPreferences.maxNumberOfChartElements));
+    pane.add(translate(new Label("Show elements larger than")));
     pane.add(minPercentageElementField, "");
     pane.add(new Label("%"), "");
-    pane.add(restoreButton, "newline push, spanx 3");
+    pane.add(resetPreference(AppPreferences.minPercentageChartElement));
+    pane.add(restoreButton, "spanx, align right");
 
     tab = translate(new Tab("Charting"));
     tab.setContent(pane);
 
     return tab;
+  }
+
+  private Node resetPreference(AppProperty<?> property)
+  {
+    Button button;
+
+    button = translate(new Button("", IconUtil.createIconNode("restore")));
+    button.setOnAction((ae) -> property.reset());
+
+    return button;
   }
 }

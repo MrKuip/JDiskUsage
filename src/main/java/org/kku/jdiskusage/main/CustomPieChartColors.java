@@ -29,7 +29,7 @@ public class CustomPieChartColors
     {
       PieChart.Data data;
 
-      data = new PieChart.Data("Slice " + (i + 1), 100 / CUSTOM_COLORS.length);
+      data = new PieChart.Data("Slice " + (i + 1), 100.0 / CUSTOM_COLORS.length);
       pieChart.getData().add(data);
     }
 

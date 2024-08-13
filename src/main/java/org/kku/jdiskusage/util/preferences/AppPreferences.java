@@ -1,9 +1,9 @@
 package org.kku.jdiskusage.util.preferences;
 
+import org.kku.jdiskusage.conf.Language;
+import org.kku.jdiskusage.conf.LanguageConfiguration;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.Converters;
-import org.kku.jdiskusage.util.LanguageList;
-import org.kku.jdiskusage.util.LanguageList.Language;
 
 public class AppPreferences
   extends AppProperties
@@ -34,7 +34,7 @@ public class AppPreferences
     sortPreference = m_instance.createAppPropertyType("Sort", Converters.getEnumConverter(Sort.class))
         .forSubject(m_instance, Sort.NUMERIC);
     languagePreference = m_instance.createAppPropertyType("Language", Converters.getLanguageConverter())
-        .forSubject(m_instance, LanguageList.getInstance().getDefault());
+        .forSubject(m_instance, LanguageConfiguration.getInstance().getDefault());
     searchMaxCountPreference = m_instance.createAppPropertyType("Max count", Converters.getIntegerConverter())
         .forSubject(m_instance, 100);
     searchMaxTimePreference = m_instance.createAppPropertyType("Max time", Converters.getIntegerConverter())

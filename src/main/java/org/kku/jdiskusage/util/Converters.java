@@ -2,7 +2,8 @@ package org.kku.jdiskusage.util;
 
 import java.nio.file.Path;
 import java.util.function.Function;
-import org.kku.jdiskusage.util.LanguageList.Language;
+import org.kku.jdiskusage.conf.Language;
+import org.kku.jdiskusage.conf.LanguageConfiguration;
 
 public class Converters
 {
@@ -33,7 +34,7 @@ public class Converters
 
   public static Converter<Language> getLanguageConverter()
   {
-    return new Converter<Language>((s) -> LanguageList.getInstance().getLanguage(s), (e) -> e.getName());
+    return new Converter<Language>((s) -> LanguageConfiguration.getInstance().getLanguageById(s), (e) -> e.getName());
   }
 
   public static Converter<Path> getPathConverter()

@@ -9,8 +9,6 @@ import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.PathList;
 import org.kku.jdiskusage.util.SuppressFBWarnings;
-import org.kku.jdiskusage.util.Translator;
-import org.kku.jdiskusage.util.preferences.AppPreferences;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Rectangle2D;
@@ -39,8 +37,6 @@ public class Main
     Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
       Log.log.error(throwable, "%s %s", thread, throwable.getMessage());
     });
-
-    Translator.getInstance().changeLanguage(AppPreferences.languagePreference.get());
 
     diskUsageView = new DiskUsageView(stage);
     m_rootNode = diskUsageView.getContent();
@@ -101,7 +97,7 @@ public class Main
     }
     catch (Throwable ex)
     {
-      ex.printStackTrace();
+      Log.log.error(ex, "Main exits with exception");
     }
   }
 

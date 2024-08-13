@@ -1,0 +1,11 @@
+{
+  "languageList" : [ {
+    "name" : "English",
+    "language" : "en",
+    "default" : true
+  }, {
+    "name" : "Nederlands",
+    "language" : "nl",
+    "default" : false
+  } ]
+}

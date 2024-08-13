@@ -170,22 +170,27 @@ public class Log
 
     public void info(String msg)
     {
-      mi_logger.log(Level.INFO, msg);
+      log(Level.INFO, null, msg);
     }
 
     public void info(String format, Object... args)
     {
-      log(Level.INFO, null, format, args);
+      info(String.format(format, args));
     }
 
     public void debug(String msg)
     {
-      mi_logger.log(Level.FINE, msg);
+      log(Level.FINE, null, msg);
     }
 
     public void debug(String format, Object... args)
     {
-      log(Level.FINE, null, format, args);
+      debug(String.format(format, args));
+    }
+
+    public void error(String format, Object... args)
+    {
+      error(null, format, args);
     }
 
     public void error(Throwable throwable, String format, Object... args)
@@ -193,11 +198,11 @@ public class Log
       log(Level.SEVERE, throwable, String.format(format, args));
     }
 
-    private void log(Level level, Throwable throwable, String format, Object... args)
+    private void log(Level level, Throwable throwable, String text)
     {
       if (mi_logger.isLoggable(level))
       {
-        mi_logger.log(Level.SEVERE, String.format(format, args), throwable);
+        mi_logger.log(level, text, throwable);
       }
     }
   }
