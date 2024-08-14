@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -195,9 +196,10 @@ public class SizeDistributionFormPane
     yAxis = new CategoryAxis();
     barChart = FxUtil.createBarChart(xAxis, yAxis);
     pane.add(barChart);
-    barChart.setTitle(translate("Distribution of file sizes in") + " " + getCurrentFileNode().getName());
-    xAxis.setLabel(translate("Number of files"));
-    yAxis.setLabel(translate("File sizes"));
+    barChart.titleProperty().bind(
+        translatedTextProperty("Distribution of file sizes in").concat(" ").concat(getCurrentFileNode().getName()));
+    xAxis.labelProperty().bind(translatedTextProperty("Number of files"));
+    yAxis.labelProperty().bind(translatedTextProperty("File sizes"));
 
     series1 = new XYChart.Series<>();
     barChart.getData().add(series1);
@@ -216,8 +218,8 @@ public class SizeDistributionFormPane
     yAxis = new CategoryAxis();
     barChart = FxUtil.createBarChart(xAxis, yAxis);
     pane.add(barChart);
-    xAxis.setLabel(translate("Total size of files (in Gb)"));
-    yAxis.setLabel(translate("File sizes"));
+    xAxis.labelProperty().bind(translatedTextProperty("Total size of files (in Gb)"));
+    yAxis.labelProperty().bind(translatedTextProperty("File sizes"));
 
     series2 = new XYChart.Series<>();
     barChart.getData().add(series2);

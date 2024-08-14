@@ -1,11 +1,11 @@
 package org.kku.jdiskusage.ui;
 
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedExpression;
+import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
@@ -16,12 +16,14 @@ import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.FxUtil;
+import org.kku.jdiskusage.ui.util.TranslateUtil.TranslatedTextExpression;
 import org.kku.jdiskusage.util.CommonUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.tbee.javafx.scene.layout.MigPane;
+import javafx.beans.binding.StringExpression;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
@@ -40,33 +42,38 @@ class LastModifiedDistributionFormPane
 
   private enum LastModifiedDistributionBucket
   {
-    INVALID(() -> translate("Invalid"), Long.MIN_VALUE + 1),
-    LAST_MODIFIED_FUTURE(() -> translate("In the future"), 0),
-    LAST_MODIFIED_TODAY(() -> translate("Today"), days(1)),
-    LAST_MODIFIED_YESTERDAY(() -> translate("Yesterday"), days(2)),
-    LAST_MODIFIED_1_DAY_TILL_7_DAYS(() -> "2 - 7 " + translate("days"), days(8)),
-    LAST_MODIFIED_7_DAYs_TILL_30_DAYS(() -> "7 - 30 " + translate("days"), days(31)),
-    LAST_MODIFIED_30_DAYS_TILL_90_DAYS(() -> "30 - 90 " + translate("days"), days(91)),
-    LAST_MODIFIED_90_DAYS_TILL_180_DAYS(() -> "90 - 180 " + translate("days"), days(181)),
-    LAST_MODIFIED_180_DAYS_TILL_365_DAYS(() -> "180 - 365 " + translate("days"), years(1)),
-    LAST_MODIFIED_1_YEAR_TILL_2_YEAR(() -> "1 - 2 " + translate("years"), years(2)),
-    LAST_MODIFIED_2_YEAR_TILL_3_YEAR(() -> "2 - 3 " + translate("years"), years(3)),
-    LAST_MODIFIED_3_YEAR_TILL_6_YEAR(() -> "3 - 6 " + translate("years"), years(6)),
-    LAST_MODIFIED_6_YEAR_TILL_10_YEAR(() -> "6 - 10 " + translate("years"), years(10)),
-    LAST_MODIFIED_OVER_10_YEARS(() -> translate("Over") + " 10 " + translate("years"), Long.MAX_VALUE);
+    INVALID(translatedExpression("Invalid"), Long.MIN_VALUE + 1),
+    LAST_MODIFIED_FUTURE(translatedExpression("In the future"), 0),
+    LAST_MODIFIED_TODAY(translatedExpression("Today"), days(1)),
+    LAST_MODIFIED_YESTERDAY(translatedExpression("Yesterday"), days(2)),
+    LAST_MODIFIED_1_DAY_TILL_7_DAYS(translatedExpression("2 - 7 ").concat("days"), days(8)),
+    LAST_MODIFIED_7_DAYs_TILL_30_DAYS(translatedExpression("7 - 30 ").concat("days"), days(31)),
+    LAST_MODIFIED_30_DAYS_TILL_90_DAYS(translatedExpression("30 - 90 ").concat("days"), days(91)),
+    LAST_MODIFIED_90_DAYS_TILL_180_DAYS(translatedExpression("90 - 180 ").concat("days"), days(181)),
+    LAST_MODIFIED_180_DAYS_TILL_365_DAYS(translatedExpression("180 - 365 ").concat("days"), years(1)),
+    LAST_MODIFIED_1_YEAR_TILL_2_YEAR(translatedExpression("1 - 2 ").concat("years"), years(2)),
+    LAST_MODIFIED_2_YEAR_TILL_3_YEAR(translatedExpression("2 - 3 ").concat("years"), years(3)),
+    LAST_MODIFIED_3_YEAR_TILL_6_YEAR(translatedExpression("3 - 6 ").concat("years"), years(6)),
+    LAST_MODIFIED_6_YEAR_TILL_10_YEAR(translatedExpression("6 - 10").concat("years"), years(10)),
+    LAST_MODIFIED_OVER_10_YEARS(translatedExpression("Over").concat(" 10 ").concat("years"), Long.MAX_VALUE);
 
-    private final Supplier<String> mi_text;
+    private final StringExpression mi_textExpression;
     private final long mi_to;
 
-    LastModifiedDistributionBucket(Supplier<String> text, long to)
+    LastModifiedDistributionBucket(TranslatedTextExpression translatedTextExpression, long to)
     {
-      mi_text = text;
+      mi_textExpression = translatedTextExpression.get();
       mi_to = to;
     }
 
     public String getText()
     {
-      return mi_text.get();
+      return mi_textExpression.get();
+    }
+
+    public StringExpression textProperty()
+    {
+      return mi_textExpression;
     }
 
     long getTo()
@@ -136,7 +143,9 @@ class LastModifiedDistributionFormPane
 
       bucket = entry.getKey();
       bucketData = entry.getValue();
-      data = new PieChart.Data(bucket.getText(), bucketData.getSize(getCurrentDisplayMetric()));
+      data = new PieChart.Data("", bucketData.getSize(getCurrentDisplayMetric()));
+      data.nameProperty().bind(bucket.textProperty());
+
       pieChart.getData().add(data);
 
       addFilterHandler(data.getNode(), "Modification date", bucket.getText(),
@@ -165,9 +174,10 @@ class LastModifiedDistributionFormPane
     yAxis = new CategoryAxis();
     barChart = FxUtil.createBarChart(xAxis, yAxis);
     pane.add(barChart);
-    barChart.setTitle(translate("Distribution of last modified dates in") + " " + getCurrentFileNode().getName());
-    xAxis.setLabel(translate("Number of files"));
-    yAxis.setLabel(translate("Last modified date"));
+    barChart.titleProperty().bind(translatedTextProperty("Distribution of last modified dates in").concat(" ")
+        .concat(getCurrentFileNode().getName()));
+    xAxis.labelProperty().bind(translatedTextProperty("Number of files"));
+    yAxis.labelProperty().bind(translatedTextProperty("Last modified date"));
 
     series1 = new XYChart.Series<>();
     barChart.getData().add(series1);
@@ -187,8 +197,8 @@ class LastModifiedDistributionFormPane
     yAxis = new CategoryAxis();
     barChart = FxUtil.createBarChart(xAxis, yAxis);
     pane.add(barChart);
-    xAxis.setLabel(translate("Total size of files (in Gb)"));
-    yAxis.setLabel(translate("Last modified date"));
+    xAxis.labelProperty().bind(translatedTextProperty("Total size of files (in Gb)"));
+    yAxis.labelProperty().bind(translatedTextProperty("Last modified date"));
 
     series2 = new XYChart.Series<>();
     barChart.getData().add(series2);

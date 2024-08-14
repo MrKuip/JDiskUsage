@@ -1,6 +1,6 @@
 package org.kku.jdiskusage.ui;
 
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -94,7 +94,7 @@ class TypesFormPane
     xAxis.setSide(Side.TOP);
     yAxis = new CategoryAxis();
     barChart = FxUtil.createBarChart(xAxis, yAxis);
-    barChart.setTitle(translate("Number of files"));
+    barChart.titleProperty().bind(translatedTextProperty("Number of files"));
 
     series1 = new XYChart.Series<>();
     barChart.getData().add(series1);

@@ -86,7 +86,7 @@ public class MyTableView<T>
 
     buttonProperty = new ButtonCell(() -> IconUtil.createIconNode("filter"));
 
-    column = addColumn(nestedColumn, translate(name));
+    column = addColumn(nestedColumn, name);
     column.setColumnCount(2);
     column.setCellValueAlignment(Pos.CENTER);
     column.setEditable(true);

@@ -140,7 +140,7 @@ abstract public class AbstractFormPane
         if (paneType.iconName() != null)
         {
           button.setGraphic(IconUtil.createIconNode(paneType.iconName()));
-          button.setTooltip(new Tooltip(translate(paneType.description())));
+          button.setTooltip(translate(new Tooltip(paneType.description())));
         }
         else
         {

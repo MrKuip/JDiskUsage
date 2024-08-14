@@ -134,7 +134,7 @@ public class PreferencesDialog
 
     pane.add(translate(new Label("Chart shows at most")));
     pane.add(maxNumberOfElementsField, "");
-    pane.add(new Label(translate("elements")), "");
+    pane.add(translate(new Label("elements")), "");
     pane.add(resetPreference(AppPreferences.maxNumberOfChartElements));
     pane.add(translate(new Label("Show elements larger than")));
     pane.add(minPercentageElementField, "");

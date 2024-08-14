@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.ui.util;
 
 import org.kku.jdiskusage.util.Translator;
+import javafx.beans.binding.StringExpression;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.MenuItem;
@@ -62,5 +63,32 @@ public class TranslateUtil
   public static StringProperty translatedTextProperty(String text)
   {
     return Translator.translatedTextProperty(text);
+  }
+
+  public static TranslatedTextExpression translatedExpression(String text)
+  {
+    return new TranslatedTextExpression(text);
+  }
+
+  public static class TranslatedTextExpression
+  {
+    private StringExpression m_textExpression;
+
+    private TranslatedTextExpression(String text)
+    {
+      m_textExpression = translatedTextProperty(text);
+    }
+
+    public TranslatedTextExpression concat(String text)
+    {
+      m_textExpression = m_textExpression.concat(translatedTextProperty(text));
+
+      return this;
+    }
+
+    public StringExpression get()
+    {
+      return m_textExpression;
+    }
   }
 }
