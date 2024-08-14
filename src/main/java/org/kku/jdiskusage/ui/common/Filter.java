@@ -17,14 +17,14 @@ public class Filter
   private final Predicate<FileNodeIF> mi_fileNodePredicate;
   private BooleanProperty mi_filterDisabled = new SimpleBooleanProperty(true);
 
-  public Filter(String filterName, String filterValue, Predicate<FileNodeIF> fileNodePredicate)
+  public Filter(String filterType, String filterValue, Predicate<FileNodeIF> fileNodePredicate)
   {
-    this(filterName, "is", filterValue, fileNodePredicate);
+    this(filterType, "is", filterValue, fileNodePredicate);
   }
 
-  public Filter(String filterName, String filterOperator, String filterValue, Predicate<FileNodeIF> fileNodePredicate)
+  public Filter(String filterType, String filterOperator, String filterValue, Predicate<FileNodeIF> fileNodePredicate)
   {
-    mi_filterType = filterName;
+    mi_filterType = filterType;
     mi_filterOperator = filterOperator;
     mi_filterValue = filterValue;
     mi_fileNodePredicate = fileNodePredicate;

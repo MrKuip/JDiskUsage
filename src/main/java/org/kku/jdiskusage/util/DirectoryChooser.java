@@ -127,14 +127,14 @@ public class DirectoryChooser
       Button cancelButton;
       Button openButton;
 
-      cancelButton = new Button(translate("Cancel"),
-          new FxIcon("close").size(IconSize.SMALL).fillColor(IconColor.RED).getIconLabel());
+      cancelButton = translate(
+          new Button("Cancel", new FxIcon("close").size(IconSize.SMALL).fillColor(IconColor.RED).getIconLabel()));
       cancelButton.setAlignment(Pos.BASELINE_LEFT);
       cancelButton.setOnAction((ae) -> {
         m_dialog.close();
       });
 
-      openButton = new Button(translate("Open"), new FxIcon("open-in-new").size(IconSize.SMALL).getIconLabel());
+      openButton = translate(new Button("Open", new FxIcon("open-in-new").size(IconSize.SMALL).getIconLabel()));
       openButton.setAlignment(Pos.BASELINE_LEFT);
       openButton.setOnAction((ae) -> {
         List<Path> result;

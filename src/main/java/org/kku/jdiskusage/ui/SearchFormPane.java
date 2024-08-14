@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,13 +78,13 @@ public class SearchFormPane
     mi_data.mi_regexSelectedProperty = regexButton.selectedProperty();
 
     searchTextField = new TextField();
-    searchTextField.setPromptText(translate("search"));
+    searchTextField.promptTextProperty().bind(translatedTextProperty("search"));
     searchTextField.setOnAction((ae) -> getDiskUsageData().refresh());
     mi_data.mi_searchTextProperty = searchTextField.textProperty();
 
     maxCountTextField = NumericTextField.integerField();
     maxCountTextField.setPrefColumnCount(5);
-    maxCountLabel = new Label(translate("Max items"));
+    maxCountLabel = translate(new Label("Max items"));
     maxCountLabel.setLabelFor(maxCountTextField);
     maxCountTextField.valueProperty().bindBidirectional(AppPreferences.searchMaxCountPreference.property());
     mi_data.mi_maxCountProperty = maxCountTextField.valueProperty();
@@ -91,7 +92,7 @@ public class SearchFormPane
 
     maxTimeTextField = NumericTextField.integerField();
     maxTimeTextField.setPrefColumnCount(5);
-    maxTimeLabel = new Label(translate("Max time (seconds)"));
+    maxTimeLabel = translate(new Label("Max time (seconds)"));
     maxTimeLabel.setLabelFor(maxTimeTextField);
     maxTimeTextField.valueProperty().bindBidirectional(AppPreferences.searchMaxTimePreference.property());
     mi_data.mi_maxTimeProperty = maxTimeTextField.valueProperty();

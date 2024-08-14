@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.ui.common;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
 import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.util.IconUtil;
@@ -140,7 +141,7 @@ public class Notifications
 
       messageLabel = new Label();
       messageLabel.getStyleClass().add("message");
-      messageLabel.setText(translate(text));
+      messageLabel.textProperty().bind(translatedTextProperty(text));
 
       add(graphicNode, "cell 0 0, span 1 2, aligny center");
       add(titleLabel, "cell 1 0");

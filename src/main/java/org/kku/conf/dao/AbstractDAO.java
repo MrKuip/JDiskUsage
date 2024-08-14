@@ -1,6 +1,5 @@
 package org.kku.conf.dao;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import org.kku.conf.Configuration;
 import org.kku.conf.ConfigurationItem;
@@ -13,12 +12,6 @@ public abstract class AbstractDAO<C extends Configuration, CI extends Configurat
   protected AbstractDAO(Class<C> configurationClass)
   {
     m_configurationClass = configurationClass;
-  }
-
-  @SuppressWarnings("unchecked")
-  public Class reflectClassType()
-  {
-    return ((Class) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0]);
   }
 
   protected C getConfiguration()

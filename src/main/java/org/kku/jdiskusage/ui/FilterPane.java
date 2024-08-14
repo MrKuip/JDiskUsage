@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -16,6 +17,8 @@ import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.tbee.javafx.scene.layout.MigPane;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringExpression;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
@@ -93,7 +96,7 @@ class FilterPane
             filterKey -> createFilterTypePane(filter));
         if (m_filterByTypeMap.get(filter.getFilterKey()).size() > 1)
         {
-          filterTypePane.getChildren().add(getFilterTypePaneText("or"));
+          filterTypePane.getChildren().add(getFilterTypePaneText(translatedTextProperty("or")));
         }
         filterTypePane.getChildren().add(filterValueNode);
       }
@@ -102,11 +105,12 @@ class FilterPane
     updateFilterActivationPane();
   }
 
-  private Label getFilterTypePaneText(String text)
+  private Label getFilterTypePaneText(StringExpression textExpression)
   {
     Label label;
 
-    label = translate(new Label(text));
+    label = new Label();
+    label.textProperty().bind(textExpression);
     label.setId("filterTypePaneText");
 
     return label;
@@ -119,8 +123,8 @@ class FilterPane
     filterPane = new HBox();
     filterPane.setId("filterTypePane");
 
-    filterPane.getChildren().add(
-        getFilterTypePaneText(translate(filter.getFilterType()) + " " + translate(filter.getFilterOperator()) + " "));
+    filterPane.getChildren().add(getFilterTypePaneText(Bindings.format("%s %s ",
+        translatedTextProperty(filter.getFilterType()), translatedTextProperty(filter.getFilterOperator()))));
 
     m_filterPane.getChildren().add(filterPane);
 

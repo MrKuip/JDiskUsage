@@ -1,6 +1,5 @@
 package org.kku.jdiskusage.ui;
 
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedExpression;
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,13 +15,13 @@ import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.FxUtil;
-import org.kku.jdiskusage.ui.util.TranslateUtil.TranslatedTextExpression;
 import org.kku.jdiskusage.util.CommonUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.tbee.javafx.scene.layout.MigPane;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -42,27 +41,31 @@ class LastModifiedDistributionFormPane
 
   private enum LastModifiedDistributionBucket
   {
-    INVALID(translatedExpression("Invalid"), Long.MIN_VALUE + 1),
-    LAST_MODIFIED_FUTURE(translatedExpression("In the future"), 0),
-    LAST_MODIFIED_TODAY(translatedExpression("Today"), days(1)),
-    LAST_MODIFIED_YESTERDAY(translatedExpression("Yesterday"), days(2)),
-    LAST_MODIFIED_1_DAY_TILL_7_DAYS(translatedExpression("2 - 7 ").concat("days"), days(8)),
-    LAST_MODIFIED_7_DAYs_TILL_30_DAYS(translatedExpression("7 - 30 ").concat("days"), days(31)),
-    LAST_MODIFIED_30_DAYS_TILL_90_DAYS(translatedExpression("30 - 90 ").concat("days"), days(91)),
-    LAST_MODIFIED_90_DAYS_TILL_180_DAYS(translatedExpression("90 - 180 ").concat("days"), days(181)),
-    LAST_MODIFIED_180_DAYS_TILL_365_DAYS(translatedExpression("180 - 365 ").concat("days"), years(1)),
-    LAST_MODIFIED_1_YEAR_TILL_2_YEAR(translatedExpression("1 - 2 ").concat("years"), years(2)),
-    LAST_MODIFIED_2_YEAR_TILL_3_YEAR(translatedExpression("2 - 3 ").concat("years"), years(3)),
-    LAST_MODIFIED_3_YEAR_TILL_6_YEAR(translatedExpression("3 - 6 ").concat("years"), years(6)),
-    LAST_MODIFIED_6_YEAR_TILL_10_YEAR(translatedExpression("6 - 10").concat("years"), years(10)),
-    LAST_MODIFIED_OVER_10_YEARS(translatedExpression("Over").concat(" 10 ").concat("years"), Long.MAX_VALUE);
+    INVALID(translatedTextProperty("Invalid"), Long.MIN_VALUE + 1),
+    LAST_MODIFIED_FUTURE(translatedTextProperty("In the future"), 0),
+    LAST_MODIFIED_TODAY(translatedTextProperty("Today"), days(1)),
+    LAST_MODIFIED_YESTERDAY(translatedTextProperty("Yesterday"), days(2)),
+    LAST_MODIFIED_1_DAY_TILL_7_DAYS(Bindings.format("%s %s", "2 - 7 ", translatedTextProperty("days")), days(8)),
+    LAST_MODIFIED_7_DAYs_TILL_30_DAYS(Bindings.format("%s %s", "7 - 30 ", translatedTextProperty("days")), days(31)),
+    LAST_MODIFIED_30_DAYS_TILL_90_DAYS(Bindings.format("%s %s", "30 - 90 ", translatedTextProperty("days")), days(91)),
+    LAST_MODIFIED_90_DAYS_TILL_180_DAYS(Bindings.format("%s %s", "90 - 180 ", translatedTextProperty("days")),
+        days(181)),
+    LAST_MODIFIED_180_DAYS_TILL_365_DAYS(Bindings.format("%s %s", "180 - 365 ", translatedTextProperty("days")),
+        years(1)),
+    LAST_MODIFIED_1_YEAR_TILL_2_YEAR(Bindings.format("%s %s", "1 - 2 ", translatedTextProperty("years")), years(2)),
+    LAST_MODIFIED_2_YEAR_TILL_3_YEAR(Bindings.format("%s %s", "2 - 3 ", translatedTextProperty("years")), years(3)),
+    LAST_MODIFIED_3_YEAR_TILL_6_YEAR(Bindings.format("%s %s", "3 - 6 ", translatedTextProperty("years")), years(6)),
+    LAST_MODIFIED_6_YEAR_TILL_10_YEAR(Bindings.format("%s %s", "6 - 10", translatedTextProperty("years")), years(10)),
+    LAST_MODIFIED_OVER_10_YEARS(
+        Bindings.format("%s %s %s", translatedTextProperty("Over"), " 10 ", translatedTextProperty("years")),
+        Long.MAX_VALUE);
 
     private final StringExpression mi_textExpression;
     private final long mi_to;
 
-    LastModifiedDistributionBucket(TranslatedTextExpression translatedTextExpression, long to)
+    LastModifiedDistributionBucket(StringExpression textExpression, long to)
     {
-      mi_textExpression = translatedTextExpression.get();
+      mi_textExpression = textExpression;
       mi_to = to;
     }
 

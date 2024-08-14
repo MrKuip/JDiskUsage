@@ -18,6 +18,7 @@ import org.kku.jdiskusage.util.FileTree;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.PathList;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -222,11 +223,11 @@ public class ScanFileTreeDialog
         mi_previousTime = currentTimeMillis;
         mi_runLaterActive = true;
         Platform.runLater(() -> {
-          m_elapsedTimeLabel.setText(
-              String.format("%,d %s", (int) ((currentTimeMillis - mi_startTime) / 1000), translate("seconds")));
+          m_elapsedTimeLabel.textProperty().bind(Bindings.format("%,d %s",
+              (int) ((currentTimeMillis - mi_startTime) / 1000), translatedTextProperty("seconds")));
           m_currentDirectoryLabel.setText(currentPath != null ? currentPath.toString() : translate("Ready"));
-          m_currentFileCountLabel.setText(String.format("%,d %s %,d %s", numberOfDirectories, translate("directories"),
-              numberOfFiles, translate("files")));
+          m_currentFileCountLabel.textProperty().bind(Bindings.format("%,d %s %,d %s", numberOfDirectories,
+              translatedTextProperty("directories"), numberOfFiles, translatedTextProperty("files")));
 
           mi_runLaterActive = false;
           if (scanReady)

@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.ui.common;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -144,7 +145,7 @@ abstract public class AbstractFormPane
         }
         else
         {
-          button.setText(translate(paneType.description()));
+          button.textProperty().bind(translatedTextProperty(paneType.description()));
         }
         button.setUserData(paneType);
         button.setOnAction((ae) -> {
