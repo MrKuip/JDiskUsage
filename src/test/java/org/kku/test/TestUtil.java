@@ -12,6 +12,7 @@ public class TestUtil
     return invokePrivateMethod(object, methodName, Collections.emptyList(), Collections.emptyList());
   }
 
+  @SuppressWarnings("unchecked")
   static public <T> T invokePrivateMethod(Object object, String methodName, List<Class<?>> parameterTypeList,
       List<Object> parameterList)
   {
@@ -20,7 +21,15 @@ public class TestUtil
     Object[] parameters;
     Class<?>[] parameterTypes;
 
-    clazz = object.getClass();
+    if (object instanceof Class c)
+    {
+      clazz = c;
+      object = null;
+    }
+    else
+    {
+      clazz = object.getClass();
+    }
 
     parameterTypes = new Class<?>[parameterTypeList.size()];
     parameterTypes = parameterTypeList.toArray(parameterTypes);

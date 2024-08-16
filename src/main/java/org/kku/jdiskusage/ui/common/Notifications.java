@@ -1,7 +1,5 @@
 package org.kku.jdiskusage.ui.common;
 
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
 import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.util.IconUtil;
@@ -9,6 +7,7 @@ import org.tbee.javafx.scene.layout.MigPane;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.binding.StringExpression;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.scene.Node;
@@ -40,17 +39,17 @@ public class Notifications
     return m_view;
   }
 
-  public static void showMessage(String title, String text)
+  public static void showMessage(StringExpression titleExpression, StringExpression textExpression)
   {
-    m_instance._showMessage(title, text);
+    m_instance._showMessage(titleExpression, textExpression);
   }
 
-  private void _showMessage(String title, String text)
+  private void _showMessage(StringExpression titleExpression, StringExpression textExpression)
   {
     Node node;
 
-    node = new MessageItemView(new FxIcon("information").size(IconSize.LARGE).getIconLabel(), translate(title),
-        translate(text), MESSAGE_SHOW_DURATION_IN_SECONDS);
+    node = new MessageItemView(new FxIcon("information").size(IconSize.LARGE).getIconLabel(), titleExpression,
+        textExpression, MESSAGE_SHOW_DURATION_IN_SECONDS);
 
     m_instance.getView().getChildren().add(0, node);
   }
@@ -117,7 +116,8 @@ public class Notifications
   class MessageItemView
     extends MigPane
   {
-    MessageItemView(Node graphicNode, String title, String text, int durationInSeconds)
+    MessageItemView(Node graphicNode, StringExpression titleExpression, StringExpression textExpression,
+        int durationInSeconds)
     {
       super("wrap3", "[][grow]", "");
 
@@ -135,13 +135,13 @@ public class Notifications
       getStyleClass().add("notification-item");
 
       titleLabel = new Label();
-      titleLabel.setText(title);
+      titleLabel.textProperty().bind(titleExpression);
       titleLabel.getStyleClass().add("title");
       //titleLabel.setStyle("-fx-font-weight: bold");
 
       messageLabel = new Label();
       messageLabel.getStyleClass().add("message");
-      messageLabel.textProperty().bind(translatedTextProperty(text));
+      messageLabel.textProperty().bind(textExpression);
 
       add(graphicNode, "cell 0 0, span 1 2, aligny center");
       add(titleLabel, "cell 1 0");

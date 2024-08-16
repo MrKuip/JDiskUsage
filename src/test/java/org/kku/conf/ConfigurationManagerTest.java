@@ -5,32 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import org.junit.jupiter.api.Test;
-import org.kku.test.TestUtil;
 
 public class ConfigurationManagerTest
 {
-  @Test
-  void testConvertFieldName()
-  {
-    Function<String, String> convertFieldName;
-
-    convertFieldName = TestUtil.invokePrivateMethod(ConfigurationManager.getInstance(), "convertFieldName");
-
-    assertEquals("test", convertFieldName.apply("test"));
-    assertEquals("p_test", convertFieldName.apply("p_test"));
-    assertEquals("test", convertFieldName.apply("m_test"));
-    assertEquals("test", convertFieldName.apply("mi_test"));
-    assertEquals("_test", convertFieldName.apply("mi__test"));
-    assertEquals("_mi_test", convertFieldName.apply("_mi_test"));
-    assertEquals("test", convertFieldName.apply("mii_test"));
-    assertEquals("test", convertFieldName.apply("miii_test"));
-    assertEquals("test", convertFieldName.apply("miiii_test"));
-    assertEquals("test", convertFieldName.apply("miiiiiiiiiiiii_test"));
-    assertEquals("miiip_test", convertFieldName.apply("miiip_test"));
-  }
-
   @Test
   void saveAndGetConfiguration()
   {

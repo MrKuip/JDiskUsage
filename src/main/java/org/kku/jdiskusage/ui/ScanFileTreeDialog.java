@@ -19,6 +19,7 @@ import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.PathList;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringExpression;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -232,13 +233,13 @@ public class ScanFileTreeDialog
           mi_runLaterActive = false;
           if (scanReady)
           {
-            String text;
+            StringExpression textExpression;
 
-            text = String.format("%,d %s , %,d %s %s %d %s", numberOfDirectories, translate("directories"),
-                numberOfFiles, translate("files"), translate("in"), (int) ((currentTimeMillis - mi_startTime) / 1000),
-                translate("seconds"));
+            textExpression = Bindings.format("%,d %s , %,d %s %s %d %s", numberOfDirectories,
+                translatedTextProperty("directories"), numberOfFiles, translatedTextProperty("files"),
+                translatedTextProperty("in"), (int) ((currentTimeMillis - mi_startTime) / 1000), translate("seconds"));
 
-            Notifications.showMessage("Scan ready", text);
+            Notifications.showMessage(translatedTextProperty("Scan ready"), textExpression);
           }
         });
 

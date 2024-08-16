@@ -1,6 +1,6 @@
 module org.kku.jdiskusage
 {
-  requires javafx.controls;
+  requires transitive javafx.controls;
   requires transitive javafx.graphics;
   requires java.desktop;
   requires java.logging;
@@ -19,4 +19,6 @@ module org.kku.jdiskusage
 
   opens org.kku.jdiskusage.conf to com.fasterxml.jackson.databind;
   opens org.kku.conf to com.fasterxml.jackson.databind;
+  opens org.kku.jdiskusage.util.preferences to com.fasterxml.jackson.databind;
+  opens org.kku.jdiskusage.main to com.fasterxml.jackson.databind;
 }

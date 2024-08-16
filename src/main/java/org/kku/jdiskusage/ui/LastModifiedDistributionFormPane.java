@@ -266,25 +266,23 @@ class LastModifiedDistributionFormPane
           event.getClickCount() == 2);
     });
 
-    /*
     filterEqualColumn = table.addFilterColumn(filterColumn, "==");
     filterEqualColumn.setAction((event, entry) -> {
       Predicate<FileNodeIF> filterPredicate;
-    
+
       filterPredicate = (fileNode) -> findBucket(fileNode) == entry.getKey();
       getDiskUsageData().addFilter(new Filter("Modification date", entry.getKey().getText(), filterPredicate),
           event.getClickCount() == 2);
     });
-    
+
     filterGreaterThanColumn = table.addFilterColumn(filterColumn, ">=");
     filterGreaterThanColumn.setAction((event, entry) -> {
       Predicate<FileNodeIF> filterPredicate;
-    
+
       filterPredicate = (fileNode) -> findBucket(fileNode).ordinal() >= entry.getKey().ordinal();
       getDiskUsageData().addFilter(new Filter("Modification date", ">=", entry.getKey().getText(), filterPredicate),
           event.getClickCount() == 2);
     });
-    */
     table.setItems(mi_data.getList());
 
     return table;
