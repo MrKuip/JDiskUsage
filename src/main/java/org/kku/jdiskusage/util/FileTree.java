@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Stack;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -318,16 +320,19 @@ public class FileTree
   public static class FileNode
     extends AbstractFileNode
   {
-    private final String mi_fileType;
-    private final int mi_inodeNumber;
-    private final int mi_numberOfLinks;
-    private final long mi_size;
-    private final long mi_lastModifiedTime;
+    private String mi_fileType;
+    private int mi_inodeNumber;
+    private int mi_numberOfLinks;
+    private long mi_size;
+    private long mi_lastModifiedTime;
 
     private FileNode(Path path, BasicFileAttributes basicAttributes)
     {
       super(path.getFileName());
+    }
 
+    public void init(Path path, BasicFileAttributes basicAttributes)
+    {
       mi_fileType = determineFileType(getName());
 
       Map<String, Object> unixAttributes;
@@ -463,6 +468,7 @@ public class FileTree
         {
           ScanVisitor visitor = new ScanVisitor(rootNode);
           Files.walkFileTree(path, visitor);
+          visitor.waitForExecutors();
           if (!visitor.isCancelled())
           {
             rootNode = visitor.getRootDirNode();
@@ -488,14 +494,17 @@ public class FileTree
       private Stack<DirNode> mi_parentNodeStack = new Stack<>();
       private DirNode mi_rootDirNode;
       private boolean mi_cancelled;
+      private ExecutorService executor = Executors.newFixedThreadPool(1);
 
       private ScanVisitor(DirNode rootDirNode)
       {
         mi_rootDirNode = rootDirNode;
-        if (rootDirNode != null)
-        {
-          mi_parentNodeStack.push(rootDirNode);
-        }
+        mi_parentNodeStack.push(rootDirNode);
+      }
+
+      public void waitForExecutors()
+      {
+        executor.shutdown();
       }
 
       public boolean isCancelled()
@@ -524,7 +533,7 @@ public class FileTree
         {
           mi_rootDirNode = node;
         }
-        parentNode = mi_parentNodeStack.isEmpty() ? null : mi_parentNodeStack.peek();
+        parentNode = mi_parentNodeStack.peek();
         if (parentNode != null)
         {
           parentNode.addChild(node);
@@ -550,6 +559,8 @@ public class FileTree
         if (attrs.isRegularFile())
         {
           node = new FileNode(file, attrs);
+          // Speed up the scan and init the filenode in another thread
+          executor.submit(() -> node.init(file, attrs));
           mi_parentNodeStack.peek().addChild(node);
           mi_numberOfFiles++;
         }
