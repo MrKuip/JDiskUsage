@@ -11,35 +11,44 @@ public class ChartStyleSheet
     final String indexText;
     StringBuilder cssBuilder;
     String chartCss;
+    String colorChart;
 
     indexText = "${index}";
     cssBuilder = new StringBuilder("data:text/css,");
-    cssBuilder.append("""
+    colorChart = """
 
         .root {
-          -fx-chart-color-0:  #f9d900; // Default gold
-          -fx-chart-color-1:  #a9e200; // Default lime green
-          -fx-chart-color-2:  #22bad9; // Default sky blue
-          -fx-chart-color-3:  #0181e2; // Default azure
-          -fx-chart-color-4:  #2f357f; // Default indigo
-          -fx-chart-color-5:  #860061; // Default purple
-          -fx-chart-color-6:  #c62b00; // Default rust
-          -fx-chart-color-7:  #ff5700; // Default orange
-          -fx-chart-color-8:  #aea300;
-          -fx-chart-color-9:  #8b1d00;
-          -fx-chart-color-10: #f9b800;
-          -fx-chart-color-11: #188c98;
-          -fx-chart-color-12: #1e1ac6;
-          -fx-chart-color-13: #e22d00;
-          -fx-chart-color-14: #7f9e00;
-          -fx-chart-color-15: #b34900;
-          -fx-chart-color-16: #d9b822;
-          -fx-chart-color-17: #c60051;
-          -fx-chart-color-18: #865f00;
-          -fx-chart-color-19: #5e4300;
+          -fx-chart-color-0:  ${CHART_COLOR_0}; // Default gold
+          -fx-chart-color-1:  ${CHART_COLOR_1}; // Default lime green
+          -fx-chart-color-2:  ${CHART_COLOR_2}; // Default sky blue
+          -fx-chart-color-3:  ${CHART_COLOR_3}; // Default azure
+          -fx-chart-color-4:  ${CHART_COLOR_4}; // Default indigo
+          -fx-chart-color-5:  ${CHART_COLOR_5}; // Default purple
+          -fx-chart-color-6:  ${CHART_COLOR_6}; // Default rust
+          -fx-chart-color-7:  ${CHART_COLOR_7}; // Default orange
+          -fx-chart-color-8:  ${CHART_COLOR_8};
+          -fx-chart-color-9:  ${CHART_COLOR_9};
+          -fx-chart-color-10: ${CHART_COLOR_10};
+          -fx-chart-color-11: ${CHART_COLOR_11};
+          -fx-chart-color-12: ${CHART_COLOR_12};
+          -fx-chart-color-13: ${CHART_COLOR_13};
+          -fx-chart-color-14: ${CHART_COLOR_14};
+          -fx-chart-color-15: ${CHART_COLOR_15};
+          -fx-chart-color-16: ${CHART_COLOR_16};
+          -fx-chart-color-17: ${CHART_COLOR_17};
+          -fx-chart-color-18: ${CHART_COLOR_18};
+          -fx-chart-color-19: ${CHART_COLOR_19};
         }
 
-        """);
+        """;
+
+    for (int index = 0; index < Colors.values().length; index++)
+    {
+      Colors color = Colors.values()[index];
+      colorChart = colorChart.replace("${" + color.name() + "}", color.getWebColor());
+    }
+
+    cssBuilder.append(colorChart);
 
     chartCss = """
         .piechart .data${index} {

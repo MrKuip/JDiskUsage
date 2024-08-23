@@ -66,7 +66,7 @@ abstract public class AbstractFormPane
 
   public void refresh(TreeItem<FileNodeIF> selectedTreeItem)
   {
-    refresh(selectedTreeItem, m_nodeByPaneTypeMap.get(m_currentPaneType) != null);
+    refresh(selectedTreeItem, false);
   }
 
   public void refresh()
@@ -76,15 +76,21 @@ abstract public class AbstractFormPane
 
   public void refresh(TreeItem<FileNodeIF> selectedTreeItem, boolean init)
   {
+    boolean needInit;
+
     m_currentTreeItem = selectedTreeItem;
 
-    init = init || needInit(m_node);
+    needInit = false;
+    if (!init)
+    {
+      needInit = needInit(m_node);
+    }
 
     reset();
 
-    Log.log.info("refresh[showing=%b, %s-%s] filenode=%s", init, getClass().getSimpleName(),
+    Log.log.info("refresh[init=%b, needInit=%b %s-%s] filenode=%s", init, needInit, getClass().getSimpleName(),
         m_currentPaneType.description(), m_currentTreeItem == null ? "<no selection>" : m_currentTreeItem.getValue());
-    if (init)
+    if (init || needInit)
     {
       //initNode(m_diskUsageData.getTreePaneData());
       initCurrentNode();
@@ -98,13 +104,18 @@ abstract public class AbstractFormPane
       return false;
     }
 
+    if (node.getParent() == null)
+    {
+      return false;
+    }
+
     if (m_currentTreeItem == null)
     {
       // Display label with 'no data'
       return true;
     }
 
-    return Stream.iterate(node, Objects::nonNull, Node::getParent).filter(Predicate.not(Node::isVisible)).findFirst()
+    return !Stream.iterate(node, Objects::nonNull, Node::getParent).filter(Predicate.not(Node::isVisible)).findFirst()
         .isPresent();
   }
 

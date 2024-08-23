@@ -68,6 +68,7 @@ public class DiskUsageView
     private final Navigation mi_navigation = new Navigation(this);
     private final FileTreePane mi_treePaneData = new FileTreePane(this);
     private final TabPaneData mi_tabPaneData = new TabPaneData();
+    private final TreeMapChartFormPane mi_treeChartTab = new TreeMapChartFormPane(this);
     private final SizeFormPane mi_sizeTab = new SizeFormPane(this);
     private final TopRankingFormPane mi_topRankingTab = new TopRankingFormPane(this);
     private final LinkCountFormPane mi_linkCountTab = new LinkCountFormPane(this);
@@ -324,6 +325,7 @@ public class DiskUsageView
       DISTRIBUTION_SIZE("Size distribution", "chart-bell-curve", (md) -> md.mi_sizeDistributionTab),
       DISTRIBUTION_MODIFIED("Last modified", "calendar-blank", (md) -> md.mi_modifiedDistributionTab),
       DISTRIBUTION_TYPES("Types", "chart-pie", (md) -> md.mi_typesTab),
+      TREEMAP("Treemap", "chart-tree", (md) -> md.mi_treeChartTab),
       LINK_COUNT("Link count", "file-link", (md) -> md.mi_linkCountTab),
       SEARCH_TYPES("Search", "magnify", (md) -> md.mi_searchTab),
       HELP("Help", "help", (md) -> md.mi_helpTab);
