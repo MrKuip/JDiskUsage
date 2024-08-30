@@ -368,24 +368,29 @@ public class DiskUsageView
         return tab;
       }
 
-      Node fillContent(DiskUsageData mainData)
+      AbstractFormPane fillContent(DiskUsageData mainData)
       {
         try (PerformancePoint pp = Performance.measure("Filling content for %s", getName()))
         {
           AbstractFormPane contentPane;
 
-          contentPane = m_tabPaneSupplier.apply(mainData);
+          contentPane = getFormPane(mainData);
           contentPane.refresh();
 
-          return contentPane.getNode();
+          return contentPane;
         }
+      }
+
+      AbstractFormPane getFormPane(DiskUsageData mainData)
+      {
+        return m_tabPaneSupplier.apply(mainData);
       }
     }
 
     private final BorderPane mi_borderPane;
     final DraggableTabPane mi_tabPane;
     private Map<TabData, Tab> mi_tabByTabId = new HashMap<>();
-    Map<TabData, Node> mi_contentByTabId = new HashMap<>();
+    Map<TabData, AbstractFormPane> mi_contentByTabId = new HashMap<>();
 
     private TabPaneData()
     {
@@ -406,7 +411,7 @@ public class DiskUsageView
       m_data.mi_selectedTabProperty.bind(mi_tabPane.getSelectionModel().selectedItemProperty());
 
       m_data.selectedTabProperty().addListener((observable, oldTab, newTab) -> {
-        Log.log.debug("fill tab content: %s", newTab.getText());
+        Log.log.fine("fill tab content: %s", newTab.getText());
 
         // Fill the new selected tab with data.
         fillContent(newTab);
@@ -420,7 +425,7 @@ public class DiskUsageView
       mi_tabPane.getTabs().stream()
           .filter(tab -> Objects.equals(((TabData) tab.getUserData()).name(), selectedTabDataName)).findFirst()
           .ifPresent(tab -> {
-            Log.log.debug("select tab: %s", tab.getText());
+            Log.log.fine("select tab: %s", tab.getText());
             mi_tabPane.getSelectionModel().select(tab);
             fillContent(tab);
           });
@@ -446,9 +451,20 @@ public class DiskUsageView
       if (tabEntry.isPresent())
       {
         TabData tabData;
+        AbstractFormPane formPane;
 
         tabData = tabEntry.get().getKey();
-        tab.setContent(mi_contentByTabId.computeIfAbsent(tabData, td -> tabEntry.get().getKey().fillContent(m_data)));
+        formPane = mi_contentByTabId.get(tabData);
+        if (formPane == null)
+        {
+          formPane = tabEntry.get().getKey().fillContent(m_data);
+          tab.setContent(formPane.getNode());
+          mi_contentByTabId.put(tabData, tabEntry.get().getKey().fillContent(m_data));
+        }
+        else
+        {
+          formPane.refresh();
+        }
       }
       else
       {

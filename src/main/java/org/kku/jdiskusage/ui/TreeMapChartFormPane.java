@@ -12,13 +12,15 @@ import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import javafx.scene.Node;
+import javafx.scene.control.TreeItem;
 import javafx.scene.layout.BorderPane;
 
-class TreeMapChartFormPane
+public class TreeMapChartFormPane
   extends AbstractFormPane
 {
   private final TreeMapChartPaneData m_data = new TreeMapChartPaneData();
-  private BorderPane pane = new BorderPane();
+  private TreeMapChart<FileNodeTreeMapNode> m_treeMap;
+  private TreeItem<FileNodeIF> m_root;
 
   TreeMapChartFormPane(DiskUsageData diskUsageData)
   {
@@ -29,14 +31,37 @@ class TreeMapChartFormPane
     init();
   }
 
+  @Override
+  public void refresh(TreeItem<FileNodeIF> selectedTreeItem)
+  {
+    TreeItem<FileNodeIF> root;
+
+    root = getRoot(selectedTreeItem);
+    if (root != m_root)
+    {
+      super.refresh(selectedTreeItem);
+      m_root = root;
+    }
+    else
+    {
+      m_data.select(selectedTreeItem.getValue());
+    }
+  }
+
+  private TreeItem<FileNodeIF> getRoot(TreeItem<FileNodeIF> selectedTreeItem)
+  {
+    return selectedTreeItem.getParent() == null ? selectedTreeItem : getRoot(selectedTreeItem.getParent());
+  }
+
   Node getTreeChartNode()
   {
-    TreeMapChart treeMap;
+    BorderPane pane;
 
-    treeMap = new TreeMapChart();
-    treeMap.setModel(m_data.getModel());
+    m_treeMap = new TreeMapChart<>();
+    m_treeMap.setModel(m_data.getModel());
 
-    pane.setCenter(treeMap);
+    pane = new BorderPane();
+    pane.setCenter(m_treeMap);
 
     return pane;
   }
@@ -44,19 +69,30 @@ class TreeMapChartFormPane
   class TreeMapChartPaneData
     extends PaneData
   {
-    private TreeMapModel mi_model;
+    private TreeMapModel<FileNodeTreeMapNode> mi_model;
 
-    public TreeMapModel getModel()
+    public TreeMapModel<FileNodeTreeMapNode> getModel()
     {
       if (mi_model == null)
       {
         try (PerformancePoint pp = Performance.measure("Collecting data for tree chart tab"))
         {
-          mi_model = new TreeMapModel(new FileNodeTreeMapNode(getCurrentFileNode()));
+          mi_model = new TreeMapModel<>(new FileNodeTreeMapNode(getCurrentFileNode()));
         }
       }
 
       return mi_model;
+    }
+
+    public void select(FileNodeIF value)
+    {
+      if (mi_model != null)
+      {
+        mi_model.getRootNode().streamNode().map(tmn -> (FileNodeTreeMapNode) tmn)
+            .filter(fntmn -> fntmn.getFileNode() == value).findFirst().ifPresent(fntmn -> {
+              m_treeMap.select(fntmn);
+            });
+      }
     }
 
     @Override
@@ -66,7 +102,7 @@ class TreeMapChartFormPane
     }
   }
 
-  class FileNodeTreeMapNode
+  public static class FileNodeTreeMapNode
     extends TreeMapNode
   {
     private FileNodeIF mi_fileNode;
@@ -74,6 +110,11 @@ class TreeMapChartFormPane
     FileNodeTreeMapNode(FileNodeIF fileNode)
     {
       mi_fileNode = fileNode;
+    }
+
+    public FileNodeIF getFileNode()
+    {
+      return mi_fileNode;
     }
 
     @Override
@@ -89,7 +130,7 @@ class TreeMapChartFormPane
     }
 
     @Override
-    public double getSize()
+    public long getSize()
     {
       return mi_fileNode.getSize();
     }

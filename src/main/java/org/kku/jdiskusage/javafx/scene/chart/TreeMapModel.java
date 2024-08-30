@@ -1,15 +1,15 @@
 package org.kku.jdiskusage.javafx.scene.chart;
 
-public class TreeMapModel
+public class TreeMapModel<T extends TreeMapNode>
 {
-  private TreeMapNode m_root;
+  private final T m_root;
 
-  public TreeMapModel(TreeMapNode root)
+  public TreeMapModel(T root)
   {
     m_root = root;
   }
 
-  public TreeMapNode getRootNode()
+  public T getRootNode()
   {
     return m_root;
   }

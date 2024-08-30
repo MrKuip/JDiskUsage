@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 public class Log
 {
   static public final MyLogger log = createLogger("log", "log", 100000, 10, Level.FINE);
+  static public final MyLogger treemap = createLogger("treemap", "treemap", 100000, 10, Level.INFO);
   static public final MyLogger javafx = createLogger("javafx", Level.INFO);
 
   private Log()
@@ -175,17 +176,37 @@ public class Log
 
     public void info(String format, Object... args)
     {
-      info(String.format(format, args));
+      log(Level.INFO, null, format, args);
     }
 
-    public void debug(String msg)
+    public void fine(String msg)
     {
       log(Level.FINE, null, msg);
     }
 
-    public void debug(String format, Object... args)
+    public void fine(String format, Object... args)
     {
-      debug(String.format(format, args));
+      log(Level.FINE, null, format, args);
+    }
+
+    public void finer(String msg)
+    {
+      log(Level.FINER, null, msg);
+    }
+
+    public void finer(String format, Object... args)
+    {
+      log(Level.FINER, null, format, args);
+    }
+
+    public void finest(String msg)
+    {
+      log(Level.FINEST, null, msg);
+    }
+
+    public void finest(String format, Object... args)
+    {
+      log(Level.FINEST, null, format, args);
     }
 
     public void error(String format, Object... args)
@@ -195,7 +216,7 @@ public class Log
 
     public void error(Throwable throwable, String format, Object... args)
     {
-      log(Level.SEVERE, throwable, String.format(format, args));
+      log(Level.SEVERE, throwable, format, args);
     }
 
     private void log(Level level, Throwable throwable, String text)
@@ -203,6 +224,14 @@ public class Log
       if (mi_logger.isLoggable(level))
       {
         mi_logger.log(level, text, throwable);
+      }
+    }
+
+    private void log(Level level, Throwable throwable, String format, Object... args)
+    {
+      if (mi_logger.isLoggable(level))
+      {
+        mi_logger.log(level, String.format(format, args), throwable);
       }
     }
   }

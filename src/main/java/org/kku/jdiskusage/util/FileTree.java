@@ -1,11 +1,8 @@
 package org.kku.jdiskusage.util;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,9 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Stack;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,6 +23,7 @@ public class FileTree
   {
     NUMBER_OF_LINKS("nlink"),
     INODE("ino"),
+    DEF("dev"),
     FILE_SIZE("size");
 
     private final String m_id;
@@ -49,9 +44,9 @@ public class FileTree
     }
   }
 
-  @SuppressFBWarnings(value = "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
-  private static String UNIX_ATTRIBUTE_IDS;
+  public final static String UNIX_ATTRIBUTE_IDS;
 
+  static
   {
     UNIX_ATTRIBUTE_IDS = "unix:"
         + Stream.of(UnixAttribute.values()).map(UnixAttribute::getId).collect(Collectors.joining(","));
@@ -77,7 +72,7 @@ public class FileTree
 
   public DirNode scan()
   {
-    return new ScanPath().scan(m_directoryList);
+    return new ScanPath(m_scanListener).scan(m_directoryList);
   }
 
   public interface FilterIF
@@ -210,12 +205,12 @@ public class FileTree
     private long mi_fileSize = -1;
     private long mi_numberOfFiles = -1;
 
-    private DirNode(boolean root, Path path)
+    DirNode(boolean root, Path path)
     {
       this(root, path, -1);
     }
 
-    private DirNode(boolean root, Path path, int size)
+    DirNode(boolean root, Path path, int size)
     {
       super(root ? path : path.getFileName());
       if (size > 0)
@@ -326,7 +321,7 @@ public class FileTree
     private long mi_size;
     private long mi_lastModifiedTime;
 
-    private FileNode(Path path, BasicFileAttributes basicAttributes)
+    FileNode(Path path, BasicFileAttributes basicAttributes)
     {
       super(path.getFileName());
     }
@@ -438,149 +433,6 @@ public class FileTree
     }
   }
 
-  private class ScanPath
-  {
-    private int mi_numberOfFiles;
-    private int mi_numberOfDirectories;
-
-    public DirNode scan(List<Path> directoryList)
-    {
-      DirNode rootNode;
-
-      if (directoryList.size() > 1)
-      {
-        Path rootDir;
-
-        rootDir = directoryList.get(0).getParent();
-        rootNode = new DirNode(true, rootDir, directoryList.size());
-      }
-      else
-      {
-        rootNode = null;
-      }
-
-      for (int i = 0; i < directoryList.size(); i++)
-      {
-        Path path;
-
-        path = directoryList.get(i);
-        try
-        {
-          ScanVisitor visitor = new ScanVisitor(rootNode);
-          Files.walkFileTree(path, visitor);
-          visitor.waitForExecutors();
-          if (!visitor.isCancelled())
-          {
-            rootNode = visitor.getRootDirNode();
-          }
-        }
-        catch (IOException e)
-        {
-          e.printStackTrace();
-        }
-      }
-
-      if (m_scanListener != null)
-      {
-        m_scanListener.progress(null, mi_numberOfDirectories, mi_numberOfFiles, true);
-      }
-
-      return rootNode;
-    }
-
-    private class ScanVisitor
-      extends SimpleFileVisitor<Path>
-    {
-      private Stack<DirNode> mi_parentNodeStack = new Stack<>();
-      private DirNode mi_rootDirNode;
-      private boolean mi_cancelled;
-      private ExecutorService executor = Executors.newFixedThreadPool(1);
-
-      private ScanVisitor(DirNode rootDirNode)
-      {
-        mi_rootDirNode = rootDirNode;
-        mi_parentNodeStack.push(rootDirNode);
-      }
-
-      public void waitForExecutors()
-      {
-        executor.shutdown();
-      }
-
-      public boolean isCancelled()
-      {
-        return mi_cancelled;
-      }
-
-      public DirNode getRootDirNode()
-      {
-        return mi_rootDirNode;
-      }
-
-      @Override
-      public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
-      {
-        DirNode node;
-        DirNode parentNode;
-
-        if (mi_cancelled)
-        {
-          return FileVisitResult.SKIP_SUBTREE;
-        }
-
-        node = new DirNode(mi_rootDirNode == null, dir);
-        if (mi_rootDirNode == null)
-        {
-          mi_rootDirNode = node;
-        }
-        parentNode = mi_parentNodeStack.peek();
-        if (parentNode != null)
-        {
-          parentNode.addChild(node);
-        }
-        mi_parentNodeStack.push(node);
-        mi_numberOfDirectories++;
-
-        return FileVisitResult.CONTINUE;
-      }
-
-      @Override
-      public FileVisitResult postVisitDirectory(Path dir, IOException exc)
-      {
-        mi_parentNodeStack.pop();
-        return FileVisitResult.CONTINUE;
-      }
-
-      @Override
-      public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-      {
-        FileNode node;
-
-        if (attrs.isRegularFile())
-        {
-          node = new FileNode(file, attrs);
-          // Speed up the scan and init the filenode in another thread
-          executor.submit(() -> node.init(file, attrs));
-          mi_parentNodeStack.peek().addChild(node);
-          mi_numberOfFiles++;
-        }
-
-        if (m_scanListener != null)
-        {
-          mi_cancelled = m_scanListener.progress(file, mi_numberOfDirectories, mi_numberOfFiles, false);
-        }
-
-        return FileVisitResult.CONTINUE;
-      }
-
-      @Override
-      public FileVisitResult visitFileFailed(Path file, IOException io)
-      {
-        return FileVisitResult.SKIP_SUBTREE;
-      }
-    }
-  }
-
   private static class FilterNodes
   {
     private final FilterIF mi_filter;
@@ -657,7 +509,7 @@ public class FileTree
   {
     try
     {
-      String pathName = "/media/kees/CubeSSD/export/hoorn/snapshot_001_2024_03_13__11_53_56/";
+      String pathName = "/";
       //pathName = "/home/kees";
       Path path = Path.of(args.length >= 1 ? args[0] : pathName);
       StopWatch sw = new StopWatch();

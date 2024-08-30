@@ -3,21 +3,32 @@ package org.kku.jdiskusage.javafx.scene.chart;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
+import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.TailCall;
 import org.kku.jdiskusage.util.TailCalls;
 
+/**
+ * Algorithm to 'squarify' rectangles in a treemap in order to better compare and select.
+ * 
+ * @see https://www.win.tue.nl/~vanwijk/stm.pdf
+ * 
+ */
+
 public class TreeMapSquarifyAlgoritm
 {
-  private final double m_x;
-  private final double m_y;
-  private final double m_width;
-  private final double m_height;
+  private final int m_x;
+  private final int m_y;
+  private final int m_width;
+  private final int m_height;
   private final List<TreeMapNode> m_treeNodeList;
   private final double m_sumSize;
   private final double m_areaFactor;
+  private final Consumer<List<TreeMapNode>> m_handler;
+  private double m_rowListSum;
 
-  public TreeMapSquarifyAlgoritm(String parentName, double x, double y, double width, double height,
-      List<TreeMapNode> treeNodeList)
+  public TreeMapSquarifyAlgoritm(int x, int y, int width, int height, List<TreeMapNode> treeNodeList,
+      Consumer<List<TreeMapNode>> handler)
   {
     m_x = x;
     m_y = y;
@@ -26,7 +37,8 @@ public class TreeMapSquarifyAlgoritm
     m_treeNodeList = new ArrayList<>(treeNodeList);
     m_treeNodeList.sort(Comparator.comparingDouble((TreeMapNode::getSize)).reversed());
     m_sumSize = m_treeNodeList.stream().mapToDouble(TreeMapNode::getSize).sum();
-    m_areaFactor = Math.sqrt((m_width * m_height) / m_sumSize);
+    m_areaFactor = (m_width * m_height) / m_sumSize;
+    m_handler = handler;
   }
 
   public void evaluate()
@@ -34,22 +46,24 @@ public class TreeMapSquarifyAlgoritm
     TailCall<Void> tc;
 
     // Use tail recursion because the stack will grow enormously when using normal recursion
-    tc = evaluate(m_x / m_areaFactor, m_y / m_areaFactor, m_width / m_areaFactor, m_height / m_areaFactor,
-        m_treeNodeList);
+    tc = evaluate(m_x, m_y, m_width, m_height, m_treeNodeList);
     tc.invoke();
+
+    if (m_handler != null)
+    {
+      m_handler.accept(m_treeNodeList);
+    }
   }
 
-  private TailCall<Void> evaluate(double x, double y, double width, double height, List<TreeMapNode> treeNodeList)
+  private TailCall<Void> evaluate(int x, int y, int width, int height, List<TreeMapNode> treeNodeList)
   {
     int index;
     List<TreeMapNode> rowList;
 
-    if (width < 0.1 && height < 0.1)
-    {
-      return TailCalls.done(null);
-    }
+    Log.treemap.finest("evaluate: x=%d, y=%d, width=%d, height=%d", x, y, width, height);
 
     rowList = new ArrayList<>();
+    m_rowListSum = 0.0;
     index = 0;
     while (index < treeNodeList.size())
     {
@@ -58,18 +72,26 @@ public class TreeMapSquarifyAlgoritm
       treeNode = treeNodeList.get(index);
       if (rowList.isEmpty())
       {
-        rowList.add(treeNode);
+        if (treeNode.getSize() > 0.0001)
+        {
+          rowList.add(treeNode);
+          m_rowListSum += treeNode.getSize();
+        }
         index++;
       }
       else
       {
-        if (isRatioWorseWhenTreeNodeisAddedToRow(width, height, rowList, treeNode))
+        if (isRatioGettingWorse(width, height, rowList, treeNode))
         {
-          return fixRowAndEvaluateNewRow(treeNodeList, index, rowList, x, y, width, height);
+          return fixateRowList(treeNodeList, index, rowList, x, y, width, height);
         }
         else
         {
-          rowList.add(treeNode);
+          if (treeNode.getSize() > 0.0001)
+          {
+            rowList.add(treeNode);
+            m_rowListSum += treeNode.getSize();
+          }
           index++;
         }
       }
@@ -77,76 +99,166 @@ public class TreeMapSquarifyAlgoritm
 
     if (!rowList.isEmpty())
     {
-      fixRowAndEvaluateNewRow(null, -1, rowList, x, y, width, height);
+      fixateRowList(null, -1, rowList, x, y, width, height);
     }
 
     return TailCalls.done(null);
   }
 
-  private TailCall<Void> fixRowAndEvaluateNewRow(List<TreeMapNode> treeNodeList, int currentTreeNodeListIndex,
-      List<TreeMapNode> rowList, double x, double y, double width, double height)
+  private TailCall<Void> fixateRowList(List<TreeMapNode> treeNodeList, int currentTreeNodeListIndex,
+      List<TreeMapNode> rowList, int x, int y, int remainingWidth, int remainingHeight)
   {
-    double area;
-    double remainingWidth;
-    double remainingHeight;
-
-    area = rowList.stream().mapToDouble(TreeMapNode::getSize).sum();
-    if (width > height)
+    if (remainingWidth >= remainingHeight)
     {
-      double rowWidth;
-      double nodeY;
+      int nodeX, nodeY, nodeWidth, nodeHeight;
+      int rowListSize;
+      int allocatedRowHeight;
 
-      rowWidth = area / height;
-      remainingWidth = width - rowWidth;
-      remainingHeight = height;
-      nodeY = y;
+      nodeX = 0;
+      nodeWidth = (int) Math.ceil((m_rowListSum * m_areaFactor) / remainingHeight);
+      if (nodeWidth > remainingWidth)
+      {
+        nodeWidth = remainingWidth;
+      }
+      allocatedRowHeight = 0;
 
-      for (int i = 0; i < rowList.size(); i++)
+      rowListSize = rowList.size();
+      for (int i = 0; i < rowListSize; i++)
       {
         TreeMapNode tn;
-        double nodeHeight;
 
         tn = rowList.get(i);
-        nodeHeight = tn.getSize() / rowWidth;
+        if (i == 0)
+        {
+          // First node always starts at 0.
+          nodeY = 0;
+        }
+        else
+        {
+          // Next starts always just under the previous one
+          nodeY = allocatedRowHeight;
+        }
 
-        tn.setBounds(x * m_areaFactor, nodeY * m_areaFactor, rowWidth * m_areaFactor, nodeHeight * m_areaFactor);
-        nodeY += nodeHeight;
+        if (i == rowListSize - 1)
+        {
+          // Last node takes remaining space
+          nodeHeight = remainingHeight - allocatedRowHeight;
+        }
+        else
+        {
+          int remainingSpace;
+
+          nodeHeight = (int) Math.ceil((tn.getSize() * m_areaFactor) / nodeWidth);
+          if (nodeHeight > remainingHeight)
+          {
+            nodeHeight = remainingHeight;
+          }
+          remainingSpace = remainingHeight - allocatedRowHeight - nodeHeight;
+          if (remainingSpace <= 1)
+          {
+            // In any circumstance leave at least one pixel for the last node
+            nodeHeight = (remainingHeight - allocatedRowHeight) - 1;
+          }
+          if (nodeWidth == 0 && remainingSpace > 2)
+          {
+            // Let this node be 1 pixel if there is remaining space (and always 1 pixel for the last node!)
+            nodeHeight = 1;
+          }
+        }
+
+        allocatedRowHeight += nodeHeight;
+
+        if (nodeWidth == 0 && nodeHeight == 0)
+        {
+          //System.out.println("null! " + (counter++));
+        }
+
+        tn.setBounds(x + nodeX, y + nodeY, nodeWidth, nodeHeight);
+        Log.treemap.finest("squarified: tn=%s, x=%d, y=%d, width=%d, height=%d", tn.getName(), tn.getX(), tn.getY(),
+            tn.getWidth(), tn.getHeight());
       }
 
       if (treeNodeList != null)
       {
-        final double x1;
-
-        x1 = x + rowWidth;
-        return TailCalls.call(() -> evaluate(x1, y, remainingWidth, remainingHeight,
+        int nWidth = nodeWidth;
+        return TailCalls.call(() -> evaluate(x + nWidth, y, remainingWidth - nWidth, remainingHeight,
             treeNodeList.subList(currentTreeNodeListIndex, treeNodeList.size())));
       }
     }
     else
     {
-      double rowHeight;
-      double nodeX;
+      int nodeX, nodeY, nodeWidth, nodeHeight;
+      int rowListSize;
+      int allocatedRowWidth;
 
-      rowHeight = area / width;
-      remainingWidth = width;
-      remainingHeight = height - rowHeight;
-      nodeX = x;
+      nodeY = 0;
+      nodeHeight = (int) (Math.ceil((m_rowListSum * m_areaFactor) / remainingWidth));
+      if (nodeHeight > remainingHeight)
+      {
+        nodeHeight = remainingHeight;
+      }
+      allocatedRowWidth = 0;
 
-      for (int i = 0; i < rowList.size(); i++)
+      rowListSize = rowList.size();
+      for (int i = 0; i < rowListSize; i++)
       {
         TreeMapNode tn;
-        double nodeWidth;
 
         tn = rowList.get(i);
-        nodeWidth = tn.getSize() / rowHeight;
+        if (i == 0)
+        {
+          // First node always starts at 0.
+          nodeX = 0;
+        }
+        else
+        {
+          // Next starts always just after the previous one
+          nodeX = allocatedRowWidth;
+        }
 
-        tn.setBounds(nodeX * m_areaFactor, y * m_areaFactor, nodeWidth * m_areaFactor, rowHeight * m_areaFactor);
-        nodeX += nodeWidth;
+        if (i == rowListSize - 1)
+        {
+          // Last node takes remaining space
+          nodeWidth = remainingWidth - allocatedRowWidth;
+        }
+        else
+        {
+          int remainingSpace;
+
+          nodeWidth = (int) Math.ceil((tn.getSize() * m_areaFactor) / nodeHeight);
+          if (nodeWidth > remainingWidth)
+          {
+            nodeWidth = remainingWidth;
+          }
+          remainingSpace = remainingWidth - allocatedRowWidth - nodeWidth;
+          if (remainingSpace < 1)
+          {
+            // In any circumstance leave at least one pixel for the last node
+            nodeWidth = (remainingWidth - allocatedRowWidth) - 1;
+          }
+          if (nodeHeight == 0 && remainingSpace > 2)
+          {
+            // Let this node be 1 pixel if there is remaining space (and always 1 pixel for the last node!)
+            nodeWidth = 1;
+          }
+        }
+
+        allocatedRowWidth += nodeWidth;
+
+        if (nodeWidth == 0 && nodeHeight == 0)
+        {
+          //System.out.println("null! " + (counter++));
+        }
+
+        tn.setBounds(x + nodeX, y + nodeY, nodeWidth, nodeHeight);
+        Log.treemap.finest("squarified: tn=%s, x=%d, y=%d, height=%d, width=%d", tn.getName(), tn.getX(), tn.getY(),
+            tn.getHeight(), tn.getWidth());
       }
 
       if (treeNodeList != null)
       {
-        return TailCalls.call(() -> evaluate(x, y + rowHeight, remainingWidth, remainingHeight,
+        int nHeight = nodeHeight;
+        return TailCalls.call(() -> evaluate(x, y + nHeight, remainingWidth, remainingHeight - nHeight,
             treeNodeList.subList(currentTreeNodeListIndex, treeNodeList.size())));
       }
     }
@@ -154,28 +266,46 @@ public class TreeMapSquarifyAlgoritm
     return TailCalls.done(null);
   }
 
-  private boolean isRatioWorseWhenTreeNodeisAddedToRow(double width, double height, List<TreeMapNode> rowList,
-      TreeMapNode treeNode)
+  private boolean isRatioGettingWorse(int width, int height, List<TreeMapNode> rowList, TreeMapNode treeNode)
   {
     double ratioBefore;
     double ratioAfter;
-    double length;
-    double area;
-    double rowLength;
+    TreeMapNode tmn;
 
-    length = (width > height) ? height : width;
+    tmn = rowList.get(rowList.size() - 1);
 
-    area = rowList.stream().mapToDouble(TreeMapNodeIF::getSize).sum();
-    rowLength = area / length;
-    ratioBefore = (rowList.get(0).getSize() / rowLength) / rowLength;
+    if (width >= height)
+    {
+      double rowHeight;
+      double rowWidth;
+
+      rowWidth = (m_rowListSum * m_areaFactor) / height;
+      rowHeight = (tmn.getSize() * m_areaFactor) / rowWidth;
+      ratioBefore = Math.max(rowHeight / rowWidth, rowWidth / rowHeight);
+
+      rowWidth = ((m_rowListSum + treeNode.getSize()) * m_areaFactor) / height;
+      rowHeight = (treeNode.getSize() * m_areaFactor) / rowWidth;
+      ratioAfter = Math.max(rowHeight / rowWidth, rowWidth / rowHeight);
+    }
+    else
+    {
+      double rowHeight;
+      double rowWidth;
+
+      rowHeight = (m_rowListSum * m_areaFactor) / width;
+      rowWidth = (tmn.getSize() * m_areaFactor) / rowHeight;
+      ratioBefore = Math.max(rowHeight / rowWidth, rowWidth / rowHeight);
+
+      rowHeight = ((m_rowListSum + treeNode.getSize()) * m_areaFactor) / width;
+      rowWidth = (treeNode.getSize() * m_areaFactor) / rowHeight;
+      ratioAfter = Math.max(rowHeight / rowWidth, rowWidth / rowHeight);
+    }
+
+    Log.treemap.finest("ratio %3.2f -> %3.2f when adding node %s with size %d", ratioBefore, ratioAfter, tmn.getName(),
+        tmn.getSize());
+
     ratioBefore = Math.abs(ratioBefore - 1);
-
-    area += treeNode.getSize();
-    rowLength = area / length;
-    ratioAfter = (rowList.get(0).getSize() / rowLength) / rowLength;
     ratioAfter = Math.abs(ratioAfter - 1);
-
-    //System.out.printf("ratio %3.2f -> %3.2f%n", ratioBefore, ratioAfter);
 
     return ratioBefore < ratioAfter;
   }

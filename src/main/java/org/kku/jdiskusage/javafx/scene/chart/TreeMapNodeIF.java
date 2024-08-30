@@ -8,17 +8,17 @@ public interface TreeMapNodeIF
 
   public int getDepth();
 
-  public double getSize();
+  public long getSize();
 
-  public double getX();
+  public int getX();
 
-  public double getY();
+  public int getY();
 
-  public double getWidth();
+  public int getWidth();
 
-  public double getHeight();
+  public int getHeight();
 
-  public void setBounds(double x, double y, double width, double height);
+  public void setBounds(int x, int y, int width, int height);
 
   public String getTooltipText();
 }

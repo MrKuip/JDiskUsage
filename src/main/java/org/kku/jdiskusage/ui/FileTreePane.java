@@ -78,7 +78,7 @@ public class FileTreePane
         Platform.runLater(() -> {
           if (!newTreeItem.isExpanded())
           {
-            Log.log.debug("auto expand:" + newTreeItem);
+            Log.log.fine("auto expand:" + newTreeItem);
             newTreeItem.setExpanded(true);
           }
         });
@@ -96,7 +96,7 @@ public class FileTreePane
           Platform.runLater(() -> {
             if (oldTreeItem.isExpanded())
             {
-              Log.log.debug("auto collapse:" + oldTreeItem);
+              Log.log.fine("auto collapse:" + oldTreeItem);
               oldTreeItem.setExpanded(false);
             }
           });

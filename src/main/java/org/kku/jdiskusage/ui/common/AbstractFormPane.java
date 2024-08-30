@@ -46,17 +46,7 @@ abstract public class AbstractFormPane
 
     m_diskUsageData.selectedTreeItemProperty().addListener((o, oldValue, newValue) -> refresh(newValue));
     AppPreferences.displayMetricPreference.addListener((o, oldValue, newValue) -> refresh());
-    Log.log.debug("Create content pane %s", getClass().getSimpleName());
-  }
-
-  public void refreshView()
-  {
-
-  }
-
-  public void refreshModel()
-  {
-
+    Log.log.fine("Create content pane %s", getClass().getSimpleName());
   }
 
   public Node getNode()

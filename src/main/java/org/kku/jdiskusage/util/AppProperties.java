@@ -210,7 +210,7 @@ public abstract class AppProperties
 
     public void putProperty(String propertyName, String stringValue)
     {
-      Log.log.debug("Mark properties[%s] dirty because property %s changed from %s to %s", getFilePath(), propertyName,
+      Log.log.fine("Mark properties[%s] dirty because property %s changed from %s to %s", getFilePath(), propertyName,
           getProperties().get(propertyName), stringValue);
       getProperties().put(propertyName, stringValue);
       markDirty();
@@ -218,7 +218,7 @@ public abstract class AppProperties
 
     public void removeProperty(String propertyName)
     {
-      Log.log.debug("Mark properties[%s] dirty because property %s is removed", getFilePath(), propertyName);
+      Log.log.fine("Mark properties[%s] dirty because property %s is removed", getFilePath(), propertyName);
       getProperties().remove(propertyName);
       markDirty();
     }
@@ -240,7 +240,7 @@ public abstract class AppProperties
       {
         mi_properties = new Properties();
 
-        Log.log.debug("Load properties[%s]", getFilePath());
+        Log.log.fine("Load properties[%s]", getFilePath());
         try (InputStream is = Files.newInputStream(getFilePath()))
         {
           mi_properties.load(is);
@@ -280,7 +280,7 @@ public abstract class AppProperties
 
     private synchronized void save()
     {
-      Log.log.debug("Save properties[%s]", getFilePath());
+      Log.log.fine("Save properties[%s]", getFilePath());
       try (OutputStream os = Files.newOutputStream(getFilePath()))
       {
         getProperties().store(os, "store to properties file");
