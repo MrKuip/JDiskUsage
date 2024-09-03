@@ -1,5 +1,9 @@
 image: eclipse-temurin:17
 
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    
 stages:
   - build
 
