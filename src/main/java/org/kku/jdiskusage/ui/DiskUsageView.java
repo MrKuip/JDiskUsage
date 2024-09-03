@@ -169,6 +169,7 @@ public class DiskUsageView
     Menu menu;
 
     menuBar = new MenuBar();
+    menuBar.setUseSystemMenuBar(true);
 
     menu = translate(new Menu("File"));
     menu.getItems().addAll(createScanFileTreeMenuItem(), createRecentFilesMenu(), createPreferencesMenuItem(),
