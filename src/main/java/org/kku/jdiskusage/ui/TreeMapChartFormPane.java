@@ -37,11 +37,13 @@ public class TreeMapChartFormPane
   {
     if (!isDecendantOf(m_root, selectedTreeItem))
     {
+      // If the selected tree item is not part of the root tree -> draw the tree map chart from scratch
       super.refresh(selectedTreeItem);
       m_root = selectedTreeItem;
     }
     else
     {
+      // If the selected tree item is part of the root tree -> select the part of the chart with a red border
       m_data.select(selectedTreeItem.getValue());
     }
   }
