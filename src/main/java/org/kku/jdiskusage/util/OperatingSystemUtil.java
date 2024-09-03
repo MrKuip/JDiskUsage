@@ -20,16 +20,34 @@ public class OperatingSystemUtil
     return getOperatingSystem().isWindows();
   }
 
+  public static boolean isMacOS()
+  {
+    return getOperatingSystem().isMacOS();
+  }
+
   public static OperatingSystem getOperatingSystem()
   {
     if (OPERATING_SYSTEM == null)
     {
-      OPERATING_SYSTEM = switch (System.getProperty("os.name").toLowerCase())
+      String osName;
+
+      osName = System.getProperty("os.name").toLowerCase();
+      if (osName.equals("linux"))
       {
-        case "linux" -> new Linux();
-        case "windows" -> new Windows();
-        default -> new Unknown();
-      };
+        OPERATING_SYSTEM = new Linux();
+      }
+      else if (osName.equals("windows"))
+      {
+        OPERATING_SYSTEM = new Windows();
+      }
+      else if (osName.startsWith("mac "))
+      {
+        OPERATING_SYSTEM = new MacOS();
+      }
+      else
+      {
+        OPERATING_SYSTEM = new Unknown();
+      }
     }
 
     return OPERATING_SYSTEM;
@@ -78,6 +96,39 @@ public class OperatingSystemUtil
     }
   }
 
+  static class MacOS
+    extends OperatingSystem
+  {
+    private static final String DEV = "(dev=";
+
+    @Override
+    public String getFileStoreId(BasicFileAttributes attr)
+    {
+      String fileKey;
+
+      fileKey = attr.fileKey().toString();
+      if (fileKey.startsWith(DEV))
+      {
+        int index;
+
+        fileKey = fileKey.substring(DEV.length());
+        index = fileKey.indexOf(',');
+        if (index != -1)
+        {
+          return fileKey.substring(0, index);
+        }
+      }
+
+      return super.getFileStoreId(attr);
+    }
+
+    @Override
+    public boolean isMacOS()
+    {
+      return true;
+    }
+  }
+
   static class Unknown
     extends OperatingSystem
   {
@@ -96,6 +147,11 @@ public class OperatingSystemUtil
     }
 
     public boolean isWindows()
+    {
+      return false;
+    }
+
+    public boolean isMacOS()
     {
       return false;
     }

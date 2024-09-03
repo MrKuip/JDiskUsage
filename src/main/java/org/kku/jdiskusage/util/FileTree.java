@@ -333,7 +333,7 @@ public class FileTree
       Map<String, Object> unixAttributes;
 
       unixAttributes = null;
-      if (OperatingSystemUtil.isLinux())
+      if (OperatingSystemUtil.isLinux() || OperatingSystemUtil.isMacOS())
       {
         try
         {
