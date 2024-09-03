@@ -19,6 +19,8 @@ import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.tbee.javafx.scene.layout.MigPane;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
@@ -44,6 +46,7 @@ public class TreeMapChart<T extends TreeMapNode>
   private Pane m_selectionOverlay;
   private MigPane m_overlay;
   private Rectangle m_selection;
+  private Button m_reselectButton;
 
   public TreeMapChart()
   {
@@ -74,6 +77,8 @@ public class TreeMapChart<T extends TreeMapNode>
         }
       }
     });
+
+    m_reselectButton = translate(new Button("", IconUtil.createIconNode("selection")));
   }
 
   public void setModel(TreeMapModel<T> model)
@@ -125,13 +130,11 @@ public class TreeMapChart<T extends TreeMapNode>
 
       BorderPane bPane;
       StackPane pane;
-      Button button;
 
       m_overlay = new MigPane();
       m_selectionOverlay = new Pane();
 
-      button = translate(new Button("", IconUtil.createIconNode("selection")));
-      m_overlay.add(button);
+      m_overlay.add(m_reselectButton);
 
       pane = new StackPane();
       pane.getChildren().add(m_pixelDraw.getCanvas());
@@ -420,4 +423,8 @@ public class TreeMapChart<T extends TreeMapNode>
     });
   }
 
+  public void addReselectListener(EventHandler<ActionEvent> eventHandler)
+  {
+    m_reselectButton.setOnAction(eventHandler);
+  }
 }

@@ -2,6 +2,7 @@ package org.kku.jdiskusage.ui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapChart;
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapModel;
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapNode;
@@ -34,13 +35,10 @@ public class TreeMapChartFormPane
   @Override
   public void refresh(TreeItem<FileNodeIF> selectedTreeItem)
   {
-    TreeItem<FileNodeIF> root;
-
-    root = getRoot(selectedTreeItem);
-    if (root != m_root)
+    if (!isDecendantOf(m_root, selectedTreeItem))
     {
       super.refresh(selectedTreeItem);
-      m_root = root;
+      m_root = selectedTreeItem;
     }
     else
     {
@@ -48,9 +46,19 @@ public class TreeMapChartFormPane
     }
   }
 
-  private TreeItem<FileNodeIF> getRoot(TreeItem<FileNodeIF> selectedTreeItem)
+  private boolean isDecendantOf(TreeItem<FileNodeIF> parent, TreeItem<FileNodeIF> child)
   {
-    return selectedTreeItem.getParent() == null ? selectedTreeItem : getRoot(selectedTreeItem.getParent());
+    while (child != null)
+    {
+      if (Objects.equals(parent, child))
+      {
+        return true;
+      }
+
+      child = child.getParent();
+    }
+
+    return false;
   }
 
   Node getTreeChartNode()
@@ -59,6 +67,10 @@ public class TreeMapChartFormPane
 
     m_treeMap = new TreeMapChart<>();
     m_treeMap.setModel(m_data.getModel());
+    m_treeMap.addReselectListener((ae) -> {
+      m_root = null;
+      refresh(getDiskUsageData().selectedTreeItemProperty().get());
+    });
 
     pane = new BorderPane();
     pane.setCenter(m_treeMap);
