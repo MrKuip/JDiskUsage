@@ -316,8 +316,8 @@ public class FileTree
     extends AbstractFileNode
   {
     private String mi_fileType;
-    private int mi_inodeNumber;
-    private int mi_numberOfLinks;
+    private int mi_inodeNumber = -1;
+    private int mi_numberOfLinks = -1;
     private long mi_size;
     private long mi_lastModifiedTime;
 
@@ -333,21 +333,22 @@ public class FileTree
       Map<String, Object> unixAttributes;
 
       unixAttributes = null;
-      if (OperatingSystemUtil.isLinux())
+      if (OperatingSystemUtil.isLinux() || OperatingSystemUtil.isMacOS())
       {
         try
         {
           unixAttributes = Files.readAttributes(path, UNIX_ATTRIBUTE_IDS);
+          if (unixAttributes != null)
+          {
+            mi_inodeNumber = ((Long) UnixAttribute.INODE.get(unixAttributes)).intValue();
+            mi_numberOfLinks = ((Integer) UnixAttribute.NUMBER_OF_LINKS.get(unixAttributes)).intValue();
+          }
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-          e.printStackTrace();
+          Log.log.error(ex, "Failed to read unix attributes for %s", path);
         }
       }
-
-      mi_inodeNumber = unixAttributes == null ? -1 : ((Long) UnixAttribute.INODE.get(unixAttributes)).intValue();
-      mi_numberOfLinks = unixAttributes == null ? -1
-          : ((Integer) UnixAttribute.NUMBER_OF_LINKS.get(unixAttributes)).intValue();
 
       mi_size = basicAttributes == null ? -1 : basicAttributes.size();
       mi_lastModifiedTime = basicAttributes == null ? -1 : basicAttributes.lastModifiedTime().toMillis();
