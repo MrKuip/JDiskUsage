@@ -20,7 +20,7 @@ cache:
 compile:
   stage: build
   script:
-    - ./gradlew assemble
+    - ./gradlew build
   
 after_script:
   - echo "End CI"
