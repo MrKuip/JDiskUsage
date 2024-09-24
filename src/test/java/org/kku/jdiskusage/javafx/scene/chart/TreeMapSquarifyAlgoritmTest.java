@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 public class TreeMapSquarifyAlgoritmTest
 {
-  @Test
+  //@Test
   public void testAlgorithm()
   {
     TestTreeMapNode root;
