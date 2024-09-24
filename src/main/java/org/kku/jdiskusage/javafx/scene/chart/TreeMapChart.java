@@ -1,18 +1,15 @@
 package org.kku.jdiskusage.javafx.scene.chart;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-
 import java.nio.IntBuffer;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapChart.TreeMapColors.MyColor;
 import org.kku.jdiskusage.ui.TreeMapChartFormPane.FileNodeTreeMapNode;
 import org.kku.jdiskusage.ui.util.Colors;
@@ -21,7 +18,6 @@ import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.tbee.javafx.scene.layout.MigPane;
-
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
@@ -49,6 +45,7 @@ public class TreeMapChart<T extends TreeMapNode>
   private Pane m_selectionOverlay;
   private MigPane m_overlay;
   private Rectangle m_selection;
+  private Rectangle m_selectionBorder;
   private Button m_reselectButton;
 
   public TreeMapChart()
@@ -408,22 +405,31 @@ public class TreeMapChart<T extends TreeMapNode>
 
   public void select(FileNodeTreeMapNode fntmn)
   {
-    m_model.getRootNode().streamNode().filter(tmn -> Objects.equals(tmn, fntmn)).findFirst().ifPresent(tmn -> {
-      if (m_selection == null)
-      {
-        m_selection = new Rectangle();
-        m_selection.setStroke(Color.RED);
-        m_selection.setStrokeWidth(3.0);
-        m_selection.getStrokeDashArray().addAll(20d, 10d);
-        m_selection.setFill(Color.TRANSPARENT);
-        m_selectionOverlay.getChildren().add(m_selection);
-      }
+    if (m_selection == null)
+    {
+      m_selection = new Rectangle();
+      m_selection.setStroke(Color.BLACK);
+      m_selection.setStrokeWidth(3.0);
+      m_selection.getStrokeDashArray().addAll(20d, 10d);
+      m_selection.setFill(Color.TRANSPARENT);
 
-      m_selection.setLayoutX(tmn.getX());
-      m_selection.setLayoutY(tmn.getY());
-      m_selection.setWidth(tmn.getWidth());
-      m_selection.setHeight(tmn.getHeight());
-    });
+      m_selectionBorder = new Rectangle();
+      m_selectionBorder.setStroke(Color.WHITE);
+      m_selectionBorder.setStrokeWidth(5.0);
+      m_selectionBorder.setFill(Color.TRANSPARENT);
+
+      m_selectionOverlay.getChildren().addAll(m_selectionBorder, m_selection);
+    }
+
+    m_selection.setLayoutX(fntmn.getX());
+    m_selection.setLayoutY(fntmn.getY());
+    m_selection.setWidth(fntmn.getWidth());
+    m_selection.setHeight(fntmn.getHeight());
+
+    m_selectionBorder.setLayoutX(fntmn.getX());
+    m_selectionBorder.setLayoutY(fntmn.getY());
+    m_selectionBorder.setWidth(fntmn.getWidth());
+    m_selectionBorder.setHeight(fntmn.getHeight());
   }
 
   public void addReselectListener(EventHandler<ActionEvent> eventHandler)

@@ -68,6 +68,11 @@ abstract public class TreeMapNode
 
   abstract protected List<TreeMapNode> initChildList();
 
+  public TreeMapNode getChild(String name)
+  {
+    return getChildList().stream().filter(tmn -> name.equals(tmn.getName())).findFirst().orElse(null);
+  }
+
   public List<TreeMapNode> getChildList()
   {
     if (m_childList == null)

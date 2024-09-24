@@ -3,7 +3,6 @@ package org.kku.jdiskusage.ui;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapChart;
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapModel;
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapNode;
@@ -13,7 +12,6 @@ import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
-
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.layout.BorderPane;
@@ -46,7 +44,7 @@ public class TreeMapChartFormPane
     else
     {
       // If the selected tree item is part of the root tree -> select the part of the chart with a red border
-      m_data.select(selectedTreeItem.getValue());
+      m_data.select(selectedTreeItem);
     }
   }
 
@@ -100,12 +98,58 @@ public class TreeMapChartFormPane
       return mi_model;
     }
 
-    public void select(FileNodeIF value)
+    public void select(TreeItem<FileNodeIF> selectedTreeItem)
     {
       if (mi_model != null)
       {
+        FileNodeIF fileNodeParent;
+        List<String> list;
+        TreeMapNode selectedNode;
+        int rootFound;
+
+        // Collect the path of the fileNode
+        fileNodeParent = selectedTreeItem.getValue();
+        list = new ArrayList<>();
+        while (fileNodeParent != null)
+        {
+          list.add(fileNodeParent.getName());
+          fileNodeParent = fileNodeParent.getParent();
+        }
+        list = list.reversed();
+
+        selectedNode = mi_model.getRootNode();
+        rootFound = -1;
+        for (int i = 0; i < list.size(); i++)
+        {
+          String path;
+
+          path = list.get(i);
+          if (path.equals(selectedNode.getName()))
+          {
+            rootFound = i;
+            break;
+          }
+        }
+
+        if (rootFound != -1)
+        {
+          for (int i = rootFound + 1; i < list.size(); i++)
+          {
+            if (selectedNode != null)
+            {
+              selectedNode = selectedNode.getChild(list.get(i));
+            }
+          }
+
+          if (selectedNode != mi_model.getRootNode() && selectedNode != null)
+          {
+            m_treeMap.select((FileNodeTreeMapNode) selectedNode);
+            return;
+          }
+        }
+
         mi_model.getRootNode().streamNode().map(tmn -> (FileNodeTreeMapNode) tmn)
-            .filter(fntmn -> fntmn.getFileNode() == value).findFirst().ifPresent(fntmn -> {
+            .filter(fntmn -> fntmn.getFileNode() == selectedTreeItem.getValue()).findFirst().ifPresent(fntmn -> {
               m_treeMap.select(fntmn);
             });
       }
