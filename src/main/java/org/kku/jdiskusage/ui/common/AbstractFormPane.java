@@ -2,6 +2,7 @@ package org.kku.jdiskusage.ui.common;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
 import org.controlsfx.control.SegmentedButton;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.util.IconUtil;
@@ -18,6 +20,7 @@ import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
+
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;

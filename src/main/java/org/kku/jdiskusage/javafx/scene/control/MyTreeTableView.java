@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;

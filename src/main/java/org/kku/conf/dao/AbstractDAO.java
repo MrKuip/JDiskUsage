@@ -1,6 +1,7 @@
 package org.kku.conf.dao;
 
 import java.util.List;
+
 import org.kku.conf.Configuration;
 import org.kku.conf.ConfigurationItem;
 import org.kku.conf.ConfigurationManager;

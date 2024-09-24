@@ -3,6 +3,7 @@ package org.kku.jdiskusage.ui.util;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+
 import javafx.beans.value.ChangeListener;
 import javafx.scene.Node;
 import javafx.scene.Scene;

@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.ui.common;
 
 import org.kku.jdiskusage.main.Main;
+
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.Scene;

@@ -1,10 +1,13 @@
 package org.kku.jdiskusage.main;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-import org.kku.jdiskusage.javafx.scene.chart.TreeMapNode;
-import org.kku.jdiskusage.javafx.scene.chart.TreeMapSquarifyAlgoritm;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemoryLayout;
+import java.lang.foreign.MemoryLayout.PathElement;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SequenceLayout;
+import java.lang.foreign.ValueLayout;
+import java.lang.invoke.VarHandle;
+
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -12,85 +15,56 @@ public class TestFx2
   extends Application
 {
   @Override
-  public void start(Stage stage)
+  public void start(Stage stage) throws Exception
   {
-    TreeMapSquarifyAlgoritm algo;
-    Consumer<List<TreeMapNode>> handler;
-    List<TreeMapNode> treeNodeList;
-
-    algo = new TreeMapSquarifyAlgoritm(0, 0, 60, 40, getTreeNodeList(), getHandler());
-    algo.evaluate();
+    test1();
+    System.exit(1);
   }
 
-  private Consumer<List<TreeMapNode>> getHandler()
+  private void test1()
   {
-    return (tmnList) -> {
-      tmnList.forEach(tmn -> {
-        System.out.println(tmn);
-      });
-    };
+    SequenceLayout pointLayout;
+
+    pointLayout = MemoryLayout.sequenceLayout(10,
+        MemoryLayout.structLayout(ValueLayout.JAVA_INT.withName("x"), ValueLayout.JAVA_INT.withName("y")));
+
+    VarHandle xHandle = pointLayout.varHandle(PathElement.sequenceElement(), PathElement.groupElement("x"));
+    VarHandle yHandle = pointLayout.varHandle(PathElement.sequenceElement(), PathElement.groupElement("y"));
+
+    MemorySegment segment = Arena.ofAuto().allocate(pointLayout);
+
+    for (int i = 0; i < pointLayout.elementCount(); i++)
+    {
+      xHandle.set(segment, 0L, i, i);
+      yHandle.set(segment, 0L, i, i + 100);
+    }
+
+    System.out.println("x[9]=" + xHandle.get(segment, 0, 9));
+    System.out.println("y[9]=" + yHandle.get(segment, 0, 9));
   }
 
-  private List<TreeMapNode> getTreeNodeList()
+  class PointArray
   {
-    return new MyTreeMapNode(24, true).getChildList();
+    Point addPoint(int x, int y)
+    {
+      return new Point(x, y);
+    }
   }
 
-  class MyTreeMapNode
-    extends TreeMapNode
+  class Point
   {
-    private boolean m_root;
-    private long m_size;
-
-    MyTreeMapNode(int size, boolean root)
+    public Point(int x, int y)
     {
-      m_size = size;
-      m_root = root;
     }
 
-    MyTreeMapNode(int size)
+    public int getX()
     {
-      m_size = size;
+      return 0;
     }
 
-    @Override
-    public String getTooltipText()
+    public int getY()
     {
-      return "";
-    }
-
-    @Override
-    public String getName()
-    {
-      return "" + m_size;
-    }
-
-    @Override
-    public long getSize()
-    {
-      return m_size;
-    }
-
-    @Override
-    protected List<TreeMapNode> initChildList()
-    {
-      if (m_root)
-      {
-        List<TreeMapNode> list;
-
-        list = new ArrayList<>();
-        list.add(new MyTreeMapNode(6));
-        list.add(new MyTreeMapNode(6));
-        list.add(new MyTreeMapNode(4));
-        list.add(new MyTreeMapNode(3));
-        list.add(new MyTreeMapNode(2));
-        list.add(new MyTreeMapNode(2));
-        list.add(new MyTreeMapNode(1));
-
-        return list;
-      }
-
-      return new ArrayList<>();
+      return 0;
     }
   }
 

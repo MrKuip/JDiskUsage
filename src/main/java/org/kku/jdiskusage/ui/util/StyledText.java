@@ -3,6 +3,7 @@ package org.kku.jdiskusage.ui.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;

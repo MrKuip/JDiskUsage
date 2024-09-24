@@ -2,8 +2,10 @@ package org.kku.jdiskusage.ui.common;
 
 import java.util.Objects;
 import java.util.function.Predicate;
+
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.FileTree.FilterIF;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 

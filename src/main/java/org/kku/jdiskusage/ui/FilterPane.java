@@ -2,6 +2,7 @@ package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Stream;
+
 import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconColor;
 import org.kku.fonticons.ui.FxIcon.IconSize;
@@ -17,6 +19,7 @@ import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.tbee.javafx.scene.layout.MigPane;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.scene.Node;

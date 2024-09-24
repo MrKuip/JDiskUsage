@@ -2,9 +2,11 @@ package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
+
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.main.Main;
 import org.kku.jdiskusage.ui.common.Notifications;
@@ -17,6 +19,7 @@ import org.kku.jdiskusage.util.DirectoryChooser;
 import org.kku.jdiskusage.util.FileTree;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.PathList;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;

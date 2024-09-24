@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.util;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.controlsfx.control.BreadCrumbBar;
 import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconColor;
@@ -22,6 +24,7 @@ import org.kku.jdiskusage.ui.common.FxDialog;
 import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.DirectoryList.Directory;
 import org.tbee.javafx.scene.layout.MigPane;
+
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

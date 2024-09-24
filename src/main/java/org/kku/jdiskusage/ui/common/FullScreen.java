@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.ui.common;
 
 import org.kku.jdiskusage.util.OperatingSystemUtil;
+
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;

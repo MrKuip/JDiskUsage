@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.javafx.scene.chart;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+
 import java.nio.IntBuffer;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapChart.TreeMapColors.MyColor;
 import org.kku.jdiskusage.ui.TreeMapChartFormPane.FileNodeTreeMapNode;
 import org.kku.jdiskusage.ui.util.Colors;
@@ -19,6 +21,7 @@ import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.tbee.javafx.scene.layout.MigPane;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;

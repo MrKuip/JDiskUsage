@@ -1,8 +1,10 @@
 package org.kku.jdiskusage.ui.common;
 
 import java.util.function.Function;
+
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 

@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+
 import org.kku.jdiskusage.conf.Language;
 import org.kku.jdiskusage.conf.LanguageConfiguration;
 import org.kku.jdiskusage.main.Main;
@@ -10,6 +11,7 @@ import org.kku.jdiskusage.ui.util.TranslateUtil;
 import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.tbee.javafx.scene.layout.MigPane;
+
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;

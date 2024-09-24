@@ -2,12 +2,14 @@ package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.concurrent.FxTask;
 import org.kku.jdiskusage.concurrent.ProgressData;
@@ -25,6 +27,7 @@ import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.StringUtils;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.tbee.javafx.scene.layout.MigPane;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;

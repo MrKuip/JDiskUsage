@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.controlsfx.control.BreadCrumbBar;
 import org.kku.jdiskusage.javafx.scene.control.MyTreeTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTreeTableView;
@@ -18,6 +19,7 @@ import org.kku.jdiskusage.util.FileTree.FilterIF;
 import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.OperatingSystemUtil;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
+
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;

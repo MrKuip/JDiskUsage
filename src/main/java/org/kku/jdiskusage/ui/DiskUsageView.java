@@ -2,6 +2,7 @@ package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.DraggableTabPane;
@@ -34,6 +36,7 @@ import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.kku.jdiskusage.util.preferences.Sort;
 import org.tbee.javafx.scene.layout.MigPane;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;

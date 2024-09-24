@@ -3,6 +3,7 @@ package org.kku.jdiskusage.ui;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapChart;
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapModel;
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapNode;
@@ -12,6 +13,7 @@ import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
+
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.layout.BorderPane;

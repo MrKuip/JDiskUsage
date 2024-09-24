@@ -2,6 +2,7 @@ package org.kku.jdiskusage.util;
 
 import java.nio.file.Path;
 import java.util.function.Function;
+
 import org.kku.jdiskusage.conf.Language;
 import org.kku.jdiskusage.conf.LanguageConfiguration;
 

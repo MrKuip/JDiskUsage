@@ -15,11 +15,12 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.kku.jdiskusage.ui.DiskUsageView;
 
 public class FileTree
 {
-  private enum UnixAttribute
+  public enum UnixAttribute
   {
     NUMBER_OF_LINKS("nlink"),
     INODE("ino"),
@@ -38,7 +39,7 @@ public class FileTree
       return m_id;
     }
 
-    <T> T get(Map<String, T> attributeMap)
+    public <T> T get(Map<String, T> attributeMap)
     {
       return attributeMap.get(getId());
     }

@@ -1,8 +1,10 @@
 package org.kku.jdiskusage.main;
 
 import java.util.stream.Stream;
+
 import org.kku.jdiskusage.ui.util.Colors;
 import org.tbee.javafx.scene.layout.MigPane;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
