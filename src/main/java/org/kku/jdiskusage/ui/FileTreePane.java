@@ -7,8 +7,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.controlsfx.control.BreadCrumbBar;
+import org.kku.jdiskusage.javafx.scene.control.BreadCrumbBar;
 import org.kku.jdiskusage.javafx.scene.control.MyTreeTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTreeTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
@@ -19,7 +18,6 @@ import org.kku.jdiskusage.util.FileTree.FilterIF;
 import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.OperatingSystemUtil;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
-
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -32,42 +30,47 @@ import javafx.scene.layout.BorderPane;
 
 public class FileTreePane
 {
-  private final DiskUsageData mi_diskUsageData;
-  private FileTreeView mi_fileTreeView;
-  private BorderPane mi_treePane;
-  private BreadCrumbBar<FileNodeIF> mi_breadCrumbBar;
-  TreeTableView<FileNodeIF> mi_treeTableView;
+  private final DiskUsageData m_diskUsageData;
+  private FileTreeView m_fileTreeView;
+  private BorderPane m_treePane;
+  private BreadCrumbBar<FileNodeIF> m_breadcrumbBar = new BreadCrumbBar<>();
+  private TreeTableView<FileNodeIF> m_treeTableView;
 
   public FileTreePane(DiskUsageData diskUsageData)
   {
-    mi_diskUsageData = diskUsageData;
-    mi_treePane = new BorderPane();
+    m_diskUsageData = diskUsageData;
+    m_treePane = new BorderPane();
   }
 
   public Node getNode()
   {
-    return mi_treePane;
+    return m_treePane;
   }
 
   public void setFilter(FilterIF filter)
   {
-    mi_fileTreeView.setFilter(filter);
+    m_fileTreeView.setFilter(filter);
+  }
+
+  public BreadCrumbBar<FileNodeIF> getBreadCrumbBar()
+  {
+    return m_breadcrumbBar;
   }
 
   public void createTreeTableView(DirNode dirNode)
   {
-    mi_fileTreeView = new FileTreeView(dirNode);
-    mi_treeTableView = mi_fileTreeView.createComponent();
-    mi_breadCrumbBar.selectedCrumbProperty().bind(mi_diskUsageData.selectedTreeItemProperty());
-    mi_breadCrumbBar.setAutoNavigationEnabled(false);
-    mi_breadCrumbBar.setOnCrumbAction((e) -> {
-      mi_diskUsageData.getTreePaneData().navigateTo(e.getSelectedCrumb());
+    m_fileTreeView = new FileTreeView(dirNode);
+    m_treeTableView = m_fileTreeView.createComponent();
+
+    m_breadcrumbBar.treeItem().bind(m_diskUsageData.selectedTreeItemProperty());
+    m_breadcrumbBar.selectedTreeItem().addListener((o, oldValue, newValue) -> {
+      m_diskUsageData.getTreePaneData().navigateTo(newValue);
     });
 
-    mi_treePane.setCenter(mi_treeTableView);
+    m_treePane.setCenter(m_treeTableView);
 
-    mi_diskUsageData.selectedTreeItemProperty().bind(mi_treeTableView.getSelectionModel().selectedItemProperty());
-    mi_diskUsageData.selectedTreeItemProperty().addListener(this::evaluateExpand);
+    m_diskUsageData.selectedTreeItemProperty().bind(m_treeTableView.getSelectionModel().selectedItemProperty());
+    m_diskUsageData.selectedTreeItemProperty().addListener(this::evaluateExpand);
   }
 
   private final void evaluateExpand(ObservableValue<? extends TreeItem<FileNodeIF>> observable,
@@ -114,17 +117,11 @@ public class FileTreePane
       return;
     }
 
-    if (mi_treeTableView != null)
+    if (m_treeTableView != null)
     {
 
-      mi_fileTreeView.selectItem(treeItem);
+      m_fileTreeView.selectItem(treeItem);
     }
-  }
-
-  public BreadCrumbBar<FileNodeIF> createBreadCrumbBar()
-  {
-    mi_breadCrumbBar = new BreadCrumbBar<>();
-    return mi_breadCrumbBar;
   }
 
   private static class FileTreeView

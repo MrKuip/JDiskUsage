@@ -4,7 +4,7 @@ plugins {
   id 'eclipse'
   id 'application'
   id 'org.openjfx.javafxplugin' version '0.1.0'
-  id 'org.beryx.jlink' version '3.0.0'
+  id 'org.beryx.jlink' version '3.0.1'
 }
 
 defaultTasks 'jar'
@@ -26,7 +26,7 @@ javafx {
 }
 
 dependencies {
-  implementation 'org.controlsfx:controlsfx:11.2.1'
+  //implementation 'org.controlsfx:controlsfx:11.2.1'
   implementation files('lib/fontIcons-1.0.jar')
   implementation 'com.miglayout:miglayout-javafx:11.4'
   implementation 'com.miglayout:miglayout-swing:11.4'

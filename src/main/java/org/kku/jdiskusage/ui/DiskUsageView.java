@@ -2,7 +2,6 @@ package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,10 +12,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.controlsfx.control.SegmentedButton;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.DraggableTabPane;
+import org.kku.jdiskusage.javafx.scene.control.SegmentedControl;
 import org.kku.jdiskusage.ui.ScanFileTreeDialog.ScanResult;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.Filter;
@@ -36,7 +34,6 @@ import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.kku.jdiskusage.util.preferences.Sort;
 import org.tbee.javafx.scene.layout.MigPane;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
@@ -53,7 +50,6 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -158,7 +154,7 @@ public class DiskUsageView
     // container.y2 = the lowest point of the container
     m_content.add(m_data.mi_taskView.getView(), "pos null null container.x2 container.y2");
 
-    m_data.getTabPaneData().getNode().setTop(m_data.getTreePaneData().createBreadCrumbBar());
+    m_data.getTabPaneData().getNode().add(m_data.getTreePaneData().getBreadCrumbBar(), "dock north");
   }
 
   public Pane getContent()
@@ -194,11 +190,11 @@ public class DiskUsageView
     ToggleButton showFileSizeButton;
     ToggleButton showFileCountButton;
     ToggleGroup showDisplayMetricGroup;
-    SegmentedButton showDisplayMetricButton;
+    SegmentedControl showDisplayMetricButton;
     ToggleButton sortAlphabeticallyButton;
     ToggleButton sortNumericButton;
     ToggleGroup sortGroup;
-    SegmentedButton sortButton;
+    SegmentedControl sortButton;
     Node filterPaneNode;
 
     navigation = m_data.getNavigation();
@@ -239,8 +235,9 @@ public class DiskUsageView
       AppPreferences.displayMetricPreference.set(DisplayMetric.FILE_COUNT);
     });
 
-    showDisplayMetricButton = new SegmentedButton();
-    showDisplayMetricButton.getButtons().addAll(showFileSizeButton, showFileCountButton);
+    showDisplayMetricButton = new SegmentedControl();
+    showDisplayMetricButton.add(showFileSizeButton);
+    showDisplayMetricButton.add(showFileCountButton);
 
     sortGroup = new ToggleGroup();
 
@@ -259,8 +256,9 @@ public class DiskUsageView
       AppPreferences.sortPreference.set(Sort.NUMERIC);
     });
 
-    sortButton = new SegmentedButton();
-    sortButton.getButtons().addAll(sortAlphabeticallyButton, sortNumericButton);
+    sortButton = new SegmentedControl();
+    sortButton.add(sortAlphabeticallyButton);
+    sortButton.add(sortNumericButton);
 
     filterPaneNode = createFilterPane().getNode();
     filterPaneNode.setId("filterButton");
@@ -271,8 +269,8 @@ public class DiskUsageView
     toolBar.add(homeButton);
     toolBar.add(fullScreenButton);
     toolBar.add(refreshButton);
-    toolBar.add(showDisplayMetricButton);
-    toolBar.add(sortButton);
+    toolBar.add(showDisplayMetricButton.getNode());
+    toolBar.add(sortButton.getNode());
     toolBar.add(filterPaneNode, "grow");
 
     return toolBar;
@@ -391,7 +389,7 @@ public class DiskUsageView
       }
     }
 
-    private final BorderPane mi_borderPane;
+    private final MigPane mi_borderPane;
     final DraggableTabPane mi_tabPane;
     private Map<TabData, Tab> mi_tabByTabId = new HashMap<>();
     Map<TabData, AbstractFormPane> mi_contentByTabId = new HashMap<>();
@@ -399,8 +397,8 @@ public class DiskUsageView
     private TabPaneData()
     {
       mi_tabPane = new DraggableTabPane();
-      mi_borderPane = new BorderPane();
-      mi_borderPane.setCenter(mi_tabPane);
+      mi_borderPane = new MigPane();
+      mi_borderPane.add(mi_tabPane, "dock center");
     }
 
     public void init()
@@ -435,7 +433,7 @@ public class DiskUsageView
           });
     }
 
-    public BorderPane getNode()
+    public MigPane getNode()
     {
       return mi_borderPane;
     }

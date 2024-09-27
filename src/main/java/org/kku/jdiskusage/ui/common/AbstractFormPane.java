@@ -2,7 +2,6 @@ package org.kku.jdiskusage.ui.common;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
-
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -10,8 +9,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-
-import org.controlsfx.control.SegmentedButton;
+import org.kku.jdiskusage.javafx.scene.control.SegmentedControl;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties.AppProperty;
@@ -20,7 +18,6 @@ import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
-
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -36,7 +33,7 @@ abstract public class AbstractFormPane
   private PaneData m_paneData;
   private Map<String, PaneType> m_paneTypeByIdMap = new LinkedHashMap<>();
   private final BorderPane m_node = new BorderPane();
-  private final SegmentedButton m_segmentedButton = new SegmentedButton();
+  private final SegmentedControl m_segmentedControl = new SegmentedControl();
   private PaneType m_currentPaneType;
   private Map<PaneType, Node> m_nodeByPaneTypeMap = new HashMap<>();
   private TreeItem<FileNodeIF> m_currentTreeItem;
@@ -81,10 +78,10 @@ abstract public class AbstractFormPane
 
     reset();
 
-    Log.log.info("refresh[init=%b, needInit=%b %s-%s] filenode=%s", init, needInit, getClass().getSimpleName(),
-        m_currentPaneType.description(), m_currentTreeItem == null ? "<no selection>" : m_currentTreeItem.getValue());
     if (init || needInit)
     {
+      Log.log.info("refresh[init=%b, needInit=%b %s-%s] filenode=%s", init, needInit, getClass().getSimpleName(),
+          m_currentPaneType.description(), m_currentTreeItem == null ? "<no selection>" : m_currentTreeItem.getValue());
       //initNode(m_diskUsageData.getTreePaneData());
       initCurrentNode();
     }
@@ -162,11 +159,11 @@ abstract public class AbstractFormPane
 
         return button;
       }).forEach(button -> {
-        m_segmentedButton.getButtons().add(button);
+        m_segmentedControl.add(button);
       });
 
-      BorderPane.setMargin(m_segmentedButton, new Insets(2, 2, 2, 2));
-      m_node.setBottom(m_segmentedButton);
+      BorderPane.setMargin(m_segmentedControl.getNode(), new Insets(2, 2, 2, 2));
+      m_node.setBottom(m_segmentedControl.getNode());
     }
   }
 
