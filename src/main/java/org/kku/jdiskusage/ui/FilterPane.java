@@ -2,7 +2,6 @@ package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -10,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Stream;
-
 import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconColor;
 import org.kku.fonticons.ui.FxIcon.IconSize;
@@ -19,13 +17,14 @@ import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.tbee.javafx.scene.layout.MigPane;
-
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.control.TreeItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
@@ -152,6 +151,7 @@ class FilterPane
 
     closeNode.addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
       removeFilters(filter);
+      activateFilter();
     });
 
     return filterNode;
@@ -193,11 +193,9 @@ class FilterPane
         m_activateFilterButton = translate(
             new Button("Activate filter", IconUtil.createIconNode("filter-check", IconSize.SMALL)));
         m_activateFilterButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        m_activateFilterButton.setOnAction((ae) -> getFilterSet().forEach(filter -> {
-          filter.disable(false);
-          m_diskUsageData.getTreePaneData().setFilter((fn) -> accept(fn));
-          updateFilterActivationPane();
-        }));
+        m_activateFilterButton.setOnAction((ae) -> {
+          activateFilter();
+        });
         m_filterActivationPane.getChildren().add(m_activateFilterButton);
 
         m_clearFilterButton = translate(
@@ -217,6 +215,8 @@ class FilterPane
             removeFilters(filters);
             m_diskUsageData.getTreePaneData().setFilter((fn) -> accept(fn));
           }
+
+          activateFilter();
         });
         m_filterActivationPane.getChildren().add(m_clearFilterButton);
       }
@@ -232,5 +232,21 @@ class FilterPane
         m_activateFilterButton = null;
       }
     }
+  }
+
+  private void activateFilter()
+  {
+    TreeItem<FileNodeIF> selectedTreeItem;
+
+    getFilterSet().forEach(filter -> { filter.disable(false); });
+
+    selectedTreeItem = m_diskUsageData.getSelectedTreeItem();
+    m_diskUsageData.getTreePaneData().setFilter((fn) -> accept(fn));
+    updateFilterActivationPane();
+
+    // try to navigate to the selected tree item (due to filtering it is possible it is no longer a node in the tree!)
+    Platform.runLater(() -> {
+      m_diskUsageData.getTreePaneData().navigateTo(selectedTreeItem);
+    });
   }
 }

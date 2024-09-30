@@ -202,7 +202,6 @@ public class FileTreePane
 
     private void selectItem(TreeItem<FileNodeIF> treeItem)
     {
-      mi_treeTableView.getSelectionModel().select(treeItem);
       expandTo(treeItem);
       mi_treeTableView.scrollTo(mi_treeTableView.getSelectionModel().getSelectedIndex());
       mi_treeTableView.requestFocus();
