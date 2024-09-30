@@ -10,15 +10,13 @@ import javafx.scene.layout.HBox;
 public class SegmentedControl
 {
   private HBox m_segmentedControl = new HBox();
-  private String SEGMENTED_CONTROL_STYLE = "segmented-control";
-  private String FIRST_BUTTON_STYLE = "left-pill";
-  private String CENTER_BUTTON_STYLE = "center-pill";
-  private String LAST_BUTTON_STYLE = "right-pill";
+  private String LEFT_PILL_STYLE = "left-pill";
+  private String CENTER_PILL_STYLE = "center-pill";
+  private String RIGHT_PILL_STYLE = "right-pill";
   private ToggleGroup m_toggleGroup = new ToggleGroup();
 
   public SegmentedControl()
   {
-    m_segmentedControl.getStyleClass().add(SEGMENTED_CONTROL_STYLE);
   }
 
   public ToggleButton addToggle(String text)
@@ -33,17 +31,16 @@ public class SegmentedControl
 
   public ToggleButton add(ToggleButton button)
   {
-    //button.setFocusTraversable(false);
     button.setToggleGroup(m_toggleGroup);
 
     m_segmentedControl.getChildren().add(button);
+    evaluateStyles();
 
     return button;
   }
 
   public Node getNode()
   {
-    evaluateStyles();
     return m_segmentedControl;
   }
 
@@ -53,21 +50,20 @@ public class SegmentedControl
 
     children = m_segmentedControl.getChildren();
     children.forEach(child -> {
-      child.getStyleClass().removeAll(FIRST_BUTTON_STYLE, CENTER_BUTTON_STYLE, LAST_BUTTON_STYLE);
+      child.getStyleClass().removeAll(LEFT_PILL_STYLE, CENTER_PILL_STYLE, RIGHT_PILL_STYLE);
     });
 
     if (children.size() > 1)
     {
-      children.get(0).getStyleClass().add(FIRST_BUTTON_STYLE);
-      children.get(children.size() - 1).getStyleClass().add(LAST_BUTTON_STYLE);
+      children.get(0).getStyleClass().add(LEFT_PILL_STYLE);
+      children.get(children.size() - 1).getStyleClass().add(RIGHT_PILL_STYLE);
 
       if (children.size() > 2)
       {
         children.subList(1, children.size() - 1).forEach(child -> {
-          child.getStyleClass().add(CENTER_BUTTON_STYLE);
+          child.getStyleClass().add(CENTER_PILL_STYLE);
         });
       }
     }
   }
-
 }
