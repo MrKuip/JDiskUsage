@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 
 public class Log
 {
-  static public final MyLogger log = createLogger("log", "log", 100000, 10, Level.FINE);
+  static public final MyLogger log = createLogger("log", "log", 100000, 10, Level.INFO);
   static public final MyLogger treemap = createLogger("treemap", "treemap", 100000, 10, Level.INFO);
   static public final MyLogger javafx = createLogger("javafx", Level.INFO);
 
