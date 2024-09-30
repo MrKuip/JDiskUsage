@@ -29,7 +29,7 @@ dependencies {
   implementation files('lib/fontIcons-1.0.jar')
   implementation 'com.miglayout:miglayout-javafx:11.4.2'
   implementation 'org.commonmark:commonmark:0.23.0'
-  implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.0'
+  implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.0'
 
   testImplementation 'org.junit.jupiter:junit-jupiter:5.11.1'
   testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -57,3 +57,4 @@ task initEclipseMetaData {
     createLauncher('Main', 'jdiskusage', 'org.kku.jdiskusage', 'org.kku.jdiskusage.main.Main')
   }
 }
+
