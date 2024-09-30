@@ -2,6 +2,7 @@ package org.kku.jdiskusage.javafx.scene.chart;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.nio.IntBuffer;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -91,9 +92,11 @@ public class TreeMapChart<T extends TreeMapNode>
   @Override
   protected void layoutChildren()
   {
-    if (m_pixelDraw == null || (getWidth() != m_pixelDraw.getWidth() && getHeight() != m_pixelDraw.getWidth()))
+    if (m_pixelDraw == null || (getWidth() != m_pixelDraw.getWidth() && getWidth() != m_pixelDraw.getWidth()))
     {
       m_pixelDraw = new PixelDraw((int) getWidth(), (int) getHeight());
+      m_selection = null;
+      m_selectionBorder = null;
 
       getChildren().clear();
       layoutChart();
@@ -108,6 +111,7 @@ public class TreeMapChart<T extends TreeMapNode>
       // The nodes with a higher depth will derive their color from its parent
       try (PerformancePoint pp2 = Performance.measure("Setting colorIndex for nodes with depth <= 1"))
       {
+        m_model.getRootNode().setColorIndex(m_treeMapColors.getNextColorIndex());
         m_model.getRootNode().getChildList().stream().sorted(Comparator.comparing(TreeMapNode::getSize).reversed())
             .forEach(tmn -> {
               tmn.setColorIndex(m_treeMapColors.getNextColorIndex());
@@ -119,6 +123,7 @@ public class TreeMapChart<T extends TreeMapNode>
         // Try to create TreeMapNodes that are squarish in order for a user to comprehend the chart better than
         //   small long rectangles
         m_model.getRootNode().setBounds(0, 0, m_pixelDraw.getWidth(), m_pixelDraw.getHeight());
+        m_pixelDraw.accept(Arrays.asList(m_model.getRootNode()));
         m_model.getRootNode().streamNode().filter(TreeMapNode::hasChildren)
             .sorted(Comparator.comparingInt(TreeMapNode::getDepth)).forEach(fn -> {
               new TreeMapSquarifyAlgoritm(fn.getX(), fn.getY(), fn.getWidth(), fn.getHeight(),
@@ -133,6 +138,7 @@ public class TreeMapChart<T extends TreeMapNode>
 
       m_overlay = new MigPane();
       m_selectionOverlay = new Pane();
+      m_selectionOverlay.setMouseTransparent(true);
 
       m_overlay.add(m_reselectButton);
 
@@ -409,11 +415,13 @@ public class TreeMapChart<T extends TreeMapNode>
     {
       m_selection = new Rectangle();
       m_selection.setStroke(Color.BLACK);
+      m_selection.setMouseTransparent(true);
       m_selection.setStrokeWidth(3.0);
       m_selection.getStrokeDashArray().addAll(20d, 10d);
       m_selection.setFill(Color.TRANSPARENT);
 
       m_selectionBorder = new Rectangle();
+      m_selectionBorder.setMouseTransparent(true);
       m_selectionBorder.setStroke(Color.WHITE);
       m_selectionBorder.setStrokeWidth(5.0);
       m_selectionBorder.setFill(Color.TRANSPARENT);
