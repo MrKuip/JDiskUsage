@@ -2,14 +2,12 @@ package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.concurrent.FxTask;
 import org.kku.jdiskusage.concurrent.ProgressData;
@@ -27,13 +25,13 @@ import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.StringUtils;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.tbee.javafx.scene.layout.MigPane;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -44,12 +42,15 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.TreeItem;
 import javafx.scene.paint.Color;
 
 public class SearchFormPane
   extends AbstractFormPane
 {
-  private SearchPaneData mi_data = new SearchPaneData();
+  private SearchPaneData m_data = new SearchPaneData();
+  private MyTableView<FileNodeIF> m_table;
+  private Label m_searchActivityLabel = new Label("");
 
   public SearchFormPane(DiskUsageData diskUsageData)
   {
@@ -78,28 +79,28 @@ public class SearchFormPane
 
     regexButton = new ToggleButton(null, IconUtil.createIconNode("regex"));
     regexButton.selectedProperty().bindBidirectional(AppPreferences.searchRegexPreference.property());
-    mi_data.mi_regexSelectedProperty = regexButton.selectedProperty();
+    m_data.mi_regexSelectedProperty = regexButton.selectedProperty();
 
     searchTextField = new TextField();
     searchTextField.promptTextProperty().bind(translatedTextProperty("search"));
-    searchTextField.setOnAction((ae) -> getDiskUsageData().refresh());
-    mi_data.mi_searchTextProperty = searchTextField.textProperty();
+    searchTextField.setOnAction((ae) -> search());
+    m_data.mi_searchTextProperty = searchTextField.textProperty();
 
     maxCountTextField = NumericTextField.integerField();
     maxCountTextField.setPrefColumnCount(5);
     maxCountLabel = translate(new Label("Max items"));
     maxCountLabel.setLabelFor(maxCountTextField);
     maxCountTextField.valueProperty().bindBidirectional(AppPreferences.searchMaxCountPreference.property());
-    mi_data.mi_maxCountProperty = maxCountTextField.valueProperty();
-    mi_data.mi_progress.mi_stoppedOnMaxCountProperty.addListener(FxUtil.showWarning(maxCountTextField));
+    m_data.mi_maxCountProperty = maxCountTextField.valueProperty();
+    m_data.mi_progress.mi_stoppedOnMaxCountProperty.addListener(FxUtil.showWarning(maxCountTextField));
 
     maxTimeTextField = NumericTextField.integerField();
     maxTimeTextField.setPrefColumnCount(5);
     maxTimeLabel = translate(new Label("Max time (seconds)"));
     maxTimeLabel.setLabelFor(maxTimeTextField);
     maxTimeTextField.valueProperty().bindBidirectional(AppPreferences.searchMaxTimePreference.property());
-    mi_data.mi_maxTimeProperty = maxTimeTextField.valueProperty();
-    mi_data.mi_progress.mi_stoppedOnTimeoutProperty.addListener(FxUtil.showWarning(maxTimeTextField));
+    m_data.mi_maxTimeProperty = maxTimeTextField.valueProperty();
+    m_data.mi_progress.mi_stoppedOnTimeoutProperty.addListener(FxUtil.showWarning(maxTimeTextField));
 
     cancelButton = new Button(null,
         IconUtil.createFxIcon("cancel", IconSize.SMALLER).fillColor(Color.RED).getIconLabel());
@@ -118,42 +119,68 @@ public class SearchFormPane
     progressBar.setMaxWidth(Double.MAX_VALUE);
     progressBar.setProgress(0.25f);
     progressBar.getStyleClass().add("thin-progress-bar");
-    progressBar.progressProperty().bind(Bindings.divide(mi_data.mi_progress.mi_progressProperty, 100.0));
+    progressBar.progressProperty().bind(Bindings.divide(m_data.mi_progress.mi_progressProperty, 100.0));
 
     toolBar.add(progressBar, "newline, span, grow, gap 0");
 
     setTop(toolBar);
   }
 
+  private void search()
+  {
+    getDiskUsageData().refresh();
+    m_data.mi_progress.mi_searchActivityProperty.set("Searching...");
+    m_table.getItems().clear();
+
+    new FxTask<>((progressData) -> m_data.getList(progressData), (itemList) -> {
+      if (itemList.isEmpty())
+      {
+        m_data.mi_progress.mi_searchActivityProperty.set("No results found");
+      }
+      else
+      {
+        SearchFormPane.this.m_table.setItems(itemList);
+      }
+    }, SearchProgressData::new).execute();
+  }
+
   Node getTableNode()
   {
-    MyTableView<FileNodeIF> table;
-    MyTableColumn<FileNodeIF, StyledText> nameColumn;
-    MyTableColumn<FileNodeIF, Long> fileSizeColumn;
+    if (m_table == null)
+    {
+      MyTableColumn<FileNodeIF, StyledText> nameColumn;
+      MyTableColumn<FileNodeIF, Long> fileSizeColumn;
 
-    table = new MyTableView<>("Search");
-    table.setEditable(false);
+      m_table = new MyTableView<>("Search");
+      m_table.setEditable(false);
 
-    table.addRankColumn("Rank");
+      m_table.addRankColumn("Rank");
 
-    nameColumn = table.addColumn("Name");
-    nameColumn.setColumnCount(300);
-    nameColumn.setCellValueGetter((fn) -> {
-      return mi_data.getAbsolutePathWithSearchHighlighted(fn);
-    });
+      nameColumn = m_table.addColumn("Name");
+      nameColumn.setColumnCount(300);
+      nameColumn.setCellValueGetter((fn) -> {
+        return m_data.getAbsolutePathWithSearchHighlighted(fn);
+      });
 
-    fileSizeColumn = table.addColumn("File size");
-    fileSizeColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
-    fileSizeColumn.setColumnCount(8);
-    fileSizeColumn.setCellValueGetter((fn) -> fn.getSize());
+      fileSizeColumn = m_table.addColumn("File size");
+      fileSizeColumn.setCellValueAlignment(Pos.CENTER_RIGHT);
+      fileSizeColumn.setColumnCount(8);
+      fileSizeColumn.setCellValueGetter((fn) -> fn.getSize());
 
-    table.getPlaceholder();
-    table.setPlaceholder(new Label("Searching..."));
+      m_table.setPlaceholder(translate(m_searchActivityLabel));
 
-    new FxTask<>((progressData) -> mi_data.getList(progressData), (itemList) -> table.setItems(itemList),
-        SearchProgressData::new).execute();
+      m_searchActivityLabel.textProperty().bind(m_data.mi_progress.mi_searchActivityProperty);
+    }
 
-    return table;
+    //m_data.mi_progress.mi_searchActivityProperty.set("No data");
+    //m_table.getItems().clear();
+
+    return m_table;
+  }
+
+  public void refresh(TreeItem<FileNodeIF> selectedTreeItem)
+  {
+    super.refresh(selectedTreeItem);
   }
 
   private static class SearchProgressData
@@ -162,6 +189,7 @@ public class SearchFormPane
     private final BooleanProperty mi_stoppedOnMaxCountProperty = new SimpleBooleanProperty();
     private final BooleanProperty mi_stoppedOnTimeoutProperty = new SimpleBooleanProperty();
     private final IntegerProperty mi_progressProperty = new SimpleIntegerProperty(0);
+    private final StringProperty mi_searchActivityProperty = new SimpleStringProperty();
   }
 
   private class SearchPaneData
@@ -186,7 +214,7 @@ public class SearchFormPane
         String searchText;
         List<FileNodeIF> list;
 
-        searchText = mi_data.mi_searchTextProperty.get();
+        searchText = m_data.mi_searchTextProperty.get();
         try (PerformancePoint pp = Performance.measure("Collecting data for search '%s'", searchText))
         {
           Pattern pattern;
@@ -194,7 +222,7 @@ public class SearchFormPane
 
           list = new ArrayList<>();
 
-          if (mi_data.mi_regexSelectedProperty.get())
+          if (m_data.mi_regexSelectedProperty.get())
           {
             if (searchText.startsWith("*"))
             {
@@ -223,8 +251,8 @@ public class SearchFormPane
             fnIterator.setStoppedOnMaxCountProperty(mi_progress.mi_stoppedOnMaxCountProperty);
             fnIterator.setStoppedOnTimeoutProperty(mi_progress.mi_stoppedOnTimeoutProperty);
             fnIterator.enableProgress(mi_progress.mi_progressProperty);
-            fnIterator.setMaxCount(mi_data.mi_maxCountProperty.get());
-            fnIterator.setTimeoutInSeconds(mi_data.mi_maxTimeProperty.get());
+            fnIterator.setMaxCount(m_data.mi_maxCountProperty.get());
+            fnIterator.setTimeoutInSeconds(m_data.mi_maxTimeProperty.get());
             fnIterator.forEach(fn -> {
               String searchedString;
 

@@ -1,21 +1,12 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
-
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonCell;
-import org.kku.jdiskusage.ui.util.ConcurrentUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.ui.util.TableUtils;
-
-import javafx.application.Platform;
-import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.StackPane;
@@ -24,7 +15,7 @@ import javafx.scene.text.TextAlignment;
 public class MyTableView<T>
   extends TableView<T>
 {
-  private final Map<Integer, Integer> m_lineNumberMap = new HashMap<>();
+  private RankColumnData m_rankColumnData;
 
   public MyTableView(String id)
   {
@@ -121,53 +112,34 @@ public class MyTableView<T>
   {
     MyTableColumn<T, Integer> rankColumn;
 
+    m_rankColumnData = new RankColumnData();
+
     rankColumn = addColumn(columnName);
     rankColumn.setColumnCount(5);
-    rankColumn.setCellValueGetter(this::getLineNumber);
+    rankColumn.setCellValueGetter(m_rankColumnData::getRank);
     rankColumn.setCellValueAlignment(Pos.BASELINE_RIGHT);
-
-    itemsProperty().addListener((o, oldValue, newValue) -> {
-      m_lineNumberMap.clear();
-    });
 
     return rankColumn;
   }
 
-  private Integer getLineNumber(T t1)
+  private class RankColumnData
   {
-    return m_lineNumberMap.computeIfAbsent(System.identityHashCode(t1), (key) -> {
-      int index = getItems().indexOf(t1);
-      if (index < 0)
-      {
-        return 0;
-      }
-      return index + 1;
-    });
-  }
+    private final Map<Integer, Integer> m_lineNumberMap = new HashMap<>();
 
-  public void setItems(Supplier<List<T>> itemSupplier)
-  {
-    Node originalPlaceHolder;
-
-    originalPlaceHolder = getPlaceholder();
-    setPlaceholder(new Label("Searching..."));
-
-    ConcurrentUtil.getInstance().getDefaultExecutor().submit(() -> {
-      List<T> itemList;
-
-      itemList = itemSupplier.get();
-      Platform.runLater(() -> {
-        setItems(FXCollections.observableArrayList(itemList));
-        if (itemList.size() == 0)
+    private RankColumnData()
+    {
+      itemsProperty().addListener((o, oldItemList, newItemList) -> {
+        m_lineNumberMap.clear();
+        for (int index = 0; index < newItemList.size(); index++)
         {
-          setPlaceholder(new Label("No search data"));
-        }
-        else
-        {
-          setPlaceholder(originalPlaceHolder);
+          m_lineNumberMap.put(System.identityHashCode(newItemList.get(index)), index + 1);
         }
       });
-    });
-  }
+    }
 
+    public Integer getRank(T item)
+    {
+      return m_lineNumberMap.get(System.identityHashCode(item));
+    }
+  }
 }
