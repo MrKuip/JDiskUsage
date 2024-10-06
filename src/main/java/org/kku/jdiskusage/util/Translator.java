@@ -57,6 +57,11 @@ public class Translator
     String translatedText;
     String resourceKey;
 
+    if (StringUtils.isEmpty(text))
+    {
+      return text;
+    }
+
     resourceKey = toResourceKey(text);
 
     translatedText = m_instance.m_translationByIdMap.get(resourceKey);

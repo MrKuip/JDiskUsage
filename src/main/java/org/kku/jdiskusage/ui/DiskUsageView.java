@@ -532,7 +532,7 @@ public class DiskUsageView
     {
       MenuItem menuItem;
 
-      menuItem = translate(new MenuItem(pathList.toString()));
+      menuItem = new MenuItem(pathList.toString());
       menuItem.setGraphic(IconUtil.createIconNode("folder-outline"));
       menuItem.setOnAction(e -> {
         scanDirectory(pathList);
