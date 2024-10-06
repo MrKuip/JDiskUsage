@@ -1,7 +1,6 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-
 import org.kku.jdiskusage.conf.Language;
 import org.kku.jdiskusage.conf.LanguageConfiguration;
 import org.kku.jdiskusage.main.Main;
@@ -11,7 +10,6 @@ import org.kku.jdiskusage.ui.util.TranslateUtil;
 import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.tbee.javafx.scene.layout.MigPane;
-
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -69,7 +67,7 @@ public class PreferencesDialog
     autoExpandCheckBox = new CheckBox("Auto expand selected tree node");
     autoExpandCheckBox.selectedProperty().bindBidirectional(AppPreferences.autoExpandTreeNode.property());
 
-    autoCollapseCheckBox = new CheckBox("Auto collapse deselected tree nodes");
+    autoCollapseCheckBox = new CheckBox("Auto collapse deselected tree node");
     autoCollapseCheckBox.selectedProperty().bindBidirectional(AppPreferences.autoCollapseTreeNode.property());
 
     languageComboBox = new ComboBox<>();
@@ -96,10 +94,10 @@ public class PreferencesDialog
     pane.add(resetPreference(AppPreferences.autoExpandTreeNode));
     pane.add(translate(autoCollapseCheckBox), "spanx 2");
     pane.add(resetPreference(AppPreferences.autoCollapseTreeNode));
-    pane.add(TranslateUtil.translate(new Label("Language")));
+    pane.add(translate(new Label("Language")));
     pane.add(languageComboBox);
     pane.add(resetPreference(AppPreferences.languagePreference));
-    pane.add(TranslateUtil.translate(new Label("Max number in top Ranking")));
+    pane.add(translate(new Label("Max number in top Ranking")));
     pane.add(maxNumberInTopRankingField);
     pane.add(resetPreference(AppPreferences.maxNumberInTopRanking));
     pane.add(resetAllButton, "spanx, align right");
