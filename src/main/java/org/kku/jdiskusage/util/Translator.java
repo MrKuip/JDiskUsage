@@ -1,8 +1,15 @@
 package org.kku.jdiskusage.util;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import org.kku.jdiskusage.conf.Language;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
@@ -15,6 +22,7 @@ public class Translator
 {
   // Singleton
   private static Translator m_instance = new Translator();
+  private static boolean debugUntranslatedTexts = true;
 
   private Map<String, String> m_translationByIdMap = new HashMap<>();
   private Map<String, StringProperty> m_translationPropertyByIdMap = new HashMap<>();
@@ -55,8 +63,33 @@ public class Translator
     if (StringUtils.isEmpty(translatedText))
     {
       translatedText = text;
+      debugUntranslatedText(translatedText);
     }
     return translatedText;
+  }
+
+  private static void debugUntranslatedText(String unTranslatedText)
+  {
+    if (debugUntranslatedTexts)
+    {
+      try
+      {
+        Path path;
+
+        path = Paths.get("untranslated.txt");
+        if (Files.notExists(path) || Files.readAllLines(Paths.get("untranslated.txt")).stream()
+            .noneMatch(txt -> Objects.equals(txt, unTranslatedText)))
+        {
+          Files.write(path, Collections.singletonList(unTranslatedText), StandardOpenOption.APPEND,
+              StandardOpenOption.CREATE);
+        }
+      }
+      catch (IOException e)
+      {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
   }
 
   private void reload()
