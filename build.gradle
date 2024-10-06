@@ -58,3 +58,7 @@ task initEclipseMetaData {
   }
 }
 
+
+tasks.withType(JavaCompile) {
+    options.deprecation = true
+}

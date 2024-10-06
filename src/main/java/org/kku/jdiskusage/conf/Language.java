@@ -4,12 +4,9 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
 import org.kku.conf.ConfigurationItem;
 import org.kku.jdiskusage.util.Log;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javafx.scene.image.Image;
 
 public class Language
@@ -90,7 +87,7 @@ public class Language
   {
     if (mi_locale == null)
     {
-      mi_locale = new Locale(mi_language);
+      mi_locale = Locale.of(mi_language);
     }
 
     return mi_locale;
