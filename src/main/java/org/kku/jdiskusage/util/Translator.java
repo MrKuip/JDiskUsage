@@ -4,10 +4,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
-
 import org.kku.jdiskusage.conf.Language;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -26,8 +24,6 @@ public class Translator
 
   private Translator()
   {
-    reload();
-
     m_languageProperty.addListener((o, oldValue, newValue) -> changeLanguage(newValue));
     m_languageProperty.bind(AppPreferences.languagePreference.property());
   }
@@ -65,11 +61,24 @@ public class Translator
 
   private void reload()
   {
-    ResourceBundle bundle;
-
     m_translationByIdMap.clear();
 
-    bundle = ResourceBundle.getBundle(bundleName);
+    // First choice is translations from the current language setting.
+    reload(m_languageProperty.get().getLocale());
+    // Second choice is the translations in english.
+    reload(Locale.ENGLISH);
+    // Last choice is the untranslated key (as programmed in the software)
+
+    m_translationPropertyByIdMap.entrySet().forEach(entry -> {
+      entry.getValue().set(getTranslatedText(entry.getKey()));
+    });
+  }
+
+  private void reload(Locale locale)
+  {
+    ResourceBundle bundle;
+
+    bundle = ResourceBundle.getBundle(bundleName, locale);
     if (bundle != null)
     {
       bundle.keySet().forEach(key -> {
@@ -79,13 +88,9 @@ public class Translator
         resourceKey = toResourceKey(key);
         value = bundle.getString(key);
 
-        m_translationByIdMap.put(resourceKey, value);
+        m_translationByIdMap.putIfAbsent(resourceKey, value);
       });
     }
-
-    m_translationPropertyByIdMap.entrySet().forEach(entry -> {
-      entry.getValue().set(getTranslatedText(entry.getKey()));
-    });
   }
 
   private static String toResourceKey(String text)
