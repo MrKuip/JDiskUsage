@@ -197,7 +197,7 @@ public class DirectoryChooser
 
     private DirectoryNode getHomeNode()
     {
-      return new DirectoryNode("Home", "home", Path.of(System.getProperty("user.home")));
+      return new DirectoryNode(translate("Home"), "home", Path.of(System.getProperty("user.home")));
     }
 
     private List<DirectoryNode> getFavoriteNodes()
