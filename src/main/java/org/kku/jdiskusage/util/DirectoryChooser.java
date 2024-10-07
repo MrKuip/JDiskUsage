@@ -25,6 +25,8 @@ import org.tbee.javafx.scene.layout.MigPane;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -40,6 +42,8 @@ import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.stage.Window;
@@ -48,6 +52,7 @@ public class DirectoryChooser
 {
   private final ObjectProperty<Path> m_directory = new SimpleObjectProperty<>();
   private final ObjectProperty<SelectionMode> m_selectionMode = new SimpleObjectProperty<>(SelectionMode.SINGLE);
+  private final StringProperty m_searchText = new SimpleStringProperty();
 
   private FxDialog<PathList> m_dialog;
   private final FavoriteDirectoryNodes m_favoriteDirectoryNodes = new FavoriteDirectoryNodes();
@@ -107,6 +112,10 @@ public class DirectoryChooser
     content.add(m_breadCrumbPane, "dock north");
     content.add(m_directoryPane, "grow");
 
+    content.addEventFilter(KeyEvent.KEY_PRESSED, m_toolBarPane::onKeyTyped);
+    content.addEventFilter(KeyEvent.KEY_RELEASED, m_toolBarPane::onKeyTyped);
+    content.addEventFilter(KeyEvent.KEY_TYPED, m_toolBarPane::onKeyTyped);
+
     m_dialog = new FxDialog<>(content, PathList.empty());
     m_dialog.showAndWait();
 
@@ -116,15 +125,18 @@ public class DirectoryChooser
   private class ToolBarPane
     extends MigPane
   {
+    private TextField mi_searchField;
+
     private ToolBarPane()
     {
-      super("insets 0 0 6 0", "[]push[]", "[pref:pref:pref]");
+      super("insets 0 0 6 0", "[]push[]push[][]", "[pref:pref:pref]");
       init();
     }
 
     private void init()
     {
       Button cancelButton;
+      Button searchButton;
       Button openButton;
 
       cancelButton = translate(
@@ -133,6 +145,18 @@ public class DirectoryChooser
       cancelButton.setOnAction((ae) -> {
         m_dialog.close();
       });
+
+      mi_searchField = new TextField();
+      mi_searchField.setText("");
+      mi_searchField.setVisible(false);
+      m_searchText.bind(mi_searchField.textProperty());
+
+      searchButton = translate(new Button("", new FxIcon("magnify").size(IconSize.SMALL).getIconLabel()));
+      searchButton.setOnAction((ae) -> {
+        mi_searchField.setVisible(true);
+        mi_searchField.requestFocus();
+      });
+      searchButton.setAlignment(Pos.BASELINE_LEFT);
 
       openButton = translate(new Button("Open", new FxIcon("open-in-new").size(IconSize.SMALL).getIconLabel()));
       openButton.setAlignment(Pos.BASELINE_LEFT);
@@ -147,7 +171,39 @@ public class DirectoryChooser
       });
 
       add(cancelButton, "tag cancel, sg buttons");
+      add(mi_searchField, "");
+      add(searchButton, "");
       add(openButton, "tag ok, sg buttons");
+    }
+
+    public void onKeyTyped(KeyEvent ke)
+    {
+      if (ke.getCode() == KeyCode.UP || ke.getCode() == KeyCode.DOWN || ke.getCode() == KeyCode.ENTER)
+      {
+        if (ke.getTarget() != m_directoryPane.getTableView())
+        {
+          KeyEvent ke2;
+
+          ke2 = ke.copyFor(m_directoryPane.getTableView(), m_directoryPane.getTableView());
+          m_directoryPane.getTableView().fireEvent(ke2);
+          m_directoryPane.getTableView().requestFocus();
+          ke.consume();
+        }
+
+        return;
+      }
+      else if (ke.getTarget() != mi_searchField)
+      {
+        KeyEvent ke2;
+
+        mi_searchField.setVisible(true);
+        mi_searchField.requestFocus();
+        mi_searchField.forward();
+
+        ke2 = ke.copyFor(mi_searchField, mi_searchField);
+        mi_searchField.fireEvent(ke2);
+        ke.consume();
+      }
     }
   }
 
@@ -326,6 +382,11 @@ public class DirectoryChooser
       init();
     }
 
+    public MyTableView<Path> getTableView()
+    {
+      return mi_tableView;
+    }
+
     public List<Path> getSelectedPaths()
     {
       return mi_tableView.getSelectionModel().getSelectedItems();
@@ -337,7 +398,11 @@ public class DirectoryChooser
 
       add(mi_tableView);
 
-      m_directory.addListener((a, b, newDirectory) -> {
+      m_searchText.addListener((obs, oldValue, newValue) -> {
+        fillTableView();
+      });
+
+      m_directory.addListener((obs, oldValue, newValue) -> {
         fillTableView();
       });
     }
@@ -354,6 +419,12 @@ public class DirectoryChooser
       tableView.getSelectionModel().selectionModeProperty().bind(m_selectionMode);
       tableView.getSelectionModel().setCellSelectionEnabled(false);
       tableView.setEditable(false);
+      tableView.setOnKeyReleased((ke) -> {
+        if (ke.getCode() == KeyCode.ENTER)
+        {
+          selectDirectory();
+        }
+      });
       tableView.setOnMousePressed(new EventHandler<MouseEvent>()
       {
         @Override
@@ -361,7 +432,7 @@ public class DirectoryChooser
         {
           if (event.isPrimaryButtonDown() && event.getClickCount() == 2)
           {
-            setDirectory(tableView.getSelectionModel().getSelectedItem());
+            selectDirectory();
           }
         }
       });
@@ -391,6 +462,14 @@ public class DirectoryChooser
       return tableView;
     }
 
+    private void selectDirectory()
+    {
+      setDirectory(mi_tableView.getSelectionModel().getSelectedItem());
+      m_toolBarPane.mi_searchField.setText("");
+      m_toolBarPane.mi_searchField.setVisible(false);
+
+    }
+
     private void fillTableView()
     {
       mi_tableView.getItems().clear();
@@ -398,9 +477,20 @@ public class DirectoryChooser
       try (Stream<Path> stream = Files.list(getDirectory()))
       {
         ObservableList<Path> list;
+        String searchText;
 
-        list = stream.filter(path -> Files.isDirectory(path)).sorted()
-            .collect(Collectors.toCollection(FXCollections::observableArrayList));
+        searchText = m_searchText.get();
+
+        list = stream.filter(Files::isDirectory) // Filter only directories
+            .filter(path -> StringUtils.isEmpty(searchText)
+                || path.toString().toLowerCase().contains(searchText.toLowerCase())) // Search filter
+            .sorted(Comparator
+                .comparing(
+                    (Path path) -> path.getFileName().toString().toLowerCase().startsWith(searchText.toLowerCase()))
+                .reversed() // Sort paths where the name starts with `searchText` first
+                .thenComparing(path -> path.getFileName().toString().toLowerCase()) // Then sort alphabetically by file name
+            ).collect(Collectors.toCollection(FXCollections::observableArrayList));
+
         mi_tableView.setItems(list);
       }
       catch (IOException e)
