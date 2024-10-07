@@ -17,6 +17,7 @@ public class AppSettings
   public final static AppPropertyType<Double> SPLIT_PANE_POSITION;
   public final static AppPropertyType<Double> PREF_SIZE;
   public final static AppPropertyType<String> SELECTED_ID;
+  public final static AppPropertyType<SearchHistoryList> SEARCH_HISTORY;
 
   static
   {
@@ -30,6 +31,7 @@ public class AppSettings
     SPLIT_PANE_POSITION = m_instance.createAppPropertyType("SPLIT_PANE_POSITION", Converters.getDoubleConverter());
     PREF_SIZE = m_instance.createAppPropertyType("PREF_SIZE", Converters.getDoubleConverter());
     SELECTED_ID = m_instance.createAppPropertyType("SELECTED_ID", Converters.getStringConverter());
+    SEARCH_HISTORY = m_instance.createAppPropertyType("SEARCH_HISTORY", SearchHistoryList.getConverter());
   }
 
   private AppSettings()
