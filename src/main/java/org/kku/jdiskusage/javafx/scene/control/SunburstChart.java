@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import org.kku.jdiskusage.ui.util.Colors;
+import org.kku.jdiskusage.util.value.MutableDouble;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.NumberBinding;
 import javafx.beans.property.DoubleProperty;
@@ -120,42 +121,6 @@ public class SunburstChart<T>
       return m_radixPropertyMap.computeIfAbsent(level,
           key -> Bindings.min(SunburstChart.this.widthProperty(), SunburstChart.this.heightProperty())
               .divide(m_maxLevel * 2).multiply(level));
-    }
-  }
-
-  public class MutableDouble
-  {
-    private double value;
-
-    public MutableDouble(double value)
-    {
-      this.value = value;
-    }
-
-    public double get()
-    {
-      return value;
-    }
-
-    public void set(double value)
-    {
-      this.value = value;
-    }
-
-    public void add(double delta)
-    {
-      this.value += delta;
-    }
-
-    public void subtract(double delta)
-    {
-      this.value -= delta;
-    }
-
-    @Override
-    public String toString()
-    {
-      return Double.toString(value);
     }
   }
 }
