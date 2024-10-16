@@ -22,6 +22,7 @@ public class AppPreferences
   public final static AppProperty<Integer> maxNumberOfChartElements;
   public final static AppProperty<Double> minPercentageChartElement;
   public final static AppProperty<Integer> maxNumberInTopRanking;
+  public final static AppProperty<Integer> maxNumberOfElementsInSunburstChart;
 
   static
   {
@@ -52,6 +53,9 @@ public class AppPreferences
     maxNumberInTopRanking = m_instance
         .createAppPropertyType("Max number in top ranking", Converters.getIntegerConverter())
         .forSubject(m_instance, 50);
+    maxNumberOfElementsInSunburstChart = m_instance
+        .createAppPropertyType("Max number of levels in sunburst chart", Converters.getIntegerConverter())
+        .forSubject(m_instance, 5);
   }
 
   protected AppPreferences()

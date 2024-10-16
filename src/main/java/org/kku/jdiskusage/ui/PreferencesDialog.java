@@ -114,6 +114,7 @@ public class PreferencesDialog
     MigPane pane;
     NumericTextField<Integer> maxNumberOfElementsField;
     NumericTextField<Double> minPercentageElementField;
+    NumericTextField<Integer> maxNumberOfLevelsSunburstChartField;
     Button restoreButton;
 
     maxNumberOfElementsField = NumericTextField.integerField();
@@ -124,22 +125,36 @@ public class PreferencesDialog
     minPercentageElementField.setPrefWidth(80.0);
     minPercentageElementField.valueProperty().bindBidirectional(AppPreferences.minPercentageChartElement.property());
 
+    maxNumberOfLevelsSunburstChartField = NumericTextField.integerField();
+    maxNumberOfLevelsSunburstChartField.setPrefWidth(80.0);
+    maxNumberOfLevelsSunburstChartField.valueProperty()
+        .bindBidirectional(AppPreferences.maxNumberOfElementsInSunburstChart.property());
+
+    minPercentageElementField = NumericTextField.doubleField();
+
     restoreButton = translate(new Button("Reset all to default", IconUtil.createIconNode("restore")));
     restoreButton.setOnAction((ae) -> {
       AppPreferences.maxNumberOfChartElements.reset();
       AppPreferences.minPercentageChartElement.reset();
     });
 
-    pane = new MigPane("wrap 4", "[][][]push[align right]", "[][]push[]");
+    pane = new MigPane("wrap 4", "[][][]push[align right]", "[][][]push[]");
 
     pane.add(translate(new Label("Chart shows at most")));
     pane.add(maxNumberOfElementsField, "");
     pane.add(translate(new Label("elements")), "");
     pane.add(resetPreference(AppPreferences.maxNumberOfChartElements));
+
     pane.add(translate(new Label("Show elements larger than")));
     pane.add(minPercentageElementField, "");
     pane.add(new Label("%"), "");
     pane.add(resetPreference(AppPreferences.minPercentageChartElement));
+
+    pane.add(translate(new Label("Sunburst chart has at most")));
+    pane.add(maxNumberOfLevelsSunburstChartField, "");
+    pane.add(translate(new Label("levels")));
+    pane.add(resetPreference(AppPreferences.maxNumberOfElementsInSunburstChart));
+
     pane.add(restoreButton, "spanx, align right");
 
     tab = translate(new Tab("Charting"));
