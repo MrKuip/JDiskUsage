@@ -80,11 +80,17 @@ class SizeFormPane
           FileNodeIF fileNode;
 
           fileNode = treeNode.getValue();
+
           Tooltip.install(node, new Tooltip(fileNode.getAbsolutePath()));
+
           node.addEventHandler(MouseEvent.MOUSE_CLICKED, (me) -> {
             if (fileNode.isDirectory())
             {
               getDiskUsageData().getTreePaneData().navigateTo(treeNode);
+            }
+            else
+            {
+              getDiskUsageData().getTreePaneData().navigateTo(treeNode.getParent());
             }
           });
         });
