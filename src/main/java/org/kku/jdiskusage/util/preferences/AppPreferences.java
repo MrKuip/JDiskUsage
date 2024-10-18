@@ -4,6 +4,7 @@ import org.kku.jdiskusage.conf.Language;
 import org.kku.jdiskusage.conf.LanguageConfiguration;
 import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.Converters;
+import org.kku.jdiskusage.util.Converters.Converter;
 
 public class AppPreferences
   extends AppProperties
@@ -56,6 +57,11 @@ public class AppPreferences
     maxNumberOfElementsInSunburstChart = m_instance
         .createAppPropertyType("Max number of levels in sunburst chart", Converters.getIntegerConverter())
         .forSubject(m_instance, 5);
+  }
+
+  static public <T> AppPropertyType<T> createPreference(String name, Converter<T> converter)
+  {
+    return m_instance.createAppPropertyType(name, converter);
   }
 
   protected AppPreferences()
