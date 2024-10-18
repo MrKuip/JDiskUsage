@@ -1,12 +1,14 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import org.kku.jdiskusage.ui.util.Colors;
 import org.kku.jdiskusage.util.value.MutableDouble;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.NumberBinding;
@@ -15,6 +17,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -24,10 +27,11 @@ import javafx.scene.shape.ArcType;
 public class SunburstChart<T>
   extends Region
 {
-  private final TreeItem<T> m_root;
-  private final int m_maxLevel;
+  private TreeItem<T> m_root;
+  private int m_maxLevel = 3;
   private final Function<T, Double> m_valueSupplier;
-  private final BiConsumer<Node, TreeItem<T>> m_nodeCreationCallback;
+  private BiConsumer<Node, TreeItem<T>> m_nodeCreationCallback;
+  private List<Color> m_colorList = new ArrayList<>();
 
   private final Map<TreeItem<T>, Color> m_colorByItemMap = new HashMap<>();
   private final Map<String, Color> m_colorByLevelMap = new HashMap<>();
@@ -37,18 +41,47 @@ public class SunburstChart<T>
   private final DoubleProperty m_centerYProperty = new SimpleDoubleProperty();
   private final IntegerProperty m_detectedMaxLevelProperty = new SimpleIntegerProperty();
 
-  public SunburstChart(TreeItem<T> root, int maxLevel, Function<T, Double> valueSupplier,
-      BiConsumer<Node, TreeItem<T>> nodeCreationCallback)
+  public SunburstChart(Function<T, Double> valueSupplier)
   {
-    m_root = root;
-    m_maxLevel = maxLevel;
     m_valueSupplier = valueSupplier;
-    m_nodeCreationCallback = nodeCreationCallback;
 
     m_centerXProperty.bind(this.widthProperty().divide(2));
     m_centerYProperty.bind(this.heightProperty().divide(2));
 
-    createNodes(root, 90.0, -360.0, 1);
+    refresh();
+  }
+
+  public void setMaxLevel(int maxLevel)
+  {
+    m_maxLevel = maxLevel;
+    refresh();
+  }
+
+  public void setColorList(List<Color> colorList)
+  {
+    m_colorList = colorList;
+    refresh();
+  }
+
+  public void setNodeCreationCallBack(BiConsumer<Node, TreeItem<T>> nodeCreationCallback)
+  {
+    m_nodeCreationCallback = nodeCreationCallback;
+    refresh();
+  }
+
+  public void setModel(TreeItem<T> root)
+  {
+    m_root = root;
+    refresh();
+  }
+
+  private void refresh()
+  {
+    if (m_root != null)
+    {
+      getChildren().clear();
+      createNodes(Arrays.asList(m_root), 90.0, -360.0, 1);
+    }
   }
 
   /**
@@ -60,13 +93,13 @@ public class SunburstChart<T>
    * @param level
    */
 
-  private void createNodes(TreeItem<T> root, double startAngle, double maxLength, int level)
+  private void createNodes(List<TreeItem<T>> children, double startAngle, double maxLength, int level)
   {
-    root.getChildren().stream().map(TreeItem::getValue).map(m_valueSupplier).reduce(Double::sum).ifPresent(sum -> {
+    children.stream().map(TreeItem::getValue).map(m_valueSupplier).reduce(Double::sum).ifPresent(sum -> {
       MutableDouble previousStartAngle;
 
       previousStartAngle = new MutableDouble(startAngle);
-      root.getChildren().forEach(item -> {
+      children.forEach(item -> {
         Arc arc;
 
         arc = new Arc();
@@ -84,15 +117,27 @@ public class SunburstChart<T>
         // Recursively add the arc's from the next level
         if (level < m_maxLevel && item.getChildren().size() > 0 && Math.abs(arc.getLength()) > 2)
         {
-          createNodes(item, arc.getStartAngle(), arc.getLength(), level + 1);
+          createNodes(item.getChildren(), arc.getStartAngle(), arc.getLength(), level + 1);
         }
 
         // First the arc's of the highest level are added (This is necessary because they need to be 
         // painted over by arc's of a lower level) 
         if (Math.abs(arc.getLength()) > 0.5)
         {
-          m_nodeCreationCallback.accept(arc, item);
+          if (m_nodeCreationCallback != null)
+          {
+            m_nodeCreationCallback.accept(arc, item);
+          }
           getChildren().add(arc);
+          if (item == m_root)
+          {
+            Label label;
+
+            label = new Label(item.getValue().toString());
+            label.layoutXProperty().bind(arc.centerXProperty().subtract(label.widthProperty().divide(2)));
+            label.layoutYProperty().bind(arc.centerYProperty().subtract(label.heightProperty().divide(2)));
+            getChildren().add(label);
+          }
 
           if (m_detectedMaxLevelProperty.get() < level)
           {
@@ -107,7 +152,14 @@ public class SunburstChart<T>
   {
     Optional<TreeItem<T>> parent;
 
-    parent = Stream.iterate(item, TreeItem::getParent).filter(itm -> itm.getParent() == m_root).findFirst();
+    if (item == m_root)
+    {
+      parent = Optional.of(item);
+    }
+    else
+    {
+      parent = Stream.iterate(item, TreeItem::getParent).filter(itm -> itm.getParent() == m_root).findFirst();
+    }
     if (parent.isPresent())
     {
       Color color;
@@ -115,7 +167,7 @@ public class SunburstChart<T>
       // The basic color of a child is determined from it's ultimate parent that is not the root.
       // (That is the parent just 1 level above the root)
       color = m_colorByItemMap.computeIfAbsent(parent.get(),
-          key -> Colors.values()[m_colorByItemMap.size() % Colors.values().length].getColor());
+          key -> m_colorList.get(m_colorByItemMap.size() % m_colorList.size()));
 
       // The basic color is made 'darker' depended on it's level. The higher the level the darker the arc.
       return m_colorByLevelMap.computeIfAbsent(color.toString() + "-" + level, key -> {

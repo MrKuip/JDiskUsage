@@ -1,8 +1,10 @@
 package org.kku.jdiskusage.ui;
 
+import java.util.stream.Stream;
 import org.kku.jdiskusage.javafx.scene.control.SunburstChart;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
+import org.kku.jdiskusage.ui.util.Colors;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
@@ -75,25 +77,32 @@ class SizeFormPane
 
   Node getSunburstChartNode()
   {
-    return new SunburstChart<>(getCurrentTreeItem(), AppPreferences.maxNumberOfElementsInSunburstChart.get(),
-        fn -> (double) fn.getSize(), (node, treeNode) -> {
-          FileNodeIF fileNode;
+    SunburstChart<FileNodeIF> chart;
 
-          fileNode = treeNode.getValue();
+    chart = new SunburstChart<>(fn -> (double) fn.getSize());
+    chart.setMaxLevel(AppPreferences.maxNumberOfElementsInSunburstChart.get());
+    chart.setNodeCreationCallBack((node, treeNode) -> {
+      FileNodeIF fileNode;
 
-          Tooltip.install(node, new Tooltip(fileNode.getAbsolutePath()));
+      fileNode = treeNode.getValue();
 
-          node.addEventHandler(MouseEvent.MOUSE_CLICKED, (me) -> {
-            if (fileNode.isDirectory())
-            {
-              getDiskUsageData().getTreePaneData().navigateTo(treeNode);
-            }
-            else
-            {
-              getDiskUsageData().getTreePaneData().navigateTo(treeNode.getParent());
-            }
-          });
-        });
+      Tooltip.install(node, new Tooltip(fileNode.getAbsolutePath()));
+
+      node.addEventHandler(MouseEvent.MOUSE_CLICKED, (me) -> {
+        if (fileNode.isDirectory())
+        {
+          getDiskUsageData().getTreePaneData().navigateTo(treeNode);
+        }
+        else
+        {
+          getDiskUsageData().getTreePaneData().navigateTo(treeNode.getParent());
+        }
+      });
+    });
+    chart.setColorList(Stream.of(Colors.values()).map(Colors::getColor).toList());
+    chart.setModel(getCurrentTreeItem());
+
+    return chart;
   }
 
   Node getTableNode()
