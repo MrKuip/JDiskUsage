@@ -4,6 +4,7 @@ import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import org.kku.jdiskusage.conf.Language;
 import org.kku.jdiskusage.conf.LanguageConfiguration;
 import org.kku.jdiskusage.main.Main;
+import org.kku.jdiskusage.ui.util.Colors;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.ui.util.TranslateUtil;
@@ -14,11 +15,13 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 
 public class PreferencesDialog
@@ -39,7 +42,6 @@ public class PreferencesDialog
     m_dialog.setTitle("Preferences");
     TranslateUtil.bind(m_dialog.titleProperty());
     m_dialog.getDialogPane().getScene().getWindow().setOnCloseRequest((e) -> m_dialog.close());
-    m_dialog.getDialogPane().setPrefSize(600, 400);
     m_dialog.getDialogPane().setMinSize(600, 400);
     m_dialog.showAndWait();
   }
@@ -49,14 +51,13 @@ public class PreferencesDialog
     TabPane tabPane;
 
     tabPane = new TabPane();
-    tabPane.getTabs().addAll(getGeneralTab(), getChartingTab());
+    tabPane.getTabs().addAll(getGeneralTab(), getChartingTab(), getColorsTab());
 
     return tabPane;
   }
 
   private Tab getGeneralTab()
   {
-    Tab tab;
     MigPane pane;
     CheckBox autoExpandCheckBox;
     CheckBox autoCollapseCheckBox;
@@ -102,15 +103,11 @@ public class PreferencesDialog
     pane.add(resetPreference(AppPreferences.maxNumberInTopRanking));
     pane.add(resetAllButton, "spanx, align right");
 
-    tab = translate(new Tab("General"));
-    tab.setContent(pane);
-
-    return tab;
+    return createTab("General", pane);
   }
 
   private Tab getChartingTab()
   {
-    Tab tab;
     MigPane pane;
     NumericTextField<Integer> maxNumberOfElementsField;
     NumericTextField<Double> minPercentageElementField;
@@ -157,8 +154,62 @@ public class PreferencesDialog
 
     pane.add(restoreButton, "spanx, align right");
 
-    tab = translate(new Tab("Charting"));
-    tab.setContent(pane);
+    return createTab("Charting", pane);
+  }
+
+  private Tab getColorsTab()
+  {
+    MigPane pane;
+    HBox box;
+
+    box = new HBox(30);
+    pane = null;
+    for (int index = 0; index < Colors.values().length; index++)
+    {
+      Label colorLabel;
+      Colors colors;
+      ColorPicker colorPicker;
+      Button restoreButton;
+
+      if (index == 0 || index == Colors.values().length / 2)
+      {
+        pane = new MigPane("wrap 4", "[][][]10[]", "");
+        box.getChildren().add(pane);
+      }
+
+      colors = Colors.values()[index];
+
+      colorLabel = new Label();
+      colorLabel.setMinWidth(80.0);
+      colorLabel.setStyle(colors.getBackgroundCss());
+
+      colorPicker = new ColorPicker();
+      colorPicker.setValue(colors.getColor());
+      colorPicker.setOnAction((ae2) -> {
+        colors.setPrefColor(colorPicker.getValue());
+      });
+
+      restoreButton = translate(new Button("", IconUtil.createIconNode("restore")));
+      restoreButton.setOnAction((ae) -> {
+        colors.reset();
+      });
+
+      pane.add(new Label(String.valueOf(index + 1)));
+      pane.add(colorLabel, "growy, growx");
+      pane.add(colorPicker);
+      pane.add(restoreButton, "spanx, align right");
+    }
+
+    return createTab("Colors", box);
+  }
+
+  private Tab createTab(String text, Node content)
+  {
+    Tab tab;
+
+    tab = translate(new Tab(text));
+    tab.setContent(content);
+    tab.setClosable(false);
 
     return tab;
   }

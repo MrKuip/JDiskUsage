@@ -1,5 +1,10 @@
 package org.kku.jdiskusage.ui.util;
 
+import org.kku.jdiskusage.util.AppProperties.AppProperty;
+import org.kku.jdiskusage.util.Converters;
+import org.kku.jdiskusage.util.preferences.AppPreferences;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
 
 public enum Colors
@@ -27,20 +32,61 @@ public enum Colors
 
   private final String mi_webColor;
   private final Color mi_color;
+  private final ObjectProperty<Color> mi_colorProperty = new SimpleObjectProperty<Color>();
+  private final AppProperty<Color> mi_preference;
+  private String mi_prefWebColor;
+  private Color mi_prefColor;
 
   Colors(String webColor)
   {
     mi_webColor = webColor;
     mi_color = Color.web(webColor);
+    mi_preference = AppPreferences.createPreference("color" + ordinal(), Converters.getColorConverter())
+        .forSubject(this, null);
+    mi_prefColor = mi_preference.get();
+    mi_prefWebColor = toHexString(mi_prefColor);
+
+    mi_colorProperty.set(getColor());
+
+    mi_preference.addListener((obs, oldValue, newValue) -> {
+      mi_prefColor = newValue;
+      mi_prefWebColor = toHexString(newValue);
+      mi_colorProperty.set(getColor());
+
+      ChartStyleSheet.getInstance().refresh();
+    });
+  }
+
+  public void reset()
+  {
+    mi_preference.set(null);
+  }
+
+  public void setPrefColor(Color prefColor)
+  {
+    mi_preference.set(prefColor);
   }
 
   public String getWebColor()
   {
+    if (mi_prefWebColor != null)
+    {
+      return mi_prefWebColor;
+    }
     return mi_webColor;
+  }
+
+  public ObjectProperty<Color> colorProperty()
+  {
+    return mi_colorProperty;
   }
 
   public Color getColor()
   {
+    if (mi_prefColor != null)
+    {
+      return mi_prefColor;
+    }
     return mi_color;
   }
 
@@ -63,7 +109,7 @@ public enum Colors
 
   public String getBackgroundCss()
   {
-    return "-fx-background-color: " + mi_webColor + ";";
+    return "-fx-background-color: " + getWebColor() + ";";
   }
 
   public String getBackgroundCss(double newBrightness)
@@ -73,11 +119,13 @@ public enum Colors
 
   public static String toHexString(Color color)
   {
-    int r = (int) (color.getRed() * 255);
-    int g = (int) (color.getGreen() * 255);
-    int b = (int) (color.getBlue() * 255);
-    int a = (int) (color.getOpacity() * 255);
+    if (color == null)
+    {
+      return null;
+    }
 
-    return String.format("#%02X%02X%02X%02X", r, g, b, a);
+    return String.format("#%02X%02X%02X%02X", (int) (color.getRed() * 255), (int) (color.getGreen() * 255),
+        (int) (color.getBlue() * 255), (int) (color.getOpacity() * 255));
   }
+
 }

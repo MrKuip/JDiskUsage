@@ -2,9 +2,10 @@ package org.kku.jdiskusage.util;
 
 import java.nio.file.Path;
 import java.util.function.Function;
-
 import org.kku.jdiskusage.conf.Language;
 import org.kku.jdiskusage.conf.LanguageConfiguration;
+import org.kku.jdiskusage.ui.util.Colors;
+import javafx.scene.paint.Color;
 
 public class Converters
 {
@@ -43,12 +44,17 @@ public class Converters
     return new Converter<Path>(Path::of, Path::toString);
   }
 
+  public static Converter<Color> getColorConverter()
+  {
+    return new Converter<Color>(Color::web, Colors::toHexString);
+  }
+
   public static <E extends Enum<E>> Converter<E> getEnumConverter(Class<E> enumClass)
   {
     return new Converter<E>((s) -> Enum.valueOf(enumClass, s), (e) -> e.name());
   }
 
-  static class Converter<T>
+  public static class Converter<T>
   {
     private Function<String, T> mi_fromString;
     private Function<T, String> mi_toString;

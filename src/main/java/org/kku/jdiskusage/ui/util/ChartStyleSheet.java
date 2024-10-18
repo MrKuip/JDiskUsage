@@ -1,9 +1,32 @@
 package org.kku.jdiskusage.ui.util;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 public class ChartStyleSheet
 {
-  public ChartStyleSheet()
+  private static ChartStyleSheet m_instance = new ChartStyleSheet();
+
+  private StringProperty m_styleSheetProperty = new SimpleStringProperty();
+
+  private ChartStyleSheet()
   {
+    refresh();
+  }
+
+  public static ChartStyleSheet getInstance()
+  {
+    return m_instance;
+  }
+
+  public StringProperty styleSheetProperty()
+  {
+    return m_styleSheetProperty;
+  }
+
+  public void refresh()
+  {
+    m_styleSheetProperty.set(getStyleSheet());
   }
 
   public String getStyleSheet()

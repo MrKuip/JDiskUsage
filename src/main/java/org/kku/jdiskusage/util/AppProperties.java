@@ -12,9 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
 import org.kku.jdiskusage.util.Converters.Converter;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -214,7 +212,14 @@ public abstract class AppProperties
     {
       Log.log.fine("Mark properties[%s] dirty because property %s changed from %s to %s", getFilePath(), propertyName,
           getProperties().get(propertyName), stringValue);
-      getProperties().put(propertyName, stringValue);
+      if (stringValue == null)
+      {
+        removeProperty(propertyName);
+      }
+      else
+      {
+        getProperties().put(propertyName, stringValue);
+      }
       markDirty();
     }
 
