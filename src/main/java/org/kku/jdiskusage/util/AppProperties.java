@@ -212,7 +212,14 @@ public abstract class AppProperties
     {
       Log.log.fine("Mark properties[%s] dirty because property %s changed from %s to %s", getFilePath(), propertyName,
           getProperties().get(propertyName), stringValue);
-      getProperties().put(propertyName, stringValue);
+      if (stringValue == null)
+      {
+        removeProperty(propertyName);
+      }
+      else
+      {
+        getProperties().put(propertyName, stringValue);
+      }
       markDirty();
     }
 

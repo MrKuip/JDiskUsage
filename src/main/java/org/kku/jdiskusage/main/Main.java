@@ -2,7 +2,6 @@ package org.kku.jdiskusage.main;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-
 import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.ui.util.ChartStyleSheet;
 import org.kku.jdiskusage.util.AppProperties.AppProperty;
@@ -10,7 +9,6 @@ import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.PathList;
 import org.kku.jdiskusage.util.SuppressFBWarnings;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Rectangle2D;
@@ -45,7 +43,10 @@ public class Main
 
     scene = new Scene(m_rootNode);
     scene.getStylesheets().add("jdiskusage.css");
-    scene.getStylesheets().add(new ChartStyleSheet().getStyleSheet());
+    ChartStyleSheet.getInstance().styleSheetProperty().addListener((obs, oldValue, newValue) -> {
+      scene.getStylesheets().remove(oldValue);
+      scene.getStylesheets().add(newValue);
+    });
 
     defaultScreenBounds = getDefaultScreenBounds();
 
@@ -66,6 +67,8 @@ public class Main
 
     getParameters().getRaw().stream().map(Path::of).filter(path -> Files.exists(path) && Files.isDirectory(path))
         .map(PathList::of).findFirst().ifPresent(diskUsageView::scanDirectory);
+
+    ChartStyleSheet.getInstance().refresh();
   }
 
   @SuppressFBWarnings(value = "MS_EXPOSE_REP")

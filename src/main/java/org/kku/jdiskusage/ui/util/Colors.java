@@ -3,6 +3,8 @@ package org.kku.jdiskusage.ui.util;
 import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.Converters;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
 
 public enum Colors
@@ -30,6 +32,7 @@ public enum Colors
 
   private final String mi_webColor;
   private final Color mi_color;
+  private final ObjectProperty<Color> mi_colorProperty = new SimpleObjectProperty<Color>();
   private final AppProperty<Color> mi_preference;
   private String mi_prefWebColor;
   private Color mi_prefColor;
@@ -46,6 +49,9 @@ public enum Colors
     mi_preference.addListener((obs, oldValue, newValue) -> {
       mi_prefColor = newValue;
       mi_prefWebColor = toHexString(newValue);
+      mi_colorProperty.set(getColor());
+
+      ChartStyleSheet.getInstance().refresh();
     });
   }
 
@@ -66,6 +72,11 @@ public enum Colors
       return mi_prefWebColor;
     }
     return mi_webColor;
+  }
+
+  public ObjectProperty<Color> colorProperty()
+  {
+    return mi_colorProperty;
   }
 
   public Color getColor()
@@ -108,7 +119,7 @@ public enum Colors
   {
     if (color == null)
     {
-      return "";
+      return null;
     }
 
     return String.format("#%02X%02X%02X%02X", (int) (color.getRed() * 255), (int) (color.getGreen() * 255),
