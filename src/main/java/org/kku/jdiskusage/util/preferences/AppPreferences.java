@@ -27,41 +27,28 @@ public class AppPreferences
 
   static
   {
-    sizeSystemPreference = m_instance
-        .createAppPropertyType("Size system", Converters.getEnumConverter(SizeSystem.class))
-        .forSubject(m_instance, SizeSystem.BINARY);
-    displayMetricPreference = m_instance
-        .createAppPropertyType("Display metric", Converters.getEnumConverter(DisplayMetric.class))
-        .forSubject(m_instance, DisplayMetric.FILE_SIZE);
-    sortPreference = m_instance.createAppPropertyType("Sort", Converters.getEnumConverter(Sort.class))
-        .forSubject(m_instance, Sort.NUMERIC);
-    languagePreference = m_instance.createAppPropertyType("Language", Converters.getLanguageConverter())
-        .forSubject(m_instance, LanguageConfiguration.getInstance().getDefault());
-    searchMaxCountPreference = m_instance.createAppPropertyType("Max count", Converters.getIntegerConverter())
-        .forSubject(m_instance, 100);
-    searchMaxTimePreference = m_instance.createAppPropertyType("Max time", Converters.getIntegerConverter())
-        .forSubject(m_instance, 10);
-    searchRegexPreference = m_instance.createAppPropertyType("Use regex search", Converters.getBooleanConverter())
-        .forSubject(m_instance, Boolean.FALSE);
-    autoExpandTreeNode = m_instance.createAppPropertyType("Auto expand tree node", Converters.getBooleanConverter())
-        .forSubject(m_instance, Boolean.FALSE);
-    autoCollapseTreeNode = m_instance.createAppPropertyType("Auto collapse tree node", Converters.getBooleanConverter())
-        .forSubject(m_instance, Boolean.FALSE);
-    maxNumberOfChartElements = m_instance
-        .createAppPropertyType("Max number of elements", Converters.getIntegerConverter()).forSubject(m_instance, 11);
-    minPercentageChartElement = m_instance
-        .createAppPropertyType("Min percentage element", Converters.getDoubleConverter()).forSubject(m_instance, 5.0);
-    maxNumberInTopRanking = m_instance
-        .createAppPropertyType("Max number in top ranking", Converters.getIntegerConverter())
-        .forSubject(m_instance, 50);
-    maxNumberOfElementsInSunburstChart = m_instance
-        .createAppPropertyType("Max number of levels in sunburst chart", Converters.getIntegerConverter())
-        .forSubject(m_instance, 5);
+    sizeSystemPreference = createPreference("Size system", Converters.getEnumConverter(SizeSystem.class),
+        SizeSystem.BINARY);
+    displayMetricPreference = createPreference("Display metric", Converters.getEnumConverter(DisplayMetric.class),
+        DisplayMetric.FILE_SIZE);
+    sortPreference = createPreference("Sort", Converters.getEnumConverter(Sort.class), Sort.NUMERIC);
+    languagePreference = createPreference("Language", Converters.getLanguageConverter(),
+        LanguageConfiguration.getInstance().getDefault());
+    searchMaxCountPreference = createPreference("Max count", Converters.getIntegerConverter(), 100);
+    searchMaxTimePreference = createPreference("Max time", Converters.getIntegerConverter(), 10);
+    searchRegexPreference = createPreference("Use regex search", Converters.getBooleanConverter(), Boolean.FALSE);
+    autoExpandTreeNode = createPreference("Auto expand tree node", Converters.getBooleanConverter(), Boolean.FALSE);
+    autoCollapseTreeNode = createPreference("Auto collapse tree node", Converters.getBooleanConverter(), Boolean.FALSE);
+    maxNumberOfChartElements = createPreference("Max number of elements", Converters.getIntegerConverter(), 11);
+    minPercentageChartElement = createPreference("Min percentage element", Converters.getDoubleConverter(), 5.0);
+    maxNumberInTopRanking = createPreference("Max number in top ranking", Converters.getIntegerConverter(), 50);
+    maxNumberOfElementsInSunburstChart = createPreference("Max number of levels in sunburst chart",
+        Converters.getIntegerConverter(), 5);
   }
 
-  static public <T> AppPropertyType<T> createPreference(String name, Converter<T> converter)
+  static public <T> AppProperty<T> createPreference(String name, Converter<T> converter, T defaultValue)
   {
-    return m_instance.createAppPropertyType(name, converter);
+    return m_instance.createAppPropertyType(name, converter).forSubject(m_instance, defaultValue);
   }
 
   protected AppPreferences()

@@ -12,6 +12,7 @@ module org.kku.jdiskusage
   requires javafx.web;
   requires jdk.xml.dom;
   requires com.fasterxml.jackson.databind;
+  requires com.miglayout.core;
 
   exports org.kku.jdiskusage.main;
 

@@ -1,5 +1,6 @@
 package org.kku.jdiskusage.ui.util;
 
+import org.kku.jdiskusage.ui.util.ColorPalette.ChartColor;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -65,10 +66,9 @@ public class ChartStyleSheet
 
         """;
 
-    for (int index = 0; index < Colors.values().length; index++)
+    for (ChartColor cc : ColorPalette.getColorList())
     {
-      Colors color = Colors.values()[index];
-      colorChart = colorChart.replace("${" + color.name() + "}", color.getWebColor());
+      colorChart = colorChart.replace("${" + cc.getVariableName() + "}", cc.getWebColor());
     }
 
     cssBuilder.append(colorChart);

@@ -1,10 +1,9 @@
 package org.kku.jdiskusage.ui;
 
-import java.util.stream.Stream;
-import org.kku.jdiskusage.javafx.scene.control.SunburstChart;
+import org.kku.jdiskusage.javafx.scene.chart.SunburstChart;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
-import org.kku.jdiskusage.ui.util.Colors;
+import org.kku.jdiskusage.ui.util.ColorPalette;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
@@ -99,7 +98,7 @@ class SizeFormPane
         }
       });
     });
-    chart.setColorList(Stream.of(Colors.values()).map(Colors::getColor).toList());
+    chart.setColorList(ColorPalette.getColorList());
     chart.setModel(getCurrentTreeItem());
 
     return chart;

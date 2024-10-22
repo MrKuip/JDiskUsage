@@ -1,10 +1,7 @@
 package org.kku.jdiskusage.main;
 
-import java.util.stream.Stream;
-
-import org.kku.jdiskusage.ui.util.Colors;
+import org.kku.jdiskusage.ui.util.ColorPalette;
 import org.tbee.javafx.scene.layout.MigPane;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -37,16 +34,16 @@ public class TestFx
 
     maxDepth = 20;
 
-    pane = new MigPane("wrap " + Colors.values().length + ", gap 0, fill", "", "");
+    pane = new MigPane("wrap " + ColorPalette.getColorList().size() + ", gap 0, fill", "", "");
     for (int depth = 0; depth < 20; depth++)
     {
-      double d;
+      double brightness;
 
-      d = (depth / maxDepth);
-      Stream.of(Colors.values()).forEach(color -> {
+      brightness = (depth / maxDepth);
+      ColorPalette.getColorList().stream().forEach(color -> {
         Label label;
         label = new Label("");
-        label.setStyle(color.getBackgroundCss(d));
+        label.setStyle(color.getBackgroundCss(brightness));
 
         pane.add(label, "grow");
       });

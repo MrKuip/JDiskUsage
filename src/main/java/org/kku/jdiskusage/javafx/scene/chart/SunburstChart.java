@@ -1,4 +1,4 @@
-package org.kku.jdiskusage.javafx.scene.control;
+package org.kku.jdiskusage.javafx.scene.chart;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import org.kku.jdiskusage.ui.util.ColorPalette.ChartColor;
 import org.kku.jdiskusage.util.value.MutableDouble;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.NumberBinding;
@@ -16,6 +17,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
@@ -31,9 +33,9 @@ public class SunburstChart<T>
   private int m_maxLevel = 3;
   private final Function<T, Double> m_valueSupplier;
   private BiConsumer<Node, TreeItem<T>> m_nodeCreationCallback;
-  private List<Color> m_colorList = new ArrayList<>();
+  private List<ChartColor> m_colorList = new ArrayList<>();
 
-  private final Map<TreeItem<T>, Color> m_colorByItemMap = new HashMap<>();
+  private final Map<TreeItem<T>, ChartColor> m_colorByItemMap = new HashMap<>();
   private final Map<String, Color> m_colorByLevelMap = new HashMap<>();
   private final Map<Integer, NumberBinding> m_radixPropertyMap = new HashMap<>();
 
@@ -57,7 +59,7 @@ public class SunburstChart<T>
     refresh();
   }
 
-  public void setColorList(List<Color> colorList)
+  public void setColorList(List<ChartColor> colorList)
   {
     m_colorList = colorList;
     refresh();
@@ -105,7 +107,7 @@ public class SunburstChart<T>
         arc = new Arc();
         arc.setType(ArcType.ROUND);
         arc.setStroke(Color.WHITE);
-        arc.setFill(calculateColor(item, level));
+        arc.fillProperty().bind(calculateColor(item, level));
         arc.centerXProperty().bind(m_centerXProperty);
         arc.centerYProperty().bind(m_centerYProperty);
         arc.radiusXProperty().bind(calculateRadixProperty(level));
@@ -148,7 +150,7 @@ public class SunburstChart<T>
     });
   }
 
-  private Color calculateColor(TreeItem<T> item, int level)
+  private ObservableValue<Color> calculateColor(TreeItem<T> item, int level)
   {
     Optional<TreeItem<T>> parent;
 
@@ -162,7 +164,7 @@ public class SunburstChart<T>
     }
     if (parent.isPresent())
     {
-      Color color;
+      ChartColor color;
 
       // The basic color of a child is determined from it's ultimate parent that is not the root.
       // (That is the parent just 1 level above the root)
@@ -170,13 +172,11 @@ public class SunburstChart<T>
           key -> m_colorList.get(m_colorByItemMap.size() % m_colorList.size()));
 
       // The basic color is made 'darker' depended on it's level. The higher the level the darker the arc.
-      return m_colorByLevelMap.computeIfAbsent(color.toString() + "-" + level, key -> {
-        return color.deriveColor(0, 1.0, 1.0 - +level * 0.05, 1.0);
-      });
+      return color.colorProperty(1.0 - ((0.6 / m_maxLevel) * level));
     }
 
     // This will never happen!
-    return Color.RED;
+    return null;
   }
 
   private NumberBinding calculateRadixProperty(int level)

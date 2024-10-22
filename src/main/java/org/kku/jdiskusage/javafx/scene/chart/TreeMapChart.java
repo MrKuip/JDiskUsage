@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapChart.TreeMapColors.MyColor;
 import org.kku.jdiskusage.ui.TreeMapChartFormPane.FileNodeTreeMapNode;
-import org.kku.jdiskusage.ui.util.Colors;
+import org.kku.jdiskusage.ui.util.ColorPalette;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.Performance;
@@ -352,7 +352,8 @@ public class TreeMapChart<T extends TreeMapNode>
     private MyColor getColor(int colorIndex, int depth)
     {
       return m_colorMap.computeIfAbsent(colorIndex, ci -> new HashMap<Integer, MyColor>()).computeIfAbsent(depth, d -> {
-        return new MyColor(Colors.values()[colorIndex % Colors.values().length].getColor(1 - (depth / MAX_DEPTH)));
+        return new MyColor(ColorPalette.getColorList().get(colorIndex % ColorPalette.getColorList().size())
+            .getColor(1 - (depth / MAX_DEPTH)));
       });
     }
 

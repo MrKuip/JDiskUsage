@@ -4,7 +4,8 @@ import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import org.kku.jdiskusage.conf.Language;
 import org.kku.jdiskusage.conf.LanguageConfiguration;
 import org.kku.jdiskusage.main.Main;
-import org.kku.jdiskusage.ui.util.Colors;
+import org.kku.jdiskusage.ui.util.ColorPalette;
+import org.kku.jdiskusage.ui.util.ColorPalette.ChartColor;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.ui.util.TranslateUtil;
@@ -21,7 +22,6 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 
 public class PreferencesDialog
@@ -160,48 +160,67 @@ public class PreferencesDialog
   private Tab getColorsTab()
   {
     MigPane pane;
-    HBox box;
+    int colorSize;
+    int colorSizePerColumn;
+    int x;
+    int y;
 
-    box = new HBox(30);
-    pane = null;
-    for (int index = 0; index < Colors.values().length; index++)
+    pane = new MigPane("", "[][][][]30[][][][]", "[][][][][][][][][][][]");
+    colorSize = ColorPalette.getColorList().size();
+    colorSizePerColumn = colorSize / 2;
+    x = 0;
+    y = 0;
+    for (int index = 0; index < colorSize; index++)
     {
       Label colorLabel;
-      Colors colors;
+      ChartColor color;
       ColorPicker colorPicker;
       Button restoreButton;
 
-      if (index == 0 || index == Colors.values().length / 2)
-      {
-        pane = new MigPane("wrap 4", "[][][]10[]", "");
-        box.getChildren().add(pane);
-      }
-
-      colors = Colors.values()[index];
+      color = ColorPalette.getColorList().get(index);
 
       colorLabel = new Label();
       colorLabel.setMinWidth(80.0);
-      //colorLabel.setMinHeight(30.0);
-      colorLabel.setStyle(colors.getBackgroundCss());
+      colorLabel.styleProperty().bind(color.backgroundCssProperty());
 
       colorPicker = new ColorPicker();
-      colorPicker.setValue(colors.getColor());
+      colorPicker.setValue(color.getColor());
+      color.colorProperty().addListener((obs, oldValue, newValue) -> {
+        colorPicker.setValue(newValue);
+      });
       colorPicker.setOnAction((ae2) -> {
-        colors.setPrefColor(colorPicker.getValue());
+        color.setColor(colorPicker.getValue());
       });
 
       restoreButton = translate(new Button("", IconUtil.createIconNode("restore")));
       restoreButton.setOnAction((ae) -> {
-        colors.reset();
+        color.reset();
       });
 
-      pane.add(new Label(String.valueOf(index + 1)));
-      pane.add(colorLabel, "growy, growx");
-      pane.add(colorPicker);
-      pane.add(restoreButton, "spanx, align right");
+      pane.add(new Label(String.valueOf(index + 1)), getCellConstraint(x++, y));
+      pane.add(colorLabel, "growy, growx, " + getCellConstraint(x++, y));
+      pane.add(colorPicker, getCellConstraint(x++, y));
+      pane.add(restoreButton, "align right, " + getCellConstraint(x++, y));
+
+      x = index < colorSizePerColumn - 1 ? 0 : 4;
+      y = (y == colorSizePerColumn - 1) ? 0 : y + 1;
     }
 
-    return createTab("Colors", box);
+    Button restoreButton;
+
+    restoreButton = translate(new Button("Reset all to default", IconUtil.createIconNode("restore")));
+    restoreButton.setOnAction((ae) -> {
+      ColorPalette.getColorList().forEach(ChartColor::reset);
+    });
+
+    pane.add(restoreButton, "spanx, align right, " + getCellConstraint(0, colorSizePerColumn));
+
+    return createTab("Colors", pane);
+  }
+
+  private String getCellConstraint(int x, int y)
+  {
+    return "cell " + x + " " + y + " ";
   }
 
   private Tab createTab(String text, Node content)

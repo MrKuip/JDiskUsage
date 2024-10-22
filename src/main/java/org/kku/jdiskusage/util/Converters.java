@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.util.function.Function;
 import org.kku.jdiskusage.conf.Language;
 import org.kku.jdiskusage.conf.LanguageConfiguration;
-import org.kku.jdiskusage.ui.util.Colors;
+import org.kku.jdiskusage.ui.util.ColorPalette;
 import javafx.scene.paint.Color;
 
 public class Converters
@@ -46,7 +46,7 @@ public class Converters
 
   public static Converter<Color> getColorConverter()
   {
-    return new Converter<Color>(Color::web, Colors::toHexString);
+    return new Converter<Color>(Color::web, ColorPalette::toHexString);
   }
 
   public static <E extends Enum<E>> Converter<E> getEnumConverter(Class<E> enumClass)
