@@ -36,7 +36,6 @@ public class SunburstChart<T>
   private List<ChartColor> m_colorList = new ArrayList<>();
 
   private final Map<TreeItem<T>, ChartColor> m_colorByItemMap = new HashMap<>();
-  private final Map<String, Color> m_colorByLevelMap = new HashMap<>();
   private final Map<Integer, NumberBinding> m_radixPropertyMap = new HashMap<>();
 
   private final DoubleProperty m_centerXProperty = new SimpleDoubleProperty();
