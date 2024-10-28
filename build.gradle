@@ -62,7 +62,7 @@ tasks.withType(JavaCompile) {
     options.deprecation = true
 }
 
-
 //gluonfx {
 //   resourcesList = [ '.*properties$', '.*md$', '.*htm$', '.*html$' , '.*json$' ]
 //}
+
