@@ -1,4 +1,4 @@
-package org.kku.jdiskusage.ui;
+package org.kku.jdiskusage.ui.dialog;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import org.kku.jdiskusage.conf.Language;

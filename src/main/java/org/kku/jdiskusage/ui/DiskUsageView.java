@@ -15,12 +15,14 @@ import java.util.stream.Stream;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.DraggableTabPane;
 import org.kku.jdiskusage.javafx.scene.control.SegmentedControl;
-import org.kku.jdiskusage.ui.ScanFileTreeDialog.ScanResult;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.common.FullScreen;
 import org.kku.jdiskusage.ui.common.Navigation;
 import org.kku.jdiskusage.ui.common.Notifications;
+import org.kku.jdiskusage.ui.dialog.PreferencesDialog;
+import org.kku.jdiskusage.ui.dialog.ScanFileTreeDialog;
+import org.kku.jdiskusage.ui.dialog.ScanFileTreeDialog.ScanResult;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.AppSettings;
@@ -633,10 +635,10 @@ public class DiskUsageView
           + getValueDescription(DisplayMetric.FILE_SIZE) + ")";
     }
 
-    public void add(int i, long size)
+    public void add(int fileCount, long fileSize)
     {
-      mi_fileCount += 1;
-      mi_fileSize += size;
+      mi_fileCount += fileCount;
+      mi_fileSize += fileSize;
     }
   }
 

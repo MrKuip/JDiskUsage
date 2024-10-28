@@ -1,5 +1,6 @@
 package org.kku.jdiskusage.ui;
 
+import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -9,7 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonCell;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
@@ -17,7 +17,6 @@ import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.DiskUsageView.FileAggregates;
 import org.kku.jdiskusage.ui.DiskUsageView.FileAggregatesEntry;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
-import org.kku.jdiskusage.ui.common.AbstractFormPane.PaneData;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
@@ -25,7 +24,9 @@ import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
-
+import org.kku.jdiskusage.util.preferences.AppPreferences;
+import javafx.beans.binding.StringExpression;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
@@ -84,11 +85,35 @@ class LinkCountFormPane
     ScrollPane scrollPane;
     NumberAxis xAxis;
     CategoryAxis yAxis;
+    StringExpression titleExpression;
+    StringExpression xAxisLabelExpression;
 
     xAxis = new NumberAxis();
     xAxis.setSide(Side.TOP);
     yAxis = new CategoryAxis();
     barChart = FxUtil.createBarChart(xAxis, yAxis);
+
+    switch (AppPreferences.displayMetricPreference.property().get())
+    {
+      case FILE_COUNT:
+        titleExpression = translatedTextProperty("Distribution of number of files by number of links in").concat(" ")
+            .concat(getCurrentFileNode().getName());
+        xAxisLabelExpression = translatedTextProperty("Number of files");
+        break;
+      case FILE_SIZE:
+        titleExpression = translatedTextProperty("Distribution of file size by number of links in").concat(" ")
+            .concat(getCurrentFileNode().getName());
+        xAxisLabelExpression = translatedTextProperty("File size");
+        break;
+      default:
+        titleExpression = new SimpleStringProperty("?");
+        xAxisLabelExpression = new SimpleStringProperty("?");
+        break;
+    }
+
+    barChart.titleProperty().bind(titleExpression);
+    xAxis.labelProperty().bind(xAxisLabelExpression);
+    yAxis.labelProperty().bind(translatedTextProperty("Number of links"));
 
     series1 = new XYChart.Series<>();
     barChart.getData().add(series1);
