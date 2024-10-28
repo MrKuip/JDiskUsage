@@ -28,7 +28,7 @@ public class Translator
   private Map<String, StringProperty> m_translationPropertyByIdMap = new HashMap<>();
   private ObjectProperty<Language> m_languageProperty = new SimpleObjectProperty<>();
 
-  private String bundleName = "/translations/messages";
+  private String bundleName = "translations/messages";
 
   private Translator()
   {
