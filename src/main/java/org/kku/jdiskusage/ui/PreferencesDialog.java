@@ -3,6 +3,7 @@ package org.kku.jdiskusage.ui;
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import org.kku.jdiskusage.conf.Language;
 import org.kku.jdiskusage.conf.LanguageConfiguration;
+import org.kku.jdiskusage.javafx.scene.control.NumericTextField;
 import org.kku.jdiskusage.main.Main;
 import org.kku.jdiskusage.ui.util.ColorPalette;
 import org.kku.jdiskusage.ui.util.ColorPalette.ChartColor;

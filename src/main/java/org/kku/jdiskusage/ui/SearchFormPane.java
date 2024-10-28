@@ -13,6 +13,7 @@ import org.kku.jdiskusage.concurrent.FxTask;
 import org.kku.jdiskusage.concurrent.ProgressData;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
+import org.kku.jdiskusage.javafx.scene.control.NumericTextField;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;

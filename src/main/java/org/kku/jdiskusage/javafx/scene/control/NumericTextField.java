@@ -1,4 +1,4 @@
-package org.kku.jdiskusage.ui;
+package org.kku.jdiskusage.javafx.scene.control;
 
 import java.text.DecimalFormat;
 import java.text.ParseException;
