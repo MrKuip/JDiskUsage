@@ -191,7 +191,8 @@ public class TreeMapChart<T extends TreeMapNode>
 
     private void drawRectangles(List<TreeMapNode> tmnList)
     {
-      tmnList.forEach(tmn -> {
+      for (TreeMapNode tmn : tmnList)
+      {
         try
         {
           int x, y, width, height;
@@ -289,7 +290,7 @@ public class TreeMapChart<T extends TreeMapNode>
         {
           ex.printStackTrace();
         }
-      });
+      }
     }
 
     private double getCushionEffect(TreeMapNode node, int x, int y)

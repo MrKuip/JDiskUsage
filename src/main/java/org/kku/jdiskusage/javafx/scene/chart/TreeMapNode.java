@@ -78,10 +78,11 @@ abstract public class TreeMapNode
     if (m_childList == null)
     {
       m_childList = initChildList();
-      m_childList.stream().forEach(tmn -> {
+      for (TreeMapNode tmn : m_childList)
+      {
         tmn.setDepth(getDepth() + 1);
         tmn.setParent(this);
-      });
+      }
     }
 
     return m_childList;

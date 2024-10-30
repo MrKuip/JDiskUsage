@@ -455,29 +455,27 @@ public class FileTree
 
     private void filter(DirNode parentNode, DirNode currentNode)
     {
-      try (Stream<FileNodeIF> stream = currentNode.getChildList().stream())
+      for (FileNodeIF node : currentNode.getChildList())
       {
-        stream.forEach(node -> {
-          if (node.isDirectory())
-          {
-            DirNode newDirNode;
+        if (node.isDirectory())
+        {
+          DirNode newDirNode;
 
-            newDirNode = new DirNode((DirNode) node);
+          newDirNode = new DirNode((DirNode) node);
 
-            filter(parentNode.addChild(newDirNode), (DirNode) node);
-            if (!newDirNode.hasChildren())
-            {
-              parentNode.removeChild(newDirNode);
-            }
-          }
-          else
+          filter(parentNode.addChild(newDirNode), (DirNode) node);
+          if (!newDirNode.hasChildren())
           {
-            if (mi_filter.accept(node))
-            {
-              parentNode.addChild((FileNode) node);
-            }
+            parentNode.removeChild(newDirNode);
           }
-        });
+        }
+        else
+        {
+          if (mi_filter.accept(node))
+          {
+            parentNode.addChild((FileNode) node);
+          }
+        }
       }
     }
   }
