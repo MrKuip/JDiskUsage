@@ -12,7 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapChart.TreeMapColors.MyColor;
-import org.kku.jdiskusage.ui.TreeMapChartFormPane.FileNodeTreeMapNode;
+import org.kku.jdiskusage.ui.TreeMapChartFormPane.PathNodeTreeMapNode;
 import org.kku.jdiskusage.ui.util.ColorPalette;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.Log;
@@ -438,7 +438,7 @@ public class TreeMapChart<T extends TreeMapNode>
     return false;
   }
 
-  public void select(FileNodeTreeMapNode fntmn)
+  public void select(PathNodeTreeMapNode fntmn)
   {
     if (m_selection == null)
     {

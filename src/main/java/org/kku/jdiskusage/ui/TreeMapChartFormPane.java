@@ -21,7 +21,7 @@ public class TreeMapChartFormPane
   extends AbstractFormPane
 {
   private final TreeMapChartPaneData m_data = new TreeMapChartPaneData();
-  private TreeMapChart<FileNodeTreeMapNode> m_treeMap;
+  private TreeMapChart<TreeMapNode> m_treeMap;
   private TreeItem<FileNodeIF> m_root;
 
   TreeMapChartFormPane(DiskUsageData diskUsageData)
@@ -84,15 +84,15 @@ public class TreeMapChartFormPane
   class TreeMapChartPaneData
     extends PaneData
   {
-    private TreeMapModel<FileNodeTreeMapNode> mi_model;
+    private TreeMapModel<TreeMapNode> mi_model;
 
-    public TreeMapModel<FileNodeTreeMapNode> getModel()
+    public TreeMapModel<TreeMapNode> getModel()
     {
       if (mi_model == null)
       {
         try (PerformancePoint pp = Performance.measure("Collecting data for tree chart tab"))
         {
-          mi_model = new TreeMapModel<>(new FileNodeTreeMapNode(getCurrentFileNode()));
+          mi_model = new TreeMapModel<>(PathNodeTreeMapNode.create(getCurrentFileNode()));
         }
       }
 
@@ -144,12 +144,12 @@ public class TreeMapChartFormPane
 
           if (selectedNode != mi_model.getRootNode() && selectedNode != null)
           {
-            m_treeMap.select((FileNodeTreeMapNode) selectedNode);
+            m_treeMap.select((PathNodeTreeMapNode) selectedNode);
             return;
           }
         }
 
-        mi_model.getRootNode().streamNode().map(tmn -> (FileNodeTreeMapNode) tmn)
+        mi_model.getRootNode().streamNode().map(tmn -> (PathNodeTreeMapNode) tmn)
             .filter(fntmn -> fntmn.getFileNode() == selectedTreeItem.getValue()).findFirst().ifPresent(fntmn -> {
               m_treeMap.select(fntmn);
             });
@@ -164,18 +164,72 @@ public class TreeMapChartFormPane
   }
 
   public static class FileNodeTreeMapNode
+    extends PathNodeTreeMapNode
+  {
+    public FileNodeTreeMapNode(FileNodeIF fileNode)
+    {
+      super(fileNode);
+    }
+
+    @Override
+    public boolean hasChildren()
+    {
+      return false;
+    }
+
+    @Override
+    protected List<TreeMapNode> initChildList()
+    {
+      return Collections.emptyList();
+    }
+  }
+
+  public static class DirNodeTreeMapNode
+    extends PathNodeTreeMapNode
+  {
+    private DirNode mi_dirNode;
+
+    public DirNodeTreeMapNode(DirNode fileNode)
+    {
+      super(fileNode);
+
+      mi_dirNode = fileNode;
+    }
+
+    @Override
+    protected List<TreeMapNode> initChildList()
+    {
+      List<TreeMapNode> resultList;
+
+      resultList = new ArrayList<>(mi_dirNode.getChildList().size());
+      mi_dirNode.getChildList().forEach(fn -> {
+        resultList.add(PathNodeTreeMapNode.create(fn));
+      });
+
+      return resultList;
+    }
+  }
+
+  public abstract static class PathNodeTreeMapNode
     extends TreeMapNode
   {
     private FileNodeIF mi_fileNode;
 
-    FileNodeTreeMapNode(FileNodeIF fileNode)
+    protected PathNodeTreeMapNode(FileNodeIF fileNode)
     {
       mi_fileNode = fileNode;
     }
 
-    static TreeMapNode create(FileNodeIF fileNode)
+    public static TreeMapNode create(FileNodeIF fileNode)
     {
-      return new FileNodeTreeMapNode(fileNode);
+      if (fileNode instanceof DirNode dirNode)
+      {
+        return new DirNodeTreeMapNode(dirNode);
+      }
+      else
+      {
+        return new FileNodeTreeMapNode(fileNode);
+      }
     }
 
     public FileNodeIF getFileNode()
@@ -199,24 +253,6 @@ public class TreeMapChartFormPane
     public long getSize()
     {
       return mi_fileNode.getSize();
-    }
-
-    @Override
-    protected List<TreeMapNode> initChildList()
-    {
-      if (mi_fileNode instanceof DirNode dirNode)
-      {
-        List<TreeMapNode> resultList;
-
-        resultList = new ArrayList<>(dirNode.getChildList().size());
-        dirNode.getChildList().forEach(fn -> {
-          resultList.add(new FileNodeTreeMapNode(fn));
-        });
-
-        return resultList;
-      }
-
-      return Collections.emptyList();
     }
   }
 }
