@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapChart;
@@ -172,6 +173,11 @@ public class TreeMapChartFormPane
       mi_fileNode = fileNode;
     }
 
+    static TreeMapNode create(FileNodeIF fileNode)
+    {
+      return new FileNodeTreeMapNode(fileNode);
+    }
+
     public FileNodeIF getFileNode()
     {
       return mi_fileNode;
@@ -200,10 +206,17 @@ public class TreeMapChartFormPane
     {
       if (mi_fileNode instanceof DirNode dirNode)
       {
-        return dirNode.getChildList().stream().map(FileNodeTreeMapNode::new).map(TreeMapNode.class::cast).toList();
+        List<TreeMapNode> resultList;
+
+        resultList = new ArrayList<>(dirNode.getChildList().size());
+        dirNode.getChildList().forEach(fn -> {
+          resultList.add(new FileNodeTreeMapNode(fn));
+        });
+
+        return resultList;
       }
 
-      return new ArrayList<>();
+      return Collections.emptyList();
     }
   }
 }

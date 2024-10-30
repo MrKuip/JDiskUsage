@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
-
 import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.TailCall;
 import org.kku.jdiskusage.util.TailCalls;
@@ -169,11 +168,6 @@ public class TreeMapSquarifyAlgoritm
 
         allocatedRowHeight += nodeHeight;
 
-        if (nodeWidth == 0 && nodeHeight == 0)
-        {
-          //System.out.println("null! " + (counter++));
-        }
-
         tn.setBounds(x + nodeX, y + nodeY, nodeWidth, nodeHeight);
         Log.treemap.finest("squarified: tn=%s, x=%d, y=%d, width=%d, height=%d", tn.getName(), tn.getX(), tn.getY(),
             tn.getWidth(), tn.getHeight());
@@ -182,8 +176,11 @@ public class TreeMapSquarifyAlgoritm
       if (treeNodeList != null)
       {
         int nWidth = nodeWidth;
-        return TailCalls.call(() -> evaluate(x + nWidth, y, remainingWidth - nWidth, remainingHeight,
-            treeNodeList.subList(currentTreeNodeListIndex, treeNodeList.size())));
+        if (remainingHeight > 0 && remainingWidth - nWidth > 0)
+        {
+          return TailCalls.call(() -> evaluate(x + nWidth, y, remainingWidth - nWidth, remainingHeight,
+              treeNodeList.subList(currentTreeNodeListIndex, treeNodeList.size())));
+        }
       }
     }
     else
@@ -252,15 +249,18 @@ public class TreeMapSquarifyAlgoritm
         }
 
         tn.setBounds(x + nodeX, y + nodeY, nodeWidth, nodeHeight);
-        Log.treemap.finest("squarified: tn=%s, x=%d, y=%d, height=%d, width=%d", tn.getName(), tn.getX(), tn.getY(),
-            tn.getHeight(), tn.getWidth());
+        Log.treemap.finest("squarified: tn=%s, x=%d, y=%d, width=%d, height=%d", tn.getName(), tn.getX(), tn.getY(),
+            tn.getWidth(), tn.getHeight());
       }
 
       if (treeNodeList != null)
       {
         int nHeight = nodeHeight;
-        return TailCalls.call(() -> evaluate(x, y + nHeight, remainingWidth, remainingHeight - nHeight,
-            treeNodeList.subList(currentTreeNodeListIndex, treeNodeList.size())));
+        if (remainingHeight - nHeight > 0 && remainingWidth > 0)
+        {
+          return TailCalls.call(() -> evaluate(x, y + nHeight, remainingWidth, remainingHeight - nHeight,
+              treeNodeList.subList(currentTreeNodeListIndex, treeNodeList.size())));
+        }
       }
     }
 

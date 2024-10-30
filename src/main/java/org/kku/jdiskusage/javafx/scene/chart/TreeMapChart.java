@@ -126,10 +126,11 @@ public class TreeMapChart<T extends TreeMapNode>
         m_pixelDraw.accept(Arrays.asList(m_model.getRootNode()));
         m_model.getRootNode().streamNode().filter(TreeMapNode::hasChildren)
             .sorted(Comparator.comparingInt(TreeMapNode::getDepth)).forEach(fn -> {
-              new TreeMapSquarifyAlgoritm(fn.getX(), fn.getY(), fn.getWidth(), fn.getHeight(),
-                  fn.getChildList().stream().sorted(Comparator.comparing(TreeMapNode::getSize).reversed())
-                      .map(TreeMapNode.class::cast).toList(),
-                  m_pixelDraw).evaluate();
+              if (fn.getWidth() > 0 && fn.getHeight() > 0)
+              {
+                new TreeMapSquarifyAlgoritm(fn.getX(), fn.getY(), fn.getWidth(), fn.getHeight(), fn.getChildList(),
+                    m_pixelDraw).evaluate();
+              }
             });
       }
 
@@ -169,12 +170,6 @@ public class TreeMapChart<T extends TreeMapNode>
       mi_height = height;
       mi_buffer = new int[(mi_width + 1) * (mi_height + 1)];
       mi_canvas = new Canvas(mi_width, mi_height);
-      mi_canvas.widthProperty().addListener((o, oldValue, newValue) -> {
-        System.out.println("Canvas.width " + oldValue + " -> " + newValue);
-      });
-      mi_canvas.heightProperty().addListener((o, oldValue, newValue) -> {
-        System.out.println("Canvas.height " + oldValue + " -> " + newValue);
-      });
     }
 
     public int getWidth()
@@ -225,38 +220,70 @@ public class TreeMapChart<T extends TreeMapNode>
 
           int color = myColor.getIntColor();
           int darkerColor = myColor.getIntDarkerColor();
-          int toX = x + width;
-          int toY = y + height;
 
-          int y1 = y;
-          int y2 = y + height;
           int x1 = x;
           int x2 = x + width;
+          int y1 = y;
+          int y2 = y + height;
+          int fromIndex;
+          int toIndex;
 
           if (x1 + y2 * width > mi_buffer.length)
           {
             return;
           }
 
-          for (int dx = x; dx < toX; dx++)
+          for (int dy = y1; dy < y2; dy++)
           {
-            for (int dy = y; dy < toY; dy++)
+            fromIndex = x1 + mi_width * dy;
+            toIndex = fromIndex + width;
+            for (int index = fromIndex; index < toIndex; index++)
             {
-              mi_buffer[dx + mi_width * dy] = color;
+              mi_buffer[index] = color;
             }
           }
 
+          fromIndex = x1 + mi_width * y1;
+          toIndex = fromIndex + width;
+          for (int index = fromIndex; index < toIndex; index++)
+          {
+            mi_buffer[index] = darkerColor;
+          }
+
+          fromIndex = x1 + mi_width * y2;
+          toIndex = fromIndex + width;
+          for (int index = fromIndex; index < toIndex; index++)
+          {
+            mi_buffer[index] = darkerColor;
+          }
+
+          fromIndex = x1 + mi_width * y1;
+          toIndex = x1 + mi_width * y2;
+          for (int index = fromIndex; index < toIndex; index += mi_width)
+          {
+            mi_buffer[index] = darkerColor;
+          }
+
+          fromIndex = x2 + mi_width * y1;
+          toIndex = x2 + mi_width * y2;
+          for (int index = fromIndex; index < toIndex; index += mi_width)
+          {
+            mi_buffer[index] = darkerColor;
+          }
+
+          /*
           for (int dx = 0; dx < width; dx++)
           {
             mi_buffer[(x1 + dx) + mi_width * y] = darkerColor;
             mi_buffer[(x1 + dx) + mi_width * y2] = darkerColor;
           }
-
+          
           for (int dy = 0; dy < height; dy++)
           {
             mi_buffer[x1 + mi_width * (y1 + dy)] = darkerColor;
             mi_buffer[x2 + mi_width * (y1 + dy)] = darkerColor;
           }
+          */
         }
         catch (Throwable ex)
         {

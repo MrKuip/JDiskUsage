@@ -15,7 +15,6 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.kku.jdiskusage.ui.DiskUsageView;
 
 public class FileTree
@@ -296,7 +295,7 @@ public class FileTree
     {
       if (mi_childList == null)
       {
-        mi_childList = new ArrayList<>(100);
+        mi_childList = new ArrayList<>();
       }
       return mi_childList;
     }
