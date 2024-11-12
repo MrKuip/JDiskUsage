@@ -63,7 +63,7 @@ public class Language
       flagName = "/flags/" + flag + ".png";
       try (InputStream is = Language.class.getResourceAsStream(flagName))
       {
-        return new Image(is);
+        return is == null ? null : new Image(is);
       }
       catch (Exception e)
       {
