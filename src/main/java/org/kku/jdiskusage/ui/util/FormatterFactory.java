@@ -25,10 +25,11 @@ public class FormatterFactory
   }
 
   static private class ByteFormatter
-      implements FormatterIF<Long>
+    extends AbstractFormatter<Long>
   {
     private ByteFormatter()
     {
+      super("");
     }
 
     @Override
@@ -40,36 +41,36 @@ public class FormatterFactory
   }
 
   static private class DateFormatter
-      implements FormatterIF<Date>
+    extends AbstractFormatter<Date>
   {
-    private final SimpleDateFormat m_format;
+    private final SimpleDateFormat m_dateFormat;
 
-    private DateFormatter(String pattern)
+    private DateFormatter(String format)
     {
-      m_format = new SimpleDateFormat(pattern);
+      super(format);
+
+      m_dateFormat = new SimpleDateFormat(format);
     }
 
     @Override
     public String format(Date date)
     {
-      return m_format.format(date);
+      return m_dateFormat.format(date);
     }
   }
 
   static private class StringFormatFormatter<T>
-      implements FormatterIF<T>
+    extends AbstractFormatter<T>
   {
-    private final String m_format;
-
     private StringFormatFormatter(String format)
     {
-      m_format = format;
+      super(format);
     }
 
     @Override
     public String format(T object)
     {
-      return String.format(m_format, object);
+      return String.format(getFormat(), object);
     }
   }
 }

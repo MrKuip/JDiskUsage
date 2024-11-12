@@ -62,15 +62,19 @@ public class PreferencesDialog
     MigPane pane;
     CheckBox autoExpandCheckBox;
     CheckBox autoCollapseCheckBox;
+    CheckBox showProgressInCellCheckBox;
     ComboBox<Language> languageComboBox;
     NumericTextField<Integer> maxNumberInTopRankingField;
     Button resetAllButton;
 
-    autoExpandCheckBox = new CheckBox("Auto expand selected tree node");
+    autoExpandCheckBox = translate(new CheckBox("Auto expand selected tree node"));
     autoExpandCheckBox.selectedProperty().bindBidirectional(AppPreferences.autoExpandTreeNode.property());
 
-    autoCollapseCheckBox = new CheckBox("Auto collapse deselected tree node");
+    autoCollapseCheckBox = translate(new CheckBox("Auto collapse deselected tree node"));
     autoCollapseCheckBox.selectedProperty().bindBidirectional(AppPreferences.autoCollapseTreeNode.property());
+
+    showProgressInCellCheckBox = translate(new CheckBox("Show percent graphic in table"));
+    showProgressInCellCheckBox.selectedProperty().bindBidirectional(AppPreferences.showProgressInTable.property());
 
     languageComboBox = new ComboBox<>();
     languageComboBox.getItems().addAll(LanguageConfiguration.getInstance().getList());
@@ -90,12 +94,14 @@ public class PreferencesDialog
       AppPreferences.maxNumberInTopRanking.reset();
     });
 
-    pane = new MigPane("wrap 3", "[][]push[align right]", "[][][][]push[]");
+    pane = new MigPane("wrap 3", "[][]push[align right]", "[][][][][]push[]");
 
-    pane.add(translate(autoExpandCheckBox), "spanx 2");
+    pane.add(autoExpandCheckBox, "spanx 2");
     pane.add(resetPreference(AppPreferences.autoExpandTreeNode));
-    pane.add(translate(autoCollapseCheckBox), "spanx 2");
+    pane.add(autoCollapseCheckBox, "spanx 2");
     pane.add(resetPreference(AppPreferences.autoCollapseTreeNode));
+    pane.add(showProgressInCellCheckBox, "spanx 2");
+    pane.add(resetPreference(AppPreferences.showProgressInTable));
     pane.add(translate(new Label("Language")));
     pane.add(languageComboBox);
     pane.add(resetPreference(AppPreferences.languagePreference));

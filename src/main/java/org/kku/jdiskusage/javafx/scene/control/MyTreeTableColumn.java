@@ -1,15 +1,18 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
 import java.util.function.Function;
-
 import org.kku.jdiskusage.ui.util.FormatterIF;
 import org.kku.jdiskusage.ui.util.FxUtil;
+import org.kku.jdiskusage.ui.util.Percent;
 import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.AppSettings;
-
+import org.kku.jdiskusage.util.preferences.AppPreferences;
+import org.tbee.javafx.scene.layout.MigPane;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
@@ -62,24 +65,47 @@ public class MyTreeTableColumn<T, R>
     extends TreeTableCell<T, R>
   {
     private final FormatterIF<R> mi_formatter;
+    private final MigPane mi_progressPane = new MigPane("ins 0", "[grow][pref:pref:pref]", "[]");
+    private final ProgressBar mi_progressBar = new ProgressBar();
+    private final Label mi_progressLabel = new Label();
 
     MyTreeTableCell(FormatterIF<R> formatter)
     {
       mi_formatter = formatter;
+      initProgressPane();
+    }
+
+    private void initProgressPane()
+    {
+      mi_progressPane.getChildren().addAll(mi_progressBar, mi_progressLabel);
+      mi_progressPane.getStylesheets().add("jdiskusage.css");
+      mi_progressPane.getStyleClass().add("progress-bar-cell");
     }
 
     @Override
-    protected void updateItem(R date, boolean empty)
+    protected void updateItem(R item, boolean empty)
     {
-      super.updateItem(date, empty);
+      super.updateItem(item, empty);
 
-      if (empty || date == null)
+      setText("");
+      setGraphic(null);
+
+      if (item instanceof Percent percent)
       {
-        setText("");
+        mi_progressLabel.setText(mi_formatter.format(item));
+        if (AppPreferences.showProgressInTable.get())
+        {
+          mi_progressBar.setProgress(percent.getPercent());
+          setGraphic(mi_progressPane);
+        }
+        else
+        {
+          setGraphic(mi_progressLabel);
+        }
       }
       else
       {
-        setText(mi_formatter.format(date));
+        setText(mi_formatter.format(item));
       }
     }
   }

@@ -12,6 +12,7 @@ import org.kku.jdiskusage.javafx.scene.control.MyTreeTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTreeTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
+import org.kku.jdiskusage.ui.util.Percent;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.FileTree.FilterIF;
@@ -139,7 +140,7 @@ public class FileTreePane
     {
       MyTreeTableColumn<FileNodeIF, String> treeTableColumn1;
       MyTreeTableColumn<FileNodeIF, Long> treeTableColumn2;
-      MyTreeTableColumn<FileNodeIF, Double> treeTableColumn3;
+      MyTreeTableColumn<FileNodeIF, Percent> treeTableColumn3;
       MyTreeTableColumn<FileNodeIF, Integer> treeTableColumn4;
 
       mi_treeTableView = new MyTreeTableView<FileNodeIF>(getClass().getSimpleName(), new FileTreeItem(m_dirNode));
@@ -162,16 +163,16 @@ public class FileTreePane
 
       treeTableColumn3 = mi_treeTableView.addColumn("%");
       treeTableColumn3.setColumnCount(5);
-      treeTableColumn3.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2f %%"));
+      treeTableColumn3.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2s %%"));
       treeTableColumn3.setCellValueAlignment(Pos.BASELINE_RIGHT);
       treeTableColumn3.setCellValueGetter((treeItem) -> {
         if (treeItem.getParent() != null)
         {
-          return treeItem.getValue().getSize() * 100.0 / treeItem.getParent().getValue().getSize();
+          return new Percent(treeItem.getValue().getSize(), treeItem.getParent().getValue().getSize());
         }
         else
         {
-          return 100.0;
+          return Percent.PERCENT_100;
         }
       });
 
