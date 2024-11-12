@@ -3,18 +3,17 @@ package org.kku.jdiskusage.javafx.scene.control;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import org.kku.jdiskusage.ui.util.FormatterIF;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.StyledText;
 import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.AppSettings;
-
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.input.MouseEvent;
@@ -23,9 +22,10 @@ import javafx.util.Callback;
 public class MyTableColumn<T, R>
   extends TableColumn<T, R>
 {
-  private FormatterIF<R> mi_formatter;
+  private FormatterIF<R> m_formatter;
   private Pos m_alignment;
   private BiConsumer<MouseEvent, T> m_action;
+  private BiConsumer<T, R> m_setter;
 
   public MyTableColumn()
   {
@@ -46,7 +46,12 @@ public class MyTableColumn<T, R>
 
   public void setCellValueFormatter(FormatterIF<R> formatter)
   {
-    mi_formatter = formatter;
+    m_formatter = formatter;
+  }
+
+  public void setCellValueSetter(BiConsumer<T, R> setter)
+  {
+    m_setter = setter;
   }
 
   public void setCellValueGetter(Function<T, R> function)
@@ -69,23 +74,34 @@ public class MyTableColumn<T, R>
   private void init()
   {
     this.setCellFactory(column -> {
-      TableCell<T, R> cell;
-      final Button button = new Button();
-
-      cell = new TableCell<>()
+      return new TableCell<>()
       {
+        final Button button = new Button();
+        final CheckBox checkBox = new CheckBox();
+
+        {
+          if (m_setter != null)
+          {
+            checkBox.setOnAction((ae) -> {
+              T item = getTableRow().getItem();
+              if (item != null)
+              {
+                m_setter.accept(item, (R) Boolean.valueOf(checkBox.isSelected()));
+                getTableView().refresh();
+              }
+            });
+          }
+        }
+
         @Override
-        protected void updateItem(R value, boolean empty)
+        protected void updateItem(R item, boolean empty)
         {
           String text;
           Node graphic;
 
-          super.updateItem(value, empty);
+          super.updateItem(item, empty);
 
-          button.setText("");
-          button.setOnAction(null);
-
-          if (value != null && value instanceof StyledText styledText)
+          if (item != null && item instanceof StyledText styledText)
           {
             if (styledText.isPlainText())
             {
@@ -99,14 +115,22 @@ public class MyTableColumn<T, R>
               setPrefHeight(1);
             }
           }
-          else if (value != null && value instanceof ButtonCell buttonCell)
+          else if (item != null && item instanceof ButtonCell buttonCell)
           {
+            button.setText("");
+            button.setOnAction(null);
             button.setGraphic(buttonCell.getGraphic());
             button.setOnMouseClicked((ae) -> m_action.accept(ae, getTableRow().getItem()));
             graphic = button;
             text = null;
           }
-          else if (value != null && value instanceof Node node)
+          else if (item != null && item instanceof Boolean checked)
+          {
+            checkBox.setSelected(checked);
+            text = "";
+            graphic = checkBox;
+          }
+          else if (item != null && item instanceof Node node)
           {
             text = "";
             graphic = node;
@@ -114,19 +138,19 @@ public class MyTableColumn<T, R>
           else
           {
             graphic = null;
-            if (empty || value == null)
+            if (empty || item == null)
             {
               text = "";
             }
             else
             {
-              if (mi_formatter != null)
+              if (m_formatter != null)
               {
-                text = mi_formatter.format(value);
+                text = m_formatter.format(item);
               }
               else
               {
-                text = value.toString();
+                text = item.toString();
               }
             }
           }
@@ -140,8 +164,6 @@ public class MyTableColumn<T, R>
           }
         }
       };
-
-      return cell;
     });
   }
 

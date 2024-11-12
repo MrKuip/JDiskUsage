@@ -2,12 +2,18 @@ package org.kku.jdiskusage.javafx.scene.control;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonCell;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.ui.util.TableUtils;
 import javafx.geometry.Pos;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.TextAlignment;
@@ -16,14 +22,116 @@ public class MyTableView<T>
   extends TableView<T>
 {
   private RankColumnData m_rankColumnData;
+  private SelectionContext m_selectionContext = new SelectionContext();
 
   public MyTableView(String id)
   {
-    super();
     setId(id);
+    setEditable(true);
 
     getSelectionModel().setCellSelectionEnabled(true);
     TableUtils.installCopyPasteHandler(this);
+
+    m_selectionContext.init();
+  }
+
+  public SelectionContext getSelectionContext()
+  {
+    return m_selectionContext;
+  }
+
+  public class SelectionContext
+  {
+    private Set<T> mi_selectedSet = new HashSet<T>();
+    private MyTableColumn<T, Boolean> mi_selectionColumn;
+
+    private void init()
+    {
+      mi_selectionColumn = addColumn("Selection");
+      mi_selectionColumn.setEditable(true);
+      mi_selectionColumn.setCellValueAlignment(Pos.BASELINE_CENTER);
+      mi_selectionColumn.setCellValueGetter(this::isSelected);
+      mi_selectionColumn.setCellValueSetter((item, selection) -> select(item, selection));
+      mi_selectionColumn.setColumnCount(4);
+      mi_selectionColumn.setVisible(false);
+
+      MyTableView.this.setContextMenu(m_selectionContext.getContextMenu());
+    }
+
+    public ContextMenu getContextMenu()
+    {
+      ContextMenu menu;
+      MenuItem selectMenuItem;
+      MenuItem selectAllMenuItem;
+      MenuItem deleteMenuItem;
+
+      menu = new ContextMenu();
+
+      selectMenuItem = translate(new MenuItem("Select", IconUtil.createIconNode("checkbox-outline", IconSize.SMALL)));
+      selectMenuItem.setOnAction((ae) -> {
+        MyTableView.this.getSelectionContext().select(MyTableView.this.getSelectionModel().getSelectedItem());
+      });
+      selectAllMenuItem = translate(
+          new MenuItem("Select all", IconUtil.createIconNode("checkbox-multiple-outline", IconSize.SMALL)));
+      selectAllMenuItem.setOnAction((ae) -> {
+        MyTableView.this.getSelectionContext().selectAll(MyTableView.this.getItems());
+      });
+
+      deleteMenuItem = translate(new MenuItem("Delete selected", IconUtil.createIconNode("delete", IconSize.SMALL)));
+
+      menu.getItems().addAll(selectMenuItem, selectAllMenuItem, deleteMenuItem);
+
+      return menu;
+    }
+
+    public void showSelectionColumn(boolean show)
+    {
+      mi_selectionColumn.setVisible(show);
+    }
+
+    public boolean isSelected(T o)
+    {
+      return getSelectedSet().contains(o);
+    }
+
+    public Set<T> getSelectedSet()
+    {
+      return mi_selectedSet;
+    }
+
+    public void select(T row)
+    {
+      select(row, true);
+    }
+
+    public void selectAll(List<T> rowList)
+    {
+      mi_selectedSet.addAll(rowList);
+      showSelectionColumn(!mi_selectedSet.isEmpty());
+      MyTableView.this.refresh();
+    }
+
+    public void deSelect(T row)
+    {
+      select(row, false);
+    }
+
+    public void select(T row, boolean selection)
+    {
+      if (selection)
+      {
+        System.out.println("select:" + row);
+        mi_selectedSet.add(row);
+      }
+      else
+      {
+        System.out.println("deselect:" + row);
+        mi_selectedSet.remove(row);
+      }
+
+      showSelectionColumn(!mi_selectedSet.isEmpty());
+      MyTableView.this.refresh();
+    }
   }
 
   /**
@@ -142,4 +250,5 @@ public class MyTableView<T>
       return m_lineNumberMap.get(System.identityHashCode(item));
     }
   }
+
 }
