@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.ui.util.ChartStyleSheet;
+import org.kku.jdiskusage.ui.util.LogoUtil;
 import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.Log;
@@ -60,6 +61,7 @@ public class Main
     stage.widthProperty().addListener(getWidthProperty().getChangeListener());
     stage.heightProperty().addListener(getHeightProperty().getChangeListener());
 
+    stage.getIcons().addAll(LogoUtil.getLogoList());
     stage.setTitle("JDiskUsage");
     stage.setScene(scene);
     stage.setOnCloseRequest((cr) -> { Platform.exit(); System.exit(1); });
