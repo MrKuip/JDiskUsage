@@ -27,7 +27,7 @@ javafx {
 }
 
 dependencies {
-  implementation files('lib/fontIcons-1.0.jar')
+  implementation project(':modules:fontIcons')
   implementation 'com.miglayout:miglayout-javafx:11.4.2'
   implementation 'org.commonmark:commonmark:0.24.0'
   implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.1'
