@@ -2,10 +2,8 @@ package org.kku.jdiskusage.ui.common;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.TreeItem;

@@ -1,14 +1,12 @@
 package org.kku.jdiskusage.ui;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonCell;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
@@ -23,7 +21,6 @@ import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.tbee.javafx.scene.layout.MigPane;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.collections.FXCollections;

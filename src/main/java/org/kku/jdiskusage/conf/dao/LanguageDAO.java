@@ -1,7 +1,6 @@
 package org.kku.jdiskusage.conf.dao;
 
 import java.util.List;
-
 import org.kku.conf.dao.AbstractDAO;
 import org.kku.jdiskusage.conf.Language;
 import org.kku.jdiskusage.conf.LanguageConfiguration;

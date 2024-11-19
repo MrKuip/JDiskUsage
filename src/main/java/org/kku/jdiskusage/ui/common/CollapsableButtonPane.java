@@ -1,9 +1,7 @@
 package org.kku.jdiskusage.ui.common;
 
 import java.util.stream.Stream;
-
 import org.kku.jdiskusage.ui.util.IconUtil;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Insets;

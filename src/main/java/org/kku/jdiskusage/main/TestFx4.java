@@ -21,14 +21,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.kku.jdiskusage.util.FileTree;
 import org.kku.jdiskusage.util.FileTree.UnixAttribute;
 import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.OperatingSystemUtil;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
-
 import javafx.application.Application;
 import javafx.stage.Stage;
 

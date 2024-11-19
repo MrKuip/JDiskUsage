@@ -4,7 +4,6 @@ import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.tbee.javafx.scene.layout.MigPane;
-
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;

@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
+import org.kku.jdiskusage.ui.common.AbstractFormPane.PaneData;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.OperatingSystemUtil;
@@ -18,7 +18,6 @@ import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.StreamUtil;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;

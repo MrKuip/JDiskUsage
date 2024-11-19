@@ -3,10 +3,8 @@ package org.kku.jdiskusage.main;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapNode;
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapSquarifyAlgoritm;
-
 import javafx.application.Application;
 import javafx.stage.Stage;
 

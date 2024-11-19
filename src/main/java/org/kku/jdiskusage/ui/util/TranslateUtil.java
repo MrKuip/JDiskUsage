@@ -1,7 +1,6 @@
 package org.kku.jdiskusage.ui.util;
 
 import org.kku.jdiskusage.util.Translator;
-
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.MenuItem;

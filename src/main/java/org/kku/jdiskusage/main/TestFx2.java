@@ -7,7 +7,6 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SequenceLayout;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.VarHandle;
-
 import javafx.application.Application;
 import javafx.stage.Stage;
 
