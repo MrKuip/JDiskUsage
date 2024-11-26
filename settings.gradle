@@ -1,5 +1,5 @@
 plugins {
-  id 'me.champeau.includegit' version '0.1.6'
+  id 'me.champeau.includegit' version '0.2.0'
 }
 
 rootProject.name = 'JDiskUsage'
