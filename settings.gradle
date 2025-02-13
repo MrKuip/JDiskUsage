@@ -1,19 +1,4 @@
-plugins {
-  id 'me.champeau.includegit' version '0.2.0'
-}
 
 rootProject.name = 'JDiskUsage'
-
-gitRepositories {
-  checkoutsDirectory.set(file(moduleDir))
-  include("fontIcons") {
-    uri = "https://github.com/MrKuip/fontIcons.git"
-    branch = "main"
-  }
-}
-
-new File(moduleDir).eachDir { dir ->
-  include "${moduleDir}:${dir.name}"
-}
 
 
