@@ -132,8 +132,14 @@ abstract public class AbstractFormPane
   {
     if (m_paneTypeByIdMap.size() > 1)
     {
-      m_currentPaneType = m_paneTypeByIdMap
-          .get(getSelectedIdProperty().get(m_paneTypeByIdMap.entrySet().iterator().next().getKey()));
+      String defaultPaneType;
+
+      defaultPaneType = m_paneTypeByIdMap.entrySet().iterator().next().getKey();
+      m_currentPaneType = m_paneTypeByIdMap.get(getSelectedIdProperty().get(defaultPaneType));
+      if (m_currentPaneType == null)
+      {
+        m_currentPaneType = m_paneTypeByIdMap.get(defaultPaneType);
+      }
 
       m_paneTypeByIdMap.values().stream().map(paneType -> {
         ToggleButton button;
@@ -163,6 +169,7 @@ abstract public class AbstractFormPane
       });
 
       BorderPane.setMargin(m_segmentedControl.getNode(), new Insets(2, 2, 2, 2));
+
       m_node.setBottom(m_segmentedControl.getNode());
     }
   }
