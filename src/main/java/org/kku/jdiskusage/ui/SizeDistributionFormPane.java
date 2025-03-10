@@ -117,9 +117,9 @@ public class SizeDistributionFormPane
   static private class SizeDistributionBucketData
   {
     public long mi_numberOfFiles;
-    public long mi_sizeOfFiles;
+    public double mi_sizeOfFiles;
 
-    public SizeDistributionBucketData(Long numberOfFiles, Long sizeOfFiles)
+    public SizeDistributionBucketData(Long numberOfFiles, double sizeOfFiles)
     {
       mi_numberOfFiles = numberOfFiles;
       mi_sizeOfFiles = sizeOfFiles;
@@ -169,6 +169,7 @@ public class SizeDistributionFormPane
       bucket = e.getKey();
       bucketData = e.getValue();
       data = new PieChart.Data(bucket.getText(), bucketData.getSize(getCurrentDisplayMetric()));
+      System.out.println("add data:" + data.getName() + " -> " + data.getPieValue());
       pieChart.getData().add(data);
 
       addFilterHandler(data.getNode(), "Size", bucket.getText(), fileNode -> findBucket(fileNode) == bucket);
@@ -245,7 +246,7 @@ public class SizeDistributionFormPane
   {
     MyTableView<SizeDistributionEntry> table;
     MyTableColumn<SizeDistributionEntry, String> timeIntervalColumn;
-    MyTableColumn<SizeDistributionEntry, Long> sumOfFileSizesColumn;
+    MyTableColumn<SizeDistributionEntry, Double> sumOfFileSizesColumn;
     MyTableColumn<SizeDistributionEntry, Long> numberOfFilesColumn;
     MyTableColumn<SizeDistributionEntry, Void> filterColumn;
     MyTableColumn<SizeDistributionEntry, ButtonCell> filterEqualColumn;
@@ -340,7 +341,7 @@ public class SizeDistributionFormPane
               bucket = SizeDistributionBucket.findBucket(fn.getSize());
               data = mi_map.get(bucket);
               data.mi_numberOfFiles += 1;
-              data.mi_sizeOfFiles += (fn.getSize() / 1000000);
+              data.mi_sizeOfFiles += (fn.getSize() / 1000000.0);
             }
 
             return true;

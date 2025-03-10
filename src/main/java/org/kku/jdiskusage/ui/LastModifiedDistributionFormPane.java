@@ -228,7 +228,7 @@ class LastModifiedDistributionFormPane
   {
     MyTableView<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>> table;
     MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, String> timeIntervalColumn;
-    MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, Long> sumOfFileSizesColumn;
+    MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, Double> sumOfFileSizesColumn;
     MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, Long> numberOfFilesColumn;
     MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, Void> filterColumn;
     MyTableColumn<Entry<LastModifiedDistributionBucket, LastModifiedDistributionBucketData>, ButtonCell> filterEqualColumn;
@@ -329,7 +329,7 @@ class LastModifiedDistributionFormPane
               bucket = findBucket(fn);
               data = mi_map.get(bucket);
               data.mi_numberOfFiles += 1;
-              data.mi_sizeOfFiles += (fn.getSize() / 1000000);
+              data.mi_sizeOfFiles += (fn.getSize() / 1000000.0);
             }
             return true;
           });
@@ -350,9 +350,9 @@ class LastModifiedDistributionFormPane
   static private class LastModifiedDistributionBucketData
   {
     public long mi_numberOfFiles;
-    public long mi_sizeOfFiles;
+    public double mi_sizeOfFiles;
 
-    public LastModifiedDistributionBucketData(Long numberOfFiles, Long sizeOfFiles)
+    public LastModifiedDistributionBucketData(Long numberOfFiles, double sizeOfFiles)
     {
       mi_numberOfFiles = numberOfFiles;
       mi_sizeOfFiles = sizeOfFiles;
