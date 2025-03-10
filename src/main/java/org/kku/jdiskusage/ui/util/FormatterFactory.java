@@ -70,6 +70,11 @@ public class FormatterFactory
     @Override
     public String format(T object)
     {
+      if (object == null)
+      {
+        return "";
+      }
+
       return String.format(getFormat(), object);
     }
   }
