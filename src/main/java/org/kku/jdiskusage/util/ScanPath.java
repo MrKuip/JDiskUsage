@@ -1,11 +1,13 @@
 package org.kku.jdiskusage.util;
 
 import java.io.IOException;
+import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Stack;
@@ -50,7 +52,7 @@ class ScanPath
       try
       {
         ScanVisitor visitor = new ScanVisitor(path, rootNode);
-        Files.walkFileTree(path, visitor);
+        Files.walkFileTree(path, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, visitor);
         visitor.waitForExecutors();
         if (!visitor.isCancelled())
         {
