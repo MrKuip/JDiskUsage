@@ -15,19 +15,29 @@ test
   useJUnitPlatform()
 }
 
-apply from: 'build-eclipse.gradle'
+//apply from: 'build-eclipse.gradle'
 
 repositories {
   mavenCentral()
 }
 
 javafx {
-    version = "22.0.1"
+    version = "24"
     modules = [ 'javafx.controls', 'javafx.web']
 }
 
+tasks.named("eclipse").configure {
+    dependsOn gradle.includedBuilds*.task(":eclipse")
+}
+
+tasks.named("cleanEclipse").configure {
+    dependsOn gradle.includedBuilds*.task(":cleanEclipse")
+}
+
 dependencies {
-  implementation files('lib/fontIcons-1.0.jar')
+  implementation 'org.kku:fontIcons:1.0'
+  implementation 'org.kku:common:1.0'
+  //implementation files('lib/fontIcons-1.0.jar')
   implementation 'com.miglayout:miglayout-javafx:11.4.2'
   implementation 'org.commonmark:commonmark:0.24.0'
   implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.1'

@@ -1,0 +1,6 @@
+[submodule "submodules/fontIcons"]
+	path = submodules/fontIcons
+	url = https://github.com/MrKuip/fontIcons.git
+[submodule "submodules/common"]
+	path = submodules/common
+	url = https://github.com/MrKuip/common.git

@@ -7,6 +7,8 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.kku.common.util.StringUtils;
 import org.kku.jdiskusage.util.Converters.Converter;
 
 public class RecentScanList

@@ -13,6 +13,7 @@ module org.kku.jdiskusage
   requires jdk.xml.dom;
   requires com.fasterxml.jackson.databind;
   requires com.miglayout.core;
+requires org.kku.common;
 
   exports org.kku.jdiskusage.main;
 

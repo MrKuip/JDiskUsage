@@ -11,8 +11,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+
+import org.kku.common.util.StringUtils;
 import org.kku.jdiskusage.conf.Language;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
