@@ -6,6 +6,14 @@ eclipse.classpath
   downloadJavadoc = true
 }
 
+tasks.named("eclipse").configure {
+    dependsOn gradle.includedBuilds*.task(":eclipse")
+}
+
+tasks.named("cleanEclipse").configure {
+    dependsOn gradle.includedBuilds*.task(":cleanEclipse")
+}
+
 eclipse.classpath.file 
 {
   // Fix the problem that this plugin doesn't put libraries on the module path (it puts them on the classpath)

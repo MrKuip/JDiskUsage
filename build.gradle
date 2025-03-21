@@ -5,7 +5,6 @@ plugins {
   id 'application'
   id 'org.openjfx.javafxplugin' version '0.1.0'
   id 'org.beryx.jlink' version '3.1.1'
-  //id 'com.gluonhq.gluonfx-gradle-plugin' version '1.0.23'
 }
 
 defaultTasks 'jar'
@@ -22,12 +21,12 @@ repositories {
 }
 
 javafx {
-    version = "22.0.1"
+    version = "24"
     modules = [ 'javafx.controls', 'javafx.web']
 }
 
 dependencies {
-  implementation files('lib/fontIcons-1.0.jar')
+  implementation 'org.kku:fontIcons:1.0'
   implementation 'com.miglayout:miglayout-javafx:11.4.2'
   implementation 'org.commonmark:commonmark:0.24.0'
   implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.1'

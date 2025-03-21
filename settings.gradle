@@ -1,4 +1,19 @@
 
+plugins {
+  id 'me.champeau.includegit' version '0.2.0'
+}
+
 rootProject.name = 'JDiskUsage'
 
+gitRepositories {
+  checkoutsDirectory.set(file("modules"))
+  include("fontIcons") {
+    uri = "https://github.com/MrKuip/fontIcons.git"
+    branch = "main"
+  }
+  include("common") {
+    uri = "https://github.com/MrKuip/common.git"
+    branch = "main"
+  }
+}
 
