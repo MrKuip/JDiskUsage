@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.kku.common.util.StringUtils;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.concurrent.FxTask;
 import org.kku.jdiskusage.concurrent.ProgressData;
@@ -23,7 +24,6 @@ import org.kku.jdiskusage.ui.util.StyledText;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
-import org.kku.jdiskusage.util.StringUtils;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.beans.binding.Bindings;
@@ -179,6 +179,7 @@ public class SearchFormPane
     return m_table;
   }
 
+  @Override
   public void refresh(TreeItem<FileNodeIF> selectedTreeItem)
   {
     super.refresh(selectedTreeItem);

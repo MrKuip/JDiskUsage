@@ -27,6 +27,7 @@ javafx {
 
 dependencies {
   implementation 'org.kku:fontIcons:1.0'
+  implementation 'org.kku:common:1.0.1'
   implementation 'com.miglayout:miglayout-javafx:11.4.2'
   implementation 'org.commonmark:commonmark:0.24.0'
   implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
@@ -59,6 +60,10 @@ task initEclipseMetaData {
 
 tasks.withType(JavaCompile) {
     options.deprecation = true
+}
+
+tasks.named("clean").configure {
+    dependsOn gradle.includedBuilds*.task(":clean")
 }
 
 //gluonfx {

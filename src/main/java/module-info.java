@@ -6,6 +6,7 @@ module org.kku.jdiskusage
   requires java.logging;
   requires java.base;
   requires org.kku.fonticons;
+  requires org.kku.common;
   requires java.prefs;
   requires com.miglayout.javafx;
   requires org.commonmark;

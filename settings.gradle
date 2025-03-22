@@ -7,13 +7,17 @@ rootProject.name = 'JDiskUsage'
 
 gitRepositories {
   checkoutsDirectory.set(file("modules"))
-  include("fontIcons") {
-    uri = "https://github.com/MrKuip/fontIcons.git"
-    branch = "main"
-  }
   include("common") {
     uri = "https://github.com/MrKuip/common.git"
     branch = "main"
   }
+  include("fonticons") {
+    uri = "https://github.com/MrKuip/fontIcons.git"
+    branch = "main"
+  }
 }
+
+//includeBuild 'modules/common'
+//includeBuild 'modules/fonticons'
+
 
