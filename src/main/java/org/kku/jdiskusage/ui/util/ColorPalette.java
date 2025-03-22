@@ -2,7 +2,7 @@ package org.kku.jdiskusage.ui.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.kku.jdiskusage.util.AppProperties.AppProperty;
+import org.kku.common.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.Converters;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import javafx.beans.property.SimpleStringProperty;

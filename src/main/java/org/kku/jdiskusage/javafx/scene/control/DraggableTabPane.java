@@ -1,11 +1,11 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
 import java.util.stream.Collectors;
+import org.kku.common.util.SuppressFBWarnings;
+import org.kku.common.util.AppProperties.AppProperty;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.util.IconUtil;
-import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.AppSettings;
-import org.kku.jdiskusage.util.SuppressFBWarnings;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.beans.binding.StringExpression;
 import javafx.geometry.Point2D;

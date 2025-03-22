@@ -1,6 +1,6 @@
 package org.kku.conf;
 
-import org.kku.jdiskusage.util.Log;
+import org.kku.common.util.Log;
 
 public class ConfigurationException
   extends RuntimeException

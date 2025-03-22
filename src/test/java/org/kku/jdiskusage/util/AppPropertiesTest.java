@@ -6,8 +6,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
-import org.kku.jdiskusage.util.AppProperties.AppProperty;
-import org.kku.jdiskusage.util.AppProperties.AppPropertyType;
+import org.kku.common.util.AppProperties;
+import org.kku.common.util.AppProperties.AppProperty;
+import org.kku.common.util.AppProperties.AppPropertyType;
 import javafx.beans.property.SimpleStringProperty;
 
 public class AppPropertiesTest

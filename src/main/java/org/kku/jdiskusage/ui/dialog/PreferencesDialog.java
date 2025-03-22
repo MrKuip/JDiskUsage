@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.ui.dialog;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import org.kku.common.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.conf.Language;
 import org.kku.jdiskusage.conf.LanguageConfiguration;
 import org.kku.jdiskusage.javafx.scene.control.NumericTextField;
@@ -10,7 +11,6 @@ import org.kku.jdiskusage.ui.util.ColorPalette.ChartColor;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.ui.util.TranslateUtil;
-import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.scene.Node;

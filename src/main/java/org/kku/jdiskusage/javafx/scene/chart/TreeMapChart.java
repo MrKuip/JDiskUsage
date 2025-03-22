@@ -15,7 +15,7 @@ import org.kku.jdiskusage.javafx.scene.chart.TreeMapChart.TreeMapColors.MyColor;
 import org.kku.jdiskusage.ui.TreeMapChartFormPane.PathNodeTreeMapNode;
 import org.kku.jdiskusage.ui.util.ColorPalette;
 import org.kku.jdiskusage.ui.util.IconUtil;
-import org.kku.jdiskusage.util.Log;
+import org.kku.jdiskusage.util.Loggers;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import org.tbee.javafx.scene.layout.MigPane;
@@ -203,7 +203,7 @@ public class TreeMapChart<T extends TreeMapNode>
           width = tmn.getWidth();
           height = tmn.getHeight();
 
-          Log.treemap.fine("Draw : %s", tmn);
+          Loggers.treemap.fine("Draw : %s", tmn);
 
           if (height < 0 || width < 0 || x < 0 || y < 0)
           {

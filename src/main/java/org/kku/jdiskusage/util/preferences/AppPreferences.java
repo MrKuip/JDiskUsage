@@ -1,10 +1,10 @@
 package org.kku.jdiskusage.util.preferences;
 
+import org.kku.common.util.AppProperties;
+import org.kku.common.util.Converters.Converter;
 import org.kku.jdiskusage.conf.Language;
 import org.kku.jdiskusage.conf.LanguageConfiguration;
-import org.kku.jdiskusage.util.AppProperties;
 import org.kku.jdiskusage.util.Converters;
-import org.kku.jdiskusage.util.Converters.Converter;
 
 public class AppPreferences
   extends AppProperties

@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
-import org.kku.jdiskusage.util.Log;
+import org.kku.common.util.Log;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
 public class ConfigurationManager

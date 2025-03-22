@@ -2,14 +2,14 @@ package org.kku.jdiskusage.main;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.kku.common.util.SuppressFBWarnings;
+import org.kku.common.util.AppProperties.AppProperty;
+import org.kku.common.util.Log;
 import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.ui.util.ChartStyleSheet;
 import org.kku.jdiskusage.ui.util.LogoUtil;
-import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.AppSettings;
-import org.kku.jdiskusage.util.Log;
 import org.kku.jdiskusage.util.PathList;
-import org.kku.jdiskusage.util.SuppressFBWarnings;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Rectangle2D;

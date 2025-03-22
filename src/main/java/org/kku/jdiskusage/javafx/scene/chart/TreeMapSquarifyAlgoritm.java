@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import org.kku.common.util.TailCall;
 import org.kku.common.util.TailCalls;
-import org.kku.jdiskusage.util.Log;
+import org.kku.jdiskusage.util.Loggers;
 
 /**
  * Algorithm to 'squarify' rectangles in a treemap in order to better compare and select.
@@ -60,7 +60,7 @@ public class TreeMapSquarifyAlgoritm
     int index;
     List<TreeMapNode> rowList;
 
-    Log.treemap.finest("evaluate: x=%d, y=%d, width=%d, height=%d", x, y, width, height);
+    Loggers.treemap.finest("evaluate: x=%d, y=%d, width=%d, height=%d", x, y, width, height);
 
     rowList = new ArrayList<>();
     m_rowListSum = 0.0;
@@ -169,7 +169,7 @@ public class TreeMapSquarifyAlgoritm
         allocatedRowHeight += nodeHeight;
 
         tn.setBounds(x + nodeX, y + nodeY, nodeWidth, nodeHeight);
-        Log.treemap.finest("squarified: tn=%s, x=%d, y=%d, width=%d, height=%d", tn.getName(), tn.getX(), tn.getY(),
+        Loggers.treemap.finest("squarified: tn=%s, x=%d, y=%d, width=%d, height=%d", tn.getName(), tn.getX(), tn.getY(),
             tn.getWidth(), tn.getHeight());
       }
 
@@ -249,7 +249,7 @@ public class TreeMapSquarifyAlgoritm
         }
 
         tn.setBounds(x + nodeX, y + nodeY, nodeWidth, nodeHeight);
-        Log.treemap.finest("squarified: tn=%s, x=%d, y=%d, width=%d, height=%d", tn.getName(), tn.getX(), tn.getY(),
+        Loggers.treemap.finest("squarified: tn=%s, x=%d, y=%d, width=%d, height=%d", tn.getName(), tn.getX(), tn.getY(),
             tn.getWidth(), tn.getHeight());
       }
 
@@ -302,7 +302,7 @@ public class TreeMapSquarifyAlgoritm
       ratioAfter = Math.max(rowHeight / rowWidth, rowWidth / rowHeight);
     }
 
-    Log.treemap.finest("ratio %3.2f -> %3.2f when adding node %s with size %d", ratioBefore, ratioAfter, tmn.getName(),
+    Loggers.treemap.finest("ratio %3.2f -> %3.2f when adding node %s with size %d", ratioBefore, ratioAfter, tmn.getName(),
         tmn.getSize());
 
     ratioBefore = Math.abs(ratioBefore - 1);

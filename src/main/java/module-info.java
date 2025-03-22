@@ -3,7 +3,6 @@ module org.kku.jdiskusage
   requires transitive javafx.controls;
   requires transitive javafx.graphics;
   requires java.desktop;
-  requires java.logging;
   requires java.base;
   requires org.kku.fonticons;
   requires org.kku.common;

@@ -1,10 +1,10 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
 import java.util.function.Function;
+import org.kku.common.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.ui.util.FormatterIF;
 import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.Percent;
-import org.kku.jdiskusage.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.tbee.javafx.scene.layout.MigPane;

@@ -4,8 +4,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import org.kku.common.util.Log;
 import org.kku.conf.ConfigurationItem;
-import org.kku.jdiskusage.util.Log;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import javafx.scene.image.Image;
 

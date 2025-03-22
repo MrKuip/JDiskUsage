@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.util;
 
 import java.nio.file.Path;
+import org.kku.common.util.AppProperties;
 
 public class AppSettings
   extends AppProperties

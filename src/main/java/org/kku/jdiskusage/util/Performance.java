@@ -1,5 +1,8 @@
 package org.kku.jdiskusage.util;
 
+import org.kku.common.util.Log;
+import org.kku.common.util.StopWatch;
+
 public class Performance
 {
   private Performance()

@@ -13,9 +13,10 @@ import java.util.Objects;
 import java.util.Stack;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.kku.common.util.OperatingSystemUtil;
+import org.kku.common.util.OperatingSystemUtil.OperatingSystem;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNode;
-import org.kku.jdiskusage.util.OperatingSystemUtil.OperatingSystem;
 
 class ScanPath
 {
