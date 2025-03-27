@@ -5,10 +5,17 @@ plugins {
 
 rootProject.name = 'JDiskUsage'
 
+gradle.ext.moduleDir = "${rootDir}/modules"
+def moduleDir = "${gradle.ext.moduleDir}"
+
 gitRepositories {
-  checkoutsDirectory.set(file("modules"))
-  include("common") {
-    uri = "https://github.com/MrKuip/common.git"
+  checkoutsDirectory.set(file(moduleDir))
+  include("commons-base") {
+    uri = "https://github.com/MrKuip/commons-base.git"
+    branch = "main"
+  }
+  include("commons-fx") {
+    uri = "https://github.com/MrKuip/commons-fx.git"
     branch = "main"
   }
   include("fonticons") {
@@ -16,8 +23,4 @@ gitRepositories {
     branch = "main"
   }
 }
-
-//includeBuild 'modules/common'
-//includeBuild 'modules/fonticons'
-
 

@@ -9,7 +9,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
-import org.kku.common.util.AppProperties.AppProperty;
+import org.kku.fx.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.util.ConcurrentUtil;

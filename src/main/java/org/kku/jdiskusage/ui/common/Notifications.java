@@ -2,7 +2,7 @@ package org.kku.jdiskusage.ui.common;
 
 import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconSize;
-import org.kku.jdiskusage.ui.util.IconUtil;
+import org.kku.fx.ui.util.FxIconUtil;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -89,7 +89,7 @@ public class Notifications
 
       getStyleClass().add("task-item");
 
-      graphic = IconUtil.createIconNode("magnify", IconSize.LARGE);
+      graphic = FxIconUtil.createIconNode("magnify", IconSize.LARGE);
       titleText = new Label();
       titleText.textProperty().bind(task.titleProperty());
       titleText.setStyle("-fx-font-weight: bold");
@@ -99,7 +99,7 @@ public class Notifications
       progressBar.setMaxWidth(Double.MAX_VALUE);
       progressBar.setMaxHeight(8);
       progressBar.progressProperty().bind(task.progressProperty());
-      cancelButton = new Button("Cancel", IconUtil.createIconNode("cancel", IconSize.SMALLER));
+      cancelButton = new Button("Cancel", FxIconUtil.createIconNode("cancel", IconSize.SMALLER));
       cancelButton.setTooltip(new Tooltip("Cancel Task"));
       cancelButton.setOnAction(evt -> {
         task.cancel();

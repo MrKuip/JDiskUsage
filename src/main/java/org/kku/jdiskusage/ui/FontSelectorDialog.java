@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import org.kku.common.util.StringUtils;
 import org.kku.fonticons.ui.FxIcon.IconSize;
-import org.kku.jdiskusage.ui.util.IconUtil;
+import org.kku.fx.ui.util.FxIconUtil;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
@@ -99,7 +99,7 @@ public class FontSelectorDialog
             : null);
 
     getDialogPane().setHeaderText(translate("Select font"));
-    getDialogPane().setGraphic(IconUtil.createIconNode("help-circle-outline", IconSize.VERY_LARGE));
+    getDialogPane().setGraphic(FxIconUtil.createIconNode("help-circle-outline", IconSize.VERY_LARGE));
     getDialogPane().setContent(pane);
     getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
   }

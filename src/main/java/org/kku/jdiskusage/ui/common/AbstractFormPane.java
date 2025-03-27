@@ -9,11 +9,11 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import org.kku.common.util.AppProperties.AppProperty;
 import org.kku.common.util.Log;
+import org.kku.fx.ui.util.FxIconUtil;
+import org.kku.fx.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.javafx.scene.control.SegmentedControl;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
@@ -147,7 +147,7 @@ abstract public class AbstractFormPane
         button = new ToggleButton();
         if (paneType.iconName() != null)
         {
-          button.setGraphic(IconUtil.createIconNode(paneType.iconName()));
+          button.setGraphic(FxIconUtil.createIconNode(paneType.iconName()));
           button.setTooltip(translate(new Tooltip(paneType.description())));
         }
         else

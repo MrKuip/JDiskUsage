@@ -1,7 +1,7 @@
 package org.kku.jdiskusage.ui.common;
 
 import java.util.stream.Stream;
-import org.kku.jdiskusage.ui.util.IconUtil;
+import org.kku.fx.ui.util.FxIconUtil;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Insets;
@@ -30,7 +30,7 @@ public class CollapsableButtonPane
     collapsableButtonPane.setPadding(new Insets(0, 10, 0, 10));
     collapsableButtonPane.setAlignment(Pos.CENTER);
 
-    filterButton = new Button(null, IconUtil.createIconNode("filter-menu"));
+    filterButton = new Button(null, FxIconUtil.createIconNode("filter-menu"));
     filterButton.setOnAction((ae) -> toggleExpanded());
 
     collapsableButtonPane.getChildren().add(filterButton);

@@ -11,10 +11,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapChart.TreeMapColors.MyColor;
 import org.kku.jdiskusage.ui.TreeMapChartFormPane.PathNodeTreeMapNode;
 import org.kku.jdiskusage.ui.util.ColorPalette;
-import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.Loggers;
 import org.kku.jdiskusage.util.Performance;
 import org.kku.jdiskusage.util.Performance.PerformancePoint;
@@ -79,7 +79,7 @@ public class TreeMapChart<T extends TreeMapNode>
       }
     });
 
-    m_reselectButton = translate(new Button("", IconUtil.createIconNode("selection")));
+    m_reselectButton = translate(new Button("", FxIconUtil.createIconNode("selection")));
   }
 
   public void setModel(TreeMapModel<T> model)

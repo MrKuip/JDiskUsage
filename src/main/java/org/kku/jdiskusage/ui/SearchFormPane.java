@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.kku.common.util.StringUtils;
 import org.kku.fonticons.ui.FxIcon.IconSize;
+import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.jdiskusage.concurrent.FxTask;
 import org.kku.jdiskusage.concurrent.ProgressData;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
@@ -19,7 +20,6 @@ import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
 import org.kku.jdiskusage.ui.util.FxUtil;
-import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.ui.util.StyledText;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.Performance;
@@ -76,9 +76,9 @@ public class SearchFormPane
     NumericTextField<Integer> maxTimeTextField;
     ProgressBar progressBar;
 
-    searchLabel = new Label(null, IconUtil.createIconNode("magnify"));
+    searchLabel = new Label(null, FxIconUtil.createIconNode("magnify"));
 
-    regexButton = new ToggleButton(null, IconUtil.createIconNode("regex"));
+    regexButton = new ToggleButton(null, FxIconUtil.createIconNode("regex"));
     regexButton.selectedProperty().bindBidirectional(AppPreferences.searchRegexPreference.property());
     m_data.mi_regexSelectedProperty = regexButton.selectedProperty();
 
@@ -104,7 +104,7 @@ public class SearchFormPane
     m_data.mi_progress.mi_stoppedOnTimeoutProperty.addListener(FxUtil.showWarning(maxTimeTextField));
 
     cancelButton = new Button(null,
-        IconUtil.createFxIcon("cancel", IconSize.SMALLER).fillColor(Color.RED).getIconLabel());
+        FxIconUtil.createFxIcon("cancel", IconSize.SMALLER).fillColor(Color.RED).getIconLabel());
 
     toolBar = new MigPane("", "[pref][pref][grow,fill][pref][pref][pref][pref]", "[pref]1[pref]0");
     toolBar.add(cancelButton);

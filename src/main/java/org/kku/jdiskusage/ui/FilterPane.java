@@ -12,9 +12,9 @@ import java.util.stream.Stream;
 import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconColor;
 import org.kku.fonticons.ui.FxIcon.IconSize;
+import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.Filter;
-import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.application.Platform;
@@ -50,7 +50,7 @@ class FilterPane
 
     m_filterPane.setId("filterPane");
 
-    m_contentPane.add(IconUtil.createIconNode("filter", IconSize.SMALL), "aligny baseline");
+    m_contentPane.add(FxIconUtil.createIconNode("filter", IconSize.SMALL), "aligny baseline");
     m_contentPane.add(m_filterPane, "grow");
     m_contentPane.add(m_filterActivationPane, "top");
 
@@ -191,7 +191,7 @@ class FilterPane
       if (m_filterActivationPane.getChildren().isEmpty())
       {
         m_activateFilterButton = translate(
-            new Button("Activate filter", IconUtil.createIconNode("filter-check", IconSize.SMALL)));
+            new Button("Activate filter", FxIconUtil.createIconNode("filter-check", IconSize.SMALL)));
         m_activateFilterButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         m_activateFilterButton.setOnAction((ae) -> {
           activateFilter();
@@ -199,7 +199,7 @@ class FilterPane
         m_filterActivationPane.getChildren().add(m_activateFilterButton);
 
         m_clearFilterButton = translate(
-            new Button("Clear filter", IconUtil.createIconNode("filter-remove", IconSize.SMALL)));
+            new Button("Clear filter", FxIconUtil.createIconNode("filter-remove", IconSize.SMALL)));
         m_clearFilterButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         m_clearFilterButton.setOnAction((ae) -> {
           Filter[] filters;

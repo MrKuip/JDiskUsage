@@ -12,9 +12,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.kku.common.util.AppProperties.AppProperty;
 import org.kku.common.util.Log;
 import org.kku.fonticons.ui.FxIcon.IconSize;
+import org.kku.fx.ui.util.FxIconUtil;
+import org.kku.fx.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.javafx.scene.control.DraggableTabPane;
 import org.kku.jdiskusage.javafx.scene.control.SegmentedControl;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
@@ -25,7 +26,6 @@ import org.kku.jdiskusage.ui.common.Notifications;
 import org.kku.jdiskusage.ui.dialog.PreferencesDialog;
 import org.kku.jdiskusage.ui.dialog.ScanFileTreeDialog;
 import org.kku.jdiskusage.ui.dialog.ScanFileTreeDialog.ScanResult;
-import org.kku.jdiskusage.ui.util.IconUtil;
 import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.PathList;
@@ -201,27 +201,27 @@ public class DiskUsageView
 
     navigation = m_data.getNavigation();
 
-    backButton = new Button("", IconUtil.createIconNode("arrow-left", IconSize.SMALL));
+    backButton = new Button("", FxIconUtil.createIconNode("arrow-left", IconSize.SMALL));
     backButton.disableProperty().bind(navigation.backNavigationDisabledProperty());
     backButton.setOnAction((e) -> navigation.back());
 
-    forwardButton = new Button("", IconUtil.createIconNode("arrow-right", IconSize.SMALL));
+    forwardButton = new Button("", FxIconUtil.createIconNode("arrow-right", IconSize.SMALL));
     forwardButton.disableProperty().bind(navigation.forwardNavigationDisabledProperty());
     forwardButton.setOnAction((e) -> navigation.forward());
 
-    homeButton = new Button("", IconUtil.createIconNode("home", IconSize.SMALL));
+    homeButton = new Button("", FxIconUtil.createIconNode("home", IconSize.SMALL));
     homeButton.disableProperty().bind(navigation.homeNavigationDisabledProperty());
     homeButton.setOnAction((e) -> navigation.home());
 
-    refreshButton = new Button("", IconUtil.createIconNode("refresh", IconSize.SMALL));
+    refreshButton = new Button("", FxIconUtil.createIconNode("refresh", IconSize.SMALL));
     refreshButton.setOnAction((e) -> m_data.refresh());
 
-    fullScreenButton = new ToggleButton("", IconUtil.createIconNode("fullscreen", IconSize.SMALL));
+    fullScreenButton = new ToggleButton("", FxIconUtil.createIconNode("fullscreen", IconSize.SMALL));
     fullScreenButton.setOnAction((e) -> m_data.mi_fullScreen.toggleFullScreen());
 
     showDisplayMetricGroup = new ToggleGroup();
 
-    showFileSizeButton = new ToggleButton("", IconUtil.createIconNode("sigma", IconSize.SMALL));
+    showFileSizeButton = new ToggleButton("", FxIconUtil.createIconNode("sigma", IconSize.SMALL));
     showFileSizeButton.setTooltip(translate(new Tooltip("Show file size")));
     showFileSizeButton.setToggleGroup(showDisplayMetricGroup);
     showFileSizeButton.setSelected(DisplayMetric.FILE_SIZE == AppPreferences.displayMetricPreference.get());
@@ -229,7 +229,7 @@ public class DiskUsageView
       AppPreferences.displayMetricPreference.set(DisplayMetric.FILE_SIZE);
     });
 
-    showFileCountButton = new ToggleButton("", IconUtil.createIconNode("tally-mark-5", IconSize.SMALL));
+    showFileCountButton = new ToggleButton("", FxIconUtil.createIconNode("tally-mark-5", IconSize.SMALL));
     showFileCountButton.setTooltip(translate(new Tooltip("Show number of files")));
     showFileCountButton.setToggleGroup(showDisplayMetricGroup);
     showFileCountButton.setSelected(DisplayMetric.FILE_COUNT == AppPreferences.displayMetricPreference.get());
@@ -244,14 +244,14 @@ public class DiskUsageView
     sortGroup = new ToggleGroup();
 
     sortAlphabeticallyButton = new ToggleButton("",
-        IconUtil.createIconNode("sort-alphabetical-ascending", IconSize.SMALL));
+        FxIconUtil.createIconNode("sort-alphabetical-ascending", IconSize.SMALL));
     sortAlphabeticallyButton.setToggleGroup(sortGroup);
     sortAlphabeticallyButton.setSelected(Sort.ALPHABETICALLY == AppPreferences.sortPreference.get());
     sortAlphabeticallyButton.setOnAction((e) -> {
       AppPreferences.sortPreference.set(Sort.ALPHABETICALLY);
     });
 
-    sortNumericButton = new ToggleButton("", IconUtil.createIconNode("sort-numeric-ascending", IconSize.SMALL));
+    sortNumericButton = new ToggleButton("", FxIconUtil.createIconNode("sort-numeric-ascending", IconSize.SMALL));
     sortNumericButton.setToggleGroup(sortGroup);
     sortNumericButton.setSelected(Sort.NUMERIC == AppPreferences.sortPreference.get());
     sortNumericButton.setOnAction((e) -> {
@@ -283,7 +283,7 @@ public class DiskUsageView
     MenuItem menuItem;
 
     menuItem = translate(new MenuItem("Scan directory"));
-    menuItem.setGraphic(IconUtil.createIconNode("file-search"));
+    menuItem.setGraphic(FxIconUtil.createIconNode("file-search"));
     menuItem.setOnAction(e -> {
       scanDirectory(new ScanFileTreeDialog().chooseDirectory(m_data.mi_fullScreen.getCurrentStage()));
     });
@@ -306,7 +306,7 @@ public class DiskUsageView
     MenuItem menuItem;
 
     menuItem = translate(new MenuItem("Exit"));
-    menuItem.setGraphic(IconUtil.createIconNode("exit-to-app"));
+    menuItem.setGraphic(FxIconUtil.createIconNode("exit-to-app"));
     menuItem.setOnAction(e -> {
       System.exit(0);
     });
@@ -493,7 +493,7 @@ public class DiskUsageView
       Menu menu;
 
       menu = translate(new Menu("Recent scans"));
-      menu.setGraphic(IconUtil.createIconNode("history"));
+      menu.setGraphic(FxIconUtil.createIconNode("history"));
       update(menu);
       m_listenerList.add(menu);
 
@@ -535,7 +535,7 @@ public class DiskUsageView
       MenuItem menuItem;
 
       menuItem = new MenuItem(pathList.toString());
-      menuItem.setGraphic(IconUtil.createIconNode("folder-outline"));
+      menuItem.setGraphic(FxIconUtil.createIconNode("folder-outline"));
       menuItem.setOnAction(e -> {
         scanDirectory(pathList);
       });
@@ -570,7 +570,7 @@ public class DiskUsageView
       MenuItem menuItem;
 
       menuItem = translate(new MenuItem("Preferences"));
-      menuItem.setGraphic(IconUtil.createIconNode("cog"));
+      menuItem.setGraphic(FxIconUtil.createIconNode("cog"));
       menuItem.setOnAction(e -> {
         new PreferencesDialog().show();
       });

@@ -1,19 +1,16 @@
 package org.kku.jdiskusage.ui.dialog;
 
 import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-import org.kku.common.util.AppProperties.AppProperty;
+import org.kku.common.ui.dialog.AbstractPreferencesDialog;
+import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.jdiskusage.conf.Language;
 import org.kku.jdiskusage.conf.LanguageConfiguration;
 import org.kku.jdiskusage.javafx.scene.control.NumericTextField;
-import org.kku.jdiskusage.main.Main;
 import org.kku.jdiskusage.ui.util.ColorPalette;
 import org.kku.jdiskusage.ui.util.ColorPalette.ChartColor;
 import org.kku.jdiskusage.ui.util.FxUtil;
-import org.kku.jdiskusage.ui.util.IconUtil;
-import org.kku.jdiskusage.ui.util.TranslateUtil;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.tbee.javafx.scene.layout.MigPane;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
@@ -23,9 +20,9 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.stage.Modality;
 
 public class PreferencesDialog
+  extends AbstractPreferencesDialog
 {
   private Dialog<ButtonType> m_dialog;
 
@@ -33,28 +30,10 @@ public class PreferencesDialog
   {
   }
 
-  public void show()
+  @Override
+  protected final void initContent(TabPane content)
   {
-    m_dialog = new Dialog<>();
-    m_dialog.setResizable(true);
-    m_dialog.getDialogPane().setContent(getContent());
-    m_dialog.initOwner(Main.getRootStage());
-    m_dialog.initModality(Modality.APPLICATION_MODAL);
-    m_dialog.setTitle("Preferences");
-    TranslateUtil.bind(m_dialog.titleProperty());
-    m_dialog.getDialogPane().getScene().getWindow().setOnCloseRequest((e) -> m_dialog.close());
-    m_dialog.getDialogPane().setMinSize(600, 400);
-    m_dialog.showAndWait();
-  }
-
-  private Node getContent()
-  {
-    TabPane tabPane;
-
-    tabPane = new TabPane();
-    tabPane.getTabs().addAll(getGeneralTab(), getChartingTab(), getColorsTab());
-
-    return tabPane;
+    content.getTabs().addAll(getGeneralTab(), getChartingTab(), getColorsTab());
   }
 
   private Tab getGeneralTab()
@@ -86,7 +65,7 @@ public class PreferencesDialog
     maxNumberInTopRankingField.setPrefWidth(80.0);
     maxNumberInTopRankingField.valueProperty().bindBidirectional(AppPreferences.maxNumberInTopRanking.property());
 
-    resetAllButton = translate(new Button("Reset all to default", IconUtil.createIconNode("restore")));
+    resetAllButton = translate(new Button("Reset all to default", FxIconUtil.createIconNode("restore")));
     resetAllButton.setOnAction((ae) -> {
       AppPreferences.autoExpandTreeNode.reset();
       AppPreferences.autoCollapseTreeNode.reset();
@@ -136,7 +115,7 @@ public class PreferencesDialog
 
     minPercentageElementField = NumericTextField.doubleField();
 
-    restoreButton = translate(new Button("Reset all to default", IconUtil.createIconNode("restore")));
+    restoreButton = translate(new Button("Reset all to default", FxIconUtil.createIconNode("restore")));
     restoreButton.setOnAction((ae) -> {
       AppPreferences.maxNumberOfChartElements.reset();
       AppPreferences.minPercentageChartElement.reset();
@@ -199,7 +178,7 @@ public class PreferencesDialog
         color.setColor(colorPicker.getValue());
       });
 
-      restoreButton = translate(new Button("", IconUtil.createIconNode("restore")));
+      restoreButton = translate(new Button("", FxIconUtil.createIconNode("restore")));
       restoreButton.setOnAction((ae) -> {
         color.reset();
       });
@@ -215,7 +194,7 @@ public class PreferencesDialog
 
     Button restoreButton;
 
-    restoreButton = translate(new Button("Reset all to default", IconUtil.createIconNode("restore")));
+    restoreButton = translate(new Button("Reset all to default", FxIconUtil.createIconNode("restore")));
     restoreButton.setOnAction((ae) -> {
       ColorPalette.getColorList().forEach(ChartColor::reset);
     });
@@ -223,31 +202,5 @@ public class PreferencesDialog
     pane.add(restoreButton, "spanx, align right, " + getCellConstraint(0, colorSizePerColumn));
 
     return createTab("Colors", pane);
-  }
-
-  private String getCellConstraint(int x, int y)
-  {
-    return "cell " + x + " " + y + " ";
-  }
-
-  private Tab createTab(String text, Node content)
-  {
-    Tab tab;
-
-    tab = translate(new Tab(text));
-    tab.setContent(content);
-    tab.setClosable(false);
-
-    return tab;
-  }
-
-  private Node resetPreference(AppProperty<?> property)
-  {
-    Button button;
-
-    button = translate(new Button("", IconUtil.createIconNode("restore")));
-    button.setOnAction((ae) -> property.reset());
-
-    return button;
   }
 }
