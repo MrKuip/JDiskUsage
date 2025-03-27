@@ -2,9 +2,9 @@ package org.kku.jdiskusage.main;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.kku.common.util.Log;
 import org.kku.common.util.SuppressFBWarnings;
 import org.kku.fx.util.AppProperties.AppProperty;
-import org.kku.common.util.Log;
 import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.ui.util.ChartStyleSheet;
 import org.kku.jdiskusage.ui.util.LogoUtil;

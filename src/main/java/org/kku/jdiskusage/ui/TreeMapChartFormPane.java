@@ -8,6 +8,7 @@ import org.kku.jdiskusage.javafx.scene.chart.TreeMapChart;
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapModel;
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapNode;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
+import org.kku.jdiskusage.ui.TreeMapChartFormPane.PathNodeTreeMapNode;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;

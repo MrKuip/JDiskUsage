@@ -1,7 +1,7 @@
 package org.kku.jdiskusage.util;
 
-import org.kku.jdiskusage.conf.Language;
-import org.kku.jdiskusage.conf.LanguageConfiguration;
+import org.kku.common.conf.Language;
+import org.kku.common.conf.LanguageConfiguration;
 import org.kku.jdiskusage.ui.util.ColorPalette;
 import javafx.scene.paint.Color;
 

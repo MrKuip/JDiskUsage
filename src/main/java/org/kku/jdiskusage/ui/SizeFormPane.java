@@ -1,10 +1,10 @@
 package org.kku.jdiskusage.ui;
 
+import org.kku.fx.ui.util.FxUtil;
 import org.kku.jdiskusage.javafx.scene.chart.SunburstChart;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.util.ColorPalette;
-import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import javafx.beans.binding.Bindings;

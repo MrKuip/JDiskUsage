@@ -1,9 +1,9 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
 import java.util.function.Function;
+import org.kku.fx.ui.util.FxUtil;
 import org.kku.fx.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.ui.util.FormatterIF;
-import org.kku.jdiskusage.ui.util.FxUtil;
 import org.kku.jdiskusage.ui.util.Percent;
 import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.preferences.AppPreferences;

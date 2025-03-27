@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
+import org.kku.jdiskusage.javafx.scene.chart.TreeMapSquarifyAlgoritmTest.TestTreeMapNode;
 
 public class TreeMapSquarifyAlgoritmTest
 {

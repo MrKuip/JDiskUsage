@@ -5,8 +5,8 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
-import org.kku.jdiskusage.conf.Language;
-import org.kku.jdiskusage.conf.LanguageConfiguration;
+import org.kku.common.conf.Language;
+import org.kku.common.conf.LanguageConfiguration;
 import org.kku.jdiskusage.util.preferences.SizeSystem;
 
 class ConvertersTest
