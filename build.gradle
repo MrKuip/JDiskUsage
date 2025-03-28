@@ -66,6 +66,10 @@ tasks.named("clean").configure {
     dependsOn gradle.includedBuilds*.task(":clean")
 }
 
+tasks.named("test").configure {
+    dependsOn gradle.includedBuilds*.task(":test")
+}
+
 //gluonfx {
 //   resourcesList = [ '.*properties$', '.*md$', '.*htm$', '.*html$' , '.*json$' ]
 //}
