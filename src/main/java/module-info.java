@@ -8,11 +8,9 @@ module org.kku.jdiskusage
   requires org.kku.common;
   requires org.kku.fx;
   requires java.prefs;
-  requires com.miglayout.javafx;
   requires org.commonmark;
   requires javafx.web;
   requires jdk.xml.dom;
-  requires com.miglayout.core;
 
   exports org.kku.jdiskusage.main;
 
