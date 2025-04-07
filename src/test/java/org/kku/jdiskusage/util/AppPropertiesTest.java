@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.kku.fx.util.AppProperties;
 import org.kku.fx.util.AppProperties.AppProperty;
 import org.kku.fx.util.AppProperties.AppPropertyType;
+import org.kku.fx.util.AppProperties.PropertyStore;
 import javafx.beans.property.SimpleStringProperty;
 
 public class AppPropertiesTest
@@ -37,7 +38,7 @@ public class AppPropertiesTest
     defaultValue = "defaultValue";
     subject = "TestSubject";
 
-    type = properties.createAppPropertyType(propertyKey, Converters.getStringConverter());
+    type = properties.getAppProperties().createAppPropertyType(propertyKey, Converters.getStringConverter());
     property = type.forSubject(subject, propertyValue);
 
     assertEquals(property.get(), propertyValue);
@@ -70,15 +71,23 @@ public class AppPropertiesTest
   }
 
   public static class TestProperties
-    extends AppProperties
   {
     private final static TestProperties mi_instance = new TestProperties();
+    private final static String TEST_PROPERTIES_FILENAME = "JDiskUsageTest.properties";
 
     private TestProperties()
     {
-      super("JDiskUsageTest.properties");
-
       getStore().setSyncImmediately(true);
+    }
+
+    public AppProperties getAppProperties()
+    {
+      return AppProperties.get(TEST_PROPERTIES_FILENAME);
+    }
+
+    public PropertyStore getStore()
+    {
+      return getAppProperties().getStore();
     }
 
     public static TestProperties getInstance()

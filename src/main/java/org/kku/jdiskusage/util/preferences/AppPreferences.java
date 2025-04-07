@@ -2,15 +2,12 @@ package org.kku.jdiskusage.util.preferences;
 
 import org.kku.common.conf.Language;
 import org.kku.common.conf.LanguageConfiguration;
-import org.kku.common.util.Converters.Converter;
-import org.kku.fx.util.AppProperties;
+import org.kku.fx.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.Converters;
 
 public class AppPreferences
-  extends AppProperties
+  extends org.kku.fx.util.AppPreferences
 {
-  private final static AppPreferences m_instance = new AppPreferences();
-
   public final static AppProperty<SizeSystem> sizeSystemPreference;
   public final static AppProperty<DisplayMetric> displayMetricPreference;
   public final static AppProperty<Sort> sortPreference;
@@ -48,13 +45,7 @@ public class AppPreferences
         Converters.getIntegerConverter(), 5);
   }
 
-  static public <T> AppProperty<T> createPreference(String name, Converter<T> converter, T defaultValue)
+  private AppPreferences()
   {
-    return m_instance.createAppPropertyType(name, converter).forSubject(m_instance, defaultValue);
-  }
-
-  protected AppPreferences()
-  {
-    super("JDiskUsage.preferences");
   }
 }
