@@ -12,6 +12,12 @@ defaultTasks 'jar'
 test
 {
   useJUnitPlatform()
+  testLogging {
+    showStandardStreams = true 
+    afterTest { descriptor , result -> 
+      logger.lifecycle("Test: " + descriptor.getClassName() + " " + descriptor.getName() + " -> " + result)
+    }
+  }
 }
 
 apply from: 'build-eclipse.gradle'
@@ -40,6 +46,8 @@ application {
   mainClass.set('org.kku.jdiskusage.main.Main');
   mainModule.set('org.kku.jdiskusage');
 }
+
+println "parent in build.xml is ${gradle.parent?.rootProject?.rootDir}"
 
 jlink {
   launcher {
