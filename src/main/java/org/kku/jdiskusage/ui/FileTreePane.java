@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kku.common.util.Log;
 import org.kku.common.util.OperatingSystemUtil;
-import org.kku.jdiskusage.javafx.scene.control.BreadCrumbBar;
+import org.kku.fx.scene.control.BreadCrumbBar;
 import org.kku.jdiskusage.javafx.scene.control.MyTreeTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTreeTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
