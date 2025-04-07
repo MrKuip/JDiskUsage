@@ -12,6 +12,12 @@ defaultTasks 'jar'
 test
 {
   useJUnitPlatform()
+  testLogging {
+    showStandardStreams = true 
+    afterTest { descriptor , result -> 
+      logger.lifecycle("Test: " + descriptor.getClassName() + " " + descriptor.getName() + " -> " + result)
+    }
+  }
 }
 
 apply from: 'build-eclipse.gradle'
@@ -29,7 +35,7 @@ dependencies {
   implementation 'org.kku:fontIcons:1.0'
   implementation 'org.kku:commons-base:1.0.1'
   implementation 'org.kku:commons-fx:1.0.1'
-  implementation 'com.miglayout:miglayout-javafx:11.4.2'
+  //implementation 'com.miglayout:miglayout-javafx:11.4.2'
   implementation 'org.commonmark:commonmark:0.24.0'
 
   testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
@@ -40,6 +46,8 @@ application {
   mainClass.set('org.kku.jdiskusage.main.Main');
   mainModule.set('org.kku.jdiskusage');
 }
+
+println "parent in build.xml is ${gradle.parent?.rootProject?.rootDir}"
 
 jlink {
   launcher {
