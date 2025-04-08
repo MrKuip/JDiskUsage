@@ -1,6 +1,6 @@
 package org.kku.jdiskusage.javafx.scene.control;
 
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import static org.kku.fx.ui.util.TranslateUtil.translate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;

@@ -1,6 +1,6 @@
 package org.kku.jdiskusage.ui;
 
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import static org.kku.fx.ui.util.TranslateUtil.translate;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;

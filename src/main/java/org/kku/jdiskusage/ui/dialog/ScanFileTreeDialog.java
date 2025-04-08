@@ -1,7 +1,7 @@
 package org.kku.jdiskusage.ui.dialog;
 
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
+import static org.kku.fx.ui.util.TranslateUtil.translate;
+import static org.kku.fx.ui.util.TranslateUtil.translatedTextProperty;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;

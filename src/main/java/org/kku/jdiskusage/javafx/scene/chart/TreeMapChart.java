@@ -1,6 +1,6 @@
 package org.kku.jdiskusage.javafx.scene.chart;
 
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import static org.kku.fx.ui.util.TranslateUtil.translate;
 import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.Comparator;

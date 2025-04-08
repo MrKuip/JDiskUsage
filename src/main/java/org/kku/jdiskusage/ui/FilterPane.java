@@ -1,7 +1,7 @@
 package org.kku.jdiskusage.ui;
 
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
+import static org.kku.fx.ui.util.TranslateUtil.translate;
+import static org.kku.fx.ui.util.TranslateUtil.translatedTextProperty;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;

@@ -1,13 +1,13 @@
 package org.kku.jdiskusage.ui.dialog;
 
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import static org.kku.fx.ui.util.TranslateUtil.translate;
 import org.kku.common.conf.Language;
 import org.kku.common.conf.LanguageConfiguration;
 import org.kku.common.ui.dialog.AbstractPreferencesDialog;
+import org.kku.fx.scene.control.NumericTextField;
 import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.fx.ui.util.FxLanguageUtil;
 import org.kku.fx.ui.util.FxUtil;
-import org.kku.jdiskusage.javafx.scene.control.NumericTextField;
 import org.kku.jdiskusage.ui.util.ColorPalette;
 import org.kku.jdiskusage.ui.util.ColorPalette.ChartColor;
 import org.kku.jdiskusage.util.preferences.AppPreferences;

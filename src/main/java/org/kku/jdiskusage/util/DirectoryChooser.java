@@ -1,6 +1,6 @@
 package org.kku.jdiskusage.util;
 
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import static org.kku.fx.ui.util.TranslateUtil.translate;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;

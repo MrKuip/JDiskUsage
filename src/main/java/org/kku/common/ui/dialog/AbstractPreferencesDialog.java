@@ -1,10 +1,10 @@
 package org.kku.common.ui.dialog;
 
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
+import static org.kku.fx.ui.util.TranslateUtil.translate;
 import org.kku.fx.ui.util.FxIconUtil;
+import org.kku.fx.ui.util.TranslateUtil;
 import org.kku.fx.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.main.Main;
-import org.kku.jdiskusage.ui.util.TranslateUtil;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;

@@ -1,7 +1,5 @@
 package org.kku.jdiskusage.util.preferences;
 
-import org.kku.common.conf.Language;
-import org.kku.common.conf.LanguageConfiguration;
 import org.kku.fx.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.Converters;
 
@@ -11,7 +9,6 @@ public class AppPreferences
   public final static AppProperty<SizeSystem> sizeSystemPreference;
   public final static AppProperty<DisplayMetric> displayMetricPreference;
   public final static AppProperty<Sort> sortPreference;
-  public final static AppProperty<Language> languagePreference;
   public final static AppProperty<Integer> searchMaxCountPreference;
   public final static AppProperty<Integer> searchMaxTimePreference;
   public final static AppProperty<Boolean> searchRegexPreference;
@@ -30,8 +27,6 @@ public class AppPreferences
     displayMetricPreference = createPreference("Display metric", Converters.getEnumConverter(DisplayMetric.class),
         DisplayMetric.FILE_SIZE);
     sortPreference = createPreference("Sort", Converters.getEnumConverter(Sort.class), Sort.NUMERIC);
-    languagePreference = createPreference("Language", Converters.getLanguageConverter(),
-        LanguageConfiguration.getInstance().getDefault());
     searchMaxCountPreference = createPreference("Max count", Converters.getIntegerConverter(), 100);
     searchMaxTimePreference = createPreference("Max time", Converters.getIntegerConverter(), 10);
     searchRegexPreference = createPreference("Use regex search", Converters.getBooleanConverter(), Boolean.FALSE);

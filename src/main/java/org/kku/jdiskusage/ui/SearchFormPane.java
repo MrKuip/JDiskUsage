@@ -1,7 +1,7 @@
 package org.kku.jdiskusage.ui;
 
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translate;
-import static org.kku.jdiskusage.ui.util.TranslateUtil.translatedTextProperty;
+import static org.kku.fx.ui.util.TranslateUtil.translate;
+import static org.kku.fx.ui.util.TranslateUtil.translatedTextProperty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,13 +10,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.kku.common.util.StringUtils;
 import org.kku.fonticons.ui.FxIcon.IconSize;
+import org.kku.fx.scene.control.NumericTextField;
 import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.fx.ui.util.FxUtil;
 import org.kku.jdiskusage.concurrent.FxTask;
 import org.kku.jdiskusage.concurrent.ProgressData;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
-import org.kku.jdiskusage.javafx.scene.control.NumericTextField;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
