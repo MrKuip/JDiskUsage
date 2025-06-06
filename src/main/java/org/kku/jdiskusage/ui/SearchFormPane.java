@@ -13,6 +13,7 @@ import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.fx.scene.control.NumericTextField;
 import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.fx.ui.util.FxUtil;
+import org.kku.fx.util.FxProperty;
 import org.kku.jdiskusage.concurrent.FxTask;
 import org.kku.jdiskusage.concurrent.ProgressData;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
@@ -79,7 +80,7 @@ public class SearchFormPane
     searchLabel = new Label(null, FxIconUtil.createIconNode("magnify"));
 
     regexButton = new ToggleButton(null, FxIconUtil.createIconNode("regex"));
-    regexButton.selectedProperty().bindBidirectional(AppPreferences.searchRegexPreference.property());
+    regexButton.selectedProperty().bindBidirectional(FxProperty.property(AppPreferences.searchRegexPreference));
     m_data.mi_regexSelectedProperty = regexButton.selectedProperty();
 
     searchTextField = new TextField();
@@ -91,7 +92,7 @@ public class SearchFormPane
     maxCountTextField.setPrefColumnCount(5);
     maxCountLabel = translate(new Label("Max items"));
     maxCountLabel.setLabelFor(maxCountTextField);
-    maxCountTextField.valueProperty().bindBidirectional(AppPreferences.searchMaxCountPreference.property());
+    maxCountTextField.valueProperty().bindBidirectional(FxProperty.property(AppPreferences.searchMaxCountPreference));
     m_data.mi_maxCountProperty = maxCountTextField.valueProperty();
     m_data.mi_progress.mi_stoppedOnMaxCountProperty.addListener(FxUtil.showWarning(maxCountTextField));
 
@@ -99,7 +100,7 @@ public class SearchFormPane
     maxTimeTextField.setPrefColumnCount(5);
     maxTimeLabel = translate(new Label("Max time (seconds)"));
     maxTimeLabel.setLabelFor(maxTimeTextField);
-    maxTimeTextField.valueProperty().bindBidirectional(AppPreferences.searchMaxTimePreference.property());
+    maxTimeTextField.valueProperty().bindBidirectional(FxProperty.property(AppPreferences.searchMaxTimePreference));
     m_data.mi_maxTimeProperty = maxTimeTextField.valueProperty();
     m_data.mi_progress.mi_stoppedOnTimeoutProperty.addListener(FxUtil.showWarning(maxTimeTextField));
 

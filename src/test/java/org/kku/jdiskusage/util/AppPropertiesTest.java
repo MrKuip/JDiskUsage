@@ -6,10 +6,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
-import org.kku.fx.util.AppProperties;
-import org.kku.fx.util.AppProperties.AppProperty;
-import org.kku.fx.util.AppProperties.AppPropertyType;
-import org.kku.fx.util.AppProperties.PropertyStore;
+import org.kku.common.util.AppProperties;
+import org.kku.common.util.AppProperties.AppProperty;
+import org.kku.common.util.AppProperties.AppPropertyType;
 import javafx.beans.property.SimpleStringProperty;
 
 public class AppPropertiesTest
@@ -21,46 +20,39 @@ public class AppPropertiesTest
   @Test
   void test() throws Exception
   {
+    AppProperties appProperties;
     AppPropertyType<String> type;
     AppProperty<String> property;
     SimpleStringProperty stringProperty;
-    TestProperties properties;
     String subject;
     String propertyKey;
     String propertyValue;
     String defaultValue;
 
-    properties = new TestProperties();
-    properties.getStore().clear();
+    appProperties = AppProperties.get(getClass());
+    appProperties.getStore().setSyncImmediately(true);
+    appProperties.getStore().clear();
 
     propertyKey = "Test";
-    propertyValue = "Test2";
+    propertyValue = "Test1";
     defaultValue = "defaultValue";
     subject = "TestSubject";
 
-    type = properties.getAppProperties().createAppPropertyType(propertyKey, Converters.getStringConverter());
+    type = appProperties.createAppPropertyType(propertyKey, Converters.getStringConverter());
     property = type.forSubject(subject, propertyValue);
 
     assertEquals(property.get(), propertyValue);
 
-    propertyValue = "Test1";
+    propertyValue = "Test2";
     property.set(propertyValue);
     assertEquals(property.get(), propertyValue);
-    assertTrue(checkFileContent(properties, subject + "_" + propertyKey + "=" + propertyValue));
+    assertTrue(checkFileContent(appProperties, subject + "_" + propertyKey + "=" + propertyValue));
 
     property = type.forSubject(subject, defaultValue);
     assertEquals(property.get(), propertyValue);
-
-    stringProperty = new SimpleStringProperty("Hallo");
-    property.property().bindBidirectional(stringProperty);
-
-    propertyValue = "Hallo2";
-    stringProperty.set(propertyValue);
-    assertEquals(property.get(), propertyValue);
-    assertTrue(checkFileContent(properties, subject + "_" + propertyKey + "=" + propertyValue));
   }
 
-  private boolean checkFileContent(TestProperties properties, String regex) throws IOException
+  private boolean checkFileContent(AppProperties properties, String regex) throws IOException
   {
     Pattern pattern;
 
@@ -68,31 +60,5 @@ public class AppPropertiesTest
 
     return Files.readAllLines(properties.getStore().getFilePath()).stream().filter(pattern.asPredicate()).findFirst()
         .isPresent();
-  }
-
-  public static class TestProperties
-  {
-    private final static TestProperties mi_instance = new TestProperties();
-    private final static String TEST_PROPERTIES_FILENAME = "JDiskUsageTest.properties";
-
-    private TestProperties()
-    {
-      getStore().setSyncImmediately(true);
-    }
-
-    public AppProperties getAppProperties()
-    {
-      return AppProperties.get(TEST_PROPERTIES_FILENAME);
-    }
-
-    public PropertyStore getStore()
-    {
-      return getAppProperties().getStore();
-    }
-
-    public static TestProperties getInstance()
-    {
-      return mi_instance;
-    }
   }
 }

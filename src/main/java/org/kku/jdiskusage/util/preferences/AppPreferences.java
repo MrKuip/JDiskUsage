@@ -1,10 +1,10 @@
 package org.kku.jdiskusage.util.preferences;
 
-import org.kku.fx.util.AppProperties.AppProperty;
+import org.kku.common.util.AppProperties.AppProperty;
 import org.kku.jdiskusage.util.Converters;
 
 public class AppPreferences
-  extends org.kku.fx.util.AppPreferences
+  extends org.kku.common.util.AppPreferences
 {
   public final static AppProperty<SizeSystem> sizeSystemPreference;
   public final static AppProperty<DisplayMetric> displayMetricPreference;

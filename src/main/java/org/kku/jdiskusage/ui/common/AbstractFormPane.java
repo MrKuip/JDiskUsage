@@ -10,9 +10,9 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.kku.common.util.Log;
+import org.kku.common.util.AppProperties.AppProperty;
+import org.kku.fx.scene.control.SegmentedControl;
 import org.kku.fx.ui.util.FxIconUtil;
-import org.kku.fx.util.AppProperties.AppProperty;
-import org.kku.jdiskusage.javafx.scene.control.SegmentedControl;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
@@ -45,7 +45,7 @@ abstract public class AbstractFormPane
     m_diskUsageData = diskUsageData;
 
     m_diskUsageData.selectedTreeItemProperty().addListener((o, oldValue, newValue) -> refresh(newValue));
-    AppPreferences.displayMetricPreference.addListener((o, oldValue, newValue) -> refresh());
+    AppPreferences.displayMetricPreference.addListener((oldValue, newValue) -> refresh());
     Log.log.fine("Create content pane %s", getClass().getSimpleName());
   }
 

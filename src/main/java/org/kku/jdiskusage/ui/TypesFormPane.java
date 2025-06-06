@@ -8,9 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.kku.fx.ui.util.FxUtil;
+import org.kku.fx.util.FxProperty;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
@@ -42,10 +44,13 @@ class TypesFormPane
   extends AbstractFormPane
 {
   private TypesPaneData mi_data = new TypesPaneData();
+  private final Function<FileNodeIF, String> mi_typeFunction;
 
-  TypesFormPane(DiskUsageData diskUsageData)
+  TypesFormPane(DiskUsageData diskUsageData, Function<FileNodeIF, String> typeFunction)
   {
     super(diskUsageData);
+
+    mi_typeFunction = typeFunction;
 
     createPaneType("PIECHART", "Show pie chart", "chart-pie", this::getPieChartNode);
     createPaneType("BARCHART", "Show bar chart", "chart-bar", this::getBarChartNode);
@@ -70,12 +75,12 @@ class TypesFormPane
 
       if (!Objects.equals(e.bucket(), DiskUsageView.getOtherText()))
       {
-        test = (fileNode) -> Objects.equals(fileNode.getFileType(), e.bucket());
+        test = (fileNode) -> Objects.equals(mi_typeFunction.apply(fileNode), e.bucket());
       }
       else
       {
         test = (fileNode) -> !mi_data.getReducedList().stream()
-            .anyMatch(e2 -> Objects.equals(e2.bucket(), fileNode.getFileType()));
+            .anyMatch(e2 -> Objects.equals(e2.bucket(), mi_typeFunction.apply(fileNode)));
       }
 
       addFilterHandler(data.getNode(), "File type", e.bucket(), test);
@@ -100,7 +105,7 @@ class TypesFormPane
     yAxis = new CategoryAxis();
     barChart = FxUtil.createBarChart(xAxis, yAxis);
 
-    switch (AppPreferences.displayMetricPreference.property().get())
+    switch (FxProperty.property(AppPreferences.displayMetricPreference).get())
     {
       case FILE_COUNT:
         titleExpression = translatedTextProperty("Distribution of number of files by type in").concat(" ")
@@ -131,16 +136,17 @@ class TypesFormPane
       Predicate<FileNodeIF> test;
 
       data = new XYChart.Data<Number, String>(e.aggregates().getSize(getCurrentDisplayMetric()), e.bucket());
+      System.out.println(data.getYValue() + " -> " + data.getXValue());
       series1.getData().add(data);
 
       if (!Objects.equals(e.bucket(), DiskUsageView.getOtherText()))
       {
-        test = (fileNode) -> Objects.equals(fileNode.getFileType(), e.bucket());
+        test = (fileNode) -> Objects.equals(mi_typeFunction.apply(fileNode), e.bucket());
       }
       else
       {
         test = (fileNode) -> !mi_data.getReducedList().stream()
-            .anyMatch(e2 -> Objects.equals(e2.bucket(), fileNode.getFileType()));
+            .anyMatch(e2 -> Objects.equals(e2.bucket(), mi_typeFunction.apply(fileNode)));
       }
 
       addFilterHandler(data.getNode(), "File type", e.bucket(), test);
@@ -241,15 +247,21 @@ class TypesFormPane
 
           if (currentFileNode != null)
           {
-            new FileNodeIterator(currentFileNode).forEach(fn -> {
-              if (fn.isFile())
+            new FileNodeIterator(currentFileNode).forEach(fileNode -> {
+              if (fileNode.isFile())
               {
                 String bucket;
                 FileAggregates data;
 
-                bucket = fn.getFileType();
+                bucket = mi_typeFunction.apply(fileNode);
+                if (bucket == null)
+                {
+                  System.out.println("bucket = " + bucket);
+                  bucket = mi_typeFunction.apply(fileNode);
+                  System.out.println("bucket = " + bucket);
+                }
                 data = map.computeIfAbsent(bucket, (a) -> new FileAggregates(0l, 0l));
-                data.add(1, fn.getSize());
+                data.add(1, fileNode.getSize());
               }
               return true;
             });

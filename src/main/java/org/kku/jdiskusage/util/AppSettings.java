@@ -1,10 +1,10 @@
 package org.kku.jdiskusage.util;
 
 import java.nio.file.Path;
-import org.kku.fx.util.AppProperties.AppPropertyType;
+import org.kku.common.util.AppProperties.AppPropertyType;
 
 public class AppSettings
-  extends org.kku.fx.util.AppSettings
+  extends org.kku.common.util.AppSettings
 {
   public static final AppPropertyType<Path> INITIAL_DIRECTORY;
   public static final AppPropertyType<RecentScanList> RECENT_SCANS;

@@ -3,7 +3,7 @@ package org.kku.jdiskusage.conf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.kku.jdiskusage.ui.util.LogoUtil;
+import org.kku.fx.ui.util.LogoUtil;
 import javafx.scene.image.Image;
 
 class LogoUtilTest

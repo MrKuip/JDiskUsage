@@ -3,11 +3,12 @@ package org.kku.jdiskusage.ui.dialog;
 import static org.kku.fx.ui.util.TranslateUtil.translate;
 import org.kku.common.conf.Language;
 import org.kku.common.conf.LanguageConfiguration;
-import org.kku.common.ui.dialog.AbstractPreferencesDialog;
 import org.kku.fx.scene.control.NumericTextField;
+import org.kku.fx.ui.dialog.AbstractPreferencesDialog;
 import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.fx.ui.util.FxLanguageUtil;
 import org.kku.fx.ui.util.FxUtil;
+import org.kku.fx.util.FxProperty;
 import org.kku.jdiskusage.ui.util.ColorPalette;
 import org.kku.jdiskusage.ui.util.ColorPalette.ChartColor;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
@@ -48,23 +49,25 @@ public class PreferencesDialog
     Button resetAllButton;
 
     autoExpandCheckBox = translate(new CheckBox("Auto expand selected tree node"));
-    autoExpandCheckBox.selectedProperty().bindBidirectional(AppPreferences.autoExpandTreeNode.property());
+    autoExpandCheckBox.selectedProperty().bindBidirectional(FxProperty.property(AppPreferences.autoExpandTreeNode));
 
     autoCollapseCheckBox = translate(new CheckBox("Auto collapse deselected tree node"));
-    autoCollapseCheckBox.selectedProperty().bindBidirectional(AppPreferences.autoCollapseTreeNode.property());
+    autoCollapseCheckBox.selectedProperty().bindBidirectional(FxProperty.property(AppPreferences.autoCollapseTreeNode));
 
     showProgressInCellCheckBox = translate(new CheckBox("Show percent graphic in table"));
-    showProgressInCellCheckBox.selectedProperty().bindBidirectional(AppPreferences.showProgressInTable.property());
+    showProgressInCellCheckBox.selectedProperty()
+        .bindBidirectional(FxProperty.property(AppPreferences.showProgressInTable));
 
     languageComboBox = new ComboBox<>();
     languageComboBox.getItems().addAll(LanguageConfiguration.getInstance().getList());
     languageComboBox.setCellFactory(FxUtil.getCellFactoryWithImage(Language::getName, FxLanguageUtil::getFlagImage));
     languageComboBox.setButtonCell(FxUtil.getListCellWithImage(Language::getName, FxLanguageUtil::getFlagImage));
-    languageComboBox.valueProperty().bindBidirectional(AppPreferences.languagePreference.property());
+    languageComboBox.valueProperty().bindBidirectional(FxProperty.property(AppPreferences.languagePreference));
 
     maxNumberInTopRankingField = NumericTextField.integerField();
     maxNumberInTopRankingField.setPrefWidth(80.0);
-    maxNumberInTopRankingField.valueProperty().bindBidirectional(AppPreferences.maxNumberInTopRanking.property());
+    maxNumberInTopRankingField.valueProperty()
+        .bindBidirectional(FxProperty.property(AppPreferences.maxNumberInTopRanking));
 
     resetAllButton = translate(new Button("Reset all to default", FxIconUtil.createIconNode("restore")));
     resetAllButton.setOnAction((ae) -> {
@@ -103,16 +106,18 @@ public class PreferencesDialog
 
     maxNumberOfElementsField = NumericTextField.integerField();
     maxNumberOfElementsField.setPrefWidth(80.0);
-    maxNumberOfElementsField.valueProperty().bindBidirectional(AppPreferences.maxNumberOfChartElements.property());
+    maxNumberOfElementsField.valueProperty()
+        .bindBidirectional(FxProperty.property(AppPreferences.maxNumberOfChartElements));
 
     minPercentageElementField = NumericTextField.doubleField();
     minPercentageElementField.setPrefWidth(80.0);
-    minPercentageElementField.valueProperty().bindBidirectional(AppPreferences.minPercentageChartElement.property());
+    minPercentageElementField.valueProperty()
+        .bindBidirectional(FxProperty.property(AppPreferences.minPercentageChartElement));
 
     maxNumberOfLevelsSunburstChartField = NumericTextField.integerField();
     maxNumberOfLevelsSunburstChartField.setPrefWidth(80.0);
     maxNumberOfLevelsSunburstChartField.valueProperty()
-        .bindBidirectional(AppPreferences.maxNumberOfElementsInSunburstChart.property());
+        .bindBidirectional(FxProperty.property(AppPreferences.maxNumberOfElementsInSunburstChart));
 
     minPercentageElementField = NumericTextField.doubleField();
 

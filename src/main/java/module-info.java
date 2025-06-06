@@ -13,12 +13,4 @@ module org.kku.jdiskusage
   requires jdk.xml.dom;
 
   exports org.kku.jdiskusage.main;
-
-  provides org.kku.common.util.ResourceProviderIF with org.kku.jdiskusage.util.ResourceProvider;
-
-  //opens org.kku.jdiskusage.util;
-
-  //opens org.kku.jdiskusage.conf to com.fasterxml.jackson.databind;
-  //opens org.kku.jdiskusage.util.preferences to com.fasterxml.jackson.databind;
-  //opens org.kku.jdiskusage.main to com.faster
 }

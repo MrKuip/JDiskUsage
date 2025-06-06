@@ -1,6 +1,8 @@
 package org.kku.jdiskusage.util;
 
 import java.io.File;
+import java.net.FileNameMap;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -92,6 +94,8 @@ public class FileTree
     public String getName();
 
     public String getFileType();
+
+    public String getFileSubType();
 
     public boolean isDirectory();
 
@@ -243,6 +247,12 @@ public class FileTree
     }
 
     @Override
+    public String getFileSubType()
+    {
+      return "";
+    }
+
+    @Override
     public long getSize()
     {
       if (mi_fileSize == -1)
@@ -318,7 +328,11 @@ public class FileTree
   public static class FileNode
     extends AbstractFileNode
   {
+    private static Pattern typePattern = Pattern.compile("[a-zA-Z_-]*");
+    private static FileNameMap fileNameMap = URLConnection.getFileNameMap();
+
     private String mi_fileType;
+    private String mi_fileSubType;
     private int mi_inodeNumber = -1;
     private int mi_numberOfLinks = -1;
     private long mi_size;
@@ -327,12 +341,12 @@ public class FileTree
     FileNode(Path path, BasicFileAttributes basicAttributes)
     {
       super(path.getFileName());
+
+      initFileType(getName());
     }
 
     public void init(Path path, BasicFileAttributes basicAttributes)
     {
-      mi_fileType = determineFileType(getName());
-
       Map<String, Object> unixAttributes;
 
       unixAttributes = null;
@@ -357,11 +371,21 @@ public class FileTree
       mi_lastModifiedTime = basicAttributes == null ? -1 : basicAttributes.lastModifiedTime().toMillis();
     }
 
-    private static Pattern typePattern = Pattern.compile("[a-zA-Z_-]*");
-
-    private String determineFileType(String name)
+    private void initFileType(String name)
     {
       int index;
+
+      String type = fileNameMap.getContentTypeFor(name);
+      if (type != null)
+      {
+        index = type.indexOf('/');
+        if (index != -1)
+        {
+          mi_fileType = type.substring(0, index);
+          mi_fileSubType = type.substring(index + 1);
+          return;
+        }
+      }
 
       index = name.lastIndexOf('/');
       if (index != -1)
@@ -381,17 +405,26 @@ public class FileTree
         name = name.substring(index + 1);
         if (name.length() < 10 && typePattern.matcher(name).matches())
         {
-          return name.toLowerCase();
+          mi_fileType = DiskUsageView.getNoneText();
+          mi_fileSubType = name.toLowerCase();
+          return;
         }
       }
 
-      return DiskUsageView.getNoneText();
+      mi_fileType = DiskUsageView.getNoneText();
+      mi_fileSubType = DiskUsageView.getNoneText();
     }
 
     @Override
     public String getFileType()
     {
       return mi_fileType;
+    }
+
+    @Override
+    public String getFileSubType()
+    {
+      return mi_fileSubType;
     }
 
     @Override

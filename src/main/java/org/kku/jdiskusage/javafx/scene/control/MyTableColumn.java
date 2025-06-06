@@ -3,8 +3,9 @@ package org.kku.jdiskusage.javafx.scene.control;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import org.kku.common.util.AppProperties.AppProperty;
 import org.kku.fx.ui.util.FxUtil;
-import org.kku.fx.util.AppProperties.AppProperty;
+import org.kku.fx.util.FxProperty;
 import org.kku.jdiskusage.ui.util.FormatterIF;
 import org.kku.jdiskusage.ui.util.StyledText;
 import org.kku.jdiskusage.util.AppSettings;
@@ -36,7 +37,7 @@ public class MyTableColumn<T, R>
   public void setColumnCount(int columnCount)
   {
     setPrefWidth(getPrefSizeProperty().get(FxUtil.getColumnCountWidth(columnCount)));
-    widthProperty().addListener(getPrefSizeProperty().getChangeListener());
+    widthProperty().addListener(FxProperty.getChangeListener(getPrefSizeProperty()));
   }
 
   public void setCellValueAlignment(Pos alignment)

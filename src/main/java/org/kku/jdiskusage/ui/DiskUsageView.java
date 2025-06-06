@@ -12,12 +12,13 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.kku.common.util.AppProperties.AppProperty;
 import org.kku.common.util.Log;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.fx.scene.control.DraggableTabPane;
+import org.kku.fx.scene.control.SegmentedControl;
 import org.kku.fx.ui.util.FxIconUtil;
-import org.kku.fx.util.AppProperties.AppProperty;
-import org.kku.jdiskusage.javafx.scene.control.SegmentedControl;
+import org.kku.fx.util.FxProperty;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.common.FullScreen;
@@ -76,7 +77,8 @@ public class DiskUsageView
     private final SizeDistributionFormPane mi_sizeDistributionTab = new SizeDistributionFormPane(this);
     private final LastModifiedDistributionFormPane mi_modifiedDistributionTab = new LastModifiedDistributionFormPane(
         this);
-    private final TypesFormPane mi_typesTab = new TypesFormPane(this);
+    private final TypesFormPane mi_subTypesTab = new TypesFormPane(this, FileNodeIF::getFileSubType);
+    private final TypesFormPane mi_typesTab = new TypesFormPane(this, FileNodeIF::getFileType);
     private final SearchFormPane mi_searchTab = new SearchFormPane(this);
     private final HelpFormPane mi_helpTab = new HelpFormPane(this);
     private final RecentFilesMenu mi_recentFiles = new RecentFilesMenu();
@@ -143,7 +145,7 @@ public class DiskUsageView
     m_data.getTabPaneData().init();
 
     splitPane.getItems().addAll(m_data.getTreePaneData().getNode(), m_data.getTabPaneData().getNode());
-    splitPane.getDividers().get(0).positionProperty().addListener(getSplitPaneProperty().getChangeListener());
+    splitPane.getDividers().get(0).positionProperty().addListener(FxProperty.getChangeListener(getSplitPaneProperty()));
     SplitPane.setResizableWithParent(m_data.getTreePaneData().getNode(), false);
     SplitPane.setResizableWithParent(m_data.getTabPaneData().getNode(), false);
 
@@ -324,10 +326,11 @@ public class DiskUsageView
     private enum TabData
     {
       SIZE("Size", "chart-pie", (md) -> md.mi_sizeTab),
-      TOP_RANKING(Bindings.concat(translatedTextProperty("Top"), " ", AppPreferences.maxNumberInTopRanking.property()),
-          "trophy", (md) -> md.mi_topRankingTab),
+      TOP_RANKING(Bindings.concat(translatedTextProperty("Top"), " ",
+          FxProperty.property(AppPreferences.maxNumberInTopRanking)), "trophy", (md) -> md.mi_topRankingTab),
       DISTRIBUTION_SIZE("Size distribution", "chart-bell-curve", (md) -> md.mi_sizeDistributionTab),
       DISTRIBUTION_MODIFIED("Last modified", "calendar-blank", (md) -> md.mi_modifiedDistributionTab),
+      DISTRIBUTION_SUBTYPES("Subtypes", "chart-pie", (md) -> md.mi_subTypesTab),
       DISTRIBUTION_TYPES("Types", "chart-pie", (md) -> md.mi_typesTab),
       TREEMAP("Treemap", "chart-tree", (md) -> md.mi_treeChartTab),
       LINK_COUNT("Link count", "file-link", (md) -> md.mi_linkCountTab),

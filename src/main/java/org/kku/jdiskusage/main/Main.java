@@ -2,12 +2,14 @@ package org.kku.jdiskusage.main;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.kku.common.util.AppProperties.AppProperty;
 import org.kku.common.util.Log;
 import org.kku.common.util.SuppressFBWarnings;
-import org.kku.fx.util.AppProperties.AppProperty;
+import org.kku.fx.ui.util.LogoUtil;
+import org.kku.fx.ui.util.RootStage;
+import org.kku.fx.util.FxProperty;
 import org.kku.jdiskusage.ui.DiskUsageView;
 import org.kku.jdiskusage.ui.util.ChartStyleSheet;
-import org.kku.jdiskusage.ui.util.LogoUtil;
 import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.PathList;
 import javafx.application.Application;
@@ -23,7 +25,6 @@ public class Main
   extends Application
 {
   static private Pane m_rootNode;
-  static private Stage m_rootStage;
 
   @SuppressFBWarnings(value = "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
   @Override
@@ -33,7 +34,8 @@ public class Main
     Scene scene;
     Rectangle2D defaultScreenBounds;
 
-    m_rootStage = stage;
+    RootStage.set(stage);
+    LogoUtil.init(getClass());
 
     Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
       Log.log.error(throwable, "%s %s", thread, throwable.getMessage());
@@ -43,7 +45,7 @@ public class Main
     m_rootNode = diskUsageView.getContent();
 
     scene = new Scene(m_rootNode);
-    scene.getStylesheets().add("jdiskusage.css");
+    scene.getStylesheets().add("module-resources/jdiskusage.css");
     ChartStyleSheet.getInstance().styleSheetProperty().addListener((obs, oldValue, newValue) -> {
       scene.getStylesheets().remove(oldValue);
       scene.getStylesheets().add(newValue);
@@ -56,10 +58,10 @@ public class Main
     stage.setWidth(getWidthProperty().get(defaultScreenBounds.getWidth()));
     stage.setHeight(getHeightProperty().get(defaultScreenBounds.getHeight()));
 
-    stage.xProperty().addListener(getXProperty().getChangeListener());
-    stage.yProperty().addListener(getYProperty().getChangeListener());
-    stage.widthProperty().addListener(getWidthProperty().getChangeListener());
-    stage.heightProperty().addListener(getHeightProperty().getChangeListener());
+    stage.xProperty().addListener(FxProperty.getChangeListener(getXProperty()));
+    stage.yProperty().addListener(FxProperty.getChangeListener(getYProperty()));
+    stage.widthProperty().addListener(FxProperty.getChangeListener(getWidthProperty()));
+    stage.heightProperty().addListener(FxProperty.getChangeListener(getHeightProperty()));
 
     stage.getIcons().addAll(LogoUtil.getLogoList());
     stage.setTitle("JDiskUsage");
@@ -77,12 +79,6 @@ public class Main
   static public Node getRootNode()
   {
     return m_rootNode;
-  }
-
-  @SuppressFBWarnings(value = "MS_EXPOSE_REP")
-  static public Stage getRootStage()
-  {
-    return m_rootStage;
   }
 
   private Rectangle2D getDefaultScreenBounds()

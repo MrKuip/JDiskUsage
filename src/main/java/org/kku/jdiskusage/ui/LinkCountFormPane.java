@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.kku.fx.ui.util.FxUtil;
+import org.kku.fx.util.FxProperty;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonCell;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
@@ -93,7 +94,7 @@ class LinkCountFormPane
     yAxis = new CategoryAxis();
     barChart = FxUtil.createBarChart(xAxis, yAxis);
 
-    switch (AppPreferences.displayMetricPreference.property().get())
+    switch (FxProperty.property(AppPreferences.displayMetricPreference).get())
     {
       case FILE_COUNT:
         titleExpression = translatedTextProperty("Distribution of number of files by number of links in").concat(" ")

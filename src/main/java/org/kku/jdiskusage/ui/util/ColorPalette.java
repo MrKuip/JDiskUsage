@@ -2,7 +2,8 @@ package org.kku.jdiskusage.ui.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.kku.fx.util.AppProperties.AppProperty;
+import org.kku.common.util.AppProperties.AppProperty;
+import org.kku.fx.util.FxProperty;
 import org.kku.jdiskusage.util.Converters;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import javafx.beans.property.SimpleStringProperty;
@@ -60,7 +61,7 @@ public class ColorPalette
       mi_preference = AppPreferences.createPreference("color" + index, Converters.getColorConverter(),
           Color.web(defaultColor));
 
-      mi_preference.addListener((obs, oldValue, newValue) -> {
+      mi_preference.addListener((oldValue, newValue) -> {
         ChartStyleSheet.getInstance().refresh();
       });
 
@@ -81,7 +82,7 @@ public class ColorPalette
 
     public ObservableValue<Color> colorProperty()
     {
-      return mi_preference.property();
+      return FxProperty.property(mi_preference);
     }
 
     public ObservableValue<Color> colorProperty(double brightness)

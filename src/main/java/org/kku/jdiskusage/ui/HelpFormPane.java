@@ -9,7 +9,9 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
-import org.kku.fx.util.AppProperties.AppProperty;
+import org.kku.common.util.AppProperties.AppProperty;
+import org.kku.common.util.ResourceLoader;
+import org.kku.fx.util.FxProperty;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.util.ConcurrentUtil;
@@ -56,7 +58,7 @@ public class HelpFormPane
     contentsView = getContentsWebBrowser().getWebView();
 
     splitPane.getItems().addAll(tableOfContentsView, contentsView);
-    splitPane.getDividers().get(0).positionProperty().addListener(getSplitPaneProperty().getChangeListener());
+    splitPane.getDividers().get(0).positionProperty().addListener(FxProperty.getChangeListener(getSplitPaneProperty()));
     SplitPane.setResizableWithParent(tableOfContentsView, false);
     SplitPane.setResizableWithParent(contentsView, false);
     splitPane.getDividers().get(0).setPosition(getSplitPaneProperty().get(0.25));
@@ -132,7 +134,8 @@ public class HelpFormPane
     {
       String html;
 
-      try (Reader reader = new InputStreamReader(HelpFormPane.class.getResourceAsStream(link), StandardCharsets.UTF_8))
+      try (Reader reader = new InputStreamReader(ResourceLoader.getInstance().getResourceAsStream(link),
+          StandardCharsets.UTF_8))
       {
         html = mi_renderer.render(mi_parser.parseReader(reader));
       }

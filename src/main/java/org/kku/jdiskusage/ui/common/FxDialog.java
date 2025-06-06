@@ -1,6 +1,6 @@
 package org.kku.jdiskusage.ui.common;
 
-import org.kku.jdiskusage.main.Main;
+import org.kku.fx.ui.util.RootStage;
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -26,7 +26,7 @@ public class FxDialog<R>
     scene.getStylesheets().add("jdiskusage.css");
 
     m_stage = new Stage();
-    m_stage.initOwner(Main.getRootStage());
+    m_stage.initOwner(RootStage.get());
     m_stage.initModality(Modality.APPLICATION_MODAL);
     m_stage.initStyle(StageStyle.UNDECORATED);
     m_stage.setScene(scene);
