@@ -341,22 +341,8 @@ public class DirectoryChooser
     {
       List<TreeItem<MyPath>> mi_treePathList;
       List<MyPath> pathList;
-      MyPath parent;
 
-      parent = path;
-      pathList = new ArrayList<>();
-      while (parent != null)
-      {
-        if (!parent.isRootNode())
-        {
-          pathList.add(parent);
-        }
-
-        Path p = parent.getPath() != null ? parent.getPath().getParent() : null;
-        parent = p != null ? new MyPath(p) : null;
-      }
-      pathList.add(new MyPath());
-
+      pathList = Stream.iterate(path, Objects::nonNull, MyPath::getParent).collect(Collectors.toList());
       Collections.reverse(pathList);
 
       mi_treePathList = new ArrayList<>();
@@ -365,11 +351,7 @@ public class DirectoryChooser
         TreeItem<MyPath> treeItem;
         int parentIndex;
 
-        treeItem = new TreeItem<>(p);
-        if (p.getPath() == null)
-        {
-          treeItem.setGraphic(FxIconUtil.createIconNode("arrow-right-circle"));
-        }
+        treeItem = p.createTreeItem();
         parentIndex = mi_treePathList.size() - 1;
         if (parentIndex >= 0)
         {
@@ -534,6 +516,7 @@ public class DirectoryChooser
 
   private class MyPath
   {
+    private MyPath mi_parent;
     private final Path mi_path;
     private final String mi_name;
     private final boolean mi_isRootNode;
@@ -543,6 +526,19 @@ public class DirectoryChooser
       mi_path = null;
       mi_name = "<Root>";
       mi_isRootNode = true;
+    }
+
+    public TreeItem<MyPath> createTreeItem()
+    {
+      TreeItem<MyPath> treeItem;
+
+      treeItem = new TreeItem<>(this);
+      if (isRootNode())
+      {
+        treeItem.setGraphic(FxIconUtil.createIconNode("arrow-right-circle"));
+      }
+
+      return treeItem;
     }
 
     private MyPath(Path path)
@@ -566,6 +562,28 @@ public class DirectoryChooser
       return mi_isRootNode;
     }
 
+    public MyPath getParent()
+    {
+      if (mi_isRootNode)
+      {
+        return null;
+      }
+
+      if (mi_parent == null)
+      {
+        if (mi_path.getParent() != null)
+        {
+          mi_parent = new MyPath(mi_path.getParent());
+        }
+        else
+        {
+          mi_parent = new MyPath();
+        }
+      }
+
+      return mi_parent;
+    }
+
     public Stream<MyPath> getChildren() throws IOException
     {
       if (mi_path == null)
@@ -580,7 +598,6 @@ public class DirectoryChooser
 
     public String getName()
     {
-      //return mi_path != null ? mi_path.getName(mi_path.getNameCount() - 1).toString() : "";
       return mi_name;
     }
 
