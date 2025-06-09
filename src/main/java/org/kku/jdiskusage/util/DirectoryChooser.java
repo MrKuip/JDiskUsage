@@ -18,6 +18,7 @@ import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconColor;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.fx.scene.control.BreadCrumbBar;
+import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.common.FxDialog;
@@ -49,7 +50,7 @@ import javafx.stage.Window;
 
 public class DirectoryChooser
 {
-  private final ObjectProperty<Path> m_directory = new SimpleObjectProperty<>();
+  private final ObjectProperty<MyPath> m_directory = new SimpleObjectProperty<>();
   private final ObjectProperty<SelectionMode> m_selectionMode = new SimpleObjectProperty<>(SelectionMode.SINGLE);
   private final StringProperty m_searchText = new SimpleStringProperty();
 
@@ -160,12 +161,12 @@ public class DirectoryChooser
       openButton = translate(new Button("Open", new FxIcon("open-in-new").size(IconSize.SMALL).getIconLabel()));
       openButton.setAlignment(Pos.BASELINE_LEFT);
       openButton.setOnAction((_) -> {
-        List<Path> result;
+        List<MyPath> result;
 
         result = new ArrayList<>();
-        result.addAll(m_directoryPane.getSelectedPaths());
-        result.sort(Comparator.comparing(Path::toString));
-        m_dialog.setResult(new PathList(result));
+        result.addAll(getSelectedPaths());
+        result.sort(Comparator.comparing(MyPath::toString));
+        m_dialog.setResult(new PathList(result.stream().map(MyPath::getPath).toList()));
         m_dialog.close();
       });
 
@@ -173,6 +174,23 @@ public class DirectoryChooser
       add(mi_searchField, "");
       add(searchButton, "");
       add(openButton, "tag ok, sg buttons");
+    }
+
+    private List<MyPath> getSelectedPaths()
+    {
+      List<MyPath> result;
+
+      result = new ArrayList<>();
+      if (m_directoryPane.getSelectedPaths().isEmpty())
+      {
+        result.add(getDirectory());
+      }
+      else
+      {
+        result.addAll(m_directoryPane.getSelectedPaths());
+      }
+
+      return result;
     }
 
     public void onKeyTyped(KeyEvent ke)
@@ -240,19 +258,9 @@ public class DirectoryChooser
       add(directoryNode, "grow, width 180px, height 30px, wrap");
     }
 
-    private List<DirectoryNode> getRootNodes()
-    {
-      List<DirectoryNode> rootNodeList;
-
-      rootNodeList = new ArrayList<>();
-      FileSystems.getDefault().getRootDirectories().forEach(path -> rootNodeList.add(new DirectoryNode(path)));
-
-      return rootNodeList;
-    }
-
     private DirectoryNode getHomeNode()
     {
-      return new DirectoryNode(translate("Home"), "home", Path.of(System.getProperty("user.home")));
+      return new DirectoryNode(translate("Home"), "home", new MyPath(Path.of(System.getProperty("user.home"))));
     }
 
     private List<DirectoryNode> getFavoriteNodes()
@@ -265,7 +273,7 @@ public class DirectoryChooser
 
         menu = new ContextMenu();
 
-        node = new DirectoryNode(directory.toString(), "star", directory.getPath());
+        node = new DirectoryNode(directory.toString(), "star", new MyPath(directory.getPath()));
         node.setTooltip(new Tooltip(directory.toString()));
         node.setContextMenu(menu);
 
@@ -321,7 +329,7 @@ public class DirectoryChooser
     private void init()
     {
       selectedTreeItem().addListener((_, _, newValue) -> {
-        setDirectory(newValue.getValue().getPath());
+        setDirectory(newValue.getValue());
       });
 
       m_directory.addListener((_, _, newDirectory) -> {
@@ -329,19 +337,25 @@ public class DirectoryChooser
       });
     }
 
-    private TreeItem<MyPath> convertToTreeItem(Path path)
+    private TreeItem<MyPath> convertToTreeItem(MyPath path)
     {
       List<TreeItem<MyPath>> mi_treePathList;
       List<MyPath> pathList;
-      Path parent;
+      MyPath parent;
 
       parent = path;
       pathList = new ArrayList<>();
       while (parent != null)
       {
-        pathList.add(new MyPath(parent));
-        parent = parent.getParent();
+        if (!parent.isRootNode())
+        {
+          pathList.add(parent);
+        }
+
+        Path p = parent.getPath() != null ? parent.getPath().getParent() : null;
+        parent = p != null ? new MyPath(p) : null;
       }
+      pathList.add(new MyPath());
 
       Collections.reverse(pathList);
 
@@ -352,6 +366,10 @@ public class DirectoryChooser
         int parentIndex;
 
         treeItem = new TreeItem<>(p);
+        if (p.getPath() == null)
+        {
+          treeItem.setGraphic(FxIconUtil.createIconNode("arrow-right-circle"));
+        }
         parentIndex = mi_treePathList.size() - 1;
         if (parentIndex >= 0)
         {
@@ -373,7 +391,7 @@ public class DirectoryChooser
   private class DirectoryPane
     extends MigPane
   {
-    private MyTableView<Path> mi_tableView;
+    private MyTableView<MyPath> mi_tableView;
 
     private DirectoryPane()
     {
@@ -381,12 +399,12 @@ public class DirectoryChooser
       init();
     }
 
-    public MyTableView<Path> getTableView()
+    public MyTableView<MyPath> getTableView()
     {
       return mi_tableView;
     }
 
-    public List<Path> getSelectedPaths()
+    public List<MyPath> getSelectedPaths()
     {
       return mi_tableView.getSelectionModel().getSelectedItems();
     }
@@ -406,11 +424,11 @@ public class DirectoryChooser
       });
     }
 
-    private MyTableView<Path> createTableView()
+    private MyTableView<MyPath> createTableView()
     {
-      MyTableView<Path> tableView;
-      MyTableColumn<Path, Node> pathTypeColumn;
-      MyTableColumn<Path, String> nameColumn;
+      MyTableView<MyPath> tableView;
+      MyTableColumn<MyPath, Node> pathTypeColumn;
+      MyTableColumn<MyPath, String> nameColumn;
       ContextMenu menu;
       MenuItem menuItem;
 
@@ -434,13 +452,13 @@ public class DirectoryChooser
       menu = new ContextMenu();
       menuItem = translate(new MenuItem("Add to favorites"));
       menuItem.setOnAction((_) -> {
-        Path path;
+        MyPath path;
         String name;
 
         path = tableView.getSelectionModel().getSelectedItem();
-        name = path.getName(path.getNameCount() - 1).toString();
+        name = path.getName();
 
-        m_favoriteDirectoryNodes.addFavorite(new Directory(name, path));
+        m_favoriteDirectoryNodes.addFavorite(new Directory(name, path.getPath()));
       });
       menu.getItems().add(menuItem);
       tableView.setContextMenu(menu);
@@ -451,7 +469,7 @@ public class DirectoryChooser
 
       nameColumn = tableView.addColumn("Name");
       nameColumn.setColumnCount(40);
-      nameColumn.setCellValueGetter((path) -> path.getFileName().toString());
+      nameColumn.setCellValueGetter((path) -> path.getName());
 
       return tableView;
     }
@@ -468,21 +486,21 @@ public class DirectoryChooser
     {
       mi_tableView.getItems().clear();
 
-      try (Stream<Path> stream = Files.list(getDirectory()))
+      //try (Stream<MyPath> stream = Files.list(getDirectory()))
+      try (Stream<MyPath> stream = getDirectory().getChildren())
       {
-        ObservableList<Path> list;
+        ObservableList<MyPath> list;
         String searchText;
 
         searchText = m_searchText.get();
 
-        list = stream.filter(Files::isDirectory) // Filter only directories
+        list = stream.filter(MyPath::isDirectory) // Filter only directories
             .filter(path -> StringUtils.isEmpty(searchText)
                 || path.toString().toLowerCase().contains(searchText.toLowerCase())) // Search filter
-            .sorted(Comparator
-                .comparing(
-                    (Path path) -> path.getFileName().toString().toLowerCase().startsWith(searchText.toLowerCase()))
-                .reversed() // Sort paths where the name starts with `searchText` first
-                .thenComparing(path -> path.getFileName().toString().toLowerCase()) // Then sort alphabetically by file name
+            .sorted(
+                Comparator.comparing((MyPath path) -> path.getName().toLowerCase().startsWith(searchText.toLowerCase()))
+                    .reversed() // Sort paths where the name starts with `searchText` first
+                    .thenComparing(path -> path.getName().toLowerCase()) // Then sort alphabetically by file name
             ).collect(Collectors.toCollection(FXCollections::observableArrayList));
 
         mi_tableView.setItems(list);
@@ -493,14 +511,19 @@ public class DirectoryChooser
       }
     }
 
-    private Node pathToImage(Path path)
+    private Node pathToImage(MyPath path)
     {
-      if (Files.isDirectory(path))
+      if (path == null)
+      {
+        return null;
+      }
+
+      if (Files.isDirectory(path.getPath()))
       {
         return new FxIcon("folder-outline").size(IconSize.SMALLER).getIconLabel();
       }
 
-      if (Files.isRegularFile(path))
+      if (Files.isRegularFile(path.getPath()))
       {
         return new FxIcon("file-outline").size(IconSize.SMALLER).getIconLabel();
       }
@@ -509,14 +532,23 @@ public class DirectoryChooser
     }
   }
 
-  static private class MyPath
+  private class MyPath
   {
     private final Path mi_path;
     private final String mi_name;
+    private final boolean mi_isRootNode;
+
+    private MyPath()
+    {
+      mi_path = null;
+      mi_name = "<Root>";
+      mi_isRootNode = true;
+    }
 
     private MyPath(Path path)
     {
       mi_path = path;
+      mi_isRootNode = false;
 
       int nameIndex = mi_path.getNameCount() - 1;
       if (nameIndex >= 0)
@@ -529,9 +561,37 @@ public class DirectoryChooser
       }
     }
 
+    public boolean isRootNode()
+    {
+      return mi_isRootNode;
+    }
+
+    public Stream<MyPath> getChildren() throws IOException
+    {
+      if (mi_path == null)
+      {
+        return getRootNodes().stream().map(DirectoryNode::getPath);
+      }
+      else
+      {
+        return Files.list(mi_path).map(MyPath::new);
+      }
+    }
+
+    public String getName()
+    {
+      //return mi_path != null ? mi_path.getName(mi_path.getNameCount() - 1).toString() : "";
+      return mi_name;
+    }
+
     public Path getPath()
     {
       return mi_path;
+    }
+
+    public boolean isDirectory()
+    {
+      return mi_path != null ? Files.isDirectory(mi_path) : false;
     }
 
     @Override
@@ -546,14 +606,14 @@ public class DirectoryChooser
   {
     private final String m_name;
     private final String m_iconName;
-    private final Path m_path;
+    private final MyPath m_path;
 
-    private DirectoryNode(Path path)
+    private DirectoryNode(MyPath path)
     {
       this(path.toString(), "folder-outline", path);
     }
 
-    private DirectoryNode(String name, String iconName, Path path)
+    private DirectoryNode(String name, String iconName, MyPath path)
     {
       m_name = name;
       m_iconName = iconName;
@@ -574,6 +634,11 @@ public class DirectoryChooser
       setOnAction((_) -> {
         setDirectory(m_path);
       });
+    }
+
+    public MyPath getPath()
+    {
+      return m_path;
     }
   }
 
@@ -624,25 +689,37 @@ public class DirectoryChooser
 
   public void setInitialDirectory(Path directory)
   {
-    setDirectory(directory);
+    setDirectory(new MyPath(directory));
   }
 
   /**
    * The current directory for the displayed dialog.
    */
 
-  public final void setDirectory(Path value)
+  public final void setDirectory(MyPath value)
   {
     Platform.runLater(() -> directoryProperty().set(value));
   }
 
-  public final Path getDirectory()
+  public final MyPath getDirectory()
   {
     return (m_directory != null) ? m_directory.get() : null;
   }
 
-  public final ObjectProperty<Path> directoryProperty()
+  public final ObjectProperty<MyPath> directoryProperty()
   {
     return m_directory;
   }
+
+  private List<DirectoryNode> getRootNodes()
+  {
+    List<DirectoryNode> rootNodeList;
+
+    rootNodeList = new ArrayList<>();
+    FileSystems.getDefault().getRootDirectories()
+        .forEach(path -> rootNodeList.add(new DirectoryNode(new MyPath(path))));
+
+    return rootNodeList;
+  }
+
 }
