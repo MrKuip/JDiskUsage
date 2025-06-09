@@ -44,7 +44,7 @@ public class TaskPaneItem<T>
       stage.setScene(scene);
       stage.show();
 
-      worker.runningProperty().addListener((o, oldValue, newValue) -> {
+      worker.runningProperty().addListener((_, _, newValue) -> {
         if (!newValue)
         {
           stage.hide();
@@ -89,7 +89,7 @@ public class TaskPaneItem<T>
     value.textProperty().bind(worker.valueProperty().asString());
 
     // Display the exception message when an exception occurs in the worker
-    worker.exceptionProperty().addListener((prop, oldValue, newValue) -> {
+    worker.exceptionProperty().addListener((_, _, newValue) -> {
       if (newValue != null)
       {
         exception.setText(newValue.getMessage());

@@ -325,7 +325,7 @@ public class SizeDistributionFormPane
     {
       if (mi_map == null)
       {
-        try (PerformancePoint pp = Performance.measure("Collecting data for size distribution tab"))
+        try (PerformancePoint _ = Performance.measure("Collecting data for size distribution tab"))
         {
           mi_map = new LinkedHashMap<>();
           Stream.of(SizeDistributionBucket.values()).forEach(bucket -> {

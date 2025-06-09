@@ -168,7 +168,7 @@ public class SunburstChart<T>
       // The basic color of a child is determined from it's ultimate parent that is not the root.
       // (That is the parent just 1 level above the root)
       color = m_colorByItemMap.computeIfAbsent(parent.get(),
-          key -> m_colorList.get(m_colorByItemMap.size() % m_colorList.size()));
+          (_) -> m_colorList.get(m_colorByItemMap.size() % m_colorList.size()));
 
       // The basic color is made 'darker' depended on it's level. The higher the level the darker the arc.
       return color.colorProperty(1.0 - ((0.6 / m_maxLevel) * level));
@@ -181,7 +181,7 @@ public class SunburstChart<T>
   private NumberBinding calculateRadixProperty(int level)
   {
     return m_radixPropertyMap.computeIfAbsent(level,
-        key -> Bindings.min(SunburstChart.this.widthProperty(), SunburstChart.this.heightProperty())
+        (_) -> Bindings.min(SunburstChart.this.widthProperty(), SunburstChart.this.heightProperty())
             .divide(m_detectedMaxLevelProperty).divide(2).multiply(level));
   }
 }

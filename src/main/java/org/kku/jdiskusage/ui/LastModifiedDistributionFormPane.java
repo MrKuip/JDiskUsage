@@ -313,7 +313,7 @@ class LastModifiedDistributionFormPane
     {
       if (mi_map == null)
       {
-        try (PerformancePoint pp = Performance.measure("Collecting data for last modified tab"))
+        try (PerformancePoint _ = Performance.measure("Collecting data for last modified tab"))
         {
           mi_map = new LinkedHashMap<>();
           Stream.of(LastModifiedDistributionBucket.values()).forEach(bucket -> {

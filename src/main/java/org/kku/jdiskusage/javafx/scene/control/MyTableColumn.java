@@ -74,7 +74,7 @@ public class MyTableColumn<T, R>
 
   private void init()
   {
-    this.setCellFactory(column -> {
+    this.setCellFactory((_) -> {
       return new TableCell<>()
       {
         final Button button = new Button();
@@ -83,7 +83,7 @@ public class MyTableColumn<T, R>
         {
           if (m_setter != null)
           {
-            checkBox.setOnAction((ae) -> {
+            checkBox.setOnAction((_) -> {
               T item = getTableRow().getItem();
               if (item != null)
               {

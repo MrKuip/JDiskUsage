@@ -23,7 +23,7 @@ public class TestFx
     stage.setScene(scene);
     stage.setWidth(800.0);
     stage.setHeight(400.0);
-    stage.setOnCloseRequest((cr) -> { Platform.exit(); System.exit(1); });
+    stage.setOnCloseRequest((_) -> { Platform.exit(); System.exit(1); });
     stage.show();
   }
 

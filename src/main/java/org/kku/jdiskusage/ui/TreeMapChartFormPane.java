@@ -8,7 +8,6 @@ import org.kku.jdiskusage.javafx.scene.chart.TreeMapChart;
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapModel;
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapNode;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
-import org.kku.jdiskusage.ui.TreeMapChartFormPane.PathNodeTreeMapNode;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
@@ -71,7 +70,7 @@ public class TreeMapChartFormPane
 
     m_treeMap = new TreeMapChart<>();
     m_treeMap.setModel(m_data.getModel());
-    m_treeMap.addReselectListener((ae) -> {
+    m_treeMap.addReselectListener((_) -> {
       m_root = null;
       refresh(getDiskUsageData().selectedTreeItemProperty().get());
     });
@@ -91,7 +90,7 @@ public class TreeMapChartFormPane
     {
       if (mi_model == null)
       {
-        try (PerformancePoint pp = Performance.measure("Collecting data for tree chart tab"))
+        try (PerformancePoint _ = Performance.measure("Collecting data for tree chart tab"))
         {
           mi_model = new TreeMapModel<>(PathNodeTreeMapNode.create(getCurrentFileNode()));
         }

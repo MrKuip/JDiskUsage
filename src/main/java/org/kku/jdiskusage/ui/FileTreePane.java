@@ -64,7 +64,7 @@ public class FileTreePane
     m_treeTableView = m_fileTreeView.createComponent();
 
     m_breadcrumbBar.treeItem().bind(m_diskUsageData.selectedTreeItemProperty());
-    m_breadcrumbBar.selectedTreeItem().addListener((o, oldValue, newValue) -> {
+    m_breadcrumbBar.selectedTreeItem().addListener((_, _, newValue) -> {
       m_diskUsageData.getTreePaneData().navigateTo(newValue);
     });
 
@@ -128,7 +128,7 @@ public class FileTreePane
   private static class FileTreeView
   {
     private DirNode m_dirNode;
-    private FilterIF mi_filter = (fn) -> true;
+    private FilterIF mi_filter = (_) -> true;
     private MyTreeTableView<FileNodeIF> mi_treeTableView;
 
     public FileTreeView(DirNode dirNode)
@@ -249,7 +249,7 @@ public class FileTreePane
         super(node);
 
         // Release memory
-        expandedProperty().addListener((observable, wasExpanded, isExpanded) -> {
+        expandedProperty().addListener((_, wasExpanded, isExpanded) -> {
           if (wasExpanded && !isExpanded && !mi_isFirstTimeChildren)
           {
             super.getChildren().clear();

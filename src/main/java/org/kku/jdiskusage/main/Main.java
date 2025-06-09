@@ -46,7 +46,7 @@ public class Main
 
     scene = new Scene(m_rootNode);
     scene.getStylesheets().add("module-resources/jdiskusage.css");
-    ChartStyleSheet.getInstance().styleSheetProperty().addListener((obs, oldValue, newValue) -> {
+    ChartStyleSheet.getInstance().styleSheetProperty().addListener((_, oldValue, newValue) -> {
       scene.getStylesheets().remove(oldValue);
       scene.getStylesheets().add(newValue);
     });
@@ -66,7 +66,7 @@ public class Main
     stage.getIcons().addAll(LogoUtil.getLogoList());
     stage.setTitle("JDiskUsage");
     stage.setScene(scene);
-    stage.setOnCloseRequest((cr) -> { Platform.exit(); System.exit(1); });
+    stage.setOnCloseRequest((_) -> { Platform.exit(); System.exit(1); });
     stage.show();
 
     getParameters().getRaw().stream().map(Path::of).filter(path -> Files.exists(path) && Files.isDirectory(path))

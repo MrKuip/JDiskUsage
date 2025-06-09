@@ -1,6 +1,6 @@
 package org.kku.jdiskusage.main;
 
-import org.kku.fx.util.Translator;
+import org.kku.common.util.ResourceLoader;
 
 public class Main5
 {
@@ -16,8 +16,8 @@ public class Main5
       //System.out.println(ResourceLoader.getInstance().getResources("/lo-go/logo/Logo-30px.png"));
       //System.out.println(ResourceLoader.getInstance().getResources("/logo/Logo-30px.png"));
       //LogoUtil.getLogoList().forEach(logo -> { System.out.println(logo); });
+      System.out.println(ResourceLoader.getInstance().getResources("flags"));
 
-      System.out.println(Translator.getTranslatedText("Name"));
     }
     catch (Exception ex)
     {

@@ -14,11 +14,9 @@ import org.kku.jdiskusage.ui.util.ColorPalette.ChartColor;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -26,8 +24,6 @@ import javafx.scene.control.TabPane;
 public class PreferencesDialog
   extends AbstractPreferencesDialog
 {
-  private Dialog<ButtonType> m_dialog;
-
   public PreferencesDialog()
   {
   }
@@ -70,7 +66,7 @@ public class PreferencesDialog
         .bindBidirectional(FxProperty.property(AppPreferences.maxNumberInTopRanking));
 
     resetAllButton = translate(new Button("Reset all to default", FxIconUtil.createIconNode("restore")));
-    resetAllButton.setOnAction((ae) -> {
+    resetAllButton.setOnAction((_) -> {
       AppPreferences.autoExpandTreeNode.reset();
       AppPreferences.autoCollapseTreeNode.reset();
       AppPreferences.languagePreference.reset();
@@ -122,7 +118,7 @@ public class PreferencesDialog
     minPercentageElementField = NumericTextField.doubleField();
 
     restoreButton = translate(new Button("Reset all to default", FxIconUtil.createIconNode("restore")));
-    restoreButton.setOnAction((ae) -> {
+    restoreButton.setOnAction((_) -> {
       AppPreferences.maxNumberOfChartElements.reset();
       AppPreferences.minPercentageChartElement.reset();
     });
@@ -177,15 +173,15 @@ public class PreferencesDialog
 
       colorPicker = new ColorPicker();
       colorPicker.setValue(color.getColor());
-      color.colorProperty().addListener((obs, oldValue, newValue) -> {
+      color.colorProperty().addListener((_, _, newValue) -> {
         colorPicker.setValue(newValue);
       });
-      colorPicker.setOnAction((ae2) -> {
+      colorPicker.setOnAction((_) -> {
         color.setColor(colorPicker.getValue());
       });
 
       restoreButton = translate(new Button("", FxIconUtil.createIconNode("restore")));
-      restoreButton.setOnAction((ae) -> {
+      restoreButton.setOnAction((_) -> {
         color.reset();
       });
 
@@ -201,7 +197,7 @@ public class PreferencesDialog
     Button restoreButton;
 
     restoreButton = translate(new Button("Reset all to default", FxIconUtil.createIconNode("restore")));
-    restoreButton.setOnAction((ae) -> {
+    restoreButton.setOnAction((_) -> {
       ColorPalette.getColorList().forEach(ChartColor::reset);
     });
 

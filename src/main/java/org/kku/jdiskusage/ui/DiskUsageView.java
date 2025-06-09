@@ -205,21 +205,21 @@ public class DiskUsageView
 
     backButton = new Button("", FxIconUtil.createIconNode("arrow-left", IconSize.SMALL));
     backButton.disableProperty().bind(navigation.backNavigationDisabledProperty());
-    backButton.setOnAction((e) -> navigation.back());
+    backButton.setOnAction((_) -> navigation.back());
 
     forwardButton = new Button("", FxIconUtil.createIconNode("arrow-right", IconSize.SMALL));
     forwardButton.disableProperty().bind(navigation.forwardNavigationDisabledProperty());
-    forwardButton.setOnAction((e) -> navigation.forward());
+    forwardButton.setOnAction((_) -> navigation.forward());
 
     homeButton = new Button("", FxIconUtil.createIconNode("home", IconSize.SMALL));
     homeButton.disableProperty().bind(navigation.homeNavigationDisabledProperty());
-    homeButton.setOnAction((e) -> navigation.home());
+    homeButton.setOnAction((_) -> navigation.home());
 
     refreshButton = new Button("", FxIconUtil.createIconNode("refresh", IconSize.SMALL));
-    refreshButton.setOnAction((e) -> m_data.refresh());
+    refreshButton.setOnAction((_) -> m_data.refresh());
 
     fullScreenButton = new ToggleButton("", FxIconUtil.createIconNode("fullscreen", IconSize.SMALL));
-    fullScreenButton.setOnAction((e) -> m_data.mi_fullScreen.toggleFullScreen());
+    fullScreenButton.setOnAction((_) -> m_data.mi_fullScreen.toggleFullScreen());
 
     showDisplayMetricGroup = new ToggleGroup();
 
@@ -227,7 +227,7 @@ public class DiskUsageView
     showFileSizeButton.setTooltip(translate(new Tooltip("Show file size")));
     showFileSizeButton.setToggleGroup(showDisplayMetricGroup);
     showFileSizeButton.setSelected(DisplayMetric.FILE_SIZE == AppPreferences.displayMetricPreference.get());
-    showFileSizeButton.setOnAction((e) -> {
+    showFileSizeButton.setOnAction((_) -> {
       AppPreferences.displayMetricPreference.set(DisplayMetric.FILE_SIZE);
     });
 
@@ -235,7 +235,7 @@ public class DiskUsageView
     showFileCountButton.setTooltip(translate(new Tooltip("Show number of files")));
     showFileCountButton.setToggleGroup(showDisplayMetricGroup);
     showFileCountButton.setSelected(DisplayMetric.FILE_COUNT == AppPreferences.displayMetricPreference.get());
-    showFileCountButton.setOnAction((e) -> {
+    showFileCountButton.setOnAction((_) -> {
       AppPreferences.displayMetricPreference.set(DisplayMetric.FILE_COUNT);
     });
 
@@ -249,14 +249,14 @@ public class DiskUsageView
         FxIconUtil.createIconNode("sort-alphabetical-ascending", IconSize.SMALL));
     sortAlphabeticallyButton.setToggleGroup(sortGroup);
     sortAlphabeticallyButton.setSelected(Sort.ALPHABETICALLY == AppPreferences.sortPreference.get());
-    sortAlphabeticallyButton.setOnAction((e) -> {
+    sortAlphabeticallyButton.setOnAction((_) -> {
       AppPreferences.sortPreference.set(Sort.ALPHABETICALLY);
     });
 
     sortNumericButton = new ToggleButton("", FxIconUtil.createIconNode("sort-numeric-ascending", IconSize.SMALL));
     sortNumericButton.setToggleGroup(sortGroup);
     sortNumericButton.setSelected(Sort.NUMERIC == AppPreferences.sortPreference.get());
-    sortNumericButton.setOnAction((e) -> {
+    sortNumericButton.setOnAction((_) -> {
       AppPreferences.sortPreference.set(Sort.NUMERIC);
     });
 
@@ -286,7 +286,7 @@ public class DiskUsageView
 
     menuItem = translate(new MenuItem("Scan directory"));
     menuItem.setGraphic(FxIconUtil.createIconNode("file-search"));
-    menuItem.setOnAction(e -> {
+    menuItem.setOnAction((_) -> {
       scanDirectory(new ScanFileTreeDialog().chooseDirectory(m_data.mi_fullScreen.getCurrentStage()));
     });
 
@@ -309,7 +309,7 @@ public class DiskUsageView
 
     menuItem = translate(new MenuItem("Exit"));
     menuItem.setGraphic(FxIconUtil.createIconNode("exit-to-app"));
-    menuItem.setOnAction(e -> {
+    menuItem.setOnAction((_) -> {
       System.exit(0);
     });
 
@@ -377,7 +377,7 @@ public class DiskUsageView
 
       AbstractFormPane fillContent(DiskUsageData mainData)
       {
-        try (PerformancePoint pp = Performance.measure("Filling content for %s", getName()))
+        try (PerformancePoint _ = Performance.measure("Filling content for %s", getName()))
         {
           AbstractFormPane contentPane;
 
@@ -417,7 +417,7 @@ public class DiskUsageView
 
       m_data.mi_selectedTabProperty.bind(mi_tabPane.getSelectionModel().selectedItemProperty());
 
-      m_data.selectedTabProperty().addListener((observable, oldTab, newTab) -> {
+      m_data.selectedTabProperty().addListener((_, _, newTab) -> {
         Log.log.fine("fill tab content: %s", newTab.getText());
 
         // Fill the new selected tab with data.
@@ -539,7 +539,7 @@ public class DiskUsageView
 
       menuItem = new MenuItem(pathList.toString());
       menuItem.setGraphic(FxIconUtil.createIconNode("folder-outline"));
-      menuItem.setOnAction(e -> {
+      menuItem.setOnAction((_) -> {
         scanDirectory(pathList);
       });
 
@@ -574,7 +574,7 @@ public class DiskUsageView
 
       menuItem = translate(new MenuItem("Preferences"));
       menuItem.setGraphic(FxIconUtil.createIconNode("cog"));
-      menuItem.setOnAction(e -> {
+      menuItem.setOnAction((_) -> {
         new PreferencesDialog().show();
       });
 

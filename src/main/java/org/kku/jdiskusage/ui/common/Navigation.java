@@ -22,7 +22,7 @@ public class Navigation
   {
     m_diskUsageData = diskUsageData;
 
-    m_diskUsageData.selectedTreeItemProperty().addListener((o, oldValue, newValue) -> addNavigationItem(newValue));
+    m_diskUsageData.selectedTreeItemProperty().addListener((_, _, newValue) -> addNavigationItem(newValue));
   }
 
   private void addNavigationItem(TreeItem<FileNodeIF> treeItem)

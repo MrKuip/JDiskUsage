@@ -40,7 +40,7 @@ public class MyTreeTableColumn<T, R>
 
   public void setCellValueFormatter(FormatterIF<R> formatter)
   {
-    this.setCellFactory(column -> {
+    this.setCellFactory((_) -> {
       return new MyTreeTableCell<T, R>(formatter);
     });
   }

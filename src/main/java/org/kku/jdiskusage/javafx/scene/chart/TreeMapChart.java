@@ -60,7 +60,7 @@ public class TreeMapChart<T extends TreeMapNode>
 
     tooltip = new Tooltip("");
     Tooltip.install(this, tooltip);
-    tooltip.activatedProperty().addListener((a, previousActivated, currentActivated) -> {
+    tooltip.activatedProperty().addListener((_, _, currentActivated) -> {
       if (currentActivated)
       {
         Point2D mousePosition;
@@ -105,11 +105,11 @@ public class TreeMapChart<T extends TreeMapNode>
 
   private void layoutChart()
   {
-    try (PerformancePoint pp1 = Performance.measure("Layout nodes: " + m_layout))
+    try (PerformancePoint _ = Performance.measure("Layout nodes: " + m_layout))
     {
       // Inject the colorIndex in the low depth TreeMapNodes.
       // The nodes with a higher depth will derive their color from its parent
-      try (PerformancePoint pp2 = Performance.measure("Setting colorIndex for nodes with depth <= 1"))
+      try (PerformancePoint _ = Performance.measure("Setting colorIndex for nodes with depth <= 1"))
       {
         m_model.getRootNode().setColorIndex(m_treeMapColors.getNextColorIndex());
         m_model.getRootNode().getChildList().stream().sorted(Comparator.comparing(TreeMapNode::getSize).reversed())
@@ -118,7 +118,7 @@ public class TreeMapChart<T extends TreeMapNode>
             });
       }
 
-      try (PerformancePoint pp2 = Performance.measure("Squarify/Create rectangles"))
+      try (PerformancePoint _ = Performance.measure("Squarify/Create rectangles"))
       {
         // Try to create TreeMapNodes that are squarish in order for a user to comprehend the chart better than
         //   small long rectangles
@@ -379,10 +379,11 @@ public class TreeMapChart<T extends TreeMapNode>
 
     private MyColor getColor(int colorIndex, int depth)
     {
-      return m_colorMap.computeIfAbsent(colorIndex, ci -> new HashMap<Integer, MyColor>()).computeIfAbsent(depth, d -> {
-        return new MyColor(ColorPalette.getColorList().get(colorIndex % ColorPalette.getColorList().size())
-            .getColor(1 - (depth / MAX_DEPTH)));
-      });
+      return m_colorMap.computeIfAbsent(colorIndex, (_) -> new HashMap<Integer, MyColor>()).computeIfAbsent(depth,
+          (_) -> {
+            return new MyColor(ColorPalette.getColorList().get(colorIndex % ColorPalette.getColorList().size())
+                .getColor(1 - (depth / MAX_DEPTH)));
+          });
     }
 
     public int getNextColorIndex()

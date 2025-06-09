@@ -70,14 +70,14 @@ public class TestFx4
     path = Path.of(
         "/media/kees/CubeSSD/backup/scheveningen/snapshot_002_2024_03_17__18_00_01/projecten/matiss/7_3_canada/branches/");
     duplicateVisitor = new DuplicateVisitor(path);
-    try (PerformancePoint p = Performance.measure("rdfind: %s", path))
+    try (PerformancePoint _ = Performance.measure("rdfind: %s", path))
     {
-      try (PerformancePoint p1 = Performance.measure("walk tree: %s", path))
+      try (PerformancePoint _ = Performance.measure("walk tree: %s", path))
       {
         Files.walkFileTree(path, duplicateVisitor);
       }
 
-      try (PerformancePoint p1 = Performance.measure("find duplicates: %s", path);
+      try (PerformancePoint _ = Performance.measure("find duplicates: %s", path);
           BufferedWriter writer = Files.newBufferedWriter(Path.of("/tmp/result.txt")))
       {
         AtomicInteger numberOfDuplicates = new AtomicInteger(0);
@@ -230,7 +230,7 @@ public class TestFx4
                     mi_numberOfDuplicates++;
                     mi_sizeOfDuplicates += file2.getSize();
 
-                    duplicateByIndexMap.computeIfAbsent(i, key -> new Duplicate(file1)).add(file2);
+                    duplicateByIndexMap.computeIfAbsent(i, (_) -> new Duplicate(file1)).add(file2);
                   }
                 }
                 catch (Exception ex)
@@ -270,7 +270,7 @@ public class TestFx4
     {
       if (attrs.isRegularFile() && Files.isReadable(file))
       {
-        mi_filesBySizeMap.computeIfAbsent(attrs.size(), (size) -> new ArrayList<>()).add(new MyFile(file, attrs));
+        mi_filesBySizeMap.computeIfAbsent(attrs.size(), (_) -> new ArrayList<>()).add(new MyFile(file, attrs));
       }
 
       return FileVisitResult.CONTINUE;

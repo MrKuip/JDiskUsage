@@ -9,8 +9,8 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import org.kku.common.util.Log;
 import org.kku.common.util.AppProperties.AppProperty;
+import org.kku.common.util.Log;
 import org.kku.fx.scene.control.SegmentedControl;
 import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
@@ -44,8 +44,8 @@ abstract public class AbstractFormPane
   {
     m_diskUsageData = diskUsageData;
 
-    m_diskUsageData.selectedTreeItemProperty().addListener((o, oldValue, newValue) -> refresh(newValue));
-    AppPreferences.displayMetricPreference.addListener((oldValue, newValue) -> refresh());
+    m_diskUsageData.selectedTreeItemProperty().addListener((_, _, newValue) -> refresh(newValue));
+    AppPreferences.displayMetricPreference.addListener((_, _) -> refresh());
     Log.log.fine("Create content pane %s", getClass().getSimpleName());
   }
 
@@ -185,7 +185,7 @@ abstract public class AbstractFormPane
     PaneType paneType;
 
     paneType = m_paneTypeByIdMap.computeIfAbsent(paneTypeId,
-        (panelTypeId) -> new PaneType(paneTypeId, description, iconName, node));
+        (_) -> new PaneType(paneTypeId, description, iconName, node));
     if (m_currentPaneType == null || current)
     {
       m_currentPaneType = paneType;

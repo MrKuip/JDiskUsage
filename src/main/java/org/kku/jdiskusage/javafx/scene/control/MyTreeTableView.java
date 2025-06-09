@@ -17,7 +17,7 @@ public class MyTreeTableView<S>
     super(root);
     setId(id);
 
-    AppPreferences.showProgressInTable.addListener((oldValue, newValue) -> { refresh(); });
+    AppPreferences.showProgressInTable.addListener((_, _) -> { refresh(); });
   }
 
   public <R> MyTreeTableColumn<S, R> addColumn(String name)

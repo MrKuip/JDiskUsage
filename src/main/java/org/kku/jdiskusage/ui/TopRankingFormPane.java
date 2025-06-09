@@ -118,8 +118,8 @@ class TopRankingFormPane
 
     public ObservableList<FileNodeIF> getList(FileNodeComparator fc)
     {
-      return mi_map.computeIfAbsent(fc, (key) -> {
-        try (PerformancePoint pp = Performance.measure("Collecting data for top 50 tab"))
+      return mi_map.computeIfAbsent(fc, (_) -> {
+        try (PerformancePoint _ = Performance.measure("Collecting data for top 50 tab"))
         {
           List<FileNodeIF> fnList;
 

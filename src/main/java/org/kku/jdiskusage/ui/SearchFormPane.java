@@ -85,7 +85,7 @@ public class SearchFormPane
 
     searchTextField = new TextField();
     searchTextField.promptTextProperty().bind(translatedTextProperty("search"));
-    searchTextField.setOnAction((ae) -> search());
+    searchTextField.setOnAction((_) -> search());
     m_data.mi_searchTextProperty = searchTextField.textProperty();
 
     maxCountTextField = NumericTextField.integerField();
@@ -218,7 +218,7 @@ public class SearchFormPane
         List<FileNodeIF> list;
 
         searchText = m_data.mi_searchTextProperty.get();
-        try (PerformancePoint pp = Performance.measure("Collecting data for search '%s'", searchText))
+        try (PerformancePoint _ = Performance.measure("Collecting data for search '%s'", searchText))
         {
           Pattern pattern;
           Matcher matcher;

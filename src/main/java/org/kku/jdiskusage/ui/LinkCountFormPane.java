@@ -241,7 +241,7 @@ class LinkCountFormPane
     {
       if (mi_list == null)
       {
-        try (PerformancePoint pp = Performance.measure("Collecting data for link count tab"))
+        try (PerformancePoint _ = Performance.measure("Collecting data for link count tab"))
         {
           Map<String, FileAggregates> map;
 
@@ -253,7 +253,7 @@ class LinkCountFormPane
               FileAggregates data;
 
               bucket = Objects.toString(fn.getNumberOfLinks());
-              data = map.computeIfAbsent(bucket, (a) -> new FileAggregates(0l, 0l));
+              data = map.computeIfAbsent(bucket, (_) -> new FileAggregates(0l, 0l));
               data.add(1, fn.getSize());
             }
             return true;

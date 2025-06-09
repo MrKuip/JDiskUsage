@@ -56,7 +56,7 @@ class SizeFormPane
     }).forEach(tuple -> {
       chart.getData().add(tuple.pieChartData);
       tuple.pieChartData.getNode().setUserData(tuple.treeItem);
-      tuple.pieChartData.getNode().addEventHandler(MouseEvent.MOUSE_CLICKED, (me) -> {
+      tuple.pieChartData.getNode().addEventHandler(MouseEvent.MOUSE_CLICKED, (_) -> {
         if (tuple.treeItem.getValue().isDirectory())
         {
           getDiskUsageData().getTreePaneData().navigateTo(tuple.treeItem);
@@ -87,7 +87,7 @@ class SizeFormPane
 
       Tooltip.install(node, new Tooltip(fileNode.getAbsolutePath()));
 
-      node.addEventHandler(MouseEvent.MOUSE_CLICKED, (me) -> {
+      node.addEventHandler(MouseEvent.MOUSE_CLICKED, (_) -> {
         if (fileNode.isDirectory())
         {
           getDiskUsageData().getTreePaneData().navigateTo(treeNode);

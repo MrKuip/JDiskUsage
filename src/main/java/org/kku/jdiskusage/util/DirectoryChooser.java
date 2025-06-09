@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.kku.common.util.StringUtils;
 import org.kku.common.util.AppProperties.AppProperty;
+import org.kku.common.util.StringUtils;
 import org.kku.fonticons.ui.FxIcon;
 import org.kku.fonticons.ui.FxIcon.IconColor;
 import org.kku.fonticons.ui.FxIcon.IconSize;
@@ -30,7 +30,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -45,7 +44,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.stage.Window;
 
@@ -143,7 +141,7 @@ public class DirectoryChooser
       cancelButton = translate(
           new Button("Cancel", new FxIcon("close").size(IconSize.SMALL).fillColor(IconColor.RED).getIconLabel()));
       cancelButton.setAlignment(Pos.BASELINE_LEFT);
-      cancelButton.setOnAction((ae) -> {
+      cancelButton.setOnAction((_) -> {
         m_dialog.close();
       });
 
@@ -153,7 +151,7 @@ public class DirectoryChooser
       m_searchText.bind(mi_searchField.textProperty());
 
       searchButton = translate(new Button("", new FxIcon("magnify").size(IconSize.SMALL).getIconLabel()));
-      searchButton.setOnAction((ae) -> {
+      searchButton.setOnAction((_) -> {
         mi_searchField.setVisible(true);
         mi_searchField.requestFocus();
       });
@@ -161,7 +159,7 @@ public class DirectoryChooser
 
       openButton = translate(new Button("Open", new FxIcon("open-in-new").size(IconSize.SMALL).getIconLabel()));
       openButton.setAlignment(Pos.BASELINE_LEFT);
-      openButton.setOnAction((ae) -> {
+      openButton.setOnAction((_) -> {
         List<Path> result;
 
         result = new ArrayList<>();
@@ -272,11 +270,11 @@ public class DirectoryChooser
         node.setContextMenu(menu);
 
         removeMenuItem = translate(new MenuItem("Remove favorite"));
-        removeMenuItem.setOnAction((ae) -> {
+        removeMenuItem.setOnAction((_) -> {
           m_favoriteDirectoryNodes.removeFavorite(directory);
         });
         renameMenuItem = translate(new MenuItem("Rename"));
-        renameMenuItem.setOnAction((ae) -> {
+        renameMenuItem.setOnAction((_) -> {
           FxDialog<String> dialog;
           TextField nameTextField;
           Bounds screenBounds;
@@ -286,7 +284,7 @@ public class DirectoryChooser
           nameTextField = new TextField(directory.getName());
           dialog = new FxDialog<>(nameTextField, "");
 
-          nameTextField.setOnAction((ae2) -> {
+          nameTextField.setOnAction((_) -> {
             String directoryName;
 
             directoryName = nameTextField.getText();
@@ -299,7 +297,7 @@ public class DirectoryChooser
           });
           dialog.setLocation(screenBounds.getMinX(), screenBounds.getMinY());
           dialog.closeOnEscape();
-          dialog.setOnShown((we) -> {
+          dialog.setOnShown((_) -> {
             nameTextField.requestFocus();
           });
           dialog.showAndWait();
@@ -322,11 +320,11 @@ public class DirectoryChooser
 
     private void init()
     {
-      selectedTreeItem().addListener((o, oldValue, newValue) -> {
+      selectedTreeItem().addListener((_, _, newValue) -> {
         setDirectory(newValue.getValue().getPath());
       });
 
-      m_directory.addListener((a, b, newDirectory) -> {
+      m_directory.addListener((_, _, newDirectory) -> {
         treeItem().setValue(convertToTreeItem(newDirectory));
       });
     }
@@ -399,11 +397,11 @@ public class DirectoryChooser
 
       add(mi_tableView);
 
-      m_searchText.addListener((obs, oldValue, newValue) -> {
+      m_searchText.addListener((_, _, _) -> {
         fillTableView();
       });
 
-      m_directory.addListener((obs, oldValue, newValue) -> {
+      m_directory.addListener((_, _, _) -> {
         fillTableView();
       });
     }
@@ -426,21 +424,16 @@ public class DirectoryChooser
           selectDirectory();
         }
       });
-      tableView.setOnMousePressed(new EventHandler<MouseEvent>()
-      {
-        @Override
-        public void handle(MouseEvent event)
+      tableView.setOnMousePressed((me) -> {
+        if (me.isPrimaryButtonDown() && me.getClickCount() == 2)
         {
-          if (event.isPrimaryButtonDown() && event.getClickCount() == 2)
-          {
-            selectDirectory();
-          }
+          selectDirectory();
         }
       });
 
       menu = new ContextMenu();
       menuItem = translate(new MenuItem("Add to favorites"));
-      menuItem.setOnAction((ae) -> {
+      menuItem.setOnAction((_) -> {
         Path path;
         String name;
 
@@ -578,7 +571,7 @@ public class DirectoryChooser
       {
         setGraphic(new FxIcon(m_iconName).size(IconSize.SMALL).getIconLabel());
       }
-      setOnAction((ae) -> {
+      setOnAction((_) -> {
         setDirectory(m_path);
       });
     }

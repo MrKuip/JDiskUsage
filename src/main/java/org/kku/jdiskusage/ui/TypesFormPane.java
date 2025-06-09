@@ -237,7 +237,7 @@ class TypesFormPane
     {
       if (mi_list == null)
       {
-        try (PerformancePoint pp = Performance.measure("Collecting data for types"))
+        try (PerformancePoint _ = Performance.measure("Collecting data for types"))
         {
           Map<String, FileAggregates> map;
           FileNodeIF currentFileNode;
@@ -260,7 +260,7 @@ class TypesFormPane
                   bucket = mi_typeFunction.apply(fileNode);
                   System.out.println("bucket = " + bucket);
                 }
-                data = map.computeIfAbsent(bucket, (a) -> new FileAggregates(0l, 0l));
+                data = map.computeIfAbsent(bucket, (_) -> new FileAggregates(0l, 0l));
                 data.add(1, fileNode.getSize());
               }
               return true;

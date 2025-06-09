@@ -52,11 +52,10 @@ public class FontSelectorDialog
     m_familyListView = new ListView<>();
     initFontListView(m_familyListView);
     m_familyListView.getItems().addAll(getFontFamilyList());
-    m_familyListView.getSelectionModel().selectedItemProperty()
-        .addListener((observable, oldValue, newValue) -> updateSelectedFont());
+    m_familyListView.getSelectionModel().selectedItemProperty().addListener((_, _, _) -> updateSelectedFont());
 
     m_styleListView = new ListView<>();
-    m_familyListView.getSelectionModel().selectedItemProperty().addListener((a, oldValue, newValue) -> {
+    m_familyListView.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
       FontStyle selectedItem = m_styleListView.getSelectionModel().getSelectedItem();
       m_styleListView.getItems().setAll(newValue.getFontStyleList());
       if (selectedItem != null)
@@ -68,13 +67,11 @@ public class FontSelectorDialog
         m_styleListView.getSelectionModel().select(0);
       }
     });
-    m_styleListView.getSelectionModel().selectedItemProperty()
-        .addListener((observable, oldValue, newValue) -> updateSelectedFont());
+    m_styleListView.getSelectionModel().selectedItemProperty().addListener((_, _, _) -> updateSelectedFont());
 
     m_sizeListView = new ListView<>();
     m_sizeListView.getItems().addAll(8d, 9d, 11d, 12d, 13d, 14d, 16d, 18d, 20d, 22d, 24d, 26d, 28d, 36d, 48d, 72d);
-    m_sizeListView.getSelectionModel().selectedItemProperty()
-        .addListener((observable, oldValue, newValue) -> updateSelectedFont());
+    m_sizeListView.getSelectionModel().selectedItemProperty().addListener((_, _, _) -> updateSelectedFont());
 
     Platform.runLater(() -> {
       m_familyListView.getSelectionModel().select(initialFontFamily);

@@ -30,7 +30,7 @@ public final class MainApp
     final var file = new MenuItem("Save As");
     final var textArea = new TextArea();
 
-    file.setOnAction(e -> new FileChooser().showSaveDialog(scene.getWindow()));
+    file.setOnAction((_) -> new FileChooser().showSaveDialog(scene.getWindow()));
 
     menu.getItems().add(file);
     menuBar.getMenus().add(menu);

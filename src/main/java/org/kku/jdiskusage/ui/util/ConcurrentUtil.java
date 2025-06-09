@@ -33,7 +33,7 @@ public class ConcurrentUtil
 
   private MyExecutor getExecutor(String executorName)
   {
-    return m_executorByNameMap.computeIfAbsent(executorName, (key) -> new MyExecutor());
+    return m_executorByNameMap.computeIfAbsent(executorName, (_) -> new MyExecutor());
   }
 
   static public class MyExecutor

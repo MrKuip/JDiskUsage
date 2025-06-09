@@ -68,12 +68,12 @@ public class MyTableView<T>
       menu = new ContextMenu();
 
       selectMenuItem = translate(new MenuItem("Select", FxIconUtil.createIconNode("checkbox-outline", IconSize.SMALL)));
-      selectMenuItem.setOnAction((ae) -> {
+      selectMenuItem.setOnAction((_) -> {
         MyTableView.this.getSelectionContext().select(MyTableView.this.getSelectionModel().getSelectedItem());
       });
       selectAllMenuItem = translate(
           new MenuItem("Select all", FxIconUtil.createIconNode("checkbox-multiple-outline", IconSize.SMALL)));
-      selectAllMenuItem.setOnAction((ae) -> {
+      selectAllMenuItem.setOnAction((_) -> {
         MyTableView.this.getSelectionContext().selectAll(MyTableView.this.getItems());
       });
 
@@ -192,7 +192,7 @@ public class MyTableView<T>
     column.setColumnCount(2);
     column.setCellValueAlignment(Pos.CENTER);
     column.setEditable(true);
-    column.setCellValueGetter((e) -> buttonProperty);
+    column.setCellValueGetter((_) -> buttonProperty);
 
     return column;
   }
@@ -236,7 +236,7 @@ public class MyTableView<T>
 
     private RankColumnData()
     {
-      itemsProperty().addListener((o, oldItemList, newItemList) -> {
+      itemsProperty().addListener((_, _, newItemList) -> {
         m_lineNumberMap.clear();
         for (int index = 0; index < newItemList.size(); index++)
         {
