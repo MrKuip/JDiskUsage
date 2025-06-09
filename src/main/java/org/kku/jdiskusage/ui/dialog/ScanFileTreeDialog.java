@@ -103,6 +103,7 @@ public class ScanFileTreeDialog
     Label currentCount;
     Label elapsedTime;
     Scan scan;
+    ButtonType cancelButtonType;
 
     scan = new Scan(directoryList.getPathList());
 
@@ -143,6 +144,8 @@ public class ScanFileTreeDialog
     GridPane.setHgrow(m_elapsedTimeLabel, Priority.SOMETIMES);
     GridPane.setHgrow(m_progressLabel, Priority.SOMETIMES);
 
+    cancelButtonType = new ButtonType(translate("Cancel"), ButtonData.CANCEL_CLOSE);
+
     m_dialog = new Dialog<>();
     m_dialog.getDialogPane().setContent(content);
     m_dialog.getDialogPane().getStyleClass().add("undecorated-dialog");
@@ -151,13 +154,13 @@ public class ScanFileTreeDialog
     m_dialog.initStyle(StageStyle.UNDECORATED);
     m_dialog.titleProperty().bind(translatedTextProperty("Scan directory"));
     m_dialog.headerTextProperty().bind(translatedTextProperty("Scan").concat(" ").concat(scan.getRootDirectory()));
-    m_dialog.getDialogPane().getButtonTypes().addAll(new ButtonType(translate("Cancel"), ButtonData.CANCEL_CLOSE));
+    m_dialog.getDialogPane().getButtonTypes().addAll(cancelButtonType);
     m_dialog.setGraphic(FxIconUtil.createIconNode("file-search", IconSize.LARGE));
 
     ConcurrentUtil.getInstance().getDefaultExecutor().submit(scan);
 
     scanDialogResult = m_dialog.showAndWait();
-    if (scanDialogResult.get() == ButtonType.CANCEL)
+    if (scanDialogResult.get() == cancelButtonType)
     {
       scan.cancel();
     }
