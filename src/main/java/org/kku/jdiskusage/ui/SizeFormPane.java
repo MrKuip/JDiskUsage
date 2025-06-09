@@ -1,6 +1,7 @@
 package org.kku.jdiskusage.ui;
 
 import org.kku.fx.ui.util.FxUtil;
+import org.kku.jdiskusage.javafx.scene.chart.IcicleChart;
 import org.kku.jdiskusage.javafx.scene.chart.SunburstChart;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
@@ -11,6 +12,8 @@ import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.MouseEvent;
@@ -24,6 +27,7 @@ class SizeFormPane
 
     createPaneType("PIECHART", "Show pie chart", "chart-pie", this::getPieChartNode, true);
     createPaneType("BARCHART", "Show sunburst chart", "chart-donut-variant", this::getSunburstChartNode);
+    createPaneType("ICICLECHART", "Show icicle chart", "chart-tree", this::getIcicleChartNode);
     createPaneType("TABLE", "Show details table", "table", this::getTableNode);
 
     init();
@@ -102,6 +106,43 @@ class SizeFormPane
     chart.setModel(getCurrentTreeItem());
 
     return chart;
+  }
+
+  Node getIcicleChartNode()
+  {
+    ScrollPane scrollPane;
+    IcicleChart<FileNodeIF> chart;
+
+    chart = new IcicleChart<>(fn -> (double) fn.getSize());
+    chart.setMaxLevel(AppPreferences.maxNumberOfElementsInIcicleChart.get());
+    chart.setNodeCreationCallBack((node, treeNode) -> {
+      FileNodeIF fileNode;
+
+      fileNode = treeNode.getValue();
+
+      Tooltip.install(node, new Tooltip(fileNode.getAbsolutePath()));
+
+      node.addEventHandler(MouseEvent.MOUSE_CLICKED, (_) -> {
+        if (fileNode.isDirectory())
+        {
+          getDiskUsageData().getTreePaneData().navigateTo(treeNode);
+        }
+        else
+        {
+          getDiskUsageData().getTreePaneData().navigateTo(treeNode.getParent());
+        }
+      });
+    });
+    chart.setColorList(ColorPalette.getColorList());
+    chart.setModel(getCurrentTreeItem());
+
+    scrollPane = new ScrollPane(chart);
+    scrollPane.setFitToHeight(true);
+    scrollPane.setFitToWidth(true);
+    scrollPane.setVbarPolicy(ScrollBarPolicy.NEVER);
+    scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
+
+    return scrollPane;
   }
 
   Node getTableNode()

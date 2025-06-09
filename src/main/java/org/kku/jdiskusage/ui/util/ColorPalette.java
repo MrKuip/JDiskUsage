@@ -35,6 +35,9 @@ public class ColorPalette
   public static final ChartColor m_chartColor18 = new ChartColor("#865f00");
   public static final ChartColor m_chartColor19 = new ChartColor("#5e4300");
 
+  public static final ChartColor SKY_BLUE = m_chartColor2;
+  public static final ChartColor RUST = m_chartColor6;
+
   private ColorPalette()
   {
   }

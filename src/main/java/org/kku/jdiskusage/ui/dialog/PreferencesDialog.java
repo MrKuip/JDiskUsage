@@ -98,6 +98,7 @@ public class PreferencesDialog
     NumericTextField<Integer> maxNumberOfElementsField;
     NumericTextField<Double> minPercentageElementField;
     NumericTextField<Integer> maxNumberOfLevelsSunburstChartField;
+    NumericTextField<Integer> maxNumberOfLevelsIcicleChartField;
     Button restoreButton;
 
     maxNumberOfElementsField = NumericTextField.integerField();
@@ -115,6 +116,11 @@ public class PreferencesDialog
     maxNumberOfLevelsSunburstChartField.valueProperty()
         .bindBidirectional(FxProperty.property(AppPreferences.maxNumberOfElementsInSunburstChart));
 
+    maxNumberOfLevelsIcicleChartField = NumericTextField.integerField();
+    maxNumberOfLevelsIcicleChartField.setPrefWidth(80.0);
+    maxNumberOfLevelsIcicleChartField.valueProperty()
+        .bindBidirectional(FxProperty.property(AppPreferences.maxNumberOfElementsInIcicleChart));
+
     minPercentageElementField = NumericTextField.doubleField();
 
     restoreButton = translate(new Button("Reset all to default", FxIconUtil.createIconNode("restore")));
@@ -123,7 +129,7 @@ public class PreferencesDialog
       AppPreferences.minPercentageChartElement.reset();
     });
 
-    pane = new MigPane("wrap 4", "[][][]push[align right]", "[][][]push[]");
+    pane = new MigPane("wrap 4", "[][][]push[align right]", "[][][][]push[]");
 
     pane.add(translate(new Label("Chart shows at most")));
     pane.add(maxNumberOfElementsField, "");
@@ -139,6 +145,11 @@ public class PreferencesDialog
     pane.add(maxNumberOfLevelsSunburstChartField, "");
     pane.add(translate(new Label("levels")));
     pane.add(resetPreference(AppPreferences.maxNumberOfElementsInSunburstChart));
+
+    pane.add(translate(new Label("Icicle chart has at most")));
+    pane.add(maxNumberOfLevelsIcicleChartField, "");
+    pane.add(translate(new Label("levels")));
+    pane.add(resetPreference(AppPreferences.maxNumberOfElementsInIcicleChart));
 
     pane.add(restoreButton, "spanx, align right");
 
