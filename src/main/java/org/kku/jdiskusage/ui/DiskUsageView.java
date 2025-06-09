@@ -18,6 +18,7 @@ import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.fx.scene.control.DraggableTabPane;
 import org.kku.fx.scene.control.SegmentedControl;
 import org.kku.fx.ui.util.FxIconUtil;
+import org.kku.fx.ui.util.FxSettingsUtil;
 import org.kku.fx.util.FxProperty;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.Filter;
@@ -66,7 +67,6 @@ public class DiskUsageView
   {
     private FullScreen mi_fullScreen;
     private final ObjectProperty<TreeItem<FileNodeIF>> mi_selectedTreeItemProperty = new SimpleObjectProperty<>();
-    private final ObjectProperty<Tab> mi_selectedTabProperty = new SimpleObjectProperty<>();
     private final Navigation mi_navigation = new Navigation(this);
     private final FileTreePane mi_treePaneData = new FileTreePane(this);
     private final TabPaneData mi_tabPaneData = new TabPaneData();
@@ -94,11 +94,6 @@ public class DiskUsageView
     public void refresh()
     {
       mi_tabPaneData.refresh();
-    }
-
-    public ObjectProperty<Tab> selectedTabProperty()
-    {
-      return mi_selectedTabProperty;
     }
 
     public ObjectProperty<TreeItem<FileNodeIF>> selectedTreeItemProperty()
@@ -408,34 +403,15 @@ public class DiskUsageView
 
     public void init()
     {
-      String selectedTabDataName;
-      AppProperty<String> selectedIdProperty;
+      FxSettingsUtil.initSelectedTabSetting(AppSettings.SELECTED_ID.forSubject(DiskUsageView.this), mi_tabPane);
 
       Stream.of(TabPaneData.TabData.values()).forEach(this::createTab);
 
-      selectedIdProperty = AppSettings.SELECTED_ID.forSubject(DiskUsageView.this);
-
-      m_data.mi_selectedTabProperty.bind(mi_tabPane.getSelectionModel().selectedItemProperty());
-
-      m_data.selectedTabProperty().addListener((_, _, newTab) -> {
-        Log.log.fine("fill tab content: %s", newTab.getText());
-
+      mi_tabPane.getSelectionModel().selectedItemProperty().addListener((_, _, newTab) -> {
         // Fill the new selected tab with data.
+        Log.log.fine("fill tab content: %s", newTab.getText());
         fillContent(newTab);
-
-        // Remember the last selected tab
-        selectedIdProperty.set(((TabData) newTab.getUserData()).name());
       });
-
-      // Select the tab that was in a previously selected (in a previous run)
-      selectedTabDataName = selectedIdProperty.get(TabPaneData.TabData.values()[0].name());
-      mi_tabPane.getTabs().stream()
-          .filter(tab -> Objects.equals(((TabData) tab.getUserData()).name(), selectedTabDataName)).findFirst()
-          .ifPresent(tab -> {
-            Log.log.fine("select tab: %s", tab.getText());
-            mi_tabPane.getSelectionModel().select(tab);
-            fillContent(tab);
-          });
     }
 
     public MigPane getNode()
@@ -446,7 +422,7 @@ public class DiskUsageView
     public Tab createTab(TabData tabData)
     {
       return mi_tabByTabId.computeIfAbsent(tabData, td -> {
-        return td.initTab(mi_tabPane.createTab(td.getIconName(), td.getNameExpression()));
+        return td.initTab(mi_tabPane.createTab(td.getName(), td.getIconName(), td.getNameExpression()));
       });
     }
 
