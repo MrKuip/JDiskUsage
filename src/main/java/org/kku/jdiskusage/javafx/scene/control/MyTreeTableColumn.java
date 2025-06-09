@@ -79,7 +79,7 @@ public class MyTreeTableColumn<T, R>
     private void initProgressPane()
     {
       mi_progressPane.getChildren().addAll(mi_progressBar, mi_progressLabel);
-      mi_progressPane.getStylesheets().add("jdiskusage.css");
+      mi_progressPane.getStylesheets().add("module-resources/jdiskusage.css");
       mi_progressPane.getStyleClass().add("progress-bar-cell");
     }
 

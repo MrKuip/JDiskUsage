@@ -23,7 +23,7 @@ public class FxDialog<R>
     content.getStyleClass().add("undecorated-dialog");
 
     scene = new Scene(content);
-    scene.getStylesheets().add("jdiskusage.css");
+    scene.getStylesheets().add("module-resources/jdiskusage.css");
 
     m_stage = new Stage();
     m_stage.initOwner(RootStage.get());
