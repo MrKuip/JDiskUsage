@@ -13,10 +13,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kku.common.util.AppProperties.AppProperty;
-import org.kku.common.util.Performance.PerformancePoint;
-import org.kku.common.util.preferences.Sort;
 import org.kku.common.util.Log;
 import org.kku.common.util.Performance;
+import org.kku.common.util.Performance.PerformancePoint;
+import org.kku.common.util.preferences.Sort;
 import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.fx.scene.control.DraggableTabPane;
 import org.kku.fx.scene.control.SegmentedControl;
@@ -407,9 +407,12 @@ public class DiskUsageView
 
       Stream.of(TabPaneData.TabData.values()).forEach(this::createTab);
 
+      // The content of the tab is lazily filled when selection changes.
+      // This is the initial filling of the content because the selection will not change
+      fillContent(mi_tabPane.getSelectionModel().getSelectedItem());
+
       mi_tabPane.getSelectionModel().selectedItemProperty().addListener((_, _, newTab) -> {
         // Fill the new selected tab with data.
-        Log.log.fine("fill tab content: %s", newTab.getText());
         fillContent(newTab);
       });
     }
@@ -429,6 +432,8 @@ public class DiskUsageView
     public void fillContent(Tab tab)
     {
       Optional<Entry<TabData, Tab>> tabEntry;
+
+      Log.log.fine("fill tab content: %s", tab.getText());
 
       tabEntry = mi_tabByTabId.entrySet().stream().filter(entry -> Objects.equals(tab, entry.getValue())).findFirst();
       if (tabEntry.isPresent())
