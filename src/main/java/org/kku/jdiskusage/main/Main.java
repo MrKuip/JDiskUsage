@@ -66,7 +66,7 @@ public class Main
     stage.getIcons().addAll(LogoUtil.getLogoList());
     stage.setTitle("JDiskUsage");
     stage.setScene(scene);
-    stage.setOnCloseRequest((_) -> { Platform.exit(); System.exit(1); });
+    stage.setOnCloseRequest((_) -> { Platform.exit(); System.exit(0); });
     stage.show();
 
     getParameters().getRaw().stream().map(Path::of).filter(path -> Files.exists(path) && Files.isDirectory(path))
