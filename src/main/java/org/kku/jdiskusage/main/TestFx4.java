@@ -23,10 +23,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import org.kku.common.util.Log;
 import org.kku.common.util.OperatingSystemUtil;
+import org.kku.common.util.Performance;
+import org.kku.common.util.Performance.PerformancePoint;
 import org.kku.jdiskusage.util.FileTree;
 import org.kku.jdiskusage.util.FileTree.UnixAttribute;
-import org.kku.jdiskusage.util.Performance;
-import org.kku.jdiskusage.util.Performance.PerformancePoint;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
