@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.kku.common.conf.Language;
 import org.kku.common.conf.LanguageConfiguration;
+import org.kku.fx.util.Converters;
 import org.kku.jdiskusage.util.preferences.SizeSystem;
 
 class ConvertersTest

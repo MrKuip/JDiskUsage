@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.kku.common.util.AppProperties;
 import org.kku.common.util.AppProperties.AppProperty;
 import org.kku.common.util.AppProperties.AppPropertyType;
+import org.kku.fx.util.Converters;
 import javafx.beans.property.SimpleStringProperty;
 
 public class AppPropertiesTest

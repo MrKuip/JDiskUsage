@@ -1,7 +1,7 @@
 package org.kku.jdiskusage.util.preferences;
 
 import org.kku.common.util.AppProperties.AppProperty;
-import org.kku.jdiskusage.util.Converters;
+import org.kku.fx.util.Converters;
 
 public class AppPreferences
   extends org.kku.common.util.AppPreferences

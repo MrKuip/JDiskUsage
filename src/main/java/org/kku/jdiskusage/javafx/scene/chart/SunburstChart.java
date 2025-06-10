@@ -10,7 +10,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import org.kku.common.util.value.MutableDouble;
-import org.kku.jdiskusage.ui.util.ColorPalette.ChartColor;
+import org.kku.fx.ui.util.ColorPalette.ChartColor;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.NumberBinding;
 import javafx.beans.property.DoubleProperty;

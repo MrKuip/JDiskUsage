@@ -2,6 +2,7 @@ package org.kku.jdiskusage.util;
 
 import java.nio.file.Path;
 import org.kku.common.util.AppProperties.AppPropertyType;
+import org.kku.fx.util.Converters;
 
 public class AppSettings
   extends org.kku.common.util.AppSettings

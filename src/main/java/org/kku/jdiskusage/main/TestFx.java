@@ -1,6 +1,6 @@
 package org.kku.jdiskusage.main;
 
-import org.kku.jdiskusage.ui.util.ColorPalette;
+import org.kku.fx.ui.util.ColorPalette;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.application.Application;
 import javafx.application.Platform;
