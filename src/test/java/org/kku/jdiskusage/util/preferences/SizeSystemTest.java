@@ -2,6 +2,7 @@ package org.kku.jdiskusage.util.preferences;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
+import org.kku.common.util.preferences.SizeSystem;
 
 class SizeSystemTest
 {

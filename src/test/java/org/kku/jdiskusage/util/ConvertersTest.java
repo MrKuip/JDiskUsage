@@ -4,21 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.kku.common.conf.Language;
 import org.kku.common.conf.LanguageConfiguration;
+import org.kku.common.util.preferences.SizeSystem;
 import org.kku.fx.util.Converters;
-import org.kku.jdiskusage.util.preferences.SizeSystem;
 
 class ConvertersTest
 {
-  @BeforeAll
-  static void setup()
-  {
-    //ResourceLoader.getInstance().register(TestResourceProvider.getInstance());
-  }
-
   @Test
   void testDoubleConverter()
   {

@@ -1,6 +1,8 @@
 package org.kku.jdiskusage.util.preferences;
 
 import org.kku.common.util.AppProperties.AppProperty;
+import org.kku.common.util.preferences.SizeSystem;
+import org.kku.common.util.preferences.Sort;
 import org.kku.fx.util.Converters;
 
 public class AppPreferences
