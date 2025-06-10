@@ -31,6 +31,11 @@ javafx {
     modules = [ 'javafx.controls', 'javafx.web']
 }
 
+java {
+  sourceCompatibility = JavaVersion.VERSION_23
+  targetCompatibility = JavaVersion.VERSION_23
+}
+
 dependencies {
   implementation 'org.kku:fontIcons:1.0'
   implementation 'org.kku:commons-base:1.0.1'
