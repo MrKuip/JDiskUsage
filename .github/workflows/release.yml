@@ -35,7 +35,7 @@ jobs:
           distribution: 'temurin'
           java-version: 23
       - name: Build Windows EXE
-        run: ./gradlew jpackage -Djpackage.type=exe
+        run: ./gradlew.bat jpackage "-Djpackage.type=exe"
       - name: Upload .exe to release
         uses: softprops/action-gh-release@v2
         with:
