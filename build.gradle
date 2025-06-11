@@ -52,7 +52,29 @@ application {
   mainModule.set('org.kku.jdiskusage');
 }
 
-println "parent in build.xml is ${gradle.parent?.rootProject?.rootDir}"
+import org.gradle.internal.os.OperatingSystem
+
+def currentOs = OperatingSystem.current()
+
+tasks.register("release") {
+  group = "release"
+  description = "Builds, tags, and pushes a new release"
+
+  doLast {
+    def tagName = "v${project.version}"
+    println "creating release tag ${tagName}"
+
+    // Create local tag
+    exec {
+      commandLine 'git', 'tag', '-f', tagName
+    }
+
+    // Push the tag to github
+    exec {
+      commandLine 'git', 'push', 'origin', tagName
+    }
+  }
+}
 
 jlink {
   options = ['--no-header-files', '--no-man-pages']
@@ -61,7 +83,14 @@ jlink {
   }
   jpackage {
     imageName = 'jdiskusage'
-    installerType = System.getProperty("jpackage.type", "deb") 
+    if (currentOs.isLinux()) {
+      installerType = 'deb'
+    } else if (currentOs.isWindows()) {
+      installerType = 'exe'
+      installerOptions = ['--win-shortcut']
+    } else if (currentOs.isMacOsX()) {
+      installerType = 'dmg'
+    }
   }
 }
 
@@ -83,8 +112,4 @@ tasks.named("clean").configure {
 tasks.named("test").configure {
     dependsOn gradle.includedBuilds*.task(":test")
 }
-
-//gluonfx {
-//   resourcesList = [ '.*properties$', '.*md$', '.*htm$', '.*html$' , '.*json$' ]
-//}
 
