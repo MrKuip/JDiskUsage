@@ -55,12 +55,13 @@ application {
 println "parent in build.xml is ${gradle.parent?.rootProject?.rootDir}"
 
 jlink {
+  options = ['--no-header-files', '--no-man-pages']
   launcher {
-    name = 'JDiskUsage'
+    name = 'jdiskusage'
   }
-
   jpackage {
-    installerType = "deb"
+    imageName = 'jdiskusage'
+    installerType = System.getProperty("jpackage.type", "deb") 
   }
 }
 
