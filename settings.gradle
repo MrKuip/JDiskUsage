@@ -18,7 +18,7 @@ gitRepositories {
     uri = "https://github.com/MrKuip/commons-fx.git"
     branch = "main"
   }
-  include("fonticons") {
+  include("fontIcons") {
     uri = "https://github.com/MrKuip/fontIcons.git"
     branch = "main"
   }
