@@ -46,6 +46,7 @@ public class AboutDialog
     Hyperlink link;
 
     link = new Hyperlink("https://github.com/MrKuip/JDiskUsage");
+    link.setFocusTraversable(false);
     link.setOnAction((_) -> {
       new Thread(() -> {
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
@@ -67,12 +68,14 @@ public class AboutDialog
     content.add(new ImageView(LogoUtil.getLogo(200)), "span 2 4");
     content.add(styleNode(new Label("JDiskUsage"), "text1"), "split 2");
     content.add(styleNode(new Label("disk analyzer"), "text2"), "wrap");
-    content.add(styleNode(new Label(VersionUtil.getInstance().getVersion()), "text3"), "wrap");
+    content.add(styleNode(new Label("Version " + VersionUtil.getInstance().getVersion()), "text3"), "wrap");
     content.add(styleNode(new Text("""
         JDiskUsage is an open source disk analyzer.
-        The sourcecode can be found on:
+        Copyright © 2025 Kees Kuip
+        Licensed under the GNU AGPLv3.
         """), "text4"), "wrap, top");
-    content.add(styleNode(link, "text4"), "wrap, top");
+    content.add(styleNode(new Label("source:"), "text4"), "split 2");
+    content.add(styleNode(link, "text4"), "wrap");
 
     return content;
   }
