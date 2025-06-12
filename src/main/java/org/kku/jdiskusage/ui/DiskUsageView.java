@@ -28,6 +28,7 @@ import org.kku.fx.util.FxProperty;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.common.Navigation;
+import org.kku.jdiskusage.ui.dialog.AboutDialog;
 import org.kku.jdiskusage.ui.dialog.PreferencesDialog;
 import org.kku.jdiskusage.ui.dialog.ScanFileTreeDialog;
 import org.kku.jdiskusage.ui.dialog.ScanFileTreeDialog.ScanResult;
@@ -171,7 +172,7 @@ public class DiskUsageView
 
     menu = translate(new Menu("File"));
     menu.getItems().addAll(createScanFileTreeMenuItem(), createRecentFilesMenu(), createPreferencesMenuItem(),
-        createExitMenuItem());
+        createAboutMenuItem(), createExitMenuItem());
     menuBar.getMenus().addAll(menu);
 
     return menuBar;
@@ -295,7 +296,28 @@ public class DiskUsageView
 
   private MenuItem createPreferencesMenuItem()
   {
-    return m_data.mi_preferences.createMenuItem();
+    MenuItem menuItem;
+
+    menuItem = translate(new MenuItem("Preferences"));
+    menuItem.setGraphic(FxIconUtil.createIconNode("cog"));
+    menuItem.setOnAction((_) -> {
+      new PreferencesDialog().show();
+    });
+
+    return menuItem;
+  }
+
+  private MenuItem createAboutMenuItem()
+  {
+    MenuItem menuItem;
+
+    menuItem = translate(new MenuItem("About"));
+    menuItem.setGraphic(FxIconUtil.createIconNode("information"));
+    menuItem.setOnAction((_) -> {
+      new AboutDialog().show();
+    });
+
+    return menuItem;
   }
 
   private MenuItem createExitMenuItem()
@@ -549,18 +571,6 @@ public class DiskUsageView
 
   static private class PreferencesMenu
   {
-    public MenuItem createMenuItem()
-    {
-      MenuItem menuItem;
-
-      menuItem = translate(new MenuItem("Preferences"));
-      menuItem.setGraphic(FxIconUtil.createIconNode("cog"));
-      menuItem.setOnAction((_) -> {
-        new PreferencesDialog().show();
-      });
-
-      return menuItem;
-    }
   }
 
   record FileAggregatesEntry(String bucket, FileAggregates aggregates) {};

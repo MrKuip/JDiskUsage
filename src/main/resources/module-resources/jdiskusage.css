@@ -92,4 +92,37 @@
     -fx-background-insets: 0, 1;
 }
 
+.about-dialog {
+  -fx-background-color: #610067;
+}
 
+.about-dialog .text1 {
+  -fx-font-size: 24pt;
+  -fx-font-weight: bold;
+  -fx-text-fill: yellow;
+}
+
+.about-dialog .text2 {
+  -fx-font-size: 20pt;
+  -fx-text-fill: yellow;
+}
+
+.about-dialog .text3 {
+  -fx-font-size: 16pt;
+  -fx-text-fill: white;
+}
+
+.about-dialog .text4 {
+  -fx-fill: white;
+}
+
+.about-dialog .hyperlink {
+  -fx-text-fill: white; 
+  -fx-underline: true;
+}
+.about-dialog .hyperlink:hover {
+  -fx-text-fill: yellow; 
+}
+.about-dialog .hyperlink:visited {
+  -fx-text-fill: lightblue; 
+}
