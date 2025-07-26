@@ -146,24 +146,23 @@ public class FileTreePane
       mi_treeTableView = new MyTreeTableView<FileNodeIF>(getClass().getSimpleName(), new FileTreeItem(m_dirNode));
       mi_treeTableView.setTableMenuButtonVisible(true);
 
-      treeTableColumn1 = mi_treeTableView.addColumn("File");
-      treeTableColumn1.setDisableHiding(true);
+      treeTableColumn1 = mi_treeTableView.addColumn("File", false);
       treeTableColumn1.setColumnCount(20);
       treeTableColumn1.setCellValueGetter((treeItem) -> treeItem.getValue().getName());
 
-      treeTableColumn2 = mi_treeTableView.addColumn("File size");
+      treeTableColumn2 = mi_treeTableView.addColumn("File size", true);
       treeTableColumn2.setColumnCount(8);
       treeTableColumn2.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
       treeTableColumn2.setCellValueAlignment(Pos.BASELINE_RIGHT);
       treeTableColumn2.setCellValueGetter((treeItem) -> treeItem.getValue().getSize());
 
-      treeTableColumn2 = mi_treeTableView.addColumn("Number of files");
+      treeTableColumn2 = mi_treeTableView.addColumn("Number of files", true);
       treeTableColumn2.setColumnCount(8);
       treeTableColumn2.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%,d"));
       treeTableColumn2.setCellValueAlignment(Pos.BASELINE_RIGHT);
       treeTableColumn2.setCellValueGetter((treeItem) -> treeItem.getValue().getNumberOfFiles());
 
-      treeTableColumn3 = mi_treeTableView.addColumn("%");
+      treeTableColumn3 = mi_treeTableView.addColumn("%", true);
       treeTableColumn3.setColumnCount(5);
       treeTableColumn3.setCellValueFormatter(FormatterFactory.createStringFormatFormatter("%3.2s %%"));
       treeTableColumn3.setCellValueAlignment(Pos.BASELINE_RIGHT);
@@ -180,7 +179,7 @@ public class FileTreePane
 
       if (OperatingSystemUtil.isLinux())
       {
-        treeTableColumn4 = mi_treeTableView.addColumn("Number of links to file");
+        treeTableColumn4 = mi_treeTableView.addColumn("Number of links to file", true);
         treeTableColumn4.setColumnCount(6);
         treeTableColumn4.setCellValueAlignment(Pos.BASELINE_RIGHT);
         treeTableColumn4.setCellValueGetter((treeItem) -> treeItem.getValue().getNumberOfLinks());

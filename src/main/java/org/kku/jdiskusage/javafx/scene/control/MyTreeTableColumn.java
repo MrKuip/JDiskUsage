@@ -23,29 +23,29 @@ import javafx.util.Callback;
 public class MyTreeTableColumn<T, R>
   extends TreeTableColumn<T, R>
 {
-  private final AppProperty<Boolean> m_visibleProperty;
-  private boolean m_disableHiding;
 
   public MyTreeTableColumn(String text)
   {
     super(text);
+  }
 
-    m_visibleProperty = AppPreferences.createPreference(text, Converters.getBooleanConverter(), Boolean.TRUE);
-    setVisible(m_visibleProperty.get());
+  public void setEnableHiding(boolean enableHiding)
+  {
+    String name;
+    AppProperty<Boolean> visibleProperty;
+
+    name = "COLUMN-" + getTreeTableView().getId() + "-" + getId();
+
+    visibleProperty = AppPreferences.createPreference(name, Converters.getBooleanConverter(), Boolean.TRUE);
+    if (enableHiding) setVisible(visibleProperty.get());
 
     visibleProperty().addListener((_, _, newValue) -> {
-      m_visibleProperty.set(newValue);
-      if (m_disableHiding && !newValue)
+      visibleProperty.set(newValue);
+      if (!enableHiding)
       {
         setVisible(true);
       }
     });
-  }
-
-  public void setDisableHiding(boolean disableHiding)
-  {
-    m_disableHiding = disableHiding;
-    setVisible(true);
   }
 
   public void setCellValueGetter(Function<TreeItem<T>, R> function)

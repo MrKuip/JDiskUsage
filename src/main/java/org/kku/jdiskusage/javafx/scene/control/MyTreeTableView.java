@@ -20,7 +20,7 @@ public class MyTreeTableView<S>
     AppPreferences.showProgressInTable.addListener((_, _) -> { refresh(); });
   }
 
-  public <R> MyTreeTableColumn<S, R> addColumn(String name)
+  public <R> MyTreeTableColumn<S, R> addColumn(String name, boolean enableHiding)
   {
     MyTreeTableColumn<S, R> column;
     Label label;
@@ -42,6 +42,8 @@ public class MyTreeTableView<S>
     column.setGraphic(stack);
 
     getColumns().add(column);
+
+    column.setEnableHiding(enableHiding);
 
     return column;
   }
