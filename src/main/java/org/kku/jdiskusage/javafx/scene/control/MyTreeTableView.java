@@ -26,7 +26,7 @@ public class MyTreeTableView<S>
     Label label;
     StackPane stack;
 
-    column = translate(new MyTreeTableColumn<S, R>());
+    column = translate(new MyTreeTableColumn<S, R>(name));
     column.setId(name);
 
     label = translate(new Label(name));

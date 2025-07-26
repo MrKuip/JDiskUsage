@@ -144,8 +144,10 @@ public class FileTreePane
       MyTreeTableColumn<FileNodeIF, Integer> treeTableColumn4;
 
       mi_treeTableView = new MyTreeTableView<FileNodeIF>(getClass().getSimpleName(), new FileTreeItem(m_dirNode));
+      mi_treeTableView.setTableMenuButtonVisible(true);
 
       treeTableColumn1 = mi_treeTableView.addColumn("File");
+      treeTableColumn1.setDisableHiding(true);
       treeTableColumn1.setColumnCount(20);
       treeTableColumn1.setCellValueGetter((treeItem) -> treeItem.getValue().getName());
 

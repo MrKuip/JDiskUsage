@@ -2,6 +2,7 @@ package org.kku.jdiskusage.javafx.scene.control;
 
 import java.util.function.Function;
 import org.kku.common.util.AppProperties.AppProperty;
+import org.kku.common.util.Converters;
 import org.kku.fx.ui.util.FxUtil;
 import org.kku.fx.util.FxProperty;
 import org.kku.jdiskusage.ui.util.FormatterIF;
@@ -22,8 +23,29 @@ import javafx.util.Callback;
 public class MyTreeTableColumn<T, R>
   extends TreeTableColumn<T, R>
 {
-  public MyTreeTableColumn()
+  private final AppProperty<Boolean> m_visibleProperty;
+  private boolean m_disableHiding;
+
+  public MyTreeTableColumn(String text)
   {
+    super(text);
+
+    m_visibleProperty = AppPreferences.createPreference(text, Converters.getBooleanConverter(), Boolean.TRUE);
+    setVisible(m_visibleProperty.get());
+
+    visibleProperty().addListener((_, _, newValue) -> {
+      m_visibleProperty.set(newValue);
+      if (m_disableHiding && !newValue)
+      {
+        setVisible(true);
+      }
+    });
+  }
+
+  public void setDisableHiding(boolean disableHiding)
+  {
+    m_disableHiding = disableHiding;
+    setVisible(true);
   }
 
   public void setCellValueGetter(Function<TreeItem<T>, R> function)
