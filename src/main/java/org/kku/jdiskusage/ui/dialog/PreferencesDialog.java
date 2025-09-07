@@ -56,8 +56,9 @@ public class PreferencesDialog
 
     languageComboBox = new ComboBox<>();
     languageComboBox.getItems().addAll(LanguageConfiguration.getInstance().getList());
-    languageComboBox.setCellFactory(FxUtil.getCellFactoryWithImage(Language::getName, FxLanguageUtil::getFlagImage));
-    languageComboBox.setButtonCell(FxUtil.getListCellWithImage(Language::getName, FxLanguageUtil::getFlagImage));
+    languageComboBox
+        .setCellFactory(FxUtil.getCellFactoryWithImage(Language::getName, FxLanguageUtil::getLanguageFlagNode));
+    languageComboBox.setButtonCell(FxUtil.getListCellWithImage(Language::getName, FxLanguageUtil::getLanguageFlagNode));
     languageComboBox.valueProperty().bindBidirectional(FxProperty.property(AppPreferences.languagePreference));
 
     maxNumberInTopRankingField = NumericTextField.integerField();
