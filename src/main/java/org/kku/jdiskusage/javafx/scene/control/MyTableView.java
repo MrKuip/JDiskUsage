@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.fx.ui.util.FxIconUtil;
+import org.kku.iconify.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonCell;
 import org.kku.jdiskusage.ui.util.TableUtils;
 import javafx.geometry.Pos;
@@ -67,17 +67,19 @@ public class MyTableView<T>
 
       menu = new ContextMenu();
 
-      selectMenuItem = translate(new MenuItem("Select", FxIconUtil.createIconNode("checkbox-outline", IconSize.SMALL)));
+      selectMenuItem = translate(
+          new MenuItem("Select", FxIconUtil.createIconNode("mdi-checkbox-outline", IconSize.REGULAR)));
       selectMenuItem.setOnAction((_) -> {
         MyTableView.this.getSelectionContext().select(MyTableView.this.getSelectionModel().getSelectedItem());
       });
       selectAllMenuItem = translate(
-          new MenuItem("Select all", FxIconUtil.createIconNode("checkbox-multiple-outline", IconSize.SMALL)));
+          new MenuItem("Select all", FxIconUtil.createIconNode("mdi-checkbox-multiple-outline", IconSize.REGULAR)));
       selectAllMenuItem.setOnAction((_) -> {
         MyTableView.this.getSelectionContext().selectAll(MyTableView.this.getItems());
       });
 
-      deleteMenuItem = translate(new MenuItem("Delete selected", FxIconUtil.createIconNode("delete", IconSize.SMALL)));
+      deleteMenuItem = translate(
+          new MenuItem("Delete selected", FxIconUtil.createIconNode("mdi-delete", IconSize.REGULAR)));
 
       menu.getItems().addAll(selectMenuItem, selectAllMenuItem, deleteMenuItem);
 
@@ -186,7 +188,7 @@ public class MyTableView<T>
     ButtonCell buttonProperty;
     MyTableColumn<T, ButtonCell> column;
 
-    buttonProperty = new ButtonCell(() -> FxIconUtil.createIconNode("filter"));
+    buttonProperty = new ButtonCell(() -> FxIconUtil.createIconNode("mdi-filter"));
 
     column = addColumn(nestedColumn, name);
     column.setColumnCount(2);

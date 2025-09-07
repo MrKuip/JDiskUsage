@@ -4,7 +4,7 @@ module org.kku.jdiskusage
   requires transitive javafx.graphics;
   requires java.desktop;
   requires java.base;
-  requires org.kku.fonticons;
+  requires org.kku.iconify4j;
   requires org.kku.common;
   requires org.kku.fx;
   requires java.prefs;

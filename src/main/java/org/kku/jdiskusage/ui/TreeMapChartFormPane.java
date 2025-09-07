@@ -28,7 +28,7 @@ public class TreeMapChartFormPane
   {
     super(diskUsageData);
 
-    createPaneType("TREECHART", "Show tree chart", "chart-tree", this::getTreeChartNode);
+    createPaneType("TREECHART", "Show tree chart", "mdi-chart-tree", this::getTreeChartNode);
 
     init();
   }

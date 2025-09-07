@@ -79,7 +79,7 @@ public class TreeMapChart<T extends TreeMapNode>
       }
     });
 
-    m_reselectButton = translate(new Button("", FxIconUtil.createIconNode("selection")));
+    m_reselectButton = translate(new Button("", FxIconUtil.createIconNode("mdi-selection")));
   }
 
   public void setModel(TreeMapModel<T> model)

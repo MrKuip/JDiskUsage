@@ -25,10 +25,10 @@ class SizeFormPane
   {
     super(diskUsageData);
 
-    createPaneType("PIECHART", "Show pie chart", "chart-pie", this::getPieChartNode, true);
-    createPaneType("BARCHART", "Show sunburst chart", "chart-donut-variant", this::getSunburstChartNode);
-    createPaneType("ICICLECHART", "Show icicle chart", "chart-tree", this::getIcicleChartNode);
-    createPaneType("TABLE", "Show details table", "table", this::getTableNode);
+    createPaneType("PIECHART", "Show pie chart", "mdi-chart-pie", this::getPieChartNode, true);
+    createPaneType("BARCHART", "Show sunburst chart", "mdi-chart-donut-variant", this::getSunburstChartNode);
+    createPaneType("ICICLECHART", "Show icicle chart", "mdi-chart-tree", this::getIcicleChartNode);
+    createPaneType("TABLE", "Show details table", "mdi-table", this::getTableNode);
 
     init();
   }

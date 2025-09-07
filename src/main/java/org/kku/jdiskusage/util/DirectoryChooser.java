@@ -14,12 +14,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kku.common.util.AppProperties.AppProperty;
 import org.kku.common.util.StringUtils;
-import org.kku.fonticons.ui.FxIcon;
-import org.kku.fonticons.ui.FxIcon.IconColor;
-import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.fx.scene.control.BreadCrumbBar;
 import org.kku.fx.ui.dialog.FxDialog;
 import org.kku.fx.ui.util.FxIconUtil;
+import org.kku.iconify.ui.FxIcon;
+import org.kku.iconify.ui.FxIcon.IconColor;
+import org.kku.iconify.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.util.DirectoryList.Directory;
@@ -140,7 +140,7 @@ public class DirectoryChooser
       Button openButton;
 
       cancelButton = translate(
-          new Button("Cancel", new FxIcon("close").size(IconSize.SMALL).fillColor(IconColor.RED).getIconLabel()));
+          new Button("Cancel", new FxIcon("mdi-close").size(IconSize.REGULAR).color(IconColor.RED).getNode()));
       cancelButton.setAlignment(Pos.BASELINE_LEFT);
       cancelButton.setOnAction((_) -> {
         m_dialog.close();
@@ -151,14 +151,14 @@ public class DirectoryChooser
       mi_searchField.setVisible(false);
       m_searchText.bind(mi_searchField.textProperty());
 
-      searchButton = translate(new Button("", new FxIcon("magnify").size(IconSize.SMALL).getIconLabel()));
+      searchButton = translate(new Button("", new FxIcon("mdi-magnify").size(IconSize.REGULAR).getNode()));
       searchButton.setOnAction((_) -> {
         mi_searchField.setVisible(true);
         mi_searchField.requestFocus();
       });
       searchButton.setAlignment(Pos.BASELINE_LEFT);
 
-      openButton = translate(new Button("Open", new FxIcon("open-in-new").size(IconSize.SMALL).getIconLabel()));
+      openButton = translate(new Button("Open", new FxIcon("mdi-open-in-new").size(IconSize.REGULAR).getNode()));
       openButton.setAlignment(Pos.BASELINE_LEFT);
       openButton.setOnAction((_) -> {
         List<MyPath> result;
@@ -260,7 +260,7 @@ public class DirectoryChooser
 
     private DirectoryNode getHomeNode()
     {
-      return new DirectoryNode(translate("Home"), "home", new MyPath(Path.of(System.getProperty("user.home"))));
+      return new DirectoryNode(translate("Home"), "mdi-home", new MyPath(Path.of(System.getProperty("user.home"))));
     }
 
     private List<DirectoryNode> getFavoriteNodes()
@@ -273,7 +273,7 @@ public class DirectoryChooser
 
         menu = new ContextMenu();
 
-        node = new DirectoryNode(directory.toString(), "star", new MyPath(directory.getPath()));
+        node = new DirectoryNode(directory.toString(), "mdi-star", new MyPath(directory.getPath()));
         node.setTooltip(new Tooltip(directory.toString()));
         node.setContextMenu(menu);
 
@@ -502,12 +502,12 @@ public class DirectoryChooser
 
       if (Files.isDirectory(path.getPath()))
       {
-        return new FxIcon("folder-outline").size(IconSize.SMALLER).getIconLabel();
+        return new FxIcon("mdi-folder-outline").size(IconSize.REGULAR).getNode();
       }
 
       if (Files.isRegularFile(path.getPath()))
       {
-        return new FxIcon("file-outline").size(IconSize.SMALLER).getIconLabel();
+        return new FxIcon("mdi-file-outline").size(IconSize.REGULAR).getNode();
       }
 
       return new Region();
@@ -535,7 +535,7 @@ public class DirectoryChooser
       treeItem = new TreeItem<>(this);
       if (isRootNode())
       {
-        treeItem.setGraphic(FxIconUtil.createIconNode("arrow-right-circle"));
+        treeItem.setGraphic(FxIconUtil.createIconNode("mdi-arrow-right-circle"));
       }
 
       return treeItem;
@@ -627,7 +627,7 @@ public class DirectoryChooser
 
     private DirectoryNode(MyPath path)
     {
-      this(path.toString(), "folder-outline", path);
+      this(path.toString(), "mdi-folder-outline", path);
     }
 
     private DirectoryNode(String name, String iconName, MyPath path)
@@ -646,7 +646,7 @@ public class DirectoryChooser
       setText(m_name);
       if (m_iconName != null)
       {
-        setGraphic(new FxIcon(m_iconName).size(IconSize.SMALL).getIconLabel());
+        setGraphic(new FxIcon(m_iconName).size(IconSize.REGULAR).getNode());
       }
       setOnAction((_) -> {
         setDirectory(m_path);

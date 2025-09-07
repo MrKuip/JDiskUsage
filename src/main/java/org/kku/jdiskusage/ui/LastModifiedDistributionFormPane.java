@@ -122,9 +122,9 @@ class LastModifiedDistributionFormPane
   {
     super(diskUsageData);
 
-    createPaneType("PIECHART", "Show pie chart", "chart-pie", this::getPieChartNode);
-    createPaneType("BARCHART", "Show bar chart", "chart-bar", this::getBarChartNode);
-    createPaneType("TABLE", "Show details table", "table", this::getTableNode);
+    createPaneType("PIECHART", "Show pie chart", "mdi-chart-pie", this::getPieChartNode);
+    createPaneType("BARCHART", "Show bar chart", "mdi-chart-bar", this::getBarChartNode);
+    createPaneType("TABLE", "Show details table", "mdi-table", this::getTableNode);
 
     init();
   }

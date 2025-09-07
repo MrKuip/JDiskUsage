@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Optional;
 import org.kku.common.util.AppProperties.AppProperty;
 import org.kku.common.util.CommonUtil;
-import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.fx.ui.util.Notifications;
 import org.kku.fx.ui.util.RootStage;
+import org.kku.iconify.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.util.ConcurrentUtil;
 import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.DirectoryChooser;
@@ -155,7 +155,7 @@ public class ScanFileTreeDialog
     m_dialog.titleProperty().bind(translatedTextProperty("Scan directory"));
     m_dialog.headerTextProperty().bind(translatedTextProperty("Scan").concat(" ").concat(scan.getRootDirectory()));
     m_dialog.getDialogPane().getButtonTypes().addAll(cancelButtonType);
-    m_dialog.setGraphic(FxIconUtil.createIconNode("file-search", IconSize.LARGE));
+    m_dialog.setGraphic(FxIconUtil.createIconNode("mdi-file-search", IconSize.LARGE));
 
     ConcurrentUtil.getInstance().getDefaultExecutor().submit(scan);
 

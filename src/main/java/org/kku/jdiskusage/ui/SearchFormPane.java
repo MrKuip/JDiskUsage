@@ -9,13 +9,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.kku.common.util.Performance;
-import org.kku.common.util.StringUtils;
 import org.kku.common.util.Performance.PerformancePoint;
-import org.kku.fonticons.ui.FxIcon.IconSize;
+import org.kku.common.util.StringUtils;
 import org.kku.fx.scene.control.NumericTextField;
 import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.fx.ui.util.FxUtil;
 import org.kku.fx.util.FxProperty;
+import org.kku.iconify.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.concurrent.FxTask;
 import org.kku.jdiskusage.concurrent.ProgressData;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
@@ -58,7 +58,7 @@ public class SearchFormPane
   {
     super(diskUsageData);
 
-    createPaneType("TABLE", "Show details table", "table", this::getTableNode);
+    createPaneType("TABLE", "Show details table", "mdi-table", this::getTableNode);
 
     init();
     initPane();
@@ -77,14 +77,14 @@ public class SearchFormPane
     NumericTextField<Integer> maxTimeTextField;
     ProgressBar progressBar;
 
-    searchLabel = new Label(null, FxIconUtil.createIconNode("magnify"));
+    searchLabel = new Label(null, FxIconUtil.createIconNode("mdi-magnify"));
 
     regexButton = new ToggleButton(null, FxIconUtil.createIconNode("regex"));
     regexButton.selectedProperty().bindBidirectional(FxProperty.property(AppPreferences.searchRegexPreference));
     m_data.mi_regexSelectedProperty = regexButton.selectedProperty();
 
     searchTextField = new TextField();
-    searchTextField.promptTextProperty().bind(translatedTextProperty("search"));
+    searchTextField.promptTextProperty().bind(translatedTextProperty("mdi-search"));
     searchTextField.setOnAction((_) -> search());
     m_data.mi_searchTextProperty = searchTextField.textProperty();
 
@@ -104,8 +104,7 @@ public class SearchFormPane
     m_data.mi_maxTimeProperty = maxTimeTextField.valueProperty();
     m_data.mi_progress.mi_stoppedOnTimeoutProperty.addListener(FxUtil.showWarning(maxTimeTextField));
 
-    cancelButton = new Button(null,
-        FxIconUtil.createFxIcon("cancel", IconSize.SMALLER).fillColor(Color.RED).getIconLabel());
+    cancelButton = new Button(null, FxIconUtil.createFxIcon("mdi-cancel", IconSize.MEDIUM).color(Color.RED).getNode());
 
     toolBar = new MigPane("", "[pref][pref][grow,fill][pref][pref][pref][pref]", "[pref]1[pref]0");
     toolBar.add(cancelButton);

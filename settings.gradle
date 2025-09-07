@@ -18,8 +18,8 @@ gitRepositories {
     uri = "https://github.com/MrKuip/commons-fx.git"
     branch = "main"
   }
-  include("fontIcons") {
-    uri = "https://github.com/MrKuip/fontIcons.git"
+  include("iconify4j") {
+    uri = "https://github.com/MrKuip/Iconify4J.git"
     branch = "main"
   }
 }

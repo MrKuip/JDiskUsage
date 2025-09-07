@@ -41,7 +41,7 @@ public class HelpFormPane
   {
     super(diskUsageData);
 
-    createPaneType("HELP", "Help", "help", this::getHelpNode);
+    createPaneType("HELP", "Help", "mdi-help", this::getHelpNode);
 
     init();
   }

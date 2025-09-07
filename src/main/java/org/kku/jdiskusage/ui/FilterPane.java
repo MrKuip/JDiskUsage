@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Stream;
-import org.kku.fonticons.ui.FxIcon;
-import org.kku.fonticons.ui.FxIcon.IconColor;
-import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.fx.ui.util.FxIconUtil;
+import org.kku.iconify.ui.FxIcon;
+import org.kku.iconify.ui.FxIcon.IconColor;
+import org.kku.iconify.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
@@ -50,7 +50,7 @@ class FilterPane
 
     m_filterPane.setId("filterPane");
 
-    m_contentPane.add(FxIconUtil.createIconNode("filter", IconSize.SMALL), "aligny baseline");
+    m_contentPane.add(FxIconUtil.createIconNode("mdi-filter", IconSize.REGULAR), "aligny baseline");
     m_contentPane.add(m_filterPane, "grow");
     m_contentPane.add(m_filterActivationPane, "top");
 
@@ -140,7 +140,7 @@ class FilterPane
 
     // Wrap in HBox because adding a mouselistener to the ImageView does not work!
     // (Bug in JavaFX!)
-    closeNode = new HBox(new FxIcon("close").size(IconSize.SMALLER).fillColor(IconColor.RED).getIconLabel());
+    closeNode = new HBox(new FxIcon("mdi-close").size(IconSize.MEDIUM).color(IconColor.RED).getNode());
     closeNode.setStyle("-fx-padding:2px 0px 1px 0px;");
 
     filterNode = translate(new Label(filter.getFilterValue(), closeNode));
@@ -191,7 +191,7 @@ class FilterPane
       if (m_filterActivationPane.getChildren().isEmpty())
       {
         m_activateFilterButton = translate(
-            new Button("Activate filter", FxIconUtil.createIconNode("filter-check", IconSize.SMALL)));
+            new Button("Activate filter", FxIconUtil.createIconNode("mdi-filter-check", IconSize.REGULAR)));
         m_activateFilterButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         m_activateFilterButton.setOnAction((_) -> {
           activateFilter();
@@ -199,7 +199,7 @@ class FilterPane
         m_filterActivationPane.getChildren().add(m_activateFilterButton);
 
         m_clearFilterButton = translate(
-            new Button("Clear filter", FxIconUtil.createIconNode("filter-remove", IconSize.SMALL)));
+            new Button("Clear filter", FxIconUtil.createIconNode("mdi-filter-remove", IconSize.REGULAR)));
         m_clearFilterButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         m_clearFilterButton.setOnAction((_) -> {
           Filter[] filters;

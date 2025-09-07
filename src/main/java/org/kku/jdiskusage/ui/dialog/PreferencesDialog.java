@@ -6,10 +6,10 @@ import org.kku.common.conf.LanguageConfiguration;
 import org.kku.fx.scene.control.NumericTextField;
 import org.kku.fx.ui.dialog.AbstractPreferencesDialog;
 import org.kku.fx.ui.util.ColorPalette;
+import org.kku.fx.ui.util.ColorPalette.ChartColor;
 import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.fx.ui.util.FxLanguageUtil;
 import org.kku.fx.ui.util.FxUtil;
-import org.kku.fx.ui.util.ColorPalette.ChartColor;
 import org.kku.fx.util.FxProperty;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.tbee.javafx.scene.layout.MigPane;
@@ -65,7 +65,7 @@ public class PreferencesDialog
     maxNumberInTopRankingField.valueProperty()
         .bindBidirectional(FxProperty.property(AppPreferences.maxNumberInTopRanking));
 
-    resetAllButton = translate(new Button("Reset all to default", FxIconUtil.createIconNode("restore")));
+    resetAllButton = translate(new Button("Reset all to default", FxIconUtil.createIconNode("mdi-restore")));
     resetAllButton.setOnAction((_) -> {
       AppPreferences.autoExpandTreeNode.reset();
       AppPreferences.autoCollapseTreeNode.reset();
@@ -123,7 +123,7 @@ public class PreferencesDialog
 
     minPercentageElementField = NumericTextField.doubleField();
 
-    restoreButton = translate(new Button("Reset all to default", FxIconUtil.createIconNode("restore")));
+    restoreButton = translate(new Button("Reset all to default", FxIconUtil.createIconNode("mdi-restore")));
     restoreButton.setOnAction((_) -> {
       AppPreferences.maxNumberOfChartElements.reset();
       AppPreferences.minPercentageChartElement.reset();
@@ -191,7 +191,7 @@ public class PreferencesDialog
         color.setColor(colorPicker.getValue());
       });
 
-      restoreButton = translate(new Button("", FxIconUtil.createIconNode("restore")));
+      restoreButton = translate(new Button("", FxIconUtil.createIconNode("mdi-restore")));
       restoreButton.setOnAction((_) -> {
         color.reset();
       });
@@ -207,7 +207,7 @@ public class PreferencesDialog
 
     Button restoreButton;
 
-    restoreButton = translate(new Button("Reset all to default", FxIconUtil.createIconNode("restore")));
+    restoreButton = translate(new Button("Reset all to default", FxIconUtil.createIconNode("mdi-restore")));
     restoreButton.setOnAction((_) -> {
       ColorPalette.getColorList().forEach(ChartColor::reset);
     });

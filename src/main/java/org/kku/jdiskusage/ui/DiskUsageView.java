@@ -17,7 +17,6 @@ import org.kku.common.util.Log;
 import org.kku.common.util.Performance;
 import org.kku.common.util.Performance.PerformancePoint;
 import org.kku.common.util.preferences.Sort;
-import org.kku.fonticons.ui.FxIcon.IconSize;
 import org.kku.fx.scene.control.DraggableTabPane;
 import org.kku.fx.scene.control.SegmentedControl;
 import org.kku.fx.ui.util.FullScreen;
@@ -25,6 +24,7 @@ import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.fx.ui.util.FxSettingsUtil;
 import org.kku.fx.ui.util.Notifications;
 import org.kku.fx.util.FxProperty;
+import org.kku.iconify.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.common.Navigation;
@@ -199,27 +199,27 @@ public class DiskUsageView
 
     navigation = m_data.getNavigation();
 
-    backButton = new Button("", FxIconUtil.createIconNode("arrow-left", IconSize.SMALL));
+    backButton = new Button("", FxIconUtil.createIconNode("mdi-arrow-left", IconSize.REGULAR));
     backButton.disableProperty().bind(navigation.backNavigationDisabledProperty());
     backButton.setOnAction((_) -> navigation.back());
 
-    forwardButton = new Button("", FxIconUtil.createIconNode("arrow-right", IconSize.SMALL));
+    forwardButton = new Button("", FxIconUtil.createIconNode("mdi-arrow-right", IconSize.REGULAR));
     forwardButton.disableProperty().bind(navigation.forwardNavigationDisabledProperty());
     forwardButton.setOnAction((_) -> navigation.forward());
 
-    homeButton = new Button("", FxIconUtil.createIconNode("home", IconSize.SMALL));
+    homeButton = new Button("", FxIconUtil.createIconNode("mdi-home", IconSize.REGULAR));
     homeButton.disableProperty().bind(navigation.homeNavigationDisabledProperty());
     homeButton.setOnAction((_) -> navigation.home());
 
-    refreshButton = new Button("", FxIconUtil.createIconNode("refresh", IconSize.SMALL));
+    refreshButton = new Button("", FxIconUtil.createIconNode("mdi-refresh", IconSize.REGULAR));
     refreshButton.setOnAction((_) -> m_data.refresh());
 
-    fullScreenButton = new ToggleButton("", FxIconUtil.createIconNode("fullscreen", IconSize.SMALL));
+    fullScreenButton = new ToggleButton("", FxIconUtil.createIconNode("mdi-fullscreen", IconSize.REGULAR));
     fullScreenButton.setOnAction((_) -> m_data.mi_fullScreen.toggleFullScreen());
 
     showDisplayMetricGroup = new ToggleGroup();
 
-    showFileSizeButton = new ToggleButton("", FxIconUtil.createIconNode("sigma", IconSize.SMALL));
+    showFileSizeButton = new ToggleButton("", FxIconUtil.createIconNode("mdi-sigma", IconSize.REGULAR));
     showFileSizeButton.setTooltip(translate(new Tooltip("Show file size")));
     showFileSizeButton.setToggleGroup(showDisplayMetricGroup);
     showFileSizeButton.setSelected(DisplayMetric.FILE_SIZE == AppPreferences.displayMetricPreference.get());
@@ -227,7 +227,7 @@ public class DiskUsageView
       AppPreferences.displayMetricPreference.set(DisplayMetric.FILE_SIZE);
     });
 
-    showFileCountButton = new ToggleButton("", FxIconUtil.createIconNode("tally-mark-5", IconSize.SMALL));
+    showFileCountButton = new ToggleButton("", FxIconUtil.createIconNode("mdi-tally-mark-5", IconSize.REGULAR));
     showFileCountButton.setTooltip(translate(new Tooltip("Show number of files")));
     showFileCountButton.setToggleGroup(showDisplayMetricGroup);
     showFileCountButton.setSelected(DisplayMetric.FILE_COUNT == AppPreferences.displayMetricPreference.get());
@@ -242,14 +242,14 @@ public class DiskUsageView
     sortGroup = new ToggleGroup();
 
     sortAlphabeticallyButton = new ToggleButton("",
-        FxIconUtil.createIconNode("sort-alphabetical-ascending", IconSize.SMALL));
+        FxIconUtil.createIconNode("mdi-sort-alphabetical-ascending", IconSize.REGULAR));
     sortAlphabeticallyButton.setToggleGroup(sortGroup);
     sortAlphabeticallyButton.setSelected(Sort.ALPHABETICALLY == AppPreferences.sortPreference.get());
     sortAlphabeticallyButton.setOnAction((_) -> {
       AppPreferences.sortPreference.set(Sort.ALPHABETICALLY);
     });
 
-    sortNumericButton = new ToggleButton("", FxIconUtil.createIconNode("sort-numeric-ascending", IconSize.SMALL));
+    sortNumericButton = new ToggleButton("", FxIconUtil.createIconNode("mdi-sort-numeric-ascending", IconSize.REGULAR));
     sortNumericButton.setToggleGroup(sortGroup);
     sortNumericButton.setSelected(Sort.NUMERIC == AppPreferences.sortPreference.get());
     sortNumericButton.setOnAction((_) -> {
@@ -281,7 +281,7 @@ public class DiskUsageView
     MenuItem menuItem;
 
     menuItem = translate(new MenuItem("Scan directory"));
-    menuItem.setGraphic(FxIconUtil.createIconNode("file-search"));
+    menuItem.setGraphic(FxIconUtil.createIconNode("mdi-file-search"));
     menuItem.setOnAction((_) -> {
       scanDirectory(new ScanFileTreeDialog().chooseDirectory(m_data.mi_fullScreen.getCurrentStage()));
     });
@@ -299,7 +299,7 @@ public class DiskUsageView
     MenuItem menuItem;
 
     menuItem = translate(new MenuItem("Preferences"));
-    menuItem.setGraphic(FxIconUtil.createIconNode("cog"));
+    menuItem.setGraphic(FxIconUtil.createIconNode("mdi-cog"));
     menuItem.setOnAction((_) -> {
       new PreferencesDialog().show();
     });
@@ -312,7 +312,7 @@ public class DiskUsageView
     MenuItem menuItem;
 
     menuItem = translate(new MenuItem("About"));
-    menuItem.setGraphic(FxIconUtil.createIconNode("information"));
+    menuItem.setGraphic(FxIconUtil.createIconNode("mdi-information"));
     menuItem.setOnAction((_) -> {
       new AboutDialog().show();
     });
@@ -325,7 +325,7 @@ public class DiskUsageView
     MenuItem menuItem;
 
     menuItem = translate(new MenuItem("Exit"));
-    menuItem.setGraphic(FxIconUtil.createIconNode("exit-to-app"));
+    menuItem.setGraphic(FxIconUtil.createIconNode("mdi-exit-to-app"));
     menuItem.setOnAction((_) -> {
       System.exit(0);
     });
@@ -342,17 +342,17 @@ public class DiskUsageView
   {
     private enum TabData
     {
-      SIZE("Size", "chart-pie", (md) -> md.mi_sizeTab),
+      SIZE("Size", "mdi-chart-pie", (md) -> md.mi_sizeTab),
       TOP_RANKING(Bindings.concat(translatedTextProperty("Top"), " ",
-          FxProperty.property(AppPreferences.maxNumberInTopRanking)), "trophy", (md) -> md.mi_topRankingTab),
-      DISTRIBUTION_SIZE("Size distribution", "chart-bell-curve", (md) -> md.mi_sizeDistributionTab),
-      DISTRIBUTION_MODIFIED("Last modified", "calendar-blank", (md) -> md.mi_modifiedDistributionTab),
-      DISTRIBUTION_SUBTYPES("Subtypes", "chart-pie", (md) -> md.mi_subTypesTab),
-      DISTRIBUTION_TYPES("Types", "chart-pie", (md) -> md.mi_typesTab),
-      TREEMAP("Treemap", "chart-tree", (md) -> md.mi_treeChartTab),
-      LINK_COUNT("Link count", "file-link", (md) -> md.mi_linkCountTab),
-      SEARCH_TYPES("Search", "magnify", (md) -> md.mi_searchTab),
-      HELP("Help", "help", (md) -> md.mi_helpTab);
+          FxProperty.property(AppPreferences.maxNumberInTopRanking)), "mdi-trophy", (md) -> md.mi_topRankingTab),
+      DISTRIBUTION_SIZE("Size distribution", "mdi-chart-bell-curve", (md) -> md.mi_sizeDistributionTab),
+      DISTRIBUTION_MODIFIED("Last modified", "mdi-calendar-blank", (md) -> md.mi_modifiedDistributionTab),
+      DISTRIBUTION_SUBTYPES("Subtypes", "mdi-chart-pie", (md) -> md.mi_subTypesTab),
+      DISTRIBUTION_TYPES("Types", "mdi-chart-pie", (md) -> md.mi_typesTab),
+      TREEMAP("Treemap", "mdi-chart-tree", (md) -> md.mi_treeChartTab),
+      LINK_COUNT("Link count", "mdi-file-link", (md) -> md.mi_linkCountTab),
+      SEARCH_TYPES("Search", "mdi-magnify", (md) -> md.mi_searchTab),
+      HELP("Help", "mdi-help", (md) -> md.mi_helpTab);
 
       private final StringExpression m_name;
       private final String m_iconName;
@@ -499,7 +499,7 @@ public class DiskUsageView
       Menu menu;
 
       menu = translate(new Menu("Recent scans"));
-      menu.setGraphic(FxIconUtil.createIconNode("history"));
+      menu.setGraphic(FxIconUtil.createIconNode("mdi-history"));
       update(menu);
       m_listenerList.add(menu);
 
@@ -541,7 +541,7 @@ public class DiskUsageView
       MenuItem menuItem;
 
       menuItem = new MenuItem(pathList.toString());
-      menuItem.setGraphic(FxIconUtil.createIconNode("folder-outline"));
+      menuItem.setGraphic(FxIconUtil.createIconNode("mdi-folder-outline"));
       menuItem.setOnAction((_) -> {
         scanDirectory(pathList);
       });
