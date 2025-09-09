@@ -23,26 +23,6 @@ eclipse.classpath.file
   }
 }
 
-/*
-eclipse {
-  jdt {
-    file {
-      withProperties { properties ->
-        properties['org.eclipse.jdt.core.formatter'] = file('KKU2.xml').absolutePath
-        properties['org.eclipse.jdt.core.formatter.profile'] = 'KKU'
-        properties['org.eclipse.jdt.core.formatter.settings'] = file('KKU2.xml').absolutePath
-      }
-    }
-  }
-  project {
-    natures 'org.eclipse.jdt.core.javanature'
-    buildCommand 'org.eclipse.jdt.core.javabuilder'
-  }
-}
-*/
-
-
-
 boolean isModule(entry) {
   // Only libraries can be modules
   if(entry == null || !entry.kind.equals("lib"))
@@ -66,23 +46,4 @@ boolean isModule(entry) {
 
   return false;
 }
-
-
-ext.createLauncher = { configurationName, project_attr, module_name, main_type ->
-  file("../.metadata/.plugins/org.eclipse.debug.core/.launches/${configurationName}.launch").withWriter { writer ->
-    // Create MarkupBuilder with 2 space indent
-    def xml = new MarkupBuilder(new IndentPrinter(writer, "  ", true))
-
-    xml.doubleQuotes = true
-    xml.mkp.xmlDeclaration(version: '1.0', encoding: 'utf-8', standalone: 'no')
-
-    xml.launchConfiguration('type': 'org.eclipse.jdt.launching.localJavaApplication') {
-      stringAttribute(key: 'org.eclipse.jdt.launching.MAIN_TYPE', value: "${main_type}")
-      stringAttribute(key: 'org.eclipse.jdt.launching.MODULE_NAME', value: "${module_name}")
-      stringAttribute(key: 'org.eclipse.jdt.launching.PROJECT_ATTR', value: "${project_attr}")
-    }
-  }
-}
-
-
 
