@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kku.common.util.AppProperties.AppProperty;
@@ -18,6 +19,8 @@ import org.kku.common.util.Performance;
 import org.kku.common.util.Performance.PerformancePoint;
 import org.kku.common.util.preferences.Sort;
 import org.kku.fx.scene.control.DraggableTabPane;
+import org.kku.fx.scene.control.Filter;
+import org.kku.fx.scene.control.FilterPane;
 import org.kku.fx.scene.control.SegmentedControl;
 import org.kku.fx.ui.util.FullScreen;
 import org.kku.fx.ui.util.FxIconUtil;
@@ -26,7 +29,6 @@ import org.kku.fx.ui.util.Notifications;
 import org.kku.fx.util.FxProperty;
 import org.kku.iconify.ui.FxIcon.IconSize;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
-import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.common.Navigation;
 import org.kku.jdiskusage.ui.dialog.AboutDialog;
 import org.kku.jdiskusage.ui.dialog.PreferencesDialog;
@@ -84,7 +86,7 @@ public class DiskUsageView
     private final HelpFormPane mi_helpTab = new HelpFormPane(this);
     private final RecentFilesMenu mi_recentFiles = new RecentFilesMenu();
     private final PreferencesMenu mi_preferences = new PreferencesMenu();
-    private final FilterPane mi_filterPane = new FilterPane(this);
+    private final FilterPane<FileNodeIF> mi_filterPane = new FilterPane<>((filter) -> setFilter(filter));
     private final Notifications mi_taskView = Notifications.getInstance();
     //
 
@@ -107,7 +109,7 @@ public class DiskUsageView
       return selectedTreeItemProperty().get();
     }
 
-    public void addFilter(Filter filter, boolean activateFilterImmediately)
+    public void addFilter(Filter<FileNodeIF> filter, boolean activateFilterImmediately)
     {
       mi_filterPane.addFilter(filter, activateFilterImmediately);
     }
@@ -289,6 +291,11 @@ public class DiskUsageView
     return menuItem;
   }
 
+  public void setFilter(Predicate<FileNodeIF> filter)
+  {
+    m_data.getTreePaneData().setFilter(filter);
+  }
+
   private Menu createRecentFilesMenu()
   {
     return m_data.mi_recentFiles.createMenu();
@@ -333,7 +340,7 @@ public class DiskUsageView
     return menuItem;
   }
 
-  private FilterPane createFilterPane()
+  private FilterPane<FileNodeIF> createFilterPane()
   {
     return m_data.mi_filterPane;
   }
@@ -573,7 +580,8 @@ public class DiskUsageView
   {
   }
 
-  record FileAggregatesEntry(String bucket, FileAggregates aggregates) {};
+  record FileAggregatesEntry(String bucket, FileAggregates aggregates) {
+  };
 
   public static class FileAggregates
   {

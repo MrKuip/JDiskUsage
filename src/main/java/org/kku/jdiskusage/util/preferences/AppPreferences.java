@@ -22,6 +22,7 @@ public class AppPreferences
   public final static AppProperty<Integer> maxNumberInTopRanking;
   public final static AppProperty<Integer> maxNumberOfElementsInSunburstChart;
   public final static AppProperty<Integer> maxNumberOfElementsInIcicleChart;
+  public final static AppProperty<Integer> maxLabelSizeChart;
 
   static
   {
@@ -43,6 +44,7 @@ public class AppPreferences
         Converters.getIntegerConverter(), 5);
     maxNumberOfElementsInIcicleChart = createPreference("Max number of levels in icicle chart",
         Converters.getIntegerConverter(), 4);
+    maxLabelSizeChart = createPreference("Max label size in chart", Converters.getIntegerConverter(), 20);
   }
 
   private AppPreferences()

@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kku.common.util.Performance;
 import org.kku.common.util.Performance.PerformancePoint;
+import org.kku.common.util.StringUtils;
+import org.kku.fx.scene.control.Filter;
 import org.kku.fx.ui.util.FxUtil;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonCell;
@@ -15,8 +17,8 @@ import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
-import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
+import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.collections.FXCollections;
@@ -34,6 +36,7 @@ public class SizeDistributionFormPane
   extends AbstractFormPane
 {
   private SizeDistributionPaneData mi_data = new SizeDistributionPaneData();
+  private static final String FILTER_NAME = "File size";
 
   public enum SizeDistributionBucket
   {
@@ -172,7 +175,7 @@ public class SizeDistributionFormPane
       System.out.println("add data:" + data.getName() + " -> " + data.getPieValue());
       pieChart.getData().add(data);
 
-      addFilterHandler(data.getNode(), "Size", bucket.getText(), fileNode -> findBucket(fileNode) == bucket);
+      addFilterHandler(data.getNode(), FILTER_NAME, bucket.getText(), fileNode -> findBucket(fileNode) == bucket);
     });
 
     return pieChart;
@@ -210,9 +213,10 @@ public class SizeDistributionFormPane
       XYChart.Data<Number, String> data;
 
       value = mi_data.getMap().getOrDefault(bucket, dataDefault);
-      data = new XYChart.Data<Number, String>(value.mi_numberOfFiles, bucket.getText());
+      data = new XYChart.Data<Number, String>(value.mi_numberOfFiles,
+          StringUtils.truncate(bucket.getText(), AppPreferences.maxLabelSizeChart.get()));
       series1.getData().add(data);
-      addFilterHandler(data.getNode(), "File size", bucket.getText(), fileNode -> findBucket(fileNode) == bucket);
+      addFilterHandler(data.getNode(), FILTER_NAME, bucket.getText(), fileNode -> findBucket(fileNode) == bucket);
     });
 
     xAxis = new NumberAxis();
@@ -230,9 +234,10 @@ public class SizeDistributionFormPane
       XYChart.Data<Number, String> data;
 
       value = mi_data.getMap().getOrDefault(bucket, dataDefault);
-      data = new XYChart.Data<Number, String>(value.mi_sizeOfFiles, bucket.getText());
+      data = new XYChart.Data<Number, String>(value.mi_sizeOfFiles,
+          StringUtils.truncate(bucket.getText(), AppPreferences.maxLabelSizeChart.get()));
       series2.getData().add(data);
-      addFilterHandler(data.getNode(), "File size", bucket.getText(), fileNode -> findBucket(fileNode) == bucket);
+      addFilterHandler(data.getNode(), FILTER_NAME, bucket.getText(), fileNode -> findBucket(fileNode) == bucket);
     });
 
     scrollPane = new ScrollPane();
@@ -277,20 +282,20 @@ public class SizeDistributionFormPane
 
     filterLessThanColumn = table.addFilterColumn(filterColumn, "<=");
     filterLessThanColumn.setAction((event, e) -> {
-      getDiskUsageData().addFilter(new Filter("File size", "<=", e.bucket().getText(),
+      getDiskUsageData().addFilter(new Filter<>(FILTER_NAME, "<=", e.bucket().getText(),
           (fileNode) -> findBucket(fileNode).ordinal() <= e.bucket().ordinal()), event.getClickCount() == 2);
     });
 
     filterEqualColumn = table.addFilterColumn(filterColumn, "==");
     filterEqualColumn.setAction((event, e) -> {
       getDiskUsageData().addFilter(
-          new Filter("File size", e.bucket().getText(), (fileNode) -> findBucket(fileNode) == e.bucket()),
+          new Filter<>(FILTER_NAME, e.bucket().getText(), (fileNode) -> findBucket(fileNode) == e.bucket()),
           event.getClickCount() == 2);
     });
 
     filterGreaterThanColumn = table.addFilterColumn(filterColumn, ">=");
     filterGreaterThanColumn.setAction((event, e) -> {
-      getDiskUsageData().addFilter(new Filter("File size", ">=", e.bucket().getText(),
+      getDiskUsageData().addFilter(new Filter<>(FILTER_NAME, ">=", e.bucket().getText(),
           (fileNode) -> findBucket(fileNode).ordinal() >= e.bucket().ordinal()), event.getClickCount() == 2);
     });
     table.setItems(mi_data.getList());
@@ -298,7 +303,8 @@ public class SizeDistributionFormPane
     return table;
   }
 
-  record SizeDistributionEntry(SizeDistributionBucket bucket, SizeDistributionBucketData data) {};
+  record SizeDistributionEntry(SizeDistributionBucket bucket, SizeDistributionBucketData data) {
+  };
 
   private class SizeDistributionPaneData
     extends PaneData

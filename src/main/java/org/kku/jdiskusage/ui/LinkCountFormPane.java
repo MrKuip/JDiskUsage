@@ -12,6 +12,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.kku.common.util.Performance;
 import org.kku.common.util.Performance.PerformancePoint;
+import org.kku.common.util.StringUtils;
+import org.kku.fx.scene.control.Filter;
 import org.kku.fx.ui.util.FxUtil;
 import org.kku.fx.util.FxProperty;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
@@ -22,7 +24,6 @@ import org.kku.jdiskusage.ui.DiskUsageView.FileAggregates;
 import org.kku.jdiskusage.ui.DiskUsageView.FileAggregatesEntry;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
-import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.ui.util.FormatterFactory;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
@@ -126,7 +127,7 @@ class LinkCountFormPane
       Predicate<FileNodeIF> test;
 
       data = new XYChart.Data<Number, String>(e.aggregates().getSize(getCurrentDisplayMetric()),
-          Objects.toString(e.bucket()));
+          StringUtils.truncate(Objects.toString(e.bucket()), AppPreferences.maxLabelSizeChart.get()));
       series1.getData().add(data);
 
       test = (fileNode) -> fileNode.getNumberOfLinks() == Integer.parseInt(e.bucket());
@@ -206,19 +207,19 @@ class LinkCountFormPane
 
     filterLessThanColumn = table.addFilterColumn(filterColumn, "<=");
     filterLessThanColumn.setAction((event, e) -> {
-      getDiskUsageData().addFilter(new Filter("Link count", "<=", e.bucket(),
+      getDiskUsageData().addFilter(new Filter<>("Link count", "<=", e.bucket(),
           (fileNode) -> fileNode.getNumberOfLinks() <= Integer.parseInt(e.bucket())), event.getClickCount() == 2);
     });
 
     filterEqualColumn = table.addFilterColumn(filterColumn, "is");
     filterEqualColumn.setAction((event, e) -> {
-      getDiskUsageData().addFilter(new Filter("Link count", e.bucket(),
+      getDiskUsageData().addFilter(new Filter<>("Link count", e.bucket(),
           (fileNode) -> fileNode.getNumberOfLinks() == Integer.parseInt(e.bucket())), event.getClickCount() == 2);
     });
 
     filterGreaterThanColumn = table.addFilterColumn(filterColumn, ">=");
     filterGreaterThanColumn.setAction((event, e) -> {
-      getDiskUsageData().addFilter(new Filter("Link count", ">=", e.bucket(),
+      getDiskUsageData().addFilter(new Filter<>("Link count", ">=", e.bucket(),
           fileNode -> fileNode.getNumberOfLinks() > Integer.parseInt(e.bucket())), event.getClickCount() == 2);
     });
 

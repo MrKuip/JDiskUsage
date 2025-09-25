@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.kku.common.util.Performance;
 import org.kku.common.util.Performance.PerformancePoint;
+import org.kku.common.util.StringUtils;
 import org.kku.fx.ui.util.ColorPalette;
 import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.jdiskusage.javafx.scene.chart.TreeMapChart.TreeMapColors.MyColor;
@@ -21,10 +22,8 @@ import org.kku.jdiskusage.util.Loggers;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
-import javafx.scene.control.Tooltip;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritablePixelFormat;
@@ -32,7 +31,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.robot.Robot;
 import javafx.scene.shape.Rectangle;
 
 public class TreeMapChart<T extends TreeMapNode>
@@ -56,29 +54,6 @@ public class TreeMapChart<T extends TreeMapNode>
 
   private void init()
   {
-    Tooltip tooltip;
-
-    tooltip = new Tooltip("");
-    Tooltip.install(this, tooltip);
-    tooltip.activatedProperty().addListener((_, _, currentActivated) -> {
-      if (currentActivated)
-      {
-        Point2D mousePosition;
-        TreeMapNode tmn;
-
-        mousePosition = this.screenToLocal(new Robot().getMousePosition());
-        tmn = getNodeAt((int) mousePosition.getX(), (int) mousePosition.getY());
-        if (tmn != null)
-        {
-          tooltip.setText(tmn.getTooltipText());
-        }
-        else
-        {
-          tooltip.setText("");
-        }
-      }
-    });
-
     m_reselectButton = translate(new Button("", FxIconUtil.createIconNode("mdi-selection")));
   }
 
@@ -87,13 +62,21 @@ public class TreeMapChart<T extends TreeMapNode>
     m_model = model;
   }
 
-  private int m_layout = 3;
+  public void refresh()
+  {
+    m_pixelDraw = null;
+    requestLayout();
+    layout();
+  }
 
   @Override
   protected void layoutChildren()
   {
-    if (m_pixelDraw == null || (getWidth() != m_pixelDraw.getWidth() && getWidth() != m_pixelDraw.getWidth()))
+    if ((getWidth() > 0 && getHeight() > 0)
+        && (m_pixelDraw == null || (getWidth() != m_pixelDraw.getWidth() && getWidth() != m_pixelDraw.getWidth())))
     {
+      Loggers.treemap.fine("Layout : width=%.2f height%.2f", getWidth(), getHeight());
+
       m_pixelDraw = new PixelDraw((int) getWidth(), (int) getHeight());
       m_selection = null;
       m_selectionBorder = null;
@@ -105,7 +88,7 @@ public class TreeMapChart<T extends TreeMapNode>
 
   private void layoutChart()
   {
-    try (PerformancePoint _ = Performance.measure("Layout nodes: " + m_layout))
+    try (PerformancePoint _ = Performance.measure("Layout nodes: "))
     {
       // Inject the colorIndex in the low depth TreeMapNodes.
       // The nodes with a higher depth will derive their color from its parent
@@ -152,6 +135,8 @@ public class TreeMapChart<T extends TreeMapNode>
 
       getChildren().add(bPane);
     }
+
+    print(m_model.getRootNode());
   }
 
   private class PixelDraw
@@ -193,6 +178,10 @@ public class TreeMapChart<T extends TreeMapNode>
     {
       for (TreeMapNode tmn : tmnList)
       {
+        if (tmn.toString().contains("3A1D5B"))
+        {
+          System.out.println("haha:" + tmn);
+        }
         try
         {
           int x, y, width, height;
@@ -229,8 +218,9 @@ public class TreeMapChart<T extends TreeMapNode>
           int fromIndex;
           int toIndex;
 
-          if (x1 + y2 * width > mi_buffer.length)
+          if (x2 + y2 * mi_width > mi_buffer.length)
           {
+            // Happens when resizing
             return;
           }
 
@@ -367,7 +357,7 @@ public class TreeMapChart<T extends TreeMapNode>
     }
   }
 
-  private TreeMapNode getNodeAt(int x, int y)
+  public TreeMapNode getNodeAt(int x, int y)
   {
     return m_model.getRootNode().getNodeAt(x, y);
   }
@@ -474,4 +464,22 @@ public class TreeMapChart<T extends TreeMapNode>
   {
     m_reselectButton.setOnAction(eventHandler);
   }
+
+  private int depth;
+
+  private void print(TreeMapNode treeMapNode)
+  {
+    System.out.println(StringUtils.indent(depth) + treeMapNode);
+    if (treeMapNode.toString().contains("3A1D5B"))
+    {
+      System.out.println("haha:" + treeMapNode.getParent());
+    }
+    for (TreeMapNode child : treeMapNode.getChildList())
+    {
+      depth++;
+      print(child);
+      depth--;
+    }
+  }
+
 }

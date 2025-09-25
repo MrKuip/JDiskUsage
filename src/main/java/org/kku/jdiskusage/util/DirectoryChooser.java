@@ -16,7 +16,6 @@ import org.kku.common.util.AppProperties.AppProperty;
 import org.kku.common.util.StringUtils;
 import org.kku.fx.scene.control.BreadCrumbBar;
 import org.kku.fx.ui.dialog.FxDialog;
-import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.iconify.ui.FxIcon;
 import org.kku.iconify.ui.FxIcon.IconColor;
 import org.kku.iconify.ui.FxIcon.IconSize;
@@ -535,7 +534,7 @@ public class DirectoryChooser
       treeItem = new TreeItem<>(this);
       if (isRootNode())
       {
-        treeItem.setGraphic(FxIconUtil.createIconNode("mdi-arrow-right-circle"));
+        treeItem.setGraphic(new FxIcon("mdi-arrow-right-circle").size(IconSize.MEDIUM).getNode());
       }
 
       return treeItem;

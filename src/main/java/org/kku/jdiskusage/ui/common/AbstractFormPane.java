@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.kku.common.util.AppProperties.AppProperty;
 import org.kku.common.util.Log;
+import org.kku.fx.scene.control.Filter;
 import org.kku.fx.scene.control.SegmentedControl;
 import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
@@ -38,7 +39,8 @@ abstract public class AbstractFormPane
   private Map<PaneType, Node> m_nodeByPaneTypeMap = new HashMap<>();
   private TreeItem<FileNodeIF> m_currentTreeItem;
 
-  private record PaneType(String id, String description, String iconName, Supplier<Node> node) {};
+  private record PaneType(String id, String description, String iconName, Supplier<Node> node) {
+  };
 
   public AbstractFormPane(DiskUsageData diskUsageData)
   {
@@ -247,7 +249,7 @@ abstract public class AbstractFormPane
       Predicate<FileNodeIF> fileNodePredicate)
   {
     node.addEventHandler(MouseEvent.MOUSE_CLICKED, (event) -> {
-      m_diskUsageData.addFilter(new Filter(filterType, filterValue, fileNodePredicate), event.getClickCount() == 2);
+      m_diskUsageData.addFilter(new Filter<>(filterType, filterValue, fileNodePredicate), event.getClickCount() == 2);
     });
   }
 

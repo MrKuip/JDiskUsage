@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import org.kku.common.util.TailCall;
 import org.kku.common.util.TailCalls;
 import org.kku.jdiskusage.util.Loggers;
@@ -39,11 +40,17 @@ public class TreeMapSquarifyAlgoritm
     m_sumSize = m_treeNodeList.stream().mapToDouble(TreeMapNode::getSize).sum();
     m_areaFactor = (m_width * m_height) / m_sumSize;
     m_handler = handler;
+
+    Loggers.treemap.setLevel(Level.FINEST);
   }
+
+  private int counter;
 
   public void evaluate()
   {
     TailCall<Void> tc;
+
+    counter = 0;
 
     // Use tail recursion because the stack will grow enormously when using normal recursion
     tc = evaluate(m_x, m_y, m_width, m_height, m_treeNodeList);
@@ -53,6 +60,8 @@ public class TreeMapSquarifyAlgoritm
     {
       m_handler.accept(m_treeNodeList);
     }
+
+    System.out.println("Count=" + counter);
   }
 
   private TailCall<Void> evaluate(int x, int y, int width, int height, List<TreeMapNode> treeNodeList)
@@ -171,6 +180,7 @@ public class TreeMapSquarifyAlgoritm
         tn.setBounds(x + nodeX, y + nodeY, nodeWidth, nodeHeight);
         Loggers.treemap.finest("squarified: tn=%s, x=%d, y=%d, width=%d, height=%d", tn.getName(), tn.getX(), tn.getY(),
             tn.getWidth(), tn.getHeight());
+        counter++;
       }
 
       if (treeNodeList != null)
@@ -243,14 +253,10 @@ public class TreeMapSquarifyAlgoritm
 
         allocatedRowWidth += nodeWidth;
 
-        if (nodeWidth == 0 && nodeHeight == 0)
-        {
-          //System.out.println("null! " + (counter++));
-        }
-
         tn.setBounds(x + nodeX, y + nodeY, nodeWidth, nodeHeight);
         Loggers.treemap.finest("squarified: tn=%s, x=%d, y=%d, width=%d, height=%d", tn.getName(), tn.getX(), tn.getY(),
             tn.getWidth(), tn.getHeight());
+        counter++;
       }
 
       if (treeNodeList != null)
@@ -302,8 +308,8 @@ public class TreeMapSquarifyAlgoritm
       ratioAfter = Math.max(rowHeight / rowWidth, rowWidth / rowHeight);
     }
 
-    Loggers.treemap.finest("ratio %3.2f -> %3.2f when adding node %s with size %d", ratioBefore, ratioAfter, tmn.getName(),
-        tmn.getSize());
+    Loggers.treemap.finest("ratio %3.2f -> %3.2f when adding node %s with size %d", ratioBefore, ratioAfter,
+        tmn.getName(), tmn.getSize());
 
     ratioBefore = Math.abs(ratioBefore - 1);
     ratioAfter = Math.abs(ratioAfter - 1);

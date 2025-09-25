@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kku.common.util.Log;
@@ -17,7 +18,6 @@ import org.kku.jdiskusage.ui.util.FormatterFactory;
 import org.kku.jdiskusage.ui.util.Percent;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
-import org.kku.jdiskusage.util.FileTree.FilterIF;
 import org.kku.jdiskusage.util.preferences.AppPreferences;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
@@ -48,9 +48,18 @@ public class FileTreePane
     return m_treePane;
   }
 
-  public void setFilter(FilterIF filter)
+  public void setFilter(Predicate<FileNodeIF> filter)
   {
+    TreeItem<FileNodeIF> selectedTreeItem;
+
+    // try to navigate to the selected tree item (due to filtering it is possible it is no longer a node in the tree!)
+    selectedTreeItem = m_diskUsageData.getSelectedTreeItem();
+
     m_fileTreeView.setFilter(filter);
+
+    Platform.runLater(() -> {
+      m_diskUsageData.getTreePaneData().navigateTo(selectedTreeItem);
+    });
   }
 
   public BreadCrumbBar<FileNodeIF> getBreadCrumbBar()
@@ -128,7 +137,7 @@ public class FileTreePane
   private static class FileTreeView
   {
     private DirNode m_dirNode;
-    private FilterIF mi_filter = (_) -> true;
+    private Predicate<FileNodeIF> mi_filter = (_) -> true;
     private MyTreeTableView<FileNodeIF> mi_treeTableView;
 
     public FileTreeView(DirNode dirNode)
@@ -190,7 +199,7 @@ public class FileTreePane
       return mi_treeTableView;
     }
 
-    public void setFilter(FilterIF filter)
+    public void setFilter(Predicate<FileNodeIF> filter)
     {
       mi_filter = filter;
 
@@ -316,7 +325,7 @@ public class FileTreePane
           nodeList = ((DirNode) node).getChildList();
           if (!nodeList.isEmpty())
           {
-            return nodeList.stream().filter(fileNode -> fileNode.isDirectory() || mi_filter.accept(fileNode))
+            return nodeList.stream().filter(fileNode -> fileNode.isDirectory() || mi_filter.test(fileNode))
                 .sorted(FileNodeIF.getSizeComparator()).map(FileTreeItem::new)
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
           }

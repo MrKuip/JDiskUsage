@@ -13,6 +13,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.kku.common.util.Performance;
 import org.kku.common.util.Performance.PerformancePoint;
+import org.kku.common.util.StringUtils;
 import org.kku.fx.ui.util.FxUtil;
 import org.kku.fx.util.FxProperty;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
@@ -135,7 +136,8 @@ class TypesFormPane
       Data<Number, String> data;
       Predicate<FileNodeIF> test;
 
-      data = new XYChart.Data<Number, String>(e.aggregates().getSize(getCurrentDisplayMetric()), e.bucket());
+      data = new XYChart.Data<Number, String>(e.aggregates().getSize(getCurrentDisplayMetric()),
+          StringUtils.truncate(e.bucket(), AppPreferences.maxLabelSizeChart.get()));
       System.out.println(data.getYValue() + " -> " + data.getXValue());
       series1.getData().add(data);
 

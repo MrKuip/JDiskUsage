@@ -10,6 +10,8 @@ import java.util.stream.Stream;
 import org.kku.common.util.CommonUtil;
 import org.kku.common.util.Performance;
 import org.kku.common.util.Performance.PerformancePoint;
+import org.kku.common.util.StringUtils;
+import org.kku.fx.scene.control.Filter;
 import org.kku.fx.ui.util.FxUtil;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonCell;
@@ -17,8 +19,8 @@ import org.kku.jdiskusage.javafx.scene.control.MyTableView;
 import org.kku.jdiskusage.ui.DiskUsageView.DiskUsageData;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.FileNodeIterator;
-import org.kku.jdiskusage.ui.common.Filter;
 import org.kku.jdiskusage.util.FileTree.FileNodeIF;
+import org.kku.jdiskusage.util.preferences.AppPreferences;
 import org.kku.jdiskusage.util.preferences.DisplayMetric;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.beans.binding.Bindings;
@@ -190,7 +192,8 @@ class LastModifiedDistributionFormPane
       XYChart.Data<Number, String> data;
 
       value = mi_data.getMap().getOrDefault(bucket, dataDefault);
-      data = new XYChart.Data<Number, String>(value.mi_numberOfFiles, bucket.getText());
+      data = new XYChart.Data<Number, String>(value.mi_numberOfFiles,
+          StringUtils.truncate(bucket.getText(), AppPreferences.maxLabelSizeChart.get()));
       series1.getData().add(data);
       addFilterHandler(data.getNode(), "Modification date", bucket.getText(),
           fileNode -> findBucket(fileNode) == bucket);
@@ -211,7 +214,8 @@ class LastModifiedDistributionFormPane
       XYChart.Data<Number, String> data;
 
       value = mi_data.getMap().getOrDefault(bucket, dataDefault);
-      data = new XYChart.Data<Number, String>(value.mi_sizeOfFiles, bucket.getText());
+      data = new XYChart.Data<Number, String>(value.mi_sizeOfFiles,
+          StringUtils.truncate(bucket.getText(), AppPreferences.maxLabelSizeChart.get()));
       series2.getData().add(data);
       addFilterHandler(data.getNode(), "Modification date", bucket.getText(),
           fileNode -> findBucket(fileNode) == bucket);
@@ -262,7 +266,7 @@ class LastModifiedDistributionFormPane
       Predicate<FileNodeIF> filterPredicate;
 
       filterPredicate = (fileNode) -> findBucket(fileNode).ordinal() <= entry.getKey().ordinal();
-      getDiskUsageData().addFilter(new Filter("Modification date", "<=", entry.getKey().getText(), filterPredicate),
+      getDiskUsageData().addFilter(new Filter<>("Modification date", "<=", entry.getKey().getText(), filterPredicate),
           event.getClickCount() == 2);
     });
 
@@ -271,7 +275,7 @@ class LastModifiedDistributionFormPane
       Predicate<FileNodeIF> filterPredicate;
 
       filterPredicate = (fileNode) -> findBucket(fileNode) == entry.getKey();
-      getDiskUsageData().addFilter(new Filter("Modification date", entry.getKey().getText(), filterPredicate),
+      getDiskUsageData().addFilter(new Filter<>("Modification date", entry.getKey().getText(), filterPredicate),
           event.getClickCount() == 2);
     });
 
@@ -280,7 +284,7 @@ class LastModifiedDistributionFormPane
       Predicate<FileNodeIF> filterPredicate;
 
       filterPredicate = (fileNode) -> findBucket(fileNode).ordinal() >= entry.getKey().ordinal();
-      getDiskUsageData().addFilter(new Filter("Modification date", ">=", entry.getKey().getText(), filterPredicate),
+      getDiskUsageData().addFilter(new Filter<>("Modification date", ">=", entry.getKey().getText(), filterPredicate),
           event.getClickCount() == 2);
     });
     table.setItems(mi_data.getList());

@@ -18,7 +18,7 @@ import org.kku.common.util.OperatingSystemUtil.OperatingSystem;
 import org.kku.jdiskusage.util.FileTree.DirNode;
 import org.kku.jdiskusage.util.FileTree.FileNode;
 
-class ScanPath
+public class ScanPath
 {
   private int mi_numberOfFiles;
   private int mi_numberOfDirectories;

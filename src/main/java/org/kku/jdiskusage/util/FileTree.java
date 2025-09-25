@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -78,11 +79,6 @@ public class FileTree
   public DirNode scan()
   {
     return new ScanPath(m_scanListener).scan(m_directoryList);
-  }
-
-  public interface FilterIF
-  {
-    public boolean accept(FileNodeIF fileNode);
   }
 
   public interface FileNodeIF
@@ -319,7 +315,7 @@ public class FileTree
       return Stream.concat(Stream.of(this), getChildList().stream().flatMap(FileNodeIF::streamNode));
     }
 
-    public FileNodeIF filter(FilterIF filter)
+    public FileNodeIF filter(Predicate<FileNodeIF> filter)
     {
       return new FilterNodes(filter).filter(this);
     }
@@ -472,9 +468,9 @@ public class FileTree
 
   private static class FilterNodes
   {
-    private final FilterIF mi_filter;
+    private final Predicate<FileNodeIF> mi_filter;
 
-    public FilterNodes(FilterIF filter)
+    public FilterNodes(Predicate<FileNodeIF> filter)
     {
       mi_filter = filter;
     }
@@ -507,7 +503,7 @@ public class FileTree
         }
         else
         {
-          if (mi_filter.accept(node))
+          if (mi_filter.test(node))
           {
             parentNode.addChild((FileNode) node);
           }
