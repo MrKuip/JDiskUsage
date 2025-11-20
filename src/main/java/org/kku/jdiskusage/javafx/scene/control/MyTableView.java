@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.kku.fx.ui.util.FxIconUtil;
-import org.kku.iconify.ui.FxIcon.IconSize;
+import org.kku.iconify.ui.AbstractIcon.IconSize;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn.ButtonCell;
 import org.kku.jdiskusage.ui.util.TableUtils;
 import javafx.geometry.Pos;

@@ -15,7 +15,7 @@ import org.kku.fx.scene.control.NumericTextField;
 import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.fx.ui.util.FxUtil;
 import org.kku.fx.util.FxProperty;
-import org.kku.iconify.ui.FxIcon.IconSize;
+import org.kku.iconify.ui.AbstractIcon.IconSize;
 import org.kku.jdiskusage.concurrent.FxTask;
 import org.kku.jdiskusage.concurrent.ProgressData;
 import org.kku.jdiskusage.javafx.scene.control.MyTableColumn;

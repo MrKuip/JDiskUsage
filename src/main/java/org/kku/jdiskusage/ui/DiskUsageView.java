@@ -27,7 +27,7 @@ import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.fx.ui.util.FxSettingsUtil;
 import org.kku.fx.ui.util.Notifications;
 import org.kku.fx.util.FxProperty;
-import org.kku.iconify.ui.FxIcon.IconSize;
+import org.kku.iconify.ui.AbstractIcon.IconSize;
 import org.kku.jdiskusage.ui.common.AbstractFormPane;
 import org.kku.jdiskusage.ui.common.Navigation;
 import org.kku.jdiskusage.ui.dialog.AboutDialog;

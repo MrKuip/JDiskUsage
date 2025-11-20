@@ -10,7 +10,7 @@ import org.kku.common.util.CommonUtil;
 import org.kku.fx.ui.util.FxIconUtil;
 import org.kku.fx.ui.util.Notifications;
 import org.kku.fx.ui.util.RootStage;
-import org.kku.iconify.ui.FxIcon.IconSize;
+import org.kku.iconify.ui.AbstractIcon.IconSize;
 import org.kku.jdiskusage.ui.util.ConcurrentUtil;
 import org.kku.jdiskusage.util.AppSettings;
 import org.kku.jdiskusage.util.DirectoryChooser;

@@ -39,7 +39,7 @@ public class AppPropertiesTest
     defaultValue = "defaultValue";
     subject = "TestSubject";
 
-    type = appProperties.createAppPropertyType(propertyKey, Converters.getStringConverter());
+    type = appProperties.createAppPropertyType(propertyKey, Converters.getStringConverter(), "");
     property = type.forSubject(subject, propertyValue);
 
     assertEquals(property.get(), propertyValue);

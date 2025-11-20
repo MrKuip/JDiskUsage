@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import org.kku.common.util.StringUtils;
 import org.kku.fx.ui.util.FxIconUtil;
-import org.kku.iconify.ui.FxIcon.IconSize;
+import org.kku.iconify.ui.AbstractIcon.IconSize;
 import org.tbee.javafx.scene.layout.MigPane;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
