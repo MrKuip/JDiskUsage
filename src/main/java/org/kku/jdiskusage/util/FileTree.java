@@ -377,8 +377,8 @@ public class FileTree
         index = type.indexOf('/');
         if (index != -1)
         {
-          mi_fileType = type.substring(0, index);
-          mi_fileSubType = type.substring(index + 1);
+          mi_fileType = type.substring(0, index).intern();
+          mi_fileSubType = type.substring(index + 1).intern();
           return;
         }
       }
@@ -401,14 +401,14 @@ public class FileTree
         name = name.substring(index + 1);
         if (name.length() < 10 && typePattern.matcher(name).matches())
         {
-          mi_fileType = DiskUsageView.getNoneText();
-          mi_fileSubType = name.toLowerCase();
+          mi_fileType = DiskUsageView.getNoneText().intern();
+          mi_fileSubType = name.toLowerCase().intern();
           return;
         }
       }
 
-      mi_fileType = DiskUsageView.getNoneText();
-      mi_fileSubType = DiskUsageView.getNoneText();
+      mi_fileType = DiskUsageView.getNoneText().intern();
+      mi_fileSubType = DiskUsageView.getNoneText().intern();
     }
 
     @Override
