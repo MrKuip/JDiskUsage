@@ -3,7 +3,6 @@ plugins {
   id 'java-library'
   id 'eclipse'
   id 'application'
-  id 'org.openjfx.javafxplugin' version '0.1.0'
   id 'org.beryx.jlink' version '3.1.1'
 }
 
@@ -26,22 +25,36 @@ repositories {
   mavenCentral()
 }
 
-javafx {
-    version = "24"
-    modules = [ 'javafx.controls', 'javafx.web']
-}
-
 java {
   sourceCompatibility = JavaVersion.VERSION_23
   targetCompatibility = JavaVersion.VERSION_23
 }
 
+def osName = System.getProperty("os.name").toLowerCase()
+def osArch = System.getProperty("os.arch").toLowerCase()
+def isArm  = osArch.contains("aarch64") || osArch.contains("arm")
+
+def fxClassifier =
+    osName.contains("win") ? "win" :
+    osName.contains("mac") ? (isArm ? "mac-aarch64" : "mac") :
+                             (isArm ? "linux-aarch64" : "linux")
+
+def fxVersion = "26"
+
 dependencies {
+  ['javafx-base', 'javafx-graphics', 'javafx-controls', 'javafx-media', 'javafx-web'].each { m ->
+    implementation "org.openjfx:$m:$fxVersion"
+    implementation "org.openjfx:$m:$fxVersion:$fxClassifier"
+  }
+  implementation "org.openjfx:jdk-jsobject:$fxVersion"
+  implementation "org.openjfx:jdk-jsobject:$fxVersion:$fxClassifier"
+
   implementation 'org.kku:iconify4j:1.0'
   implementation 'org.kku:commons-base:1.0.1'
   implementation 'org.kku:commons-fx:1.0.1'
   implementation 'com.miglayout:miglayout-javafx:11.5.2'
   implementation 'org.commonmark:commonmark:0.25.0'
+  implementation 'org.openjfx:jdk-jsobject:26.0.2'
 
   testImplementation platform('org.junit:junit-bom:5.14.4')
   testImplementation 'org.junit.jupiter:junit-jupiter'
@@ -146,4 +159,8 @@ task updateVersionProperties {
   }
 }
 processResources.dependsOn(updateVersionProperties)
+
+tasks.named('run') {
+    jvmArgs += ['--add-modules', 'jdk.jsobject']
+}
 
