@@ -12,11 +12,11 @@ defaultTasks 'jar'
 test
 {
   useJUnitPlatform()
+  outputs.upToDateWhen { false }
   testLogging {
     showStandardStreams = true 
-    afterTest { descriptor , result -> 
-      logger.lifecycle("Test: " + descriptor.getClassName() + " " + descriptor.getName() + " -> " + result)
-    }
+    events "passed", "skipped", "failed"
+    exceptionFormat "full"
   }
 }
 
@@ -43,7 +43,8 @@ dependencies {
   implementation 'com.miglayout:miglayout-javafx:11.4.2'
   implementation 'org.commonmark:commonmark:0.25.0'
 
-  testImplementation 'org.junit.jupiter:junit-jupiter:5.13.2'
+  testImplementation platform('org.junit:junit-bom:5.14.4')
+  testImplementation 'org.junit.jupiter:junit-jupiter'
   testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
