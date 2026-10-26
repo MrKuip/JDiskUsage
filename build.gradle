@@ -39,7 +39,7 @@ def fxClassifier =
     osName.contains("mac") ? (isArm ? "mac-aarch64" : "mac") :
                              (isArm ? "linux-aarch64" : "linux")
 
-def fxVersion = "26"
+def fxVersion = "27.0.1"
 
 dependencies {
   ['javafx-base', 'javafx-graphics', 'javafx-controls', 'javafx-media', 'javafx-web'].each { m ->
